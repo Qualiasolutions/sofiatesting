@@ -1,28 +1,63 @@
 import { motion } from "framer-motion";
+import { SparklesIcon, GlobeIcon } from "./icons";
+import { Badge } from "./ui/badge";
 
 export const Greeting = () => {
   return (
     <div
-      className="mx-auto mt-4 flex size-full max-w-3xl flex-col justify-center px-4 md:mt-16 md:px-8"
+      className="mx-auto mt-4 flex size-full max-w-3xl flex-col items-center justify-center px-4 text-center md:mt-16 md:px-8"
       key="overview"
     >
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="font-semibold text-xl md:text-2xl"
+        className="mb-6 flex items-center gap-2"
+        exit={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 10 }}
+        transition={{ delay: 0.3 }}
+      >
+        <div className="relative">
+          <SparklesIcon size={24} className="text-primary" />
+          <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        </div>
+        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+          Welcome to SOFIA
+        </h1>
+      </motion.div>
+
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-4 text-lg text-muted-foreground"
+        exit={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 10 }}
+        transition={{ delay: 0.4 }}
+      >
+        Your AI-powered assistant for Cyprus real estate
+      </motion.div>
+
+      <motion.div
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8 flex flex-wrap gap-2 justify-center"
         exit={{ opacity: 0, y: 10 }}
         initial={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.5 }}
       >
-        Hello there!
+        <Badge variant="secondary" className="gap-1">
+          <GlobeIcon size={12} />
+          Cyprus Focused
+        </Badge>
+        <Badge variant="secondary">40+ Document Types</Badge>
+        <Badge variant="secondary">Professional Templates</Badge>
+        <Badge variant="secondary">Instant Generation</Badge>
       </motion.div>
+
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="text-xl text-zinc-500 md:text-2xl"
+        className="text-sm text-muted-foreground"
         exit={{ opacity: 0, y: 10 }}
         initial={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.6 }}
       >
-        How can I help you today?
+        Powered by Qualia Solutions
       </motion.div>
     </div>
   );

@@ -315,3 +315,66 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* SOFIA Enhanced Formatting Styles */
+@layer utilities {
+  .sophia-response {
+    @apply max-w-none text-sm leading-relaxed;
+  }
+
+  .sophia-response ol {
+    @apply list-decimal pl-6 my-4 space-y-2;
+  }
+
+  .sophia-response ul {
+    @apply list-disc pl-6 my-4 space-y-1;
+  }
+
+  .sophia-response li {
+    @apply mb-1;
+  }
+
+  .sophia-response h1 {
+    @apply text-2xl font-bold mb-4 mt-6;
+  }
+
+  .sophia-response h2 {
+    @apply text-xl font-semibold mb-3 mt-5;
+  }
+
+  .sophia-response h3 {
+    @apply text-lg font-semibold mb-2 mt-4;
+  }
+
+  .sophia-response p {
+    @apply mb-4 leading-relaxed;
+  }
+
+  .sophia-response strong {
+    @apply font-bold;
+  }
+
+  .sophia-response b {
+    @apply font-bold;
+  }
+
+  .sophia-response br {
+    @apply block my-2;
+  }
+
+  .sophia-response hr {
+    @apply my-6 border-gray-200;
+  }
+
+  .sophia-response blockquote {
+    @apply border-l-4 border-gray-300 pl-4 my-4 italic;
+  }
+
+  .sophia-response code {
+    @apply bg-gray-100 px-1 rounded text-sm;
+  }
+
+  .sophia-response pre {
+    @apply bg-gray-100 p-2 rounded max-w-full overflow-x-auto;
+  }
+}

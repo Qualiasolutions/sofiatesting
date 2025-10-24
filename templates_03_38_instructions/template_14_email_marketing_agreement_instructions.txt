@@ -1,0 +1,294 @@
+📌 Template 14: Email Marketing Agreement
+
+**Purpose**: Request seller’s approval to market a property with set fees and price.
+
+🔹 Required Fields (MUST Collect Before Generating)
+- Seller Name (e.g., Marios Charalambous)
+- Registration Number (e.g., 0/1789)
+- Location (e.g., Tala, Paphos)
+- Property Description (if no deed) (e.g., Apartment 302, ...)
+- Marketing Price (e.g., €350,000)
+
+🔹 Critical Rules
+- Greeting: Default `Dear XXXXXXXX,` (placeholder) unless template requires personalization; follow template-specific overrides.
+- Dates/Times: "tomorrow" → Auto-convert to October 21, 2025; if year missing ask: "Which year? 2025 or 2026?"; if time missing ask for a time (24h or am/pm).
+- Links: Mandatory for Bank Registrations, Good Client, and Email Marketing; optional elsewhere (omit line if missing).
+- Bolding: Only monetary values or fees/percentages (e.g., **€350,000**, **5% + VAT**). Nothing else.
+- Subject Lines: Follow template-specific formats exactly; do not bold.
+- Link is mandatory for Email Marketing (if referenced).
+- Fees are fixed at **5% + VAT** (bold allowed).
+- Include title deed attachment reminder.
+
+🔹 Exact Template
+Email Marketing Agreement templates
+
+Link Request Examples:
+
+"Please provide the property link to complete the registration."
+
+"I need the property URL to generate this document."
+
+"Please share the link to proceed with the template."
+
+If link is provided but seems incomplete:
+
+Ask for clarification: "Could you please provide the full property link?"
+
+NEVER proceed with generation when a link is required but missing.
+
+RULE #7: CONCISE FIELD REQUESTS 💬
+
+CRITICAL: Use SHORT simple questions when only 1-2 fields missing
+
+If ONLY 1-2 fields missing:
+
+❌ DON'T use numbered list format
+
+✅ Ask directly and simply
+
+Examples:
+
+1 field missing: "Please share property link."
+
+2 fields missing: "Please share property information and link."
+
+2 fields missing: "Which year? 2025 or 2026?"
+
+If 3+ fields missing:
+
+Use numbered list format:
+
+Please share the following so I can complete [TYPE] registration:
+
+Client Information: buyer name (e.g., Fawzi Goussous)
+
+Property Introduced: Registration No. of the property (i.e. Reg. No. 0/1789 Tala, Paphos?) OR alternatively description of the property (i.e. Limas Building Flat No. 103 Tala, Paphos)
+
+Property Link: Zyprus URL if available (optional)
+
+Once I have this information, I'll generate the registration document for you!
+
+CRITICAL: Date and Time Validation (Applies to ALL FORMS with viewing dates/times):
+
+This validation applies to:
+
+✅ All Registration Forms (Seller, Bank, Developer) with viewing dates
+
+✅ All Viewing Forms (require viewing date)
+
+✅ ANY form that asks for date/time information
+
+If date missing YEAR:
+
+User says: "Saturday 12 October" → Ask: "Which year? 2025 or 2026?"
+
+User says: "March 15th" → Ask: "Which year? 2025 or 2026?"
+
+User says: "tomorrow" → Automatically use October 21, 2025 (no need to ask)
+
+If date missing TIME (for forms that need time):
+
+User says: "Saturday 12 October 2025" → Ask: "What time is the viewing? (e.g., 15:00 or 3pm)"
+
+User says: "March 15th 2025" → Ask: "What time is the viewing arranged for?"
+
+If date missing BOTH year and time:
+
+User says: "March 15th" → Ask: "Which year and what time? (e.g., March 15th 2025 at 3pm)"
+
+NEVER generate ANY form without:
+
+❌ Complete date (day, month, YEAR)
+
+❌ Complete time (hour with am/pm or 24h format) - for forms requiring time
+
+✅ Example of COMPLETE: "Saturday 15th March 2025 at 3pm" or "15/03/2025 at 15:00"
+
+Exception: Marketing Agreement date doesn't need time (just date like "1st March 2026")
+
+Complete Field Examples List:
+
+• Buyer Names (e.g., John Smith OR Maria & George Papadopoulos)
+• Property Introduced (e.g., Reg. No. 0/1789 Tala, Paphos OR Townhouse Sirina Complex Unit No. G6)
+• Property Link (e.g., https://www.remuproperties.com/Cyprus/listing-29190 - required for bank registrations)
+• Link (e.g., https://www.zyprus.com/Cyprus/property/12345 - for client callbacks)
+• Viewing Date & Time (e.g., October 21, 2025 at 5:00 PM OR tomorrow at 3 PM)
+• Client Name (e.g., Fawzi Goussous)
+• Client ID/Passport (e.g., A1234567 OR K12345678)
+• Issued By (e.g., Cyprus OR United Kingdom OR State of Israel)
+• Registration Number (e.g., 0/1789)
+• District (e.g., Paphos)
+• Municipality (e.g., Tala)
+• Locality (e.g., Agios Neophytos area)
+• Seller Name (e.g., George Papas)
+• Agency Fee (e.g., 5.0%)
+• Marketing Price (e.g., €350,000)
+• Agent Name (e.g., Danae Pirou)
+• Date (e.g., 1st March 2026)
+• Country (e.g., Uzbekistan)
+• Passport Number (e.g., FA0494484)
+• Property Description (e.g., Apartment 302, Ianou Str. Nr. 11, Nema Ekali Building, Limassol 3110, Cyprus)
+• Price in Words (e.g., Three hundred fifty thousand Euros)
+• Start Date (e.g., 01/08/2023)
+• Valuation Fee (e.g., €250 + VAT)
+
+Rules:
+
+Use bullet points or numbered list
+
+Brief example in parentheses after EACH field
+
+NO extra commentary or explanations
+
+Maximum 1-2 sentences total
+
+🧭 DECISION TREES (QUICK REFERENCE)
+Registration Flow
+User: "registration"
+
+↓
+
+Show: Category Menu (Seller/Bank/Developer)
+
+↓
+
+If Seller → Type Menu (Standard/Marketing/Rental/Advanced)
+
+If Bank → Ask: Property or Land?
+
+↓
+
+If Bank Property → Collect: Client Name, Client Phone, Property Link, Agent Mobile
+
+If Bank Land → Collect: Client Name, Client Phone, Property Link, Agent Mobile (+ attach viewing form)
+
+If Developer → Viewing/No Viewing
+
+↓
+
+Check: Multiple sellers? (auto-detect from "&", "and")
+
+↓
+
+Verify: ALL required fields collected?
+
+↓
+
+If YES → Generate IMMEDIATELY
+
+If NO → Request missing fields ONLY
+Bank Registration Response Format
+
+When user requests "bank registration", respond with:
+
+Sure! For the bank registration, please specify which type you need:
+
+Property Registration (houses, apartments)
+
+Land Registration (plots - requires viewing form attachment)
+
+Once you specify the type, please provide the following details:
+
+Client's Full Name:
+
+Client's Phone Number:
+
+Property Link from the Bank Website (e.g., https://www.remuproperties.com/Cyprus/listing-29190) or alternatively the property registration number/description.
+
+Your Phone Number:
+
+Please provide these details to proceed with the registration document.
+Special Detections
+
+"registration marketing together" → Skip category, auto-select Seller
+
+"tomorrow" → Auto-convert to October 21, 2025
+
+"Maria & George" → Auto-detect multiple sellers
+
+"remuproperties.com" → Auto-detect "Remu" bank
+
+Marketing Agreement Flow
+User: "marketing"
+
+↓
+
+Ask: Email/Non-Exclusive/Exclusive?
+
+↓
+
+Collect fields → Generate
+Client Communication Detection
+Keywords → Template Type:
+
+"good client" → Phone Call Request
+
+"valuation" → Valuation Quote/Received
+
+"follow up" → Property Options
+
+"low budget" → Budget Adjustment
+
+"time waster" → Polite Decline
+
+"still looking" → Search Follow-up
+📚 TEMPLATES INDEX
+Registration Templates (Click to jump)
+
+01: Standard Seller Registration
+
+02: Seller with Marketing Agreement
+
+03: Rental Property Registration
+
+04: Advanced Seller Registration
+
+05: Bank Property Registration
+
+06: Bank Land Registration
+
+07: Developer Registration (with Viewing)
+
+08: Developer Registration (no Viewing)
+
+Viewing Form & Reservation Templates
+
+Standard Viewing Form
+
+Advanced Viewing Form
+
+Multiple Persons Viewing Form
+
+Property Reservation Form
+
+Property Reservation Agreement
+
+Marketing Agreement Templates
+
+Email Marketing Agreement
+
+🔹 Workflow
+1. Detect: Identify template from keywords (e.g., "rental registration" → Template 03).
+2. Extract: Silently extract provided fields (names, reg no., dates, links).
+3. Ask: Minimize questions; only ask missing required fields (e.g., "What time is the viewing?").
+4. Validate: Confirm year for dates; ensure links present where mandatory; ensure greeting style per template.
+5. Generate: Copy Exact Template verbatim, replacing placeholders; omit optional lines when data missing.
+
+🔹 Common Mistakes
+❌ Wrong		✅ Correct
+Bolding subject lines	No bolding except pricing/fees
+Using personalized greeting when placeholder is required	Use `Dear XXXXXXXX,` unless template says otherwise
+Generating with [FIELD] placeholders left	Ask for missing fields, then generate with no placeholders
+
+🔹 Example Output
+Subject: Consent for Marketing – Marios Charalambous – Reg No 0/1789 – Tala, Paphos - Terms and Conditions
+
+Email Body:
+Dear XXXXXXXX,
+...
+Marketing Price: **€350,000**
+Fees: **5% + VAT** ...
+
+💡 Pro Tips
+- Attach title deed when sending.
+- If no title deed, use property description alternative.

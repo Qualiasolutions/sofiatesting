@@ -1,0 +1,74 @@
+📌 Template 05: Bank Property Registration
+
+**Purpose**: Register a client with a bank for a specific property and request confirmation.
+
+🔹 Required Fields (MUST Collect Before Generating)
+- Bank Name (e.g., REMU)
+- Client Name (e.g., Andreas Andreou)
+- Client Phone (full) (e.g., +357 99 123456)
+- Agent Mobile (e.g., +357 99 998877)
+- Property Link (e.g., https://www.remuproperties.com/Cyprus/listing-29190)
+
+🔹 Critical Rules
+- Greeting: Default `Dear XXXXXXXX,` (placeholder) unless template requires personalization; follow template-specific overrides.
+- Dates/Times: "tomorrow" → Auto-convert to October 21, 2025; if year missing ask: "Which year? 2025 or 2026?"; if time missing ask for a time (24h or am/pm).
+- Links: Mandatory for Bank Registrations, Good Client, and Email Marketing; optional elsewhere (omit line if missing).
+- Bolding: Only monetary values or fees/percentages (e.g., **€350,000**, **5% + VAT**). Nothing else.
+- Subject Lines: Follow template-specific formats exactly; do not bold.
+- Greeting must be `Dear [BANK_NAME] Team,`
+- Mask client phone in the body as required (e.g., +357 99 ****56).
+- Property link is **mandatory**.
+
+🔹 Exact Template
+Template 05: Bank Property Registration
+
+Subject: Registration Confirmation - [CLIENT_NAME]
+
+Email Body:
+
+Dear [BANK_NAME] Team,
+
+This email is to provide you with a registration.
+
+Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
+
+My Mobile: [AGENT_MOBILE] (please call me to arrange a viewing)
+
+Registration Details: [CLIENT_NAME] [CLIENT_PHONE_MASKED]
+
+Property: [PROPERTY_LINK]
+
+Looking forward to your prompt reply.
+
+🔹 Workflow
+1. Detect: Identify template from keywords (e.g., "rental registration" → Template 03).
+2. Extract: Silently extract provided fields (names, reg no., dates, links).
+3. Ask: Minimize questions; only ask missing required fields (e.g., "What time is the viewing?").
+4. Validate: Confirm year for dates; ensure links present where mandatory; ensure greeting style per template.
+5. Generate: Copy Exact Template verbatim, replacing placeholders; omit optional lines when data missing.
+
+🔹 Common Mistakes
+❌ Wrong		✅ Correct
+Bolding subject lines	No bolding except pricing/fees
+Using personalized greeting when placeholder is required	Use `Dear XXXXXXXX,` unless template says otherwise
+Generating with [FIELD] placeholders left	Ask for missing fields, then generate with no placeholders
+
+🔹 Example Output
+Subject: Registration Confirmation - Andreas Andreou
+
+Email Body:
+Dear REMU Team,
+
+This email is to provide you with a registration.
+
+Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
+
+My Mobile: +357 99 998877 (please call me to arrange a viewing)
+Registration Details: Andreas Andreou +357 99 ****56
+Property: https://www.remuproperties.com/Cyprus/listing-29190
+
+Looking forward to your prompt reply.
+
+💡 Pro Tips
+- Always include full property link; do not proceed without it.
+- Mask the client phone in the body.

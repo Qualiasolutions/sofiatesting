@@ -603,14 +603,18 @@ export const MoreHorizontalIcon = ({ size = 16 }: { size?: number }) => {
   );
 };
 
-export const MessageIcon = ({ size = 16 }: { size?: number }) => {
+export const MessageIcon = ({
+  size = 16,
+  ...props
+}: { size?: number } & React.SVGProps<SVGSVGElement>) => {
   return (
     <svg
       height={size}
       strokeLinejoin="round"
-      style={{ color: "currentcolor" }}
+      style={{ color: "currentcolor", ...props.style }}
       viewBox="0 0 16 16"
       width={size}
+      {...props}
     >
       <path
         clipRule="evenodd"
@@ -870,13 +874,17 @@ export const ChevronDownIcon = ({ size = 16 }: { size?: number }) => (
   </svg>
 );
 
-export const SparklesIcon = ({ size = 16 }: { size?: number }) => (
+export const SparklesIcon = ({
+  size = 16,
+  ...props
+}: { size?: number } & React.SVGProps<SVGSVGElement>) => (
   <svg
     height={size}
     strokeLinejoin="round"
-    style={{ color: "currentcolor" }}
+    style={{ color: "currentcolor", ...props.style }}
     viewBox="0 0 16 16"
     width={size}
+    {...props}
   >
     <path
       d="M2.5 0.5V0H3.5V0.5C3.5 1.60457 4.39543 2.5 5.5 2.5H6V3V3.5H5.5C4.39543 3.5 3.5 4.39543 3.5 5.5V6H3H2.5V5.5C2.5 4.39543 1.60457 3.5 0.5 3.5H0V3V2.5H0.5C1.60457 2.5 2.5 1.60457 2.5 0.5Z"
@@ -950,18 +958,45 @@ export const LockIcon = ({ size = 16 }: { size?: number }) => {
   );
 };
 
-export const EyeIcon = ({ size = 16 }: { size?: number }) => {
+export const EyeIcon = ({
+  size = 16,
+  ...props
+}: { size?: number } & React.SVGProps<SVGSVGElement>) => {
   return (
     <svg
       height={size}
       strokeLinejoin="round"
-      style={{ color: "currentcolor" }}
+      style={{ color: "currentcolor", ...props.style }}
       viewBox="0 0 16 16"
       width={size}
+      {...props}
     >
       <path
         clipRule="evenodd"
         d="M4.02168 4.76932C6.11619 2.33698 9.88374 2.33698 11.9783 4.76932L14.7602 7.99999L11.9783 11.2307C9.88374 13.663 6.1162 13.663 4.02168 11.2307L1.23971 7.99999L4.02168 4.76932ZM13.1149 3.79054C10.422 0.663244 5.57797 0.663247 2.88503 3.79054L-0.318359 7.5106V8.48938L2.88503 12.2094C5.57797 15.3367 10.422 15.3367 13.1149 12.2094L16.3183 8.48938V7.5106L13.1149 3.79054ZM6.49997 7.99999C6.49997 7.17157 7.17154 6.49999 7.99997 6.49999C8.82839 6.49999 9.49997 7.17157 9.49997 7.99999C9.49997 8.82842 8.82839 9.49999 7.99997 9.49999C7.17154 9.49999 6.49997 8.82842 6.49997 7.99999ZM7.99997 4.99999C6.34311 4.99999 4.99997 6.34314 4.99997 7.99999C4.99997 9.65685 6.34311 11 7.99997 11C9.65682 11 11 9.65685 11 7.99999C11 6.34314 9.65682 4.99999 7.99997 4.99999Z"
+        fill="currentColor"
+        fillRule="evenodd"
+      />
+    </svg>
+  );
+};
+
+export const EyeOffIcon = ({
+  size = 16,
+  ...props
+}: { size?: number } & React.SVGProps<SVGSVGElement>) => {
+  return (
+    <svg
+      height={size}
+      strokeLinejoin="round"
+      style={{ color: "currentcolor", ...props.style }}
+      viewBox="0 0 16 16"
+      width={size}
+      {...props}
+    >
+      <path
+        clipRule="evenodd"
+        d="M3.73527 3.73527L12.2647 12.2647L11.2573 13.2721L2.72787 4.74266C3.79587 5.84233 4.52512 7.08419 4.52512 8C4.52512 8.91581 3.79587 10.1577 2.72787 11.2573L1.41421 12.571C0.532842 11.6896 0 10.462 0 9.25C0 6.90278 0.532842 5.8104 1.41421 4.92891L2.72787 6.24266C2.28595 6.85781 2 7.40156 2 8C2 8.59844 2.28595 9.14219 2.72787 9.75734L1.41421 11.0711C0.532842 10.1896 0 8.962 0 7.75C0 5.40278 0.532842 4.3104 1.41421 3.42891L2.72787 4.74266ZM13.2721 4.74266C14.2041 5.84233 14.9334 7.08419 14.9334 8C14.9334 8.91581 14.2041 10.1577 13.2721 11.2573L14.5858 12.571C15.4671 11.6896 16 10.462 16 9.25C16 6.90278 15.4671 5.8104 14.5858 4.92891L13.2721 3.61516C13.714 4.23031 14 4.77656 14 5.375C14 5.97344 13.714 6.51719 13.2721 7.13244L14.5858 8.44619C15.4671 7.56462 16 6.33699 16 5.125C16 2.87778 15.4671 1.7854 14.5858 0.903906L13.2721 2.21766ZM4.75 8C4.75 7.44772 5.19772 7 5.75 7C6.30228 7 6.75 7.44772 6.75 8C6.75 8.55228 6.30228 9 5.75 9C5.19772 9 4.75 8.55228 4.75 8ZM11.25 8C11.25 7.44772 10.8023 7 10.25 7C9.69772 7 9.25 7.44772 9.25 8C9.25 8.55228 9.69772 9 10.25 9C10.8023 9 11.25 8.55228 11.25 8Z"
         fill="currentColor"
         fillRule="evenodd"
       />

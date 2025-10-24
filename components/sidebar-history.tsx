@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/sidebar";
 import type { Chat } from "@/lib/db/schema";
 import { fetcher } from "@/lib/utils";
-import { LoaderIcon } from "./icons";
+import { LoaderIcon, MessageIcon } from "./icons";
 import { ChatItem } from "./sidebar-history-item";
 
 type GroupedChats = {
@@ -197,8 +197,22 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
     return (
       <SidebarGroup>
         <SidebarGroupContent>
-          <div className="flex w-full flex-row items-center justify-center gap-2 px-2 text-sm text-zinc-500">
-            Your conversations will appear here once you start chatting!
+          <div className="flex flex-col items-center justify-center gap-4 px-4 py-8 text-center">
+            <div className="relative">
+              <MessageIcon size={32} className="text-muted-foreground" />
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium text-foreground">No conversations yet</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Start your first conversation with SOFIA to generate professional real estate documents instantly.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-1 justify-center">
+              <span className="px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground">📋 Registrations</span>
+              <span className="px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground">📈 Marketing</span>
+              <span className="px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground">💰 Valuations</span>
+            </div>
           </div>
         </SidebarGroupContent>
       </SidebarGroup>

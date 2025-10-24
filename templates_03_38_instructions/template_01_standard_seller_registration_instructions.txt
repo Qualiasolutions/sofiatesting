@@ -1,0 +1,142 @@
+📌 Template 01: Standard Seller Registration
+Purpose: Document to register a buyer’s interest in a seller’s property and confirm a viewing.
+
+🔹 Required Fields (MUST Collect Before Generating)
+Buyer Names (e.g., John Smith OR Maria & George Papadopoulos)
+Property Introduced (e.g., Reg. No. 0/1789 Tala, Paphos OR Townhouse Sirina Complex Unit No. G6)
+Property Link (e.g., https://www.zyprus.com/Cyprus/property/12345) (optional but preferred)
+Viewing Date & Time (e.g., October 21, 2025 at 5:00 PM OR tomorrow at 3 PM)
+🔹 Critical Rules (MUST Follow)
+Greeting Protocol:
+
+ALWAYS use: Dear XXXXXXXX, (placeholder for seller’s name).
+NEVER personalize unless explicitly instructed.
+Date/Time Validation:
+
+If user says "tomorrow" → Auto-convert to October 21, 2025 (no need to ask).
+If user says "October 15th" → ASK: "Which year? 2025 or 2026?"
+If time is missing → ASK: "What time is the viewing? (e.g., 15:00 or 3pm)"
+Link Handling:
+
+If not provided, omit the Property Link: line entirely.
+If provided, include it as-is (e.g., Property Link: https://www.zyprus.com/...).
+Formatting:
+
+ONLY bold pricing/fees (N/A for this template; no fees listed).
+No other bolding (e.g., names, links, or subject lines).
+Subject Line:
+
+MUST follow this format:
+
+Registration – [BUYER_NAMES] – Reg No. [REG_NUMBER] – [PROPERTY_DESCRIPTION]
+Example:
+
+Registration – Maria & George Papadopoulos – Reg No. 0/1789 – Villa in Tala, Paphos
+Confirmation Request:
+
+ALWAYS end with:
+
+Please confirm Registration and Viewing.
+For the confirmation, Could you please reply ''Yes I confirm''
+🔹 Exact Template (Copy Character-by-Character)
+Subject:
+
+
+Registration – [BUYER_NAMES] – Reg No. [REG_NUMBER] – [PROPERTY_DESCRIPTION]
+Email Body:
+
+
+Dear XXXXXXXX,
+
+This email is to provide you with a registration.
+
+Client Information: [BUYER_NAMES]
+
+Property Introduced: Your Property in [LOCATION] with Registration No. [REG_NUMBER]
+
+Property Link: [PROPERTY_LINK] (optional - omit if not provided)
+
+Viewing Arranged for: [VIEWING_DATETIME]
+
+Please confirm Registration and Viewing.
+
+For the confirmation, Could you please reply ''Yes I confirm''
+
+Looking forward to your prompt confirmation.
+🔹 Step-by-Step Workflow for the Agent
+Detect Request:
+
+User says: "standard registration" or "seller registration" → Proceed to this template.
+Extract Provided Fields:
+
+Example user input: "Buyer is Andreas & Elena, Reg No. 0/5678, villa in Limassol, viewing Friday 3pm"
+Silently extract:
+Buyer Names = Andreas & Elena
+Property Introduced = villa in Limassol with Registration No. 0/5678
+Viewing = October 25, 2025 at 3:00 PM (auto-add year if "Friday" is today +5 days).
+Ask for missing fields (if any):
+"Please share the property link if available."
+Validate All Fields:
+
+Checklist:
+ Buyer names (detect "&" or "and" for multiple buyers).
+ Property details (Reg No. + description).
+ Viewing date/time (full date + year + time).
+ Link (optional; omit if missing).
+Generate Instantly:
+
+No confirmation questions (e.g., "Should I generate now?").
+No placeholders (e.g., [FIELD] must be replaced).
+Output:
+
+ONLY the final email (subject + body).
+NEVER show:
+Internal notes (e.g., "Extracted: Buyer = Andreas & Elena").
+Explanations (e.g., "I’ll use Dear XXXXXXXX because...").
+🔹 Common Mistakes to Avoid
+❌ Wrong	✅ Correct
+Using Dear Maria, (personalized)	Dear XXXXXXXX, (placeholder)
+Subject: Registration for Maria	Subject: Registration – Maria & George – Reg No. 0/5678 – Villa in Limassol
+Omitting Property Link: if no link	Omit the entire line if no link provided
+Bolding the subject line	No bolding except pricing (N/A here)
+Generating with [VIEWING_DATETIME] placeholder	Ask for missing time/year first
+Adding "Let me know if you need changes"	Only output the final email
+📌 Example Final Output
+User Input:
+"Standard registration for buyer 'Nikolas & Sofia', property is apartment Reg No. 1/2345 in Paphos, viewing next Monday at 4pm."
+
+Agent Actions:
+
+Extract:
+Buyer Names = Nikolas & Sofia
+Property = apartment in Paphos with Registration No. 1/2345
+Viewing = October 28, 2025 at 4:00 PM (auto-calculate "next Monday").
+Ask: "Please share the property link if available." (if not provided).
+Generate:
+Subject:
+
+
+Registration – Nikolas & Sofia – Reg No. 1/2345 – Apartment in Paphos
+Email Body:
+
+
+Dear XXXXXXXX,
+
+This email is to provide you with a registration.
+
+Client Information: Nikolas & Sofia
+
+Property Introduced: Your Property in Paphos with Registration No. 1/2345
+
+Viewing Arranged for: October 28, 2025 at 4:00 PM
+
+Please confirm Registration and Viewing.
+
+For the confirmation, Could you please reply ''Yes I confirm''
+
+Looking forward to your prompt confirmation.
+💡 Pro Tips for the Agent
+Multiple Buyers: If names include "&", "and", or "husband & wife", no extra action needed—the template handles it.
+No Link? Omit the line entirely—never write "Property Link: N/A".
+Time Zones: Assume Cyprus time (EEST/UTC+3). If user says "3pm", use as-is.
+Urgent Requests: Generate immediately once all fields are confirmed. No delays.

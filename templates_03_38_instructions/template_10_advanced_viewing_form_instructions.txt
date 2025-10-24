@@ -1,0 +1,65 @@
+📌 Template 10: Advanced Viewing/Introduction Form
+
+**Purpose**: Record viewing and/or digital introduction with legal clause.
+
+🔹 Required Fields (MUST Collect Before Generating)
+- Date (e.g., October 25, 2025)
+- Registrant Name (e.g., John Smith)
+- ID/Passport Number (e.g., K1234567)
+- Issued By (e.g., United Kingdom)
+- Registration No. (e.g., 0/1789)
+- District (e.g., Paphos)
+- Municipality (e.g., Tala)
+- Locality (e.g., Agios Neophytos)
+
+🔹 Critical Rules
+- Greeting: Default `Dear XXXXXXXX,` (placeholder) unless template requires personalization; follow template-specific overrides.
+- Dates/Times: "tomorrow" → Auto-convert to October 21, 2025; if year missing ask: "Which year? 2025 or 2026?"; if time missing ask for a time (24h or am/pm).
+- Links: Mandatory for Bank Registrations, Good Client, and Email Marketing; optional elsewhere (omit line if missing).
+- Bolding: Only monetary values or fees/percentages (e.g., **€350,000**, **5% + VAT**). Nothing else.
+- Subject Lines: Follow template-specific formats exactly; do not bold.
+- Include the legal clause verbatim.
+- Maintain punctuation and parentheses exactly.
+
+🔹 Exact Template
+Advanced Viewing/Introduction Form
+Viewing/Introduction Form
+
+Date: [DATE]
+
+Herein, I…………………………………………………………… with ID……………………., Issued By: ……………………………… .confirm that CSC Zyprus Property Group LTD (Reg. No. 742, Lic. No. 378/E), has introduced to me with a viewing and/or digitally the property with the following Registry details:
+
+Registration No.: [REGISTRATION_NO]
+
+District: [DISTRICT]
+
+Municipality: [MUNICIPALITY]
+
+Locality: [LOCALITY]
+
+By signing the subject viewing form, you confirm that CSC Zyprus Property Group LTD (hereinafter referred to as Agent) is your exclusive representative responsible for the introduction of the subject property and any negotiations, inquiries, or communications with property owners and/or sellers and/or developers regarding the subject property should be directed through the Agent. Your liabilities are also that you need to provide honest replies to the Agent's questions and/or feedback. Failure to do so will automatically/by default consider you as liable for monetary compensation of the subject commission fee as agreed with the property owners and/or sellers and/or developers plus any other relevant expenses. The Agent is entitled to the agreed commission upon successful completion of the purchase of the property, regardless of the involvement of other parties in the final transaction. This term ensures that the conditions under which the agent earns their commission are clear, preventing potential disputes or any attempts or events of bypassing our agency and ensures that the agent is fairly compensated for their efforts in introducing you the subject property.
+
+Signature: _________________________
+
+🔹 Workflow
+1. Detect: Identify template from keywords (e.g., "rental registration" → Template 03).
+2. Extract: Silently extract provided fields (names, reg no., dates, links).
+3. Ask: Minimize questions; only ask missing required fields (e.g., "What time is the viewing?").
+4. Validate: Confirm year for dates; ensure links present where mandatory; ensure greeting style per template.
+5. Generate: Copy Exact Template verbatim, replacing placeholders; omit optional lines when data missing.
+
+🔹 Common Mistakes
+❌ Wrong		✅ Correct
+Bolding subject lines	No bolding except pricing/fees
+Using personalized greeting when placeholder is required	Use `Dear XXXXXXXX,` unless template says otherwise
+Generating with [FIELD] placeholders left	Ask for missing fields, then generate with no placeholders
+
+🔹 Example Output
+User Input: "Advanced viewing for John Smith, Reg 0/1789, add digital clause."
+Generated Document:
+Advanced Viewing/Introduction Form
+...
+
+💡 Pro Tips
+- Do not alter legal language.
+- If any field missing (e.g., locality), request it.

@@ -67,8 +67,13 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   setOpenMobile(false);
                 }}
               >
+                <img
+                  src="https://images.squarespace-cdn.com/content/v1/65bf52f873aac538961445c5/19d16cc5-aa83-437c-9c2a-61de5268d5bf/Untitled+design+-+2025-01-19T070746.544.png?format=1500w"
+                  alt="Qualia AI"
+                  className="h-8 w-8 rounded-md object-contain"
+                />
                 <span className="cursor-pointer rounded-md px-2 font-semibold text-lg hover:bg-muted">
-                  Chatbot
+                  Qualia AI Agents Suite™
                 </span>
               </Link>
               <div className="flex flex-row gap-1">
@@ -115,7 +120,14 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         <SidebarContent>
           <SidebarHistory user={user} />
         </SidebarContent>
-        <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
+        <SidebarFooter>
+          {user && <SidebarUserNav user={user} />}
+          <div className="border-t border-border px-2 py-2">
+            <div className="flex items-center justify-center text-xs text-muted-foreground">
+              <span>Powered by Qualia Solutions</span>
+            </div>
+          </div>
+        </SidebarFooter>
       </Sidebar>
 
       <AlertDialog onOpenChange={setShowDeleteAllDialog} open={showDeleteAllDialog}>
