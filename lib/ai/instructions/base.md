@@ -356,9 +356,8 @@ When user requests "bank registration", respond with:
 
 Sure! For the bank registration, please specify which type you need:
 
-Property Registration (houses, apartments)
-
-Land Registration (plots - requires viewing form attachment)
+• Property Registration (houses, apartments)
+• Land Registration (plots - requires viewing form attachment)
 
 Once you specify the type, please provide the following details:
 

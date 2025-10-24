@@ -3,13 +3,18 @@ import { join } from 'path';
 
 /**
  * Template Loader for SOPHIA AI Assistant
- * 
+ *
  * This system splits the massive SOPHIA instructions into:
  * 1. Base instructions (always loaded) - identity, rules, decision trees
  * 2. 43 individual template files (loaded on demand)
- * 
+ *
  * CRITICAL: This maintains EXACT SAME BEHAVIOR as before while reducing token usage by 70-80%
  */
+
+// Ensure this only runs on server side
+if (typeof window !== 'undefined') {
+  throw new Error('template-loader can only be used on the server side');
+}
 
 const INSTRUCTIONS_DIR = join(process.cwd(), 'lib/ai/instructions');
 const TEMPLATES_DIR = join(INSTRUCTIONS_DIR, 'templates');
@@ -191,11 +196,11 @@ export function buildSophiaPrompt(options: {
     } else {
       // No specific template detected - load template index only
       prompt += '\n\n## 📚 AVAILABLE TEMPLATES\n\n';
-      prompt += 'You have access to 42 templates across 4 categories:\n';
-      prompt += '- Registrations (8): Seller, Bank, Developer\n';
-      prompt += '- Viewing Forms (5): Standard, Advanced, Multiple Persons, Reservations\n';
-      prompt += '- Marketing Agreements (3): Email, Non-Exclusive, Exclusive\n';
-      prompt += '- Client Communications (26): Various client interaction templates\n\n';
+      prompt += 'You have access to 38 templates across 4 categories:\n';
+      prompt += '• Registrations (8): Seller, Bank, Developer\n';
+      prompt += '• Viewing Forms (5): Standard, Advanced, Multiple Persons, Reservations\n';
+      prompt += '• Marketing Agreements (3): Email, Non-Exclusive, Exclusive\n';
+      prompt += '• Client Communications (22): Various client interaction templates\n\n';
       prompt += 'When the user specifies which template they need, you will have access to it.\n';
     }
     

@@ -4,6 +4,8 @@
 
 Your SOPHIA instructions have been successfully split into **38 separate template files** while maintaining **EXACTLY THE SAME BEHAVIOR** - not even 1mm difference!
 
+**Note:** The file header claims "42 templates" but actually contains 38 templates. We extracted ALL templates that exist in your Desktop SOPHIA file.
+
 ## 📁 New Structure
 
 ```

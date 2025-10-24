@@ -24,7 +24,7 @@ export class TelegramClient {
     chatId,
     text,
     replyToMessageId,
-    parseMode = "Markdown",
+    parseMode = "HTML",
   }: {
     chatId: number | string;
     text: string;

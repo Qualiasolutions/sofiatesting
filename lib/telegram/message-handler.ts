@@ -99,7 +99,7 @@ export async function handleTelegramMessage(
 
     const result = await streamText({
       model: myProvider.languageModel("chat-model-gemini"), // Use Gemini for Telegram (fastest & cheapest)
-      system: systemPrompt({
+      system: `${systemPrompt({
         selectedChatModel: "chat-model-gemini",
         requestHints: {
           latitude: undefined,
@@ -107,7 +107,22 @@ export async function handleTelegramMessage(
           city: undefined,
           country: "Cyprus", // Default to Cyprus for SOFIA
         },
-      }),
+      })}
+
+TELEGRAM CHAT PERSONALITY:
+You are SOFIA - the Zyprus Property Group AI Assistant, but with a friendly, conversational tone suitable for Telegram messaging.
+
+GUIDELINES:
+- Be warm, friendly, and approachable in your responses
+- Use emojis occasionally when appropriate (🏠💼📊💰)
+- Keep paragraphs relatively short for better mobile readability
+- If someone greets you, greet them back warmly
+- Be helpful and proactive in offering assistance
+- Maintain your expertise as a Cyprus real estate professional
+- Feel free to ask clarifying questions if needed
+- Use formatting like <b>bold</b> for emphasis on important information
+
+Remember: You're chatting on Telegram, so keep it natural and conversational while maintaining professionalism.`,
       messages: convertToModelMessages(allMessages),
       experimental_activeTools: [
         "calculateTransferFees",
@@ -170,16 +185,38 @@ export async function handleTelegramMessage(
 }
 
 /**
- * Format text for Telegram Markdown
- * Converts **bold** to *bold* for Telegram
+ * Format text for Telegram HTML
+ * Converts markdown to HTML for better Telegram compatibility
  */
 function formatForTelegram(text: string): string {
-  // Convert **bold** to *bold*
-  let formatted = text.replace(/\*\*(.+?)\*\*/g, "*$1*");
+  let formatted = text;
 
-  // Escape special characters for Telegram MarkdownV2 if needed
-  // For now, using basic Markdown mode
-  return formatted;
+  // Convert **bold** to <b>bold</b>
+  formatted = formatted.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+
+  // Convert *italic* to <i>italic</i>
+  formatted = formatted.replace(/\*(.+?)\*/g, "<i>$1</i>");
+
+  // Convert code blocks to preformatted text
+  formatted = formatted.replace(/```[\s\S]*?```/g, (match) => {
+    const code = match.replace(/```/g, "").trim();
+    return `<code>${code}</code>`;
+  });
+
+  // Convert inline code
+  formatted = formatted.replace(/`([^`]+)`/g, "<code>$1</code>");
+
+  // Clean up multiple newlines
+  formatted = formatted.replace(/\n{3,}/g, "\n\n");
+
+  // Ensure proper spacing for lists
+  formatted = formatted.replace(/(\d+\.)/g, "\n$1");
+  formatted = formatted.replace(/([•\-\*])/g, "\n$1");
+
+  // Convert newlines to HTML line breaks for better formatting
+  formatted = formatted.replace(/\n/g, "<br>");
+
+  return formatted.trim();
 }
 
 /**
