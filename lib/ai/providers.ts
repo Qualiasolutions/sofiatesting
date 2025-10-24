@@ -13,11 +13,15 @@ export const myProvider = isTestEnvironment
         chatModel,
         reasoningModel,
         titleModel,
+        geminiModel,
+        claudeModel,
       } = require("./models.mock");
       return customProvider({
         languageModels: {
           "chat-model": chatModel,
           "chat-model-reasoning": reasoningModel,
+          "chat-model-gemini": geminiModel,
+          "chat-model-claude": claudeModel,
           "title-model": titleModel,
           "artifact-model": artifactModel,
         },
@@ -30,6 +34,8 @@ export const myProvider = isTestEnvironment
           model: gateway.languageModel("xai/grok-3-mini"),
           middleware: extractReasoningMiddleware({ tagName: "think" }),
         }),
+        "chat-model-gemini": gateway.languageModel("google/gemini-2.5-flash"),
+        "chat-model-claude": gateway.languageModel("anthropic/claude-3.7-sonnet"),
         "title-model": gateway.languageModel("xai/grok-2-1212"),
         "artifact-model": gateway.languageModel("xai/grok-2-1212"),
       },
