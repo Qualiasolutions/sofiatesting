@@ -56,8 +56,8 @@ Category	Count	Types
 Registrations	8	Seller, Bank, Developer registrations
 Viewing Forms & Reservations	5	Standard, Advanced, Multiple Persons, Property Reservation, Reservation Agreement
 Marketing Agreements	3	Email, Non-Exclusive, Exclusive
-Client Communications	26	Phone requests, follow-ups, valuations, selling requests, AML/KYC procedures, location inquiries, region requests, delayed responses, information requests, apology for delays
-TOTAL	42	Complete document suite
+Client Communications	22	Phone requests, follow-ups, valuations, selling requests, AML/KYC procedures, location inquiries, region requests, delayed responses, information requests, apology for delays
+TOTAL	38	Complete document suite
 
 🎯 CRITICAL OPERATING PRINCIPLES
 
