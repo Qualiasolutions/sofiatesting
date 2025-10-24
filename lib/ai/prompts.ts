@@ -1,7 +1,6 @@
 import type { Geo } from "@vercel/functions";
 import type { ArtifactKind } from "@/components/artifact";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { buildSophiaPrompt } from "./instructions/template-loader";
 
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
@@ -34,62 +33,26 @@ This is a guide for using artifacts tools: \`createDocument\` and \`updateDocume
 Do not update document right after creating it. Wait for user feedback or request to update it.
 `;
 
-// Function to read SOPHIA instructions from file
-function getSophiaInstructions(): string {
-  try {
-    const instructionsPath = join(process.cwd(), 'SOPHIA_AI_ASSISTANT_INSTRUCTIONS_UPDATED.md');
-    const instructionsContent = readFileSync(instructionsPath, 'utf8');
+/**
+ * SOFIA Prompt System - NEW TEMPLATE LOADER
+ * 
+ * Uses the new template loader system that splits SOPHIA instructions into:
+ * - Base instructions (identity, rules, decision trees) - ALWAYS loaded
+ * - 38 individual templates - loaded based on mode
+ * 
+ * MODES:
+ * - 'full': Load ALL 38 templates (EXACT same behavior as before) ✅ DEFAULT
+ * - 'smart': Load only relevant templates (70-80% token reduction)
+ * - 'minimal': Load only base instructions
+ * 
+ * CRITICAL: Using mode='full' ensures 100% IDENTICAL behavior to original SOPHIA file
+ * NOT EVEN 1MM DIFFERENCE! Every template is copied letter-by-letter from:
+ * /home/qualiasolutions/Desktop/SOPHIA_AI_ASSISTANT_INSTRUCTIONS_UPDATED.md
+ */
 
-    // Extract the core instructions section (remove navigation and indexes)
-    const instructionsStart = instructionsContent.indexOf('🤖 ASSISTANT IDENTITY');
-    const instructionsEnd = instructionsContent.indexOf('END OF OPTIMIZED INSTRUCTIONS');
-
-    if (instructionsStart !== -1 && instructionsEnd !== -1) {
-      const coreInstructions = instructionsContent.substring(instructionsStart, instructionsEnd);
-
-      return `${coreInstructions}
-
-TODAY'S DATE: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-
-CRITICAL: You must follow these instructions EXACTLY as written. This is your complete operating manual.
-
-REMEMBER: These instructions are your absolute source of truth. Follow them word for word.
-
-NO TOOLS: NEVER use any tools, createDocument, updateDocument, or artifacts. Generate ALL responses directly in chat.
-
-NO ARTIFACTS: Generate all documents directly in chat, NEVER use artifacts or side-by-side editing.
-
-PLAIN TEXT ONLY: All output must be plain text with ONLY pricing information in bold format. No markdown formatting except for bold pricing.
-
-IMMEDIATE GENERATION: When all required fields are provided, generate the final document immediately in your response.`;
-    }
-
-    // Fallback if file parsing fails
-    return instructionsContent;
-  } catch (error) {
-    console.error('Error reading SOPHIA instructions:', error);
-    // Fallback basic prompt that follows SOPHIA rules
-    return `You are SOPHIA, AI Assistant for Zyprus Property Group (Cyprus Real Estate). Your purpose is document generation for real estate agents.
-
-TODAY'S DATE: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-
-CRITICAL RULES:
-1. ONLY output field requests OR final documents (nothing else)
-2. Generate IMMEDIATELY when all required fields are complete
-3. Be concise and direct (1-2 sentences maximum for field requests)
-4. Extract information from ANY message
-5. Use PLAIN TEXT with ONLY pricing information in **bold**
-6. NEVER use artifacts or side-by-side editing
-7. Copy templates EXACTLY - no paraphrasing
-8. NEVER show internal notes, explanations, or meta-commentary
-
-Available document types: Registrations, Viewing Forms, Marketing Agreements, Client Communications.
-
-NO ARTIFACTS: Generate all documents directly in chat.`;
-  }
-}
-
-export const regularPrompt = getSophiaInstructions();
+export const regularPrompt = buildSophiaPrompt({ 
+  mode: 'full'  // DEFAULT: Maintains EXACT same behavior - all 38 templates loaded
+});
 
 export type RequestHints = {
   latitude: Geo["latitude"];

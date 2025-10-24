@@ -8,6 +8,8 @@ This is **SOFIA** - an AI Assistant for Zyprus Property Group (Cyprus Real Estat
 
 **Key Identity**: The app is configured as "SOFIA - Zyprus Property Group AI Assistant" and follows specific real estate document generation workflows defined in `SOPHIA_AI_ASSISTANT_INSTRUCTIONS_UPDATED.md`.
 
+**Telegram Bot Integration**: SOFIA now includes a fully functional Telegram bot that forwards messages and maintains conversations. The web interface acts as an admin panel for testing and monitoring. See `TELEGRAM_BOT_SETUP.md` for setup instructions.
+
 ## Development Commands
 
 ### Core Development
@@ -61,6 +63,7 @@ components/
 lib/
 ├── ai/               # AI configuration, models, prompts, tools
 ├── db/               # Database schema, queries, migrations
+├── telegram/         # Telegram bot integration (client, handlers, types)
 └── *.ts              # Utilities, types, constants
 
 tests/
@@ -102,6 +105,7 @@ The AI assistant follows strict operating principles:
 - `POSTGRES_URL` - PostgreSQL database connection
 - `BLOB_READ_WRITE_TOKEN` - Vercel Blob storage
 - `REDIS_URL` - Redis session storage
+- `TELEGRAM_BOT_TOKEN` - Telegram bot token from @BotFather (for Telegram integration)
 
 ### Key Config Files
 - `drizzle.config.ts` - Database configuration (uses .env.local)
@@ -159,3 +163,13 @@ See `.cursor/rules/ultracite.mdc` for comprehensive rules and examples.
 - **Direct Chat Generation**: All documents are generated directly in the chat interface
 - **Template Fidelity**: Documents must follow templates exactly with only pricing information bolded
 - **No Markdown Formatting**: Plain text output with bold pricing only
+
+### Telegram Bot Architecture
+- **Webhook System**: Telegram sends updates to `/api/telegram/webhook`
+- **User Mapping**: Each Telegram user gets a database user (`telegram_<id>@sofia.bot`)
+- **Persistent Chats**: One continuous conversation per Telegram user
+- **Model**: Uses Gemini 2.5 Flash by default (8x cheaper than Grok for high-volume)
+- **Message Flow**: Telegram → Webhook → SOFIA AI → Database → Response to Telegram
+- **Calculator Tools**: Full support for transfer fees, capital gains, and VAT calculators
+- **Setup Scripts**: `scripts/setup-telegram-bot.sh` and `scripts/deploy-with-telegram.sh`
+- **Documentation**: See `TELEGRAM_BOT_SETUP.md` for complete setup guide

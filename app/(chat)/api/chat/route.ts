@@ -22,6 +22,11 @@ import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
+import {
+  calculateCapitalGainsTool,
+  calculateTransferFeesTool,
+  calculateVATTool,
+} from "@/lib/ai/tools";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
@@ -42,8 +47,6 @@ import { type PostRequestBody, postRequestBodySchema } from "./schema";
 
 export const maxDuration = 60;
 
-let globalStreamContext: ResumableStreamContext | null = null;
-
 const getTokenlensCatalog = cache(
   async (): Promise<ModelCatalog | undefined> => {
     try {
@@ -59,26 +62,6 @@ const getTokenlensCatalog = cache(
   ["tokenlens-catalog"],
   { revalidate: 24 * 60 * 60 } // 24 hours
 );
-
-export function getStreamContext() {
-  if (!globalStreamContext) {
-    try {
-      globalStreamContext = createResumableStreamContext({
-        waitUntil: after,
-      });
-    } catch (error: any) {
-      if (error.message.includes("REDIS_URL")) {
-        console.log(
-          " > Resumable streams are disabled due to missing REDIS_URL"
-        );
-      } else {
-        console.error(error);
-      }
-    }
-  }
-
-  return globalStreamContext;
-}
 
 export async function POST(request: Request) {
   let requestBody: PostRequestBody;
@@ -181,9 +164,17 @@ export async function POST(request: Request) {
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
-          experimental_activeTools: [], // SOFIA NEVER uses tools - generates directly in chat
+          experimental_activeTools: [
+            "calculateTransferFees",
+            "calculateCapitalGains",
+            "calculateVAT",
+          ], // SOFIA can use calculator tools only
           experimental_transform: smoothStream({ chunking: "word" }),
-          tools: {}, // Empty tools object - SOFIA generates text directly
+          tools: {
+            calculateTransferFees: calculateTransferFeesTool,
+            calculateCapitalGains: calculateCapitalGainsTool,
+            calculateVAT: calculateVATTool,
+          }, // Calculator tools for Cyprus real estate
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
             functionId: "stream-text",
