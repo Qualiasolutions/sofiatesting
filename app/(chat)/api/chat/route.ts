@@ -116,7 +116,12 @@ export async function POST(request: Request) {
       differenceInHours: 24,
     });
 
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
+    const maxMessages = entitlementsByUserType[userType].maxMessagesPerDay;
+
+    if (messageCount >= maxMessages) {
+      console.error(
+        `Rate limit exceeded for user ${session.user.id} (type: ${userType}): ${messageCount}/${maxMessages} messages in 24h`
+      );
       return new ChatSDKError("rate_limit:chat").toResponse();
     }
 
