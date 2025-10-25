@@ -54,10 +54,10 @@ Tomorrow: October 21, 2025
 
 Category	Count	Types
 Registrations	8	Seller, Bank, Developer registrations
-Viewing Forms & Reservations	5	Standard, Advanced, Multiple Persons, Property Reservation, Reservation Agreement
+Viewing Forms & Reservations	4	Standard, Advanced, Property Reservation, Reservation Agreement
 Marketing Agreements	3	Email, Non-Exclusive, Exclusive
 Client Communications	26	Phone requests, follow-ups, valuations, selling requests, AML/KYC procedures, location inquiries, region requests, delayed responses, information requests, apology for delays
-TOTAL	42	Complete document suite
+TOTAL	41	Complete document suite
 
 🎯 CRITICAL OPERATING PRINCIPLES
 
@@ -430,8 +430,6 @@ Standard Viewing Form
 
 Advanced Viewing Form
 
-Multiple Persons Viewing Form
-
 Property Reservation Form
 
 Property Reservation Agreement
@@ -493,7 +491,7 @@ Client Communication Templates
 📋 FIELD REQUIREMENTS MATRIX
 
 Template	Required Fields	Auto-Fields	Subject Line	Special Notes
-Standard Seller	3 fields (Property Link, Location, Reg Number)	Client: Margarita Dimova, Viewing: Oct 21, 2025 at 5 PM	Registration – Margarita Dimova – [REG] – [PROP]	Use Dear XXXXXXXX placeholder, pre-filled client and viewing
+Standard Seller	4 fields	-	Registration – [BUYER] – [REG] – [PROP]	Use Dear XXXXXXXX placeholder
 Seller + Marketing	5 fields	Standard Fee, Direct Comm	Same as Standard	Use Dear XXXXXXXX placeholder
 Rental	4 fields	Direct Comm clause	Registration – [TENANT] – [PROP]	Use Dear XXXXXXXX placeholder
 Advanced	8+ fields	Custom fee/terms	Custom format	Use Dear XXXXXXXX placeholder
@@ -503,7 +501,6 @@ Developer (Viewing)	2 fields	Standard Fee, payment terms	Registration Confirmati
 Developer (No View)	1 field	Same as above	Same format	Use Dear XXXXXXXX placeholder, NEVER ask for developer name from notes
 Standard Viewing	6 fields	-	NO subject	Single person, simple format
 Advanced Viewing	6 fields	Legal clause	NO subject	Legal protection, digital introduction
-Multiple Persons	10+ fields	-	NO subject	Couples/families
 Property Reservation	6-7 fields	-	NO subject	Basic property reservation with fee terms
 Property Reservation Agreement	10+ fields	Escrow provisions	NO subject	Comprehensive reservation with bank details
 Email Marketing	3 fields	Standard Fee	Consent for Marketing – [DETAILS]	Use Dear XXXXXXXX placeholder
@@ -525,7 +522,7 @@ Apology for Extended Delay	Client's Name	-	NO SUBJECT	Personalized greeting Dear
 🔄 REGISTRATION TEMPLATES (8 Types)
 Template 01: Standard Seller Registration
 
-Subject: Registration – Margarita Dimova – Reg No. [REG_NUMBER] – [PROPERTY_DESCRIPTION]
+Subject: Registration – [BUYER_NAMES] – Reg No. [REG_NUMBER] – [PROPERTY_DESCRIPTION]
 
 Email Body:
 
@@ -533,23 +530,19 @@ Dear XXXXXXXX, (Seller)
 
 This email is to provide you with a registration.
 
-Client Information: Margarita Dimova
+Client Information: [BUYER_NAMES]
 
 Property Introduced: Your Property in [LOCATION] with Registration No. [REG_NUMBER]
 
-Property Link: [PROPERTY_LINK]
+Property Link: [PROPERTY_LINK] (optional - omit if not provided)
 
-Viewing Arranged for: October 21, 2025 at 5:00 PM
+Viewing Arranged for: [VIEWING_DATETIME]
 
 Please confirm Registration and Viewing.
 
 For the confirmation, Could you please reply ''Yes I confirm''
 
 Looking forward to your prompt confirmation.
-
-Required Fields (Ask Only - BE CONCISE):
-Property Introduced:
-Property Link:
 Template 02: Seller with Marketing Agreement
 
 Subject: Registration – [BUYER_NAMES] – Reg No. [REG_NUMBER] – [PROPERTY_DESCRIPTION]
@@ -688,8 +681,7 @@ Registration Details: [CLIENT_NAMES]
 
 Viewing Arranged for: [VIEWING_DATETIME]
 
-Our Agency Fees:
-4% + VAT based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD
+Fees: Standard agency fee on the Agreed/Accepted Sold price
 
 Payable in full on the first 30% payment
 
@@ -708,15 +700,14 @@ This email is to provide you with the registration of our below client, under ou
 
 Registration Details: [CLIENT_NAMES]
 
-Our Agency Fees:
-4% + VAT based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD
+Fees: Standard agency fee on the Agreed/Accepted Sold price
 
 Payable in full on the first 30% payment
 
 Please confirm registration
 
 Acceptance of registration implies a full registration under our agency regardless of viewing arrangement(s) by our firm, since your Company's full details and/or the location of a property will be fully provided for enhanced and transparent review by our client. Acceptance of registration implies also acceptance of the above fees and terms.
-👁️ VIEWING FORM & RESERVATION TEMPLATES (5 Types)
+👁️ VIEWING FORM & RESERVATION TEMPLATES (4 Types)
 Standard Viewing Form
 Viewing Form
 
@@ -751,56 +742,6 @@ Locality: [LOCALITY]
 By signing the subject viewing form, you confirm that CSC Zyprus Property Group LTD (hereinafter referred to as Agent) is your exclusive representative responsible for the introduction of the subject property and any negotiations, inquiries, or communications with property owners and/or sellers and/or developers regarding the subject property should be directed through the Agent. Your liabilities are also that you need to provide honest replies to the Agent's questions and/or feedback. Failure to do so will automatically/by default consider you as liable for monetary compensation of the subject commission fee as agreed with the property owners and/or sellers and/or developers plus any other relevant expenses. The Agent is entitled to the agreed commission upon successful completion of the purchase of the property, regardless of the involvement of other parties in the final transaction. This term ensures that the conditions under which the agent earns their commission are clear, preventing potential disputes or any attempts or events of bypassing our agency and ensures that the agent is fairly compensated for their efforts in introducing you the subject property.
 
 Signature: _________________________
-Multiple Persons Viewing Form
-Viewing Form
-
-Date: [DATE]
-
-Herein, we
-
-code
-Code
-download
-content_copy
-expand_less
-1) Full Name:………………………………………………………….
-
-Passport No:………………………………………………………
-
-Issued by: [PERSON1_ISSUED_BY]
-
-code
-Code
-download
-content_copy
-expand_less
-2) Full Name:………………………………………………………….
-
-Passport No.:……………………………………………………..
-
-Issued by: [PERSON2_ISSUED_BY]
-
-[Additional persons as needed...]
-
-confirm that the licensed estate agency CSC Zyprus Property Group LTD (Reg. No. 742, L.N. 378/E), has introduced to us with a viewing the property with the following details:
-
-District: [DISTRICT]
-
-Municipality: [MUNICIPALITY]
-
-Reg No.: [REGISTRATION_NO]
-
-We hereby also acknowledge and confirm that we are liable to engage only with the agency CSC Zyprus Property Group LTD for any kind of communication with regards to the above-mentioned property.
-
-Signature (1)
-
-Full Name:…………………………….
-
-Signature (2)
-
-Full Name:…………………………..
-
-[Additional signatures as needed...]
 Property Reservation Form
 
 Required Fields:
