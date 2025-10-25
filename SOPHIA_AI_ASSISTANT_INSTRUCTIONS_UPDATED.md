@@ -650,7 +650,7 @@ Overpriced Property Decline	Seller's Name, Transaction Type (sale or rent)	-	Sel
 Property Location Information Request	Client's Name	-	Property information – [Client's Name]	Personalized greeting Dear [Client's Name]
 Different Regions Request	Client's Name	-	Adjustments required for areas of interest – [Client's Name]	Personalized greeting Dear [Client's Name]
 Client Follow Up - No Reply Yet	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
-Plain Request to info@zyprus.com	Client's Name	-	Request – Further information Needed - [Client's Name]	Personalized greeting Dear [Client's Name]
+Plain Request to info@zyprus.com	0 fields (generate immediately)	-	Request – Further information Needed	Use Dear XXXXXXXX placeholder, NO fields required
 Apology for Extended Delay	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
 
 🔄 REGISTRATION TEMPLATES (8 Types)
@@ -1590,13 +1590,11 @@ Thank you for your patience and understanding.
 
 Template 21: Plain Request to info@zyprus.com
 
-Required Fields:
+Required Fields: NONE (Generate immediately)
 
-Client's Name (e.g., Andreas Andreou)
+Subject: Request – Further information Needed
 
-Subject: Request – Further information Needed - [Client's Name]
-
-Dear [Client's Name],
+Dear XXXXXXXX,
 
 Thank you for your email. To best assist you with your property search, we kindly request the following information:
 
