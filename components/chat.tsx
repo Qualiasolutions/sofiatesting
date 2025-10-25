@@ -26,7 +26,6 @@ import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
 import { Artifact } from "./artifact";
-import { TemplateSidebar } from "./template-sidebar";
 import { useDataStream } from "./data-stream-provider";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
@@ -158,7 +157,6 @@ export function Chat({
   return (
     <>
       <div className="flex h-dvh">
-        {/* Main Chat Area */}
         <div className="flex-1 overscroll-behavior-contain flex min-w-0 touch-pan-y flex-col bg-background">
           <ChatHeader
             chatId={id}
@@ -199,9 +197,6 @@ export function Chat({
             )}
           </div>
         </div>
-
-        {/* Template Sidebar */}
-        <TemplateSidebar />
       </div>
 
       <Artifact

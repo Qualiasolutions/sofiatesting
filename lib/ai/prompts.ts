@@ -1,6 +1,7 @@
 import type { Geo } from "@vercel/functions";
 import type { ArtifactKind } from "@/components/artifact";
-import { buildSophiaPrompt } from "./instructions/template-loader";
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
@@ -34,25 +35,28 @@ Do not update document right after creating it. Wait for user feedback or reques
 `;
 
 /**
- * SOFIA Prompt System - NEW TEMPLATE LOADER
- * 
- * Uses the new template loader system that splits SOPHIA instructions into:
- * - Base instructions (identity, rules, decision trees) - ALWAYS loaded
- * - 38 individual templates - loaded based on mode
- * 
- * MODES:
- * - 'full': Load ALL 38 templates (EXACT same behavior as before) ✅ DEFAULT
- * - 'smart': Load only relevant templates (70-80% token reduction)
- * - 'minimal': Load only base instructions
- * 
- * CRITICAL: Using mode='full' ensures 100% IDENTICAL behavior to original SOPHIA file
- * NOT EVEN 1MM DIFFERENCE! Every template is copied letter-by-letter from:
- * /home/qualiasolutions/Desktop/SOPHIA_AI_ASSISTANT_INSTRUCTIONS_UPDATED.md
+ * SOFIA Prompt System - ORIGINAL SINGLE DOCUMENT
+ *
+ * Reads the complete SOPHIA instructions directly from base.md file
+ * This maintains the original behavior with all 42 templates in a single document
  */
 
-export const regularPrompt = buildSophiaPrompt({ 
-  mode: 'full'  // DEFAULT: Maintains EXACT same behavior - all 38 templates loaded
-});
+function loadSophiaInstructions(): string {
+  const basePath = join(process.cwd(), 'lib/ai/instructions/base.md');
+  let content = readFileSync(basePath, 'utf8');
+
+  // Replace date placeholders
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  content = content.replace(/October 20, 2025/g, today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+  content = content.replace(/October 21, 2025/g, tomorrow.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+
+  return content;
+}
+
+export const regularPrompt = loadSophiaInstructions();
 
 export type RequestHints = {
   latitude: Geo["latitude"];
