@@ -56,7 +56,7 @@ Category	Count	Types
 Registrations	8	Seller, Bank, Developer registrations
 Viewing Forms & Reservations	4	Standard, Advanced, Property Reservation, Reservation Agreement
 Marketing Agreements	3	Email, Non-Exclusive, Exclusive
-Client Communications	27	Phone requests, follow-ups, valuations, selling requests, AML/KYC procedures, location inquiries, region requests, delayed responses, information requests, apology for delays, very good client missing phone
+Client Communications	27	Phone requests, follow-ups, valuations, selling requests, AML/KYC procedures, location inquiries, region requests, delayed responses, information requests, apology for delays, good client missing phone
 TOTAL	42	Complete document suite
 
 🎯 CRITICAL OPERATING PRINCIPLES
@@ -496,7 +496,7 @@ Keywords → Template Type:
 
 "still looking" → Search Follow-up
 
-"good client missing phone" OR "very good client" OR "detailed request no phone" → Very Good Client (Missing Phone) - Template 05B
+"good client missing phone" OR "missing phone good request" OR "forgot phone number" → Good Client (Missing Phone) - Template 05B
 
 🎯 CRITICAL BEHAVIOR FOR ALL TEMPLATES
 
@@ -590,7 +590,7 @@ Client Communication Templates
 
 05: Client Not Providing Phone (Generic Request)
 
-05B: Very Good Client (Missing Phone) - Detailed Request
+05B: Good Client (Missing Phone)
 
 06: Follow-up - Multiple Properties
 
@@ -655,7 +655,7 @@ Property Location Information Request	Client's Name	-	Property information – [
 Different Regions Request	Client's Name	-	Adjustments required for areas of interest – [Client's Name]	Personalized greeting Dear [Client's Name]
 Client Follow Up - No Reply Yet	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
 Plain Request to info@zyprus.com	0 fields (generate immediately)	-	Request – Further information Needed	Use Dear XXXXXXXX placeholder, NO fields required
-Very Good Client (Missing Phone)	Client's Name, Region, Property Type Context	-	NO SUBJECT	Personalized greeting Dear [Client's Name], dynamic home/property
+Good Client (Missing Phone)	Client's Name, Region, Property Type Context	-	NO SUBJECT	Personalized greeting Dear [Client's Name], dynamic home/property, for requests where phone was forgotten (not refused)
 Apology for Extended Delay	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
 
 🔄 REGISTRATION TEMPLATES (8 Types)
@@ -1255,13 +1255,17 @@ Should providing a phone number pose any inconvenience, please know that we resp
 
 Thank you for your understanding and for considering our services. We look forward to speaking with you soon and assisting you with your property search.
 
-Template 05B: Very Good Client (Missing Phone) - Detailed Request with Specific Region
+Template 05B: Good Client (Missing Phone)
+
+IMPORTANT DISTINCTION:
+- Template 05 = Client is NOT PROVIDING phone (refusing/declining to give it)
+- Template 05B = Client FORGOT to include phone (missing from request)
 
 USE THIS WHEN:
-- Client provides detailed property requirements (2-3+ lines of detail)
-- Client mentions specific region (e.g., Paphos, Limassol, Nicosia)
-- Client clearly describes what they want
-- BUT phone number is missing
+- Client sends a good quality request (clear requirements, specific region mentioned)
+- Client describes what they want in reasonable detail
+- Phone number is MISSING from the request (forgot to include it)
+- NOT for clients refusing to provide phone (use Template 05 for that)
 
 Required Fields:
 
