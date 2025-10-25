@@ -439,7 +439,7 @@ ${breakdown.map((line) => `• ${line}`).join("\n")}
 
 📊 Total VAT: €${totalVAT.toLocaleString()}
 
-Note: This calculation is for new builds only. Resale properties are exempt from VAT but pay transfer fees.`;
+Note: This calculation is for new builds only. Resale properties are exempt from VAT. Reduced rates apply for first home/main residence purchases in Cyprus.`;
 
     return {
       success: true,
