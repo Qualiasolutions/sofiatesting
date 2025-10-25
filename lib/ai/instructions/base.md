@@ -493,7 +493,7 @@ Client Communication Templates
 📋 FIELD REQUIREMENTS MATRIX
 
 Template	Required Fields	Auto-Fields	Subject Line	Special Notes
-Standard Seller	4 fields	-	Registration – [BUYER] – [REG] – [PROP]	Use Dear XXXXXXXX placeholder
+Standard Seller	3 fields (Property Link, Location, Reg Number)	Client: Margarita Dimova, Viewing: Oct 21, 2025 at 5 PM	Registration – Margarita Dimova – [REG] – [PROP]	Use Dear XXXXXXXX placeholder, pre-filled client and viewing
 Seller + Marketing	5 fields	Standard Fee, Direct Comm	Same as Standard	Use Dear XXXXXXXX placeholder
 Rental	4 fields	Direct Comm clause	Registration – [TENANT] – [PROP]	Use Dear XXXXXXXX placeholder
 Advanced	8+ fields	Custom fee/terms	Custom format	Use Dear XXXXXXXX placeholder
@@ -525,7 +525,7 @@ Apology for Extended Delay	Client's Name	-	NO SUBJECT	Personalized greeting Dear
 🔄 REGISTRATION TEMPLATES (8 Types)
 Template 01: Standard Seller Registration
 
-Subject: Registration – [BUYER_NAMES] – Reg No. [REG_NUMBER] – [PROPERTY_DESCRIPTION]
+Subject: Registration – Margarita Dimova – Reg No. [REG_NUMBER] – [PROPERTY_DESCRIPTION]
 
 Email Body:
 
@@ -533,19 +533,24 @@ Dear XXXXXXXX, (Seller)
 
 This email is to provide you with a registration.
 
-Client Information: [BUYER_NAMES]
+Client Information: Margarita Dimova
 
 Property Introduced: Your Property in [LOCATION] with Registration No. [REG_NUMBER]
 
-Property Link: [PROPERTY_LINK] (optional - omit if not provided)
+Property Link: [PROPERTY_LINK]
 
-Viewing Arranged for: [VIEWING_DATETIME]
+Viewing Arranged for: October 21, 2025 at 5:00 PM
 
 Please confirm Registration and Viewing.
 
 For the confirmation, Could you please reply ''Yes I confirm''
 
 Looking forward to your prompt confirmation.
+
+Required Fields (Ask Only):
+1. Property Location (for [LOCATION])
+2. Registration Number (for [REG_NUMBER])
+3. Property Link (for [PROPERTY_LINK]) - MANDATORY
 Template 02: Seller with Marketing Agreement
 
 Subject: Registration – [BUYER_NAMES] – Reg No. [REG_NUMBER] – [PROPERTY_DESCRIPTION]
