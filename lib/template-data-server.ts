@@ -1,6 +1,5 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { getTemplateRegistry } from './ai/instructions/template-loader';
 import type { TemplateCategory, TemplateData, TemplateInfo, TemplateField } from '@/types/template';
 
 // Ensure this only runs on server side

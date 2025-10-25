@@ -163,6 +163,7 @@ export async function POST(request: Request) {
           model: myProvider.languageModel(selectedChatModel),
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages: convertToModelMessages(uiMessages),
+          temperature: 0,
           stopWhen: stepCountIs(5),
           experimental_activeTools: [
             "calculateTransferFees",
