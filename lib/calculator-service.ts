@@ -310,7 +310,7 @@ export function calculateVAT(
         inputs,
         error: {
           code: "INVALID_INPUT",
-          message: "Planning application date is required (DD/MM/YYYY format)",
+          message: "Planning application date is required",
         },
         execution_time_ms: Date.now() - startTime,
       };
@@ -371,6 +371,8 @@ export function calculateVAT(
     // Policy cutoff date: November 1, 2023
     const policyCutoffDate = new Date(2023, 10, 1); // Month is 0-indexed
     const isNewPolicy = planningApplicationDate >= policyCutoffDate;
+
+    // Calculate VAT for MAIN RESIDENCE based on policy
 
     let totalVAT: number;
     const breakdown: string[] = [];

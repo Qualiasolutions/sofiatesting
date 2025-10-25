@@ -1,5 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { CalculatorService } from "@/lib/calculator-service";
 
 /**
  * VAT Calculator for Houses/Apartments Tool
@@ -41,45 +42,21 @@ export const calculateVATTool = tool({
   }),
   execute: async ({ price, buildable_area, planning_application_date, is_main_residence = true }) => {
     try {
-      // If main residence, redirect to website calculator
-      if (is_main_residence) {
-        return {
-          success: true,
-          formatted_output: `💵 VAT Calculation for Main Residence
+      // Calculate VAT using the service for both main residence and investment properties
+      const result = CalculatorService.calculateVAT({
+        price,
+        buildable_area,
+        planning_application_date,
+        is_main_residence,
+      });
 
-For main residence (first home) purchases, please use the official VAT calculator:
-
-🔗 https://www.mof.gov.cy/mof/tax/taxdep.nsf/vathousecalc_gr/vathousecalc_gr?openform
-
-The reduced VAT rates and specific calculations for main residence require the official government calculator.
-
-Note: This applies to houses and apartments only (not land or commercial properties).`,
-        };
+      if (!result.success) {
+        return result.error?.fallback_url
+          ? `Error calculating VAT: ${result.error.message}\n\nPlease use the online calculator: ${result.error.fallback_url}`
+          : `Error calculating VAT: ${result.error?.message || "Unknown error"}`;
       }
 
-      // For investment properties (NOT main residence), calculate 19% flat VAT
-      const totalVAT = price * 0.19;
-
-      return {
-        success: true,
-        price,
-        is_main_residence: false,
-        vat_rate: 0.19,
-        total_vat: totalVAT,
-        formatted_output: `💵 VAT Calculation (Investment Property)
-
-Property Details:
-• Price: €${price.toLocaleString()}
-• Main Residence: No (Investment Property)
-
-Calculation:
-• Standard VAT Rate: 19%
-• Property Value: €${price.toLocaleString()}
-
-📊 Total VAT: €${totalVAT.toLocaleString()}
-
-Note: This calculation is for investment properties (not main residence). For houses and apartments only (not land or commercial properties). Investment properties pay the standard 19% VAT rate on the full property value.`,
-      };
+      return result.result?.formatted_output || "VAT calculation completed";
     } catch (error) {
       return {
         success: false,
