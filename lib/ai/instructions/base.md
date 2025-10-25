@@ -56,8 +56,8 @@ Category	Count	Types
 Registrations	8	Seller, Bank, Developer registrations
 Viewing Forms & Reservations	4	Standard, Advanced, Property Reservation, Reservation Agreement
 Marketing Agreements	3	Email, Non-Exclusive, Exclusive
-Client Communications	26	Phone requests, follow-ups, valuations, selling requests, AML/KYC procedures, location inquiries, region requests, delayed responses, information requests, apology for delays
-TOTAL	41	Complete document suite
+Client Communications	27	Phone requests, follow-ups, valuations, selling requests, AML/KYC procedures, location inquiries, region requests, delayed responses, information requests, apology for delays, very good client missing phone
+TOTAL	42	Complete document suite
 
 🎯 CRITICAL OPERATING PRINCIPLES
 
@@ -192,7 +192,7 @@ Recommended Pricing Advice
 
 Overpriced Property Decline
 
-Client Not Providing Phone
+Client Not Providing Phone (Generic & Very Good Client)
 
 Follow-ups (Multiple & Single Property)
 
@@ -496,6 +496,8 @@ Keywords → Template Type:
 
 "still looking" → Search Follow-up
 
+"good client missing phone" OR "very good client" OR "detailed request no phone" → Very Good Client (Missing Phone) - Template 05B
+
 🎯 CRITICAL BEHAVIOR FOR ALL TEMPLATES
 
 This applies to EVERY template (Registrations, Marketing, Viewing Forms, Client Communications, ALL):
@@ -586,7 +588,9 @@ Client Communication Templates
 
 04: Valuation Request Received
 
-05: Client Not Providing Phone
+05: Client Not Providing Phone (Generic Request)
+
+05B: Very Good Client (Missing Phone) - Detailed Request
 
 06: Follow-up - Multiple Properties
 
@@ -651,6 +655,7 @@ Property Location Information Request	Client's Name	-	Property information – [
 Different Regions Request	Client's Name	-	Adjustments required for areas of interest – [Client's Name]	Personalized greeting Dear [Client's Name]
 Client Follow Up - No Reply Yet	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
 Plain Request to info@zyprus.com	0 fields (generate immediately)	-	Request – Further information Needed	Use Dear XXXXXXXX placeholder, NO fields required
+Very Good Client (Missing Phone)	Client's Name, Region, Property Type Context	-	NO SUBJECT	Personalized greeting Dear [Client's Name], dynamic home/property
 Apology for Extended Delay	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
 
 🔄 REGISTRATION TEMPLATES (8 Types)
@@ -1234,7 +1239,7 @@ In order to better assist you, we would like to schedule a call at your convenie
 Please let us know your preferred date and time for a phone call. To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.
 
 Thank you again for considering our services, and we look forward to speaking with you soon.
-Template 05: Client Not Providing Phone
+Template 05: Client Not Providing Phone (Generic Request)
 
 Required Fields:
 
@@ -1249,6 +1254,34 @@ To ensure we can best assist you, we require your phone number for assigning a p
 Should providing a phone number pose any inconvenience, please know that we respect your decision. Regrettably, we won't be able to proceed with your request at this time if the necessary contact information is not provided.
 
 Thank you for your understanding and for considering our services. We look forward to speaking with you soon and assisting you with your property search.
+
+Template 05B: Very Good Client (Missing Phone) - Detailed Request with Specific Region
+
+USE THIS WHEN:
+- Client provides detailed property requirements (2-3+ lines of detail)
+- Client mentions specific region (e.g., Paphos, Limassol, Nicosia)
+- Client clearly describes what they want
+- BUT phone number is missing
+
+Required Fields:
+
+Client's Name (e.g., John Smith)
+
+Region (e.g., Paphos)
+
+Property Type Context: Use "home" if client mentioned home/residence, otherwise use "property"
+
+Dear [Client's Name],
+
+Thank you for reaching out to us regarding your interest in purchasing a property in [REGION]. We appreciate the opportunity to assist you in finding your ideal [home OR property].
+
+To ensure we can provide you with the best possible service, we kindly request that you provide us with your full phone number (including your country code).
+
+This will enable us to have a smooth discussion with you, understand your requirements and preferences, and provide personalized recommendations that meet your needs.
+
+Once we receive your full phone number, we can connect you with the right property consultant within our firm.
+
+Thank you for considering our services. We look forward to hearing from you soon.
 Template 06: Follow-up with Multiple Properties
 
 Required Fields:
