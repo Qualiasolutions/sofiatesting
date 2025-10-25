@@ -391,10 +391,10 @@ export function calculateVAT(
       } else {
         // If property > €350k, use government formula:
         // Base amount at 5% = €350k × area_factor
-        // Plus additional amount from excess = (price - €350k) × area_factor × 0.10938
+        // Plus additional amount from excess = (price - €350k) × area_factor × 0.13671875
         const baseAmount = 350_000 * areaFactor;
         const excess = propertyValue - 350_000;
-        const excessAtReducedRate = excess * areaFactor * 0.10938;
+        const excessAtReducedRate = excess * areaFactor * 0.13671875;
         reducedRateValue = baseAmount + excessAtReducedRate;
       }
       
