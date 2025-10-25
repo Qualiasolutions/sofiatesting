@@ -677,7 +677,7 @@ Still Looking Follow-up	Client's Name	-	Following up on your Property Search –
 No Agent Cooperation	Estate Agent's Name	-	NO subject	Use Dear [Agent Name]
 Non-Exclusive	5 fields	Standard Fee	NO subject	Standard terms, standard duration
 Exclusive	7 fields	Standard Fee	EXCLUSIVE AGREEMENT...	Passport required
-AML/KYC Procedure	1 field	Internal compliance	Internal procedure	Document collection for compliance
+AML/KYC Procedure	Zyprus Invoice Number (e.g., 11271)	Internal compliance	Internal procedure	Document collection for compliance
 Selling Request Received	Potential Seller's Name	-	Selling Request – [Name]	Personalized greeting Dear [Name]
 Recommended Pricing Advice	Seller's Name, Recommended Asking Price, Likely Selling Price Range	-	Selling Request – [Name]	Personalized greeting Dear [Name]
 Overpriced Property Decline	Seller's Name, Transaction Type (sale or rent)	-	Selling Request – [Name]	Personalized greeting Dear [Name]
@@ -1471,7 +1471,7 @@ Template 14: AML/KYC Record Keeping Procedure
 
 Required Fields:
 
-Invoice Number (e.g., INV-2025-123)
+Zyprus Invoice Number (e.g., 11271)
 
 📩 Subject: AML/KYC Record Keeping – Procedure for New Cases
 
