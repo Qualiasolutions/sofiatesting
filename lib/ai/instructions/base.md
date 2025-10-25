@@ -176,9 +176,12 @@ RULE #5: GREETING PROTOCOLS 🎭
 
 Default Greeting: Use Dear XXXXXXXX, for all templates UNLESS a personalized greeting is specified.
 
-Personalized Greetings: For templates involving direct client callbacks or personalized advice, use Dear [Client's Name],. Treat the client's name as a required field for these templates.
+CRITICAL FOR CLIENT COMMUNICATION TEMPLATES:
+Client Name is OPTIONAL. 
+- If client name IS mentioned in conversation → use Dear [Client's Name],
+- If client name is NOT mentioned → use Dear XXXXXXXX, and generate immediately (don't ask for name)
 
-Templates requiring a personalized greeting:
+Templates with OPTIONAL personalized greeting (use name if provided, otherwise Dear XXXXXXXX):
 
 Good Client Request (Email & WhatsApp)
 
@@ -192,7 +195,7 @@ Recommended Pricing Advice
 
 Overpriced Property Decline
 
-Client Not Providing Phone (Agent Options & Good Client Missing Phone)
+Good Client (Missing Phone) - Template 05B
 
 Follow-ups (Multiple & Single Property)
 
@@ -202,7 +205,19 @@ Time Wasters Decline
 
 Still Looking Follow-up
 
+No Agent Cooperation
+
+Property Location Information Request
+
+Different Regions Request
+
+Client Follow Up - No Reply Yet
+
+Apology for Extended Delay
+
 Bank Registration Exception: Always use Dear [BANK_NAME] Team,.
+
+Client Not Providing Phone Exception: Always use Dear XXXXXXXX, (no name field, generate immediately).
 
 RULE #6: MANDATORY LINK REQUIREMENT 🔗
 
@@ -496,7 +511,7 @@ Keywords → Template Type:
 
 "still looking" → Search Follow-up
 
-"client not providing phone" OR "options for unsatisfied client" OR "client won't give phone" → Client Not Providing Phone - Template 05 (generate immediately, Dear XXXXXXXX)
+"client not providing phone" OR "client won't give phone" → Client Not Providing Phone - Template 05 (generate immediately, Dear XXXXXXXX)
 
 "good client missing phone" OR "missing phone good request" OR "forgot phone number" → Good Client (Missing Phone) - Template 05B
 
@@ -590,7 +605,7 @@ Client Communication Templates
 
 04: Valuation Request Received
 
-05: Client Not Providing Phone - Options for Agent
+05: Client Not Providing Phone
 
 05B: Good Client (Missing Phone)
 
@@ -656,7 +671,7 @@ Overpriced Property Decline	Seller's Name, Transaction Type (sale or rent)	-	Sel
 Property Location Information Request	Client's Name	-	Property information – [Client's Name]	Personalized greeting Dear [Client's Name]
 Different Regions Request	Client's Name	-	Adjustments required for areas of interest – [Client's Name]	Personalized greeting Dear [Client's Name]
 Client Follow Up - No Reply Yet	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
-Client Not Providing Phone (Agent Options)	0 fields (generate immediately)	-	NO SUBJECT	Use Dear XXXXXXXX placeholder, for agent requesting unsatisfied client options
+Client Not Providing Phone	0 fields (generate immediately)	-	NO SUBJECT	Use Dear XXXXXXXX placeholder, NO fields required
 Plain Request to info@zyprus.com	0 fields (generate immediately)	-	Request – Further information Needed	Use Dear XXXXXXXX placeholder, NO fields required
 Good Client (Missing Phone)	Client's Name, Region, Property Type Context	-	NO SUBJECT	Personalized greeting Dear [Client's Name], dynamic home/property, for requests where phone was forgotten (not refused)
 Apology for Extended Delay	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
@@ -1242,12 +1257,11 @@ In order to better assist you, we would like to schedule a call at your convenie
 Please let us know your preferred date and time for a phone call. To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.
 
 Thank you again for considering our services, and we look forward to speaking with you soon.
-Template 05: Client Not Providing Phone - Options for Agent
+Template 05: Client Not Providing Phone
 
 USE THIS WHEN:
-- Agent asks for "options for unsatisfied client"
 - Agent asks for "client not providing phone" template
-- Agent needs pre-written response for clients who won't give phone
+- Agent needs pre-written response for clients who refuse/won't give phone number
 
 Required Fields: NONE (Generate immediately)
 
@@ -1349,11 +1363,11 @@ Template 09: No Options - Low Budget
 
 Required Fields:
 
-Client's Name (e.g., John Miller)
+Client's Name (OPTIONAL - use if mentioned, otherwise use Dear XXXXXXXX)
 
-Subject: Adjustments required – [Client's Name]
+Subject: Adjustments required – [Client's Name OR XXXXXXXX]
 
-Dear [Client's Name],
+Dear [Client's Name OR XXXXXXXX],
 
 We hope this email finds you well. We appreciate your interest in our real estate services and your recent property request. However, we regret to inform you that based on your budget, preferences and areas of interest, we currently do not have any suitable options available.
 
@@ -1364,13 +1378,13 @@ Template 10: Multiple Areas Issue
 
 Required Fields:
 
-Client's Name (e.g., Svetlana Ivanova)
+Client's Name (OPTIONAL - use if mentioned, otherwise use Dear XXXXXXXX)
 
 City/Region (e.g., Cyprus)
 
-Subject: Adjustments required for areas of interest – [Client's Name]
+Subject: Adjustments required for areas of interest – [Client's Name OR XXXXXXXX]
 
-Dear [Client's Name],
+Dear [Client's Name OR XXXXXXXX],
 
 We hope this email finds you well. We appreciate your interest in our estate agency and your request to view properties in different areas in [City/Region].
 
@@ -1387,11 +1401,11 @@ Template 11: Time Wasters - Polite Decline
 
 Required Fields:
 
-Client's Name (e.g., Peter Williams)
+Client's Name (OPTIONAL - use if mentioned, otherwise use Dear XXXXXXXX)
 
-Subject: Thank you for your request - [Client's Name]
+Subject: Thank you for your request - [Client's Name OR XXXXXXXX]
 
-Dear [Client's Name],
+Dear [Client's Name OR XXXXXXXX],
 
 We hope this email finds you well. Thank you for your inquiry with our estate agency.
 
@@ -1570,11 +1584,11 @@ Template 18: Property Location Information Request
 
 Required Fields:
 
-Client's Name (e.g., Andreas Andreou)
+Client's Name (OPTIONAL - use if mentioned, otherwise use Dear XXXXXXXX)
 
-Subject: Property information – [Client's Name]
+Subject: Property information – [Client's Name OR XXXXXXXX]
 
-Dear [Client's Name],
+Dear [Client's Name OR XXXXXXXX],
 
 Thank you for expressing interest in the property listed with our estate agency. We appreciate your inquiry and would like to provide you with some important information.
 
@@ -1594,11 +1608,11 @@ Template 19: Different Regions Request
 
 Required Fields:
 
-Client's Name (e.g., Andreas Andreou)
+Client's Name (OPTIONAL - use if mentioned, otherwise use Dear XXXXXXXX)
 
-Subject: Adjustments required for areas of interest – [Client's Name]
+Subject: Adjustments required for areas of interest – [Client's Name OR XXXXXXXX]
 
-Dear [Client's Name],
+Dear [Client's Name OR XXXXXXXX],
 
 We hope this email finds you well. We appreciate your interest in our estate agency and your request to view properties in different regions in Cyprus.
 
@@ -1617,9 +1631,9 @@ Template 20: Client Follow Up - No Reply Yet
 
 Required Fields:
 
-Client's Name (e.g., Andreas Andreou)
+Client's Name (OPTIONAL - use if mentioned, otherwise use Dear XXXXXXXX)
 
-Dear [Client's Name],
+Dear [Client's Name OR XXXXXXXX],
 
 Thank you for contacting our estate agency. We appreciate your interest in our services.
 
@@ -1659,9 +1673,9 @@ Template 22: Apology for Extended Delay
 
 Required Fields:
 
-Client's Name (e.g., Andreas Andreou)
+Client's Name (OPTIONAL - use if mentioned, otherwise use Dear XXXXXXXX)
 
-Dear [Client's Name],
+Dear [Client's Name OR XXXXXXXX],
 
 We wanted to apologize for the delay in responding to your recent requests. We receive a high volume of requests on a daily basis, and unfortunately, we were unable to attend to your request in a timely manner.
 We understand that this delay has caused you inconvenience and frustration, and for that, we sincerely apologize.
