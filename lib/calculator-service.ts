@@ -378,22 +378,24 @@ export function calculateVAT(
     const breakdown: string[] = [];
 
     if (isNewPolicy) {
-      // NEW POLICY (from Nov 1, 2023)
-      if (propertyValue <= 350_000) {
-        totalVAT = propertyValue * 0.05;
-        breakdown.push(
-          `Property value (€${propertyValue.toLocaleString()}) is under €350,000 limit`
-        );
-        breakdown.push("VAT Rate: 5% (reduced rate under new policy)");
-        breakdown.push(`VAT Amount: €${totalVAT.toLocaleString()}`);
-      } else {
-        totalVAT = propertyValue * 0.19;
-        breakdown.push(
-          `Property value (€${propertyValue.toLocaleString()}) exceeds €350,000 limit`
-        );
-        breakdown.push("VAT Rate: 19% (standard rate under new policy)");
-        breakdown.push(`VAT Amount: €${totalVAT.toLocaleString()}`);
-      }
+      // NEW POLICY (from Nov 1, 2023) - For Main Residence
+      // Area-based calculation: First portion at 5%, rest at 19%
+      // Formula: €350,000 threshold adjusted by area (200m² reference)
+      
+      const areaFactor = Math.min(buildableArea, 200) / 200;
+      const reducedRateValue = Math.min(propertyValue, 350_000 * areaFactor);
+      const standardRateValue = propertyValue - reducedRateValue;
+      
+      const reducedVAT = reducedRateValue * 0.05;
+      const standardVAT = standardRateValue * 0.19;
+      totalVAT = reducedVAT + standardVAT;
+      
+      breakdown.push(`Property Value: €${propertyValue.toLocaleString()}`);
+      breakdown.push(`Buildable Area: ${buildableArea}m²`);
+      breakdown.push(`Area Factor: ${(areaFactor * 100).toFixed(1)}% (based on 200m² reference)`);
+      breakdown.push(`Value at 5% rate: €${reducedRateValue.toLocaleString()} → VAT €${reducedVAT.toLocaleString()}`);
+      breakdown.push(`Value at 19% rate: €${standardRateValue.toLocaleString()} → VAT €${standardVAT.toLocaleString()}`);
+      breakdown.push(`Total VAT: €${totalVAT.toLocaleString()}`)
     } else {
       // OLD POLICY (before Nov 1, 2023)
       const reducedRateArea = Math.min(buildableArea, 200);
