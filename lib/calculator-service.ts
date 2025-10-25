@@ -379,11 +379,25 @@ export function calculateVAT(
 
     if (isNewPolicy) {
       // NEW POLICY (from Nov 1, 2023) - For Main Residence
-      // Area-based calculation: First portion at 5%, rest at 19%
-      // Formula: €350,000 threshold adjusted by area (200m² reference)
+      // Government formula based on buildable area and €350k threshold
       
       const areaFactor = Math.min(buildableArea, 200) / 200;
-      const reducedRateValue = Math.min(propertyValue, 350_000 * areaFactor);
+      
+      // Calculate value eligible for 5% rate
+      let reducedRateValue: number;
+      if (propertyValue <= 350_000) {
+        // If property ≤ €350k, apply area factor to entire value
+        reducedRateValue = propertyValue * areaFactor;
+      } else {
+        // If property > €350k, use government formula:
+        // Base amount at 5% = €350k × area_factor
+        // Plus additional amount from excess = (price - €350k) × area_factor × 0.10938
+        const baseAmount = 350_000 * areaFactor;
+        const excess = propertyValue - 350_000;
+        const excessAtReducedRate = excess * areaFactor * 0.10938;
+        reducedRateValue = baseAmount + excessAtReducedRate;
+      }
+      
       const standardRateValue = propertyValue - reducedRateValue;
       
       const reducedVAT = reducedRateValue * 0.05;
@@ -392,9 +406,8 @@ export function calculateVAT(
       
       breakdown.push(`Property Value: €${propertyValue.toLocaleString()}`);
       breakdown.push(`Buildable Area: ${buildableArea}m²`);
-      breakdown.push(`Area Factor: ${(areaFactor * 100).toFixed(1)}% (based on 200m² reference)`);
-      breakdown.push(`Value at 5% rate: €${reducedRateValue.toLocaleString()} → VAT €${reducedVAT.toLocaleString()}`);
-      breakdown.push(`Value at 19% rate: €${standardRateValue.toLocaleString()} → VAT €${standardVAT.toLocaleString()}`);
+      breakdown.push(`€${reducedRateValue.toLocaleString()} at 5% = €${reducedVAT.toLocaleString()}`);
+      breakdown.push(`€${standardRateValue.toLocaleString()} at 19% = €${standardVAT.toLocaleString()}`);
       breakdown.push(`Total VAT: €${totalVAT.toLocaleString()}`)
     } else {
       // OLD POLICY (before Nov 1, 2023)
