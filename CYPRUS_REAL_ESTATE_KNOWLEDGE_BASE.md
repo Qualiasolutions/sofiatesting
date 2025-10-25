@@ -358,14 +358,51 @@ Earnings above thresholds NOT subject to social insurance contributions
 
 ## 10. YIELD & RETURN ON INVESTMENT FORMULAS
 
-### Yield Formula
-*[Note: Specific formulas were in presentation slides - formulas for calculating property investment returns]*
+### The Three Core Yield Formulas
 
-**Key Metrics:**
-- Gross Yield
-- Net Yield
-- Return on Investment (ROI)
-- Capital Appreciation
+**Formula 1: Calculate Yield (when you know income and value)**
+```
+Yield = Annual Income / Capital Value
+```
+
+**Formula 2: Calculate Capital Value (when you know income and yield)**
+```
+Capital Value = Annual Income / Yield
+```
+
+**Formula 3: Calculate Annual Income (when you know value and yield)**
+```
+Annual Income = Capital Value × Yield
+```
+
+### Practical Example
+
+**Property:** An apartment providing annual income of €6,000 (€500 per month)
+**Capital Value:** €100,000
+
+**Calculations:**
+
+1. **Finding the Yield:**
+   - Yield = €6,000 / €100,000 = **6%**
+
+2. **Finding the Capital Value:**
+   - Capital Value = €6,000 / 6% = **€100,000**
+
+3. **Finding the Annual Income:**
+   - Annual Income = €100,000 × 6% = **€6,000**
+
+### Important Note About Yield
+
+**If you don't know the yield of your property:**
+- Use the average yield of properties of the same type
+- Properties should be of similar condition
+- Properties should be within the same area as your subject property
+
+### How to Use These Formulas
+
+**Scenario 1:** You know annual rent and property value → Calculate yield to compare with market
+**Scenario 2:** You know annual rent and target yield → Calculate what the property should be worth
+**Scenario 3:** You know property value and market yield → Calculate expected annual rental income (divide by 12 for monthly rent)
 
 ---
 

@@ -116,6 +116,7 @@ A: [Provide COMPLETE information about ALL minimum sizes for studios, 1BR, 2BR, 
 6. **Permanent Residence** - EUR 300k investment, EUR 50k+ annual income requirement
 7. **Tax Residency** - 183-day rule and 60-day rule, non-dom benefits
 8. **Planning Zones** - Site coverage, building density, floor calculations with examples
+9. **Yield Formulas** - Three core formulas for calculating yield, capital value, and annual income with practical examples
 
 🧮 CALCULATOR CAPABILITIES
 
