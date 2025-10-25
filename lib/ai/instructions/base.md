@@ -56,8 +56,8 @@ Category	Count	Types
 Registrations	8	Seller, Bank, Developer registrations
 Viewing Forms & Reservations	4	Standard, Advanced, Property Reservation, Reservation Agreement
 Marketing Agreements	3	Email, Non-Exclusive, Exclusive
-Client Communications	27	Phone requests, follow-ups, valuations, selling requests, AML/KYC procedures, location inquiries, region requests, delayed responses, information requests, apology for delays, good client missing phone
-TOTAL	42	Complete document suite
+Client Communications	28	Phone requests, follow-ups, valuations, selling requests, AML/KYC procedures, location inquiries, region requests, delayed responses, information requests, apology for delays, good client missing phone, patience request for rushing clients
+TOTAL	43	Complete document suite
 
 🎯 CRITICAL OPERATING PRINCIPLES
 
@@ -515,6 +515,8 @@ Keywords → Template Type:
 
 "good client missing phone" OR "missing phone good request" OR "forgot phone number" → Good Client (Missing Phone) - Template 05B
 
+"client rushing" OR "client insisting" OR "impatient client" OR "wants to see property now" → Client Rushing/Insisting - Template 23
+
 🎯 CRITICAL BEHAVIOR FOR ALL TEMPLATES
 
 This applies to EVERY template (Registrations, Marketing, Viewing Forms, Client Communications, ALL):
@@ -643,6 +645,8 @@ Client Communication Templates
 
 22: Apology for Extended Delay
 
+23: Client Rushing/Insisting - Patience Request
+
 📋 FIELD REQUIREMENTS MATRIX
 
 Template	Required Fields	Auto-Fields	Subject Line	Special Notes
@@ -662,19 +666,29 @@ Email Marketing	3 fields	Standard Fee	Consent for Marketing – [DETAILS]	Use De
 Good Client Email	Client's Name, Link	-	Request - [Client] – House – Limassol	Personalized greeting, link is MANDATORY
 Good Client WhatsApp	Client's Name, Link	-	NO subject	Personalized greeting, link is MANDATORY
 Valuation Quote	Client's Name, Valuation Fee	-	Valuation Quote – [Name]	Personalized greeting Dear [Name]
+Valuation Request	Client's Name	-	NO subject	Personalized greeting Dear [Name]
+Follow-up Multiple Properties	Client's Name, Location, Link 1, Link 2	-	NO subject	Personalized greeting Dear [Name]
+Follow-up Single Property	Client's Name, Property Type, Link	-	NO subject	Personalized greeting Dear [Name]
+Buyer Viewing Confirmation	Link	-	NO subject	Use Dear XXXXXXXX placeholder
+Low Budget	Client's Name (OPTIONAL)	-	Adjustments required – [Name OR XXXXXXXX]	Name optional - use if mentioned, otherwise Dear XXXXXXXX
+Multiple Areas Issue	Client's Name (OPTIONAL), City/Region	-	Adjustments required for areas of interest – [Name OR XXXXXXXX]	Name optional - use if mentioned, otherwise Dear XXXXXXXX
+Time Wasters	Client's Name (OPTIONAL)	-	Thank you for your request - [Name OR XXXXXXXX]	Name optional - use if mentioned, otherwise Dear XXXXXXXX
+Still Looking Follow-up	Client's Name	-	Following up on your Property Search – [Name]	Personalized greeting Dear [Name]
+No Agent Cooperation	Estate Agent's Name	-	NO subject	Use Dear [Agent Name]
 Non-Exclusive	5 fields	Standard Fee	NO subject	Standard terms, standard duration
 Exclusive	7 fields	Standard Fee	EXCLUSIVE AGREEMENT...	Passport required
 AML/KYC Procedure	1 field	Internal compliance	Internal procedure	Document collection for compliance
 Selling Request Received	Potential Seller's Name	-	Selling Request – [Name]	Personalized greeting Dear [Name]
 Recommended Pricing Advice	Seller's Name, Recommended Asking Price, Likely Selling Price Range	-	Selling Request – [Name]	Personalized greeting Dear [Name]
 Overpriced Property Decline	Seller's Name, Transaction Type (sale or rent)	-	Selling Request – [Name]	Personalized greeting Dear [Name]
-Property Location Information Request	Client's Name	-	Property information – [Client's Name]	Personalized greeting Dear [Client's Name]
-Different Regions Request	Client's Name	-	Adjustments required for areas of interest – [Client's Name]	Personalized greeting Dear [Client's Name]
-Client Follow Up - No Reply Yet	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
+Property Location Information Request	Client's Name (OPTIONAL)	-	Property information – [Client's Name OR XXXXXXXX]	Name optional - use if mentioned, otherwise Dear XXXXXXXX
+Different Regions Request	Client's Name (OPTIONAL)	-	Adjustments required for areas of interest – [Client's Name OR XXXXXXXX]	Name optional - use if mentioned, otherwise Dear XXXXXXXX
+Client Follow Up - No Reply Yet	Client's Name (OPTIONAL)	-	NO SUBJECT	Name optional - use if mentioned, otherwise Dear XXXXXXXX
 Client Not Providing Phone	0 fields (generate immediately)	-	NO SUBJECT	Use Dear XXXXXXXX placeholder, NO fields required
 Plain Request to info@zyprus.com	0 fields (generate immediately)	-	Request – Further information Needed	Use Dear XXXXXXXX placeholder, NO fields required
-Good Client (Missing Phone)	Client's Name, Region, Property Type Context	-	NO SUBJECT	Personalized greeting Dear [Client's Name], dynamic home/property, for requests where phone was forgotten (not refused)
-Apology for Extended Delay	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
+Good Client (Missing Phone)	Client's Name (OPTIONAL), Region, Property Type Context	-	NO SUBJECT	Name optional - use if mentioned, otherwise Dear XXXXXXXX, dynamic home/property
+Apology for Extended Delay	Client's Name (OPTIONAL)	-	NO SUBJECT	Name optional - use if mentioned, otherwise Dear XXXXXXXX
+Client Rushing/Insisting	Client's Name (OPTIONAL)	-	NO SUBJECT	Name optional - use if mentioned, otherwise Dear XXXXXXXX, for impatient clients
 
 🔄 REGISTRATION TEMPLATES (8 Types)
 Template 01: Standard Seller Registration
@@ -1685,6 +1699,30 @@ We are taking steps to better handle the volume of requests we receive.
 We want to assure you that your request has been forwarded to the relevant team and they will be in touch with you within the day or tomorrow at the very latest. If for any reason, you do not receive a response, please feel free to contact us again by replying to this email. We value your business and appreciate your patience and understanding in this matter.
 
 Thank you for your interest and we look forward to resolving your request soon.
+
+Template 23: Client Rushing/Insisting - Patience Request
+
+USE THIS WHEN:
+- Client is insisting on seeing property immediately
+- Client is rushing or being impatient
+- Client is asking to go see the property urgently
+- Need to ask client to be patient
+
+Required Fields:
+
+Client's Name (OPTIONAL - use if mentioned, otherwise use Dear XXXXXXXX)
+
+Dear [Client's Name OR XXXXXXXX],
+
+We hope this message finds you well.
+Thank you for reaching out to Zyprus Real Estate regarding your property search. We truly value your interest and are excited about the opportunity to assist you.
+
+Before we proceed with arranging viewings, we kindly ask for a little patience. Our team is currently working through a number of client requests, and we want to ensure that each client — including yourself — receives the time and attention they deserve.
+
+As part of our process, we'll need to confirm a few basic details with you. This helps us better understand your needs and match you with the most suitable properties. 
+
+A dedicated sales consultant will be in touch with you as soon as possible and get things moving forward.
+We sincerely appreciate your understanding and cooperation, and we look forward to helping you find your ideal property.
 
 ⚠️ **IMPORTANT NOTE:** Templates 19, 20, 21, and 22 are exclusively for info@zyprus.com use only. In production, these templates will only be generated when specifically requested for the info@zyprus.com email address.
 🛠️ COMMON ISSUES & SOLUTIONS
