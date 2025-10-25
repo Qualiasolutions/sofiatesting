@@ -14,29 +14,29 @@ import { z } from "zod";
  */
 export const calculateVATTool = tool({
   description:
-    "Calculate VAT for new houses/apartments in Cyprus. Use when users ask about VAT on new builds. Ask: 'Was the planning permit applied before or after 31/10/2023?' and 'Is this for your main residence (first home)?' (Use 01/10/2023 if before, 01/11/2023 if after internally). NEW Policy (from Nov 1, 2023): 5% VAT up to €350k, 19% above. OLD Policy: 5% for first 200m², 19% for rest. Only for new builds - resale properties are VAT-exempt.",
+    "Calculate VAT for new houses/apartments in Cyprus. Use when users ask about VAT on new builds. Ask: 'Was the planning permit applied before or after 31/10/2023?' and 'Is this for your main residence?' (Use 01/10/2023 if before, 01/11/2023 if after internally). NEW Policy (from Nov 1, 2023): 5% VAT up to €350k, 19% above. OLD Policy: 5% for first 200m², 19% for rest. Only for new builds - resale properties are VAT-exempt.",
   inputSchema: z.object({
     price: z
       .number()
       .positive()
-      .describe("The property price in Euros (e.g., 350,000)"),
+      .describe("Property price in Euros (e.g., 350,000)"),
     buildable_area: z
       .number()
       .positive()
       .describe(
-        "The buildable/covered area in square meters (e.g., 150). Used for OLD policy calculations."
+        "Buildable/covered area in square meters (e.g., 150)"
       ),
     planning_application_date: z
       .string()
       .regex(/^\d{2}\/\d{2}\/\d{4}$/)
       .describe(
-        "Planning permit date in DD/MM/YYYY. Ask user: 'Was the planning permit applied before or after 31/10/2023?' Then use 01/10/2023 if before, or 01/11/2023 if after."
+        "Planning permit date. Ask: 'Was the planning permit applied before or after 31/10/2023?' Use 01/10/2023 if before, 01/11/2023 if after."
       ),
     is_main_residence: z
       .boolean()
       .default(true)
       .describe(
-        "Is this for main residence (first home)? Ask: 'Is this for your main residence (first home)?' Reduced rates apply for main residence."
+        "Is this for main residence? Ask: 'Is this for your main residence?' (Yes/No)"
       ),
   }),
   execute: async ({ price, buildable_area, planning_application_date, is_main_residence = true }) => {
