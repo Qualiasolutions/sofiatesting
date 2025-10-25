@@ -96,17 +96,44 @@ function getTemplateExample(templateContent: string): string {
 }
 
 /**
- * Simple stub for template registry - returns empty for now
- */
-function getTemplateRegistry(): Map<string, any> {
-  return new Map();
-}
-
-/**
  * Load and parse all template data
  */
 export function getTemplateData(): TemplateData {
-  const registry = getTemplateRegistry();
+  // Simplified implementation - return empty structure for now
+  // Template sidebar will be populated from SOPHIA instructions directly
+  const categories: TemplateCategory[] = [
+    {
+      id: 'registration',
+      name: 'Registrations',
+      templates: []
+    },
+    {
+      id: 'viewing',
+      name: 'Viewing Forms & Reservations',
+      templates: []
+    },
+    {
+      id: 'marketing',
+      name: 'Marketing Agreements',
+      templates: []
+    },
+    {
+      id: 'communication',
+      name: 'Client Communications',
+      templates: []
+    }
+  ];
+
+  return {
+    categories,
+    allTemplates: []
+  };
+}
+
+// Old implementation below - disabled for now
+/*
+export function getTemplateDataOld(): TemplateData {
+  const registry = [] as any[];
   const templates: TemplateInfo[] = [];
 
   // Group templates by category
@@ -169,3 +196,4 @@ export function getTemplateData(): TemplateData {
     allTemplates: templates
   };
 }
+*/
