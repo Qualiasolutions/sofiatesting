@@ -233,9 +233,13 @@ Use numbered list format:
 
 Please share the following so I can complete [TYPE] registration:
 
-Client Information: buyer name (e.g., Fawzi Goussous)
+Buyer Names (e.g., John Smith OR Maria & George Papadopoulos)
 
-Property Introduced: Registration No. of the property (i.e. Reg. No. 0/1789 Tala, Paphos?) OR alternatively description of the property (i.e. Limas Building Flat No. 103 Tala, Paphos)
+Registration Number (e.g., 0/1789)
+
+Property Introduced (e.g., Reg. No. 0/1789 Tala, Paphos OR Townhouse Sirina Complex Unit No. G6)
+
+Viewing Date & Time (e.g., October 21, 2025 at 5:00 PM OR tomorrow at 3 PM)
 
 Property Link: Zyprus URL if available (optional)
 
@@ -300,7 +304,6 @@ Complete Field Examples List:
 • Date (e.g., 1st March 2026)
 • Country (e.g., Uzbekistan)
 • Passport Number (e.g., FA0494484)
-• Property Description (e.g., Apartment 302, Ianou Str. Nr. 11, Nema Ekali Building, Limassol 3110, Cyprus)
 • Price in Words (e.g., Three hundred fifty thousand Euros)
 • Start Date (e.g., 01/08/2023)
 • Valuation Fee (e.g., €250 + VAT)
