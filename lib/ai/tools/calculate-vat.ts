@@ -15,7 +15,7 @@ import { CalculatorService } from "@/lib/calculator-service";
  */
 export const calculateVATTool = tool({
   description:
-    "Calculate VAT for new houses/apartments in Cyprus. Use when users ask about VAT on new builds. Ask: 'Was the planning permit applied before or after 31/10/2023?' and 'Is this for your main residence?' (Use 01/10/2023 if before, 01/11/2023 if after internally). NEW Policy (from Nov 1, 2023): 5% VAT up to €350k, 19% above. OLD Policy: 5% for first 200m², 19% for rest. Only for new builds - resale properties are VAT-exempt.",
+    "Calculate VAT for new houses/apartments in Cyprus. ALWAYS USE THIS TOOL for VAT calculations - do NOT calculate manually. Ask: 'Was the planning permit applied before or after 31/10/2023?' and 'Is this for your main residence?' (Use 01/10/2023 if before, 01/11/2023 if after internally). NEW Policy uses area-based formula. OLD Policy: 5% for first 200m², 19% for rest. Only for new builds - resale properties are VAT-exempt.",
   inputSchema: z.object({
     price: z
       .number()
