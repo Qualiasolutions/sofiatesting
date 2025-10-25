@@ -688,7 +688,8 @@ Registration Details: [CLIENT_NAMES]
 
 Viewing Arranged for: [VIEWING_DATETIME]
 
-Fees: Standard agency fee on the Agreed/Accepted Sold price
+Our Agency Fees:
+4% + VAT based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD
 
 Payable in full on the first 30% payment
 
@@ -707,7 +708,8 @@ This email is to provide you with the registration of our below client, under ou
 
 Registration Details: [CLIENT_NAMES]
 
-Fees: Standard agency fee on the Agreed/Accepted Sold price
+Our Agency Fees:
+4% + VAT based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD
 
 Payable in full on the first 30% payment
 
