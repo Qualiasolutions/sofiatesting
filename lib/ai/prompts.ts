@@ -95,9 +95,48 @@ export const systemPrompt = ({
   requestHints: RequestHints;
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
+  
+  const sophiaInstructions = regularPrompt;
+  const requestHintsContent = requestPrompt;
+  
+  const chatModelInstructions = `Using model: ${selectedChatModel}`;
+
+  const systemPromptContent = `${sophiaInstructions}
+
+${requestHintsContent}
+
+IMPORTANT BEHAVIORAL RULES:
+
+**For DOCUMENT GENERATION:**
+- Be concise, only ask for missing fields
+- Use "Dear XXXXXXXX" for greetings unless specified otherwise
+- Generate documents exactly as specified in templates
+
+**For GENERAL KNOWLEDGE QUESTIONS:**
+- Provide COMPLETE, DETAILED information immediately from knowledge base
+- NEVER ask clarifying questions like "which area?", "what type?", "could you provide more details?"
+- NEVER say "I don't have specific information" if it exists in the knowledge base
+- Include ALL relevant data, examples, calculations, tables, and exceptions
+- When asked about minimum sizes, VAT, taxes, PR, building density, land division, etc. → provide FULL detailed answer with ALL information
+
+**For CALCULATOR REQUESTS:**
+- Use the calculator tools to provide accurate calculations
+
+${chatModelInstructions}
+
+Current date: ${new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })}
+Current time: ${new Date().toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Nicosia",
+  })} (Cyprus time)`;
 
   // NEVER include artifactsPrompt - SOFIA generates documents directly in chat
-  return `${regularPrompt}\n\n${requestPrompt}`;
+  return systemPromptContent;
 };
 
 export const codePrompt = `
