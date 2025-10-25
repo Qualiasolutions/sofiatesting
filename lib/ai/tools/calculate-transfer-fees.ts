@@ -19,7 +19,7 @@ export const calculateTransferFeesTool = tool({
     property_value: z
       .number()
       .positive()
-      .describe("The property value in Euros (e.g., 250000)"),
+      .describe("The property value in Euros (e.g., 250,000)"),
     joint_names: z
       .boolean()
       .default(false)
@@ -69,9 +69,7 @@ Calculation Breakdown:
 ${joint_names ? `• Value per person: €${valuePerPerson.toLocaleString()}\n` : ""}• Base transfer fees: €${fees.toLocaleString()}
 • 50% Exemption (resale): -€${exemptionApplied.toLocaleString()}
 
-📊 Total Transfer Fees: €${totalFees.toLocaleString()}
-
-Note: This calculation assumes a resale property (50% exemption applied). New builds subject to VAT are fully exempt from transfer fees.`,
+📊 Total Transfer Fees: €${totalFees.toLocaleString()}`,
       };
     } catch (error) {
       return {

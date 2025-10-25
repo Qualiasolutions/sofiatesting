@@ -93,9 +93,7 @@ Calculation Breakdown:
 ${jointNames ? `- Value per person: €${valuePerPerson.toLocaleString()}\n` : ""}- Base transfer fees: €${fees.toLocaleString()}
 - 50% Exemption (resale): -€${exemptionApplied.toLocaleString()}
 
-📊 Total Transfer Fees: €${totalFees.toLocaleString()}
-
-Note: This calculation assumes a resale property (50% exemption applied). New builds subject to VAT are fully exempt from transfer fees.`;
+📊 Total Transfer Fees: €${totalFees.toLocaleString()}`;
 
     return {
       success: true,

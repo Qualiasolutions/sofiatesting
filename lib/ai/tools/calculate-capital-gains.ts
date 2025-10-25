@@ -18,11 +18,11 @@ export const calculateCapitalGainsTool = tool({
     sale_price: z
       .number()
       .positive()
-      .describe("The property sale price in Euros"),
+      .describe("The property sale price in Euros (e.g., 350,000)"),
     purchase_price: z
       .number()
       .positive()
-      .describe("The original purchase price in Euros"),
+      .describe("The original purchase price in Euros (e.g., 200,000)"),
     purchase_year: z
       .number()
       .int()
@@ -39,32 +39,32 @@ export const calculateCapitalGainsTool = tool({
       .number()
       .nonnegative()
       .default(0)
-      .describe("Cost of property improvements in Euros (optional)"),
+      .describe("Cost of property improvements in Euros (e.g., 50,000) - optional"),
     transfer_fees: z
       .number()
       .nonnegative()
       .default(0)
-      .describe("Transfer fees paid when purchasing in Euros (optional)"),
+      .describe("Transfer fees paid when purchasing in Euros (e.g., 5,000) - optional"),
     interest_on_loan: z
       .number()
       .nonnegative()
       .default(0)
-      .describe("Total interest paid on mortgage in Euros (optional)"),
+      .describe("Total interest paid on mortgage in Euros (e.g., 15,000) - optional"),
     legal_fees: z
       .number()
       .nonnegative()
       .default(0)
-      .describe("Legal fees for purchase/sale in Euros (optional)"),
+      .describe("Legal fees for purchase/sale in Euros (e.g., 3,000) - optional"),
     estate_agent_fees: z
       .number()
       .nonnegative()
       .default(0)
-      .describe("Estate agent fees in Euros (optional)"),
+      .describe("Estate agent fees in Euros (e.g., 10,000) - optional"),
     other_expenses: z
       .number()
       .nonnegative()
       .default(0)
-      .describe("Other related expenses in Euros (optional)"),
+      .describe("Other related expenses in Euros (e.g., 2,000) - optional"),
     allowance_type: z
       .enum(["main_residence", "farm_land", "any_other_sale", "none"])
       .default("any_other_sale")

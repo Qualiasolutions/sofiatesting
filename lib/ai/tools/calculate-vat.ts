@@ -19,7 +19,7 @@ export const calculateVATTool = tool({
     price: z
       .number()
       .positive()
-      .describe("The property price in Euros (e.g., 350000)"),
+      .describe("The property price in Euros (e.g., 350,000)"),
     buildable_area: z
       .number()
       .positive()
