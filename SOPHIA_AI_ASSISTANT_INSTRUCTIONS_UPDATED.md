@@ -547,10 +547,9 @@ For the confirmation, Could you please reply ''Yes I confirm''
 
 Looking forward to your prompt confirmation.
 
-Required Fields (Ask Only):
-1. Property Location (for [LOCATION])
-2. Registration Number (for [REG_NUMBER])
-3. Property Link (for [PROPERTY_LINK]) - MANDATORY
+Required Fields (Ask Only - BE CONCISE):
+Property Introduced:
+Property Link:
 Template 02: Seller with Marketing Agreement
 
 Subject: Registration – [BUYER_NAMES] – Reg No. [REG_NUMBER] – [PROPERTY_DESCRIPTION]
