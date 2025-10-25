@@ -35,7 +35,9 @@ export const myProvider = isTestEnvironment
           middleware: extractReasoningMiddleware({ tagName: "think" }),
         }),
         "chat-model-gemini": gateway.languageModel("google/gemini-2.5-flash"),
-        "chat-model-claude": gateway.languageModel("anthropic/claude-3.7-sonnet"),
+        "chat-model-claude": gateway.languageModel(
+          "anthropic/claude-3.7-sonnet"
+        ),
         "title-model": gateway.languageModel("xai/grok-2-1212"),
         "artifact-model": gateway.languageModel("xai/grok-2-1212"),
       },

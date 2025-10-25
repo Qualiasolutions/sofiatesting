@@ -1,6 +1,6 @@
+import { NextResponse } from "next/server";
 import { handleTelegramMessage } from "@/lib/telegram/message-handler";
 import type { TelegramUpdate } from "@/lib/telegram/types";
-import { NextResponse } from "next/server";
 
 export const maxDuration = 60;
 

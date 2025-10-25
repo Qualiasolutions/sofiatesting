@@ -67,11 +67,11 @@ const PurePreviewMessage = ({
         })}
       >
         {message.role === "assistant" && (
-          <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full overflow-hidden ring-1 ring-border">
+          <div className="-mt-1 flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-border">
             <img
-              src="https://i.ibb.co/FLVW0txQ/Chat-GPT-Image-Oct-24-2025-05-39-15-AM.png"
               alt="SOFIA"
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover"
+              src="https://i.ibb.co/FLVW0txQ/Chat-GPT-Image-Oct-24-2025-05-39-15-AM.png"
             />
           </div>
         )}
@@ -132,7 +132,7 @@ const PurePreviewMessage = ({
                       className={cn({
                         "w-fit break-words rounded-2xl px-3 py-2 text-right text-white":
                           message.role === "user",
-                        "bg-transparent px-0 py-0 text-left max-w-none":
+                        "max-w-none bg-transparent px-0 py-0 text-left":
                           message.role === "assistant",
                       })}
                       data-testid="message-content"
@@ -327,11 +327,11 @@ export const ThinkingMessage = () => {
       transition={{ duration: 0.2 }}
     >
       <div className="flex items-start justify-start gap-3">
-        <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full overflow-hidden ring-1 ring-border">
+        <div className="-mt-1 flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-border">
           <img
-            src="https://i.ibb.co/FLVW0txQ/Chat-GPT-Image-Oct-24-2025-05-39-15-AM.png"
             alt="SOFIA"
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
+            src="https://i.ibb.co/FLVW0txQ/Chat-GPT-Image-Oct-24-2025-05-39-15-AM.png"
           />
         </div>
 
@@ -339,11 +339,13 @@ export const ThinkingMessage = () => {
           <div className="rounded-2xl border bg-muted/50 px-4 py-3">
             <div className="flex items-center gap-2">
               <div className="flex space-x-1">
-                <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]"></div>
-                <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]"></div>
-                <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"></div>
+                <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
+                <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
+                <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground" />
               </div>
-              <span className="text-sm text-muted-foreground">SOFIA is thinking...</span>
+              <span className="text-muted-foreground text-sm">
+                SOFIA is thinking...
+              </span>
             </div>
           </div>
         </div>
@@ -351,4 +353,3 @@ export const ThinkingMessage = () => {
     </motion.div>
   );
 };
-

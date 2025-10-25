@@ -9,7 +9,8 @@ import { SessionProvider } from "next-auth/react";
 export const metadata: Metadata = {
   metadataBase: new URL("https://chat.vercel.ai"),
   title: "Qualia AI Agents Suite™ - SOFIA Assistant",
-  description: "Qualia AI Agents Suite™ - SOFIA AI Assistant for Real Estate Services.",
+  description:
+    "Qualia AI Agents Suite™ - SOFIA AI Assistant for Real Estate Services.",
 };
 
 export const viewport = {

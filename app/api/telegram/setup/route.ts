@@ -1,10 +1,10 @@
-import { getTelegramClient } from "@/lib/telegram/client";
 import { NextResponse } from "next/server";
+import { getTelegramClient } from "@/lib/telegram/client";
 
 /**
  * Telegram Bot Setup Endpoint
  * Use this to set up the webhook and check bot status
- * 
+ *
  * GET /api/telegram/setup - Get bot info and webhook status
  * POST /api/telegram/setup - Set up webhook
  */

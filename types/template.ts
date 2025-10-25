@@ -13,7 +13,7 @@ export interface TemplateCategory {
 export interface TemplateInfo {
   id: string;
   name: string;
-  category: 'registration' | 'viewing' | 'marketing' | 'communication';
+  category: "registration" | "viewing" | "marketing" | "communication";
   requiredFields: TemplateField[];
   templateExample: string;
   description?: string;

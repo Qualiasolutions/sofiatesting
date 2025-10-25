@@ -22,7 +22,7 @@ import { ImageEditor } from "./image-editor";
 import { SpreadsheetEditor } from "./sheet-editor";
 import { Editor } from "./text-editor";
 import { Badge } from "./ui/badge";
-import { Card, CardHeader, CardContent } from "./ui/card";
+import { Card, CardContent, CardHeader } from "./ui/card";
 
 type DocumentPreviewProps = {
   isReadonly: boolean;
@@ -222,26 +222,28 @@ const PureDocumentHeader = ({
             <LoaderIcon />
           </div>
         ) : kind === "image" ? (
-          <div className="p-1 rounded-lg bg-primary/10 text-primary">
+          <div className="rounded-lg bg-primary/10 p-1 text-primary">
             <ImageIcon size={16} />
           </div>
         ) : kind === "code" ? (
-          <div className="p-1 rounded-lg bg-green-500/10 text-green-600 dark:text-green-400">
+          <div className="rounded-lg bg-green-500/10 p-1 text-green-600 dark:text-green-400">
             <FileIcon size={16} />
           </div>
         ) : kind === "sheet" ? (
-          <div className="p-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400">
+          <div className="rounded-lg bg-blue-500/10 p-1 text-blue-600 dark:text-blue-400">
             <FileIcon size={16} />
           </div>
         ) : (
-          <div className="p-1 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
+          <div className="rounded-lg bg-purple-500/10 p-1 text-purple-600 dark:text-purple-400">
             <FileIcon size={16} />
           </div>
         )}
       </div>
       <div className="flex items-center gap-2">
-        <div className="-translate-y-1 font-medium sm:translate-y-0">{title}</div>
-        <Badge variant="secondary" className="text-xs">
+        <div className="-translate-y-1 font-medium sm:translate-y-0">
+          {title}
+        </div>
+        <Badge className="text-xs" variant="secondary">
           {kind === "text" && "Document"}
           {kind === "code" && "Code"}
           {kind === "sheet" && "Spreadsheet"}

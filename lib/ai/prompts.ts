@@ -1,7 +1,7 @@
 import type { Geo } from "@vercel/functions";
+import { readFileSync } from "fs";
+import { join } from "path";
 import type { ArtifactKind } from "@/components/artifact";
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
@@ -42,16 +42,30 @@ Do not update document right after creating it. Wait for user feedback or reques
  */
 
 function loadSophiaInstructions(): string {
-  const basePath = join(process.cwd(), 'lib/ai/instructions/base.md');
-  let content = readFileSync(basePath, 'utf8');
+  const basePath = join(process.cwd(), "lib/ai/instructions/base.md");
+  let content = readFileSync(basePath, "utf8");
 
   // Replace date placeholders
   const today = new Date();
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  content = content.replace(/October 20, 2025/g, today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
-  content = content.replace(/October 21, 2025/g, tomorrow.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
+  content = content.replace(
+    /October 20, 2025/g,
+    today.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  );
+  content = content.replace(
+    /October 21, 2025/g,
+    tomorrow.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  );
 
   return content;
 }

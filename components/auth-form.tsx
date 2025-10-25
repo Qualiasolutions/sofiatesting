@@ -2,9 +2,9 @@ import Form from "next/form";
 import { useState } from "react";
 import { EyeIcon, EyeOffIcon } from "./icons";
 import { Button } from "./ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 export function AuthForm({
   action,
@@ -20,7 +20,9 @@ export function AuthForm({
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState(defaultEmail);
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -65,50 +67,50 @@ export function AuthForm({
       <CardContent className="space-y-4">
         <Form action={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium">
+            <Label className="font-medium text-sm" htmlFor="email">
               Email Address
             </Label>
             <Input
-              id="email"
-              name="email"
-              type="email"
               autoComplete="email"
               autoFocus
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              error={!!errors.email}
               className="bg-background"
+              error={!!errors.email}
+              id="email"
+              name="email"
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
               required
+              type="email"
+              value={email}
             />
             {errors.email && (
-              <p className="text-sm text-destructive">{errors.email}</p>
+              <p className="text-destructive text-sm">{errors.email}</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium">
+            <Label className="font-medium text-sm" htmlFor="password">
               Password
             </Label>
             <div className="relative">
               <Input
+                autoComplete="current-password"
+                className="bg-background pr-10"
+                error={!!errors.password}
                 id="password"
                 name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                placeholder="••••••••"
-                value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                error={!!errors.password}
-                className="bg-background pr-10"
+                placeholder="••••••••"
                 required
+                type={showPassword ? "text" : "password"}
+                value={password}
               />
               <Button
+                className="absolute top-0 right-0 h-full px-3 py-2 hover:bg-transparent"
+                onClick={() => setShowPassword(!showPassword)}
+                size="sm"
                 type="button"
                 variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
                   <EyeOffIcon className="h-4 w-4" />
@@ -118,7 +120,7 @@ export function AuthForm({
               </Button>
             </div>
             {errors.password && (
-              <p className="text-sm text-destructive">{errors.password}</p>
+              <p className="text-destructive text-sm">{errors.password}</p>
             )}
           </div>
 

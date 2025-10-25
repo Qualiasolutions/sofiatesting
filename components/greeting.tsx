@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { SparklesIcon, GlobeIcon } from "./icons";
+import { GlobeIcon, SparklesIcon } from "./icons";
 import { Badge } from "./ui/badge";
 
 export const Greeting = () => {
@@ -16,10 +16,10 @@ export const Greeting = () => {
         transition={{ delay: 0.3 }}
       >
         <div className="relative">
-          <SparklesIcon size={24} className="text-primary" />
-          <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <SparklesIcon className="text-primary" size={24} />
+          <div className="-top-1 -right-1 absolute h-2 w-2 animate-pulse rounded-full bg-green-500" />
         </div>
-        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+        <h1 className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-2xl text-transparent md:text-3xl">
           Welcome to SOFIA
         </h1>
       </motion.div>
@@ -36,12 +36,12 @@ export const Greeting = () => {
 
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8 flex flex-wrap gap-2 justify-center"
+        className="mb-8 flex flex-wrap justify-center gap-2"
         exit={{ opacity: 0, y: 10 }}
         initial={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.5 }}
       >
-        <Badge variant="secondary" className="gap-1">
+        <Badge className="gap-1" variant="secondary">
           <GlobeIcon size={12} />
           Cyprus Focused
         </Badge>
@@ -52,7 +52,7 @@ export const Greeting = () => {
 
       <motion.div
         animate={{ opacity: 1, y: 0 }}
-        className="text-sm text-muted-foreground"
+        className="text-muted-foreground text-sm"
         exit={{ opacity: 0, y: 10 }}
         initial={{ opacity: 0, y: 10 }}
         transition={{ delay: 0.6 }}

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
 
 const ACCESS_CODE = "the8thchakra";
 
@@ -22,7 +22,8 @@ export default function AccessPage() {
 
     if (code === ACCESS_CODE) {
       // Set a cookie to indicate access granted
-      document.cookie = "qualia-access=granted; path=/; max-age=86400; SameSite=Lax";
+      document.cookie =
+        "qualia-access=granted; path=/; max-age=86400; SameSite=Lax";
       toast.success("Access granted! Welcome to Qualia AI Agents Suite™");
       router.push("/");
     } else {
@@ -45,24 +46,24 @@ export default function AccessPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
       <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
 
       <div className="relative z-10 w-full max-w-md">
-        <Card className="border-0 shadow-2xl bg-slate-800/90 backdrop-blur-md">
-          <CardHeader className="text-center space-y-6">
+        <Card className="border-0 bg-slate-800/90 shadow-2xl backdrop-blur-md">
+          <CardHeader className="space-y-6 text-center">
             <div className="flex justify-center">
               <Image
-                src="https://images.squarespace-cdn.com/content/v1/65bf52f873aac538961445c5/19d16cc5-aa83-437c-9c2a-61de5268d5bf/Untitled+design+-+2025-01-19T070746.544.png?format=1500w"
                 alt="Qualia AI"
-                width={80}
-                height={80}
                 className="rounded-lg"
+                height={80}
+                src="https://images.squarespace-cdn.com/content/v1/65bf52f873aac538961445c5/19d16cc5-aa83-437c-9c2a-61de5268d5bf/Untitled+design+-+2025-01-19T070746.544.png?format=1500w"
+                width={80}
               />
             </div>
 
             <div className="space-y-2">
-              <CardTitle className="text-2xl font-bold text-white">
+              <CardTitle className="font-bold text-2xl text-white">
                 Qualia AI Agents Suite™
               </CardTitle>
               <p className="text-slate-400 text-sm">
@@ -72,33 +73,36 @@ export default function AccessPage() {
           </CardHeader>
 
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="code" className="text-slate-300 text-sm font-medium">
+                <Label
+                  className="font-medium text-slate-300 text-sm"
+                  htmlFor="code"
+                >
                   Access Code
                 </Label>
                 <Input
+                  className="border-slate-600 bg-slate-700/50 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500/20"
                   id="code"
-                  type="password"
-                  value={code}
                   onChange={(e) => setCode(e.target.value)}
                   placeholder="Enter your access code"
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500/20"
                   required
+                  type="password"
+                  value={code}
                 />
               </div>
 
               <Button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-blue-500/25"
+                className="w-full rounded-lg bg-blue-600 px-4 py-3 font-medium text-white shadow-lg transition-all duration-200 hover:bg-blue-700 hover:shadow-blue-500/25"
                 disabled={isLoading}
+                type="submit"
               >
                 {isLoading ? "Verifying..." : "Access Suite"}
               </Button>
             </form>
 
-            <div className="mt-8 pt-6 border-t border-slate-700">
-              <p className="text-center text-xs text-slate-500">
+            <div className="mt-8 border-slate-700 border-t pt-6">
+              <p className="text-center text-slate-500 text-xs">
                 Powered by Qualia Solutions
               </p>
             </div>

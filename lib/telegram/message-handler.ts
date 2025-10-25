@@ -1,7 +1,7 @@
 import "server-only";
 import { convertToModelMessages, streamText } from "ai";
-import { myProvider } from "../ai/providers";
 import { systemPrompt } from "../ai/prompts";
+import { myProvider } from "../ai/providers";
 import {
   calculateCapitalGainsTool,
   calculateTransferFeesTool,
@@ -53,7 +53,7 @@ export async function handleTelegramMessage(
     const sessionChatId = getTelegramChatId(message.from.id);
 
     // Check if chat exists
-    let chat = await getChatById({ id: sessionChatId });
+    const chat = await getChatById({ id: sessionChatId });
 
     if (!chat) {
       // Create new chat session
@@ -95,7 +95,7 @@ export async function handleTelegramMessage(
 
     // Generate AI response
     let fullResponse = "";
-    let assistantMessageId = generateUUID();
+    const assistantMessageId = generateUUID();
 
     const result = await streamText({
       model: myProvider.languageModel("chat-model-gemini"), // Use Gemini for Telegram (fastest & cheapest)
@@ -211,7 +211,7 @@ function formatForTelegram(text: string): string {
 
   // Ensure proper spacing for lists
   formatted = formatted.replace(/(\d+\.)/g, "\n$1");
-  formatted = formatted.replace(/([•\-\*])/g, "\n$1");
+  formatted = formatted.replace(/([•\-*])/g, "\n$1");
 
   // Convert newlines to HTML line breaks for better formatting
   formatted = formatted.replace(/\n/g, "<br>");

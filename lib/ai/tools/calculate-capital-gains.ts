@@ -101,7 +101,7 @@ export const calculateCapitalGainsTool = tool({
       // Simplified inflation adjustment (approximation based on typical Cyprus CPI)
       const yearsHeld = sale_year - purchase_year;
       const inflationRate = 0.02; // 2% annual average
-      const inflationMultiplier = Math.pow(1 + inflationRate, yearsHeld);
+      const inflationMultiplier = (1 + inflationRate) ** yearsHeld;
 
       const adjustedPurchasePrice = purchase_price * inflationMultiplier;
 
@@ -120,9 +120,9 @@ export const calculateCapitalGainsTool = tool({
 
       // Determine allowance
       const allowances: Record<string, number> = {
-        main_residence: 85430,
-        farm_land: 25629,
-        any_other_sale: 17086,
+        main_residence: 85_430,
+        farm_land: 25_629,
+        any_other_sale: 17_086,
         none: 0,
       };
 

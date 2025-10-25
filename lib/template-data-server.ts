@@ -1,13 +1,18 @@
-import { readFileSync } from 'fs';
-import { join } from 'path';
-import type { TemplateCategory, TemplateData, TemplateInfo, TemplateField } from '@/types/template';
+import { readFileSync } from "fs";
+import { join } from "path";
+import type {
+  TemplateCategory,
+  TemplateData,
+  TemplateField,
+  TemplateInfo,
+} from "@/types/template";
 
 // Ensure this only runs on server side
-if (typeof window !== 'undefined') {
-  throw new Error('template-data-server can only be used on the server side');
+if (typeof window !== "undefined") {
+  throw new Error("template-data-server can only be used on the server side");
 }
 
-const TEMPLATES_DIR = join(process.cwd(), 'lib/ai/instructions/templates');
+const TEMPLATES_DIR = join(process.cwd(), "lib/ai/instructions/templates");
 
 /**
  * Extract required fields from template content
@@ -16,25 +21,29 @@ function extractRequiredFields(templateContent: string): TemplateField[] {
   const fields: TemplateField[] = [];
 
   // Look for "Required Fields:" section
-  const requiredFieldsMatch = templateContent.match(/Required Fields:\s*\n([\s\S]*?)(?=\n\n|\nSubject:|$)/i);
+  const requiredFieldsMatch = templateContent.match(
+    /Required Fields:\s*\n([\s\S]*?)(?=\n\n|\nSubject:|$)/i
+  );
   if (!requiredFieldsMatch) return fields;
 
   const fieldsSection = requiredFieldsMatch[1];
 
   // Extract field names and examples
-  const fieldMatches = fieldsSection.matchAll(/([^\n]+?)\s*\([^)]*e\.g\.\s*([^)]+)\)/gi);
+  const fieldMatches = fieldsSection.matchAll(
+    /([^\n]+?)\s*\([^)]*e\.g\.\s*([^)]+)\)/gi
+  );
 
   for (const match of fieldMatches) {
     const fieldName = match[1].trim();
     const example = match[2].trim();
 
     // Skip if it's not actually a field (like "Subject:" line)
-    if (fieldName.toLowerCase().includes('subject:')) continue;
+    if (fieldName.toLowerCase().includes("subject:")) continue;
 
     fields.push({
       name: fieldName,
-      example: example,
-      required: true
+      example,
+      required: true,
     });
   }
 
@@ -48,16 +57,17 @@ function extractRequiredFields(templateContent: string): TemplateField[] {
 
   // Add any placeholders that weren't found in the Required Fields section
   for (const placeholder of placeholderNames) {
-    const exists = fields.some(field =>
-      field.name.toLowerCase().includes(placeholder.toLowerCase()) ||
-      placeholder.toLowerCase().includes(field.name.toLowerCase())
+    const exists = fields.some(
+      (field) =>
+        field.name.toLowerCase().includes(placeholder.toLowerCase()) ||
+        placeholder.toLowerCase().includes(field.name.toLowerCase())
     );
 
-    if (!exists && !placeholder.toLowerCase().includes('example')) {
+    if (!exists && !placeholder.toLowerCase().includes("example")) {
       fields.push({
         name: placeholder,
-        example: '',
-        required: true
+        example: "",
+        required: true,
       });
     }
   }
@@ -70,29 +80,33 @@ function extractRequiredFields(templateContent: string): TemplateField[] {
  */
 function getTemplateExample(templateContent: string): string {
   // Find the actual template content (after metadata)
-  const lines = templateContent.split('\n');
+  const lines = templateContent.split("\n");
   let templateStart = -1;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (line && !line.toLowerCase().includes('required fields') &&
-        !line.toLowerCase().includes('template') &&
-        !line.toLowerCase().includes('subject:') &&
-        !line.match(/^[a-zA-Z\s]*$/)) { // Skip category headers
+    if (
+      line &&
+      !line.toLowerCase().includes("required fields") &&
+      !line.toLowerCase().includes("template") &&
+      !line.toLowerCase().includes("subject:") &&
+      !line.match(/^[a-zA-Z\s]*$/)
+    ) {
+      // Skip category headers
       templateStart = i;
       break;
     }
   }
 
-  if (templateStart === -1) return '';
+  if (templateStart === -1) return "";
 
   const exampleLines = lines.slice(templateStart);
 
   // Clean up the example
   return exampleLines
-    .map(line => line.trim())
-    .filter(line => line.length > 0)
-    .join('\n');
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .join("\n");
 }
 
 /**
@@ -103,30 +117,30 @@ export function getTemplateData(): TemplateData {
   // Template sidebar will be populated from SOPHIA instructions directly
   const categories: TemplateCategory[] = [
     {
-      id: 'registration',
-      name: 'Registrations',
-      templates: []
+      id: "registration",
+      name: "Registrations",
+      templates: [],
     },
     {
-      id: 'viewing',
-      name: 'Viewing Forms & Reservations',
-      templates: []
+      id: "viewing",
+      name: "Viewing Forms & Reservations",
+      templates: [],
     },
     {
-      id: 'marketing',
-      name: 'Marketing Agreements',
-      templates: []
+      id: "marketing",
+      name: "Marketing Agreements",
+      templates: [],
     },
     {
-      id: 'communication',
-      name: 'Client Communications',
-      templates: []
-    }
+      id: "communication",
+      name: "Client Communications",
+      templates: [],
+    },
   ];
 
   return {
     categories,
-    allTemplates: []
+    allTemplates: [],
   };
 }
 

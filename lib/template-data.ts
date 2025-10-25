@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import type { TemplateCategory, TemplateData, TemplateInfo, TemplateField } from '@/types/template';
+import type {
+  TemplateCategory,
+  TemplateData,
+  TemplateField,
+  TemplateInfo,
+} from "@/types/template";
 
 /**
  * Load template data from API
@@ -20,16 +25,16 @@ export function useTemplateData() {
     async function fetchData() {
       try {
         setLoading(true);
-        const response = await fetch('/api/templates');
+        const response = await fetch("/api/templates");
         if (!response.ok) {
-          throw new Error('Failed to fetch template data');
+          throw new Error("Failed to fetch template data");
         }
         const templateData = await response.json();
         setData(templateData);
         setError(null);
       } catch (err) {
-        console.error('Failed to fetch template data:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
+        console.error("Failed to fetch template data:", err);
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -44,16 +49,25 @@ export function useTemplateData() {
 /**
  * Get template by ID (client side)
  */
-export function getTemplateById(id: string, templateData: TemplateData): TemplateInfo | null {
+export function getTemplateById(
+  id: string,
+  templateData: TemplateData
+): TemplateInfo | null {
   if (!templateData) return null;
-  return templateData.allTemplates.find(template => template.id === id) || null;
+  return (
+    templateData.allTemplates.find((template) => template.id === id) || null
+  );
 }
 
 /**
  * Get templates by category (client side)
  */
-export function getTemplatesByCategory(category: string, templateData: TemplateData): TemplateInfo[] {
+export function getTemplatesByCategory(
+  category: string,
+  templateData: TemplateData
+): TemplateInfo[] {
   if (!templateData) return [];
-  return templateData.allTemplates.filter(template => template.category === category);
+  return templateData.allTemplates.filter(
+    (template) => template.category === category
+  );
 }
-

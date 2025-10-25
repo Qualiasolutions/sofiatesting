@@ -18,7 +18,10 @@ export async function getTelegramUser(
 
   try {
     // Check if user exists
-    const existingUsers = await db.select().from(user).where(eq(user.email, email));
+    const existingUsers = await db
+      .select()
+      .from(user)
+      .where(eq(user.email, email));
 
     if (existingUsers.length > 0) {
       return existingUsers[0];

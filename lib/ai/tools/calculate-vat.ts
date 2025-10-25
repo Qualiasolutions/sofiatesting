@@ -44,9 +44,9 @@ export const calculateVATTool = tool({
         };
       }
 
-      const day = parseInt(dateParts[0]);
-      const month = parseInt(dateParts[1]);
-      const year = parseInt(dateParts[2]);
+      const day = Number.parseInt(dateParts[0]);
+      const month = Number.parseInt(dateParts[1]);
+      const year = Number.parseInt(dateParts[2]);
       const planningDate = new Date(year, month - 1, day);
 
       if (isNaN(planningDate.getTime())) {
@@ -65,7 +65,7 @@ export const calculateVATTool = tool({
 
       if (isNewPolicy) {
         // NEW POLICY (from Nov 1, 2023)
-        if (price <= 350000) {
+        if (price <= 350_000) {
           totalVAT = price * 0.05;
           breakdown.push(
             `Property value (€${price.toLocaleString()}) is under €350,000 limit`

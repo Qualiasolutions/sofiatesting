@@ -23,7 +23,9 @@ export const calculateTransferFeesTool = tool({
     joint_names: z
       .boolean()
       .default(false)
-      .describe("Whether the property is being purchased in joint names (splits calculation per person)"),
+      .describe(
+        "Whether the property is being purchased in joint names (splits calculation per person)"
+      ),
   }),
   execute: async ({ property_value, joint_names }) => {
     try {
@@ -34,13 +36,13 @@ export const calculateTransferFeesTool = tool({
       // Calculate progressive transfer fees
       let fees = 0;
 
-      if (valuePerPerson <= 85000) {
+      if (valuePerPerson <= 85_000) {
         fees = valuePerPerson * 0.03;
-      } else if (valuePerPerson <= 170000) {
-        fees = 85000 * 0.03 + (valuePerPerson - 85000) * 0.05;
+      } else if (valuePerPerson <= 170_000) {
+        fees = 85_000 * 0.03 + (valuePerPerson - 85_000) * 0.05;
       } else {
         fees =
-          85000 * 0.03 + 85000 * 0.05 + (valuePerPerson - 170000) * 0.08;
+          85_000 * 0.03 + 85_000 * 0.05 + (valuePerPerson - 170_000) * 0.08;
       }
 
       // Multiply by number of persons

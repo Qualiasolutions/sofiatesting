@@ -199,19 +199,28 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
         <SidebarGroupContent>
           <div className="flex flex-col items-center justify-center gap-4 px-4 py-8 text-center">
             <div className="relative">
-              <MessageIcon size={32} className="text-muted-foreground" />
-              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+              <MessageIcon className="text-muted-foreground" size={32} />
+              <div className="-bottom-1 -right-1 absolute h-3 w-3 animate-pulse rounded-full bg-green-500" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-sm font-medium text-foreground">No conversations yet</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Start your first conversation with SOFIA to generate professional real estate documents instantly.
+              <h3 className="font-medium text-foreground text-sm">
+                No conversations yet
+              </h3>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                Start your first conversation with SOFIA to generate
+                professional real estate documents instantly.
               </p>
             </div>
-            <div className="flex flex-wrap gap-1 justify-center">
-              <span className="px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground">📋 Registrations</span>
-              <span className="px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground">📈 Marketing</span>
-              <span className="px-2 py-1 bg-muted rounded-full text-xs text-muted-foreground">💰 Valuations</span>
+            <div className="flex flex-wrap justify-center gap-1">
+              <span className="rounded-full bg-muted px-2 py-1 text-muted-foreground text-xs">
+                📋 Registrations
+              </span>
+              <span className="rounded-full bg-muted px-2 py-1 text-muted-foreground text-xs">
+                📈 Marketing
+              </span>
+              <span className="rounded-full bg-muted px-2 py-1 text-muted-foreground text-xs">
+                💰 Valuations
+              </span>
             </div>
           </div>
         </SidebarGroupContent>

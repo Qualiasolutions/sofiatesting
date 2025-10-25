@@ -26,11 +26,11 @@ import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { fetcher, fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
 import { Artifact } from "./artifact";
-import { TemplateSidebar } from "./template-sidebar";
 import { useDataStream } from "./data-stream-provider";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 import { getChatHistoryPaginationKey } from "./sidebar-history";
+import { TemplateSidebar } from "./template-sidebar";
 import { toast } from "./toast";
 import type { VisibilityType } from "./visibility-selector";
 
@@ -159,7 +159,7 @@ export function Chat({
     <>
       <div className="flex h-dvh">
         {/* Main Chat Area */}
-        <div className="flex-1 overscroll-behavior-contain flex min-w-0 touch-pan-y flex-col bg-background">
+        <div className="overscroll-behavior-contain flex min-w-0 flex-1 touch-pan-y flex-col bg-background">
           <ChatHeader
             chatId={id}
             isReadonly={isReadonly}
