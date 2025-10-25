@@ -14,7 +14,7 @@ import { z } from "zod";
  */
 export const calculateVATTool = tool({
   description:
-    "Calculate VAT for new houses/apartments in Cyprus. Use when users ask about VAT on new builds. NEW Policy (from Nov 1, 2023): 5% VAT up to €350k, 19% above. OLD Policy: 5% for first 200m², 19% for rest. Only for new builds - resale properties are VAT-exempt.",
+    "Calculate VAT for new houses/apartments in Cyprus. Use when users ask about VAT on new builds. Ask: 'Was the planning permit applied before or after 31/10/2023?' If before, use 01/10/2023. If after, use 01/11/2023. NEW Policy (from Nov 1, 2023): 5% VAT up to €350k, 19% above. OLD Policy: 5% for first 200m², 19% for rest. Only for new builds - resale properties are VAT-exempt.",
   inputSchema: z.object({
     price: z
       .number()
@@ -30,7 +30,7 @@ export const calculateVATTool = tool({
       .string()
       .regex(/^\d{2}\/\d{2}\/\d{4}$/)
       .describe(
-        "Planning application date in DD/MM/YYYY format (e.g., 15/10/2023). Determines if NEW or OLD policy applies (cutoff: 01/11/2023)."
+        "Planning permit date: Use 01/10/2023 if before 31/10/2023, or 01/11/2023 if after. Ask user: 'Was the planning permit applied before or after 31/10/2023?'"
       ),
   }),
   execute: async ({ price, buildable_area, planning_application_date }) => {
