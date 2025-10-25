@@ -192,7 +192,7 @@ Recommended Pricing Advice
 
 Overpriced Property Decline
 
-Client Not Providing Phone (Generic & Very Good Client)
+Client Not Providing Phone (Agent Options & Good Client Missing Phone)
 
 Follow-ups (Multiple & Single Property)
 
@@ -496,6 +496,8 @@ Keywords → Template Type:
 
 "still looking" → Search Follow-up
 
+"client not providing phone" OR "options for unsatisfied client" OR "client won't give phone" → Client Not Providing Phone - Template 05 (generate immediately, Dear XXXXXXXX)
+
 "good client missing phone" OR "missing phone good request" OR "forgot phone number" → Good Client (Missing Phone) - Template 05B
 
 🎯 CRITICAL BEHAVIOR FOR ALL TEMPLATES
@@ -588,7 +590,7 @@ Client Communication Templates
 
 04: Valuation Request Received
 
-05: Client Not Providing Phone (Generic Request)
+05: Client Not Providing Phone - Options for Agent
 
 05B: Good Client (Missing Phone)
 
@@ -654,6 +656,7 @@ Overpriced Property Decline	Seller's Name, Transaction Type (sale or rent)	-	Sel
 Property Location Information Request	Client's Name	-	Property information – [Client's Name]	Personalized greeting Dear [Client's Name]
 Different Regions Request	Client's Name	-	Adjustments required for areas of interest – [Client's Name]	Personalized greeting Dear [Client's Name]
 Client Follow Up - No Reply Yet	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
+Client Not Providing Phone (Agent Options)	0 fields (generate immediately)	-	NO SUBJECT	Use Dear XXXXXXXX placeholder, for agent requesting unsatisfied client options
 Plain Request to info@zyprus.com	0 fields (generate immediately)	-	Request – Further information Needed	Use Dear XXXXXXXX placeholder, NO fields required
 Good Client (Missing Phone)	Client's Name, Region, Property Type Context	-	NO SUBJECT	Personalized greeting Dear [Client's Name], dynamic home/property, for requests where phone was forgotten (not refused)
 Apology for Extended Delay	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
@@ -1239,13 +1242,16 @@ In order to better assist you, we would like to schedule a call at your convenie
 Please let us know your preferred date and time for a phone call. To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.
 
 Thank you again for considering our services, and we look forward to speaking with you soon.
-Template 05: Client Not Providing Phone (Generic Request)
+Template 05: Client Not Providing Phone - Options for Agent
 
-Required Fields:
+USE THIS WHEN:
+- Agent asks for "options for unsatisfied client"
+- Agent asks for "client not providing phone" template
+- Agent needs pre-written response for clients who won't give phone
 
-Client's Name (e.g., Anna Michael)
+Required Fields: NONE (Generate immediately)
 
-Dear [Client's Name],
+Dear XXXXXXXX,
 
 I hope this message finds you well. I wanted to inform you about our property consultation process.
 
