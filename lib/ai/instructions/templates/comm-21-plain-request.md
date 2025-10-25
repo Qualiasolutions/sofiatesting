@@ -8,18 +8,6 @@ Subject: Request – Further information Needed - [Client's Name]
 
 Dear [Client's Name],
 
-Thank you for your email. To best assist you with your property search, we kindly request the following information:
+Thank you for your inquiry. One of our property consultants will contact you shortly to discuss your requirements in detail.
 
-Your Full Name:
-
-Your Full Phone Number:
-
-Property description and desired area(s):
-
-Purpose: Investment (Buy to let) OR Main Residence
-
-Budget for ideal property: €
-
-Mortgage Buyer: YES / NO
-
-By providing us with these details, we can connect you with the right property consultant within our firm, who can offer personalized assistance. We look forward to hearing from you soon.
+We look forward to assisting you with your property search.

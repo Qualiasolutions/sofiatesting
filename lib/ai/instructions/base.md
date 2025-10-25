@@ -517,7 +517,7 @@ Overpriced Property Decline	Seller's Name, Transaction Type (sale or rent)	-	Sel
 Property Location Information Request	Client's Name	-	Property information – [Client's Name]	Personalized greeting Dear [Client's Name]
 Different Regions Request	Client's Name	-	Adjustments required for areas of interest – [Client's Name]	Personalized greeting Dear [Client's Name]
 Client Follow Up - No Reply Yet	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
-Plain Request to info@zyprus.com	Client's Name	-	Request – Further information Needed - [Client's Name]	Personalized greeting Dear [Client's Name]
+Plain Request to info@zyprus.com	1 field	-	Request – Further information Needed - [Client's Name]	Personalized greeting Dear [Client's Name]
 Apology for Extended Delay	Client's Name	-	NO SUBJECT	Personalized greeting Dear [Client's Name]
 
 CALCULATOR TOOLS AVAILABLE:
