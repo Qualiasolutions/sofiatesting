@@ -96,6 +96,13 @@ function getTemplateExample(templateContent: string): string {
 }
 
 /**
+ * Simple stub for template registry - returns empty for now
+ */
+function getTemplateRegistry(): Map<string, any> {
+  return new Map();
+}
+
+/**
  * Load and parse all template data
  */
 export function getTemplateData(): TemplateData {
