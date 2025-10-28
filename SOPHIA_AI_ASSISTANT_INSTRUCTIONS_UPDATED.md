@@ -418,6 +418,8 @@ Apology for Extended Delay
 
 Bank Registration Exception: Always use Dear [BANK_NAME] Team,.
 
+Bank Phone Masking Rule: ALWAYS mask client phone numbers in bank registrations using format: +357 99 *** **34 (show first 3 digits, mask middle 2-3 digits, show last 2 digits).
+
 Developer Registration Exception: Always use Dear XXXXXXXX, (no contact person required - generate immediately).
 
 Client Not Providing Phone Exception: Always use Dear XXXXXXXX, (no name field, generate immediately).
@@ -2032,7 +2034,19 @@ Solution: NEVER generate templates that require links without getting the link f
 
 ❌ NEVER assume or skip the link field for mandatory templates
 
-Issue 10: Incomplete field examples
+Issue 10: Phone number masking not applied in bank registrations
+
+Solution: ALWAYS mask client phone numbers in bank registration templates
+
+✅ Bank Property: Use format +357 99 *** **34 (first 3 digits, mask middle, show last 2)
+
+✅ Bank Land: Use format +357 99 *** **34 (first 3 digits, mask middle, show last 2)
+
+❌ Show full phone number in bank registrations
+
+❌ Use incomplete masking (must follow exact format)
+
+Issue 11: Incomplete field examples
 
 Solution: ALWAYS provide clear examples for EVERY field requested
 
