@@ -9,6 +9,7 @@ import {
   gt,
   gte,
   inArray,
+  // isNull, // Used for property listings (disabled)
   lt,
   type SQL,
 } from "drizzle-orm";
@@ -24,13 +25,16 @@ import {
   chat,
   type DBMessage,
   document,
+  // listingUploadAttempt,
   message,
-  type Suggestion,
+  // propertyListing,
   stream,
+  type Suggestion,
   suggestion,
   type User,
   user,
   vote,
+  // type InferInsertModel,
 } from "./schema";
 import { generateHashedPassword } from "./utils";
 
@@ -591,3 +595,125 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
     );
   }
 }
+
+// Property Listing Management Functions (DISABLED - Tables not in production yet)
+// Uncomment after running migration 0008_brave_deathbird.sql in production
+
+/*
+export async function createPropertyListing(
+  data: InferInsertModel<typeof propertyListing>
+) {
+  try {
+    const [listing] = await db
+      .insert(propertyListing)
+      .values(data)
+      .returning();
+    return listing;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to create property listing"
+    );
+  }
+}
+
+export async function getListingById({ id }: { id: string }) {
+  try {
+    const [listing] = await db
+      .select()
+      .from(propertyListing)
+      .where(and(eq(propertyListing.id, id), isNull(propertyListing.deletedAt)));
+
+    return listing;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get listing by id"
+    );
+  }
+}
+
+export async function getListingsByUserId({
+  userId,
+  limit = 10,
+}: {
+  userId: string;
+  limit?: number;
+}) {
+  try {
+    return await db
+      .select()
+      .from(propertyListing)
+      .where(and(eq(propertyListing.userId, userId), isNull(propertyListing.deletedAt)))
+      .orderBy(desc(propertyListing.createdAt))
+      .limit(limit);
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get listings by user id"
+    );
+  }
+}
+
+export async function updateListingStatus({
+  id,
+  status,
+  zyprusListingId,
+  zyprusListingUrl,
+  publishedAt,
+}: {
+  id: string;
+  status: string;
+  zyprusListingId?: string;
+  zyprusListingUrl?: string;
+  publishedAt?: Date;
+}) {
+  try {
+    await db
+      .update(propertyListing)
+      .set({
+        status,
+        zyprusListingId,
+        zyprusListingUrl,
+        publishedAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(propertyListing.id, id));
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to update listing status"
+    );
+  }
+}
+
+export async function logListingUploadAttempt(data: {
+  listingId: string;
+  attemptNumber: number;
+  status: string;
+  errorMessage?: string;
+  errorCode?: string;
+  apiResponse?: any;
+  durationMs?: number;
+}) {
+  try {
+    await db.insert(listingUploadAttempt).values({
+      id: generateUUID(),
+      listingId: data.listingId,
+      attemptNumber: data.attemptNumber,
+      status: data.status,
+      errorMessage: data.errorMessage,
+      errorCode: data.errorCode,
+      apiResponse: data.apiResponse,
+      attemptedAt: new Date(),
+      completedAt: new Date(),
+      durationMs: data.durationMs,
+    });
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to log upload attempt"
+    );
+  }
+}
+*/

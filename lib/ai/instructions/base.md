@@ -434,6 +434,11 @@ Special Detections
 "Maria & George" → Auto-detect multiple sellers
 
 "remuproperties.com" → Auto-detect "Remu" bank
+"gordianproperties.com" → Auto-detect "Gordian" bank
+"altamiraproperties.com" → Auto-detect "Altamira" bank
+"altiabank.com" → Auto-detect "Altia" bank
+"bankofcyprus.com" → Auto-detect "Bank of Cyprus" bank
+"hellenicbank.com" → Auto-detect "Hellenic Bank" bank
 
 Marketing Agreement Flow
 
@@ -643,8 +648,8 @@ Standard Seller	4 fields	-	Registration – [BUYER] – [REG] – [PROP]	Use Dea
 Seller + Marketing	5 fields	Standard Fee, Direct Comm	Same as Standard	Use Dear XXXXXXXX placeholder
 Rental	4 fields	Direct Comm clause	Registration – [TENANT] – [PROP]	Use Dear XXXXXXXX placeholder
 Advanced	8+ fields	Custom fee/terms	Custom format	Use Dear XXXXXXXX placeholder
-Bank Property	4 fields	Bank detection	Registration Confirmation - [CLIENT]	Mask client phone, property link is MANDATORY
-Bank Land	4 fields	Bank detection	Same + viewing form reminder	Different mask format, property link is MANDATORY
+Bank Property	4 fields	Bank detection, phone masking	Registration Confirmation - [CLIENT]	Mask client phone (middle digits), property link is MANDATORY
+Bank Land	4 fields	Bank detection, phone masking	Same + viewing form reminder	Mask client phone (middle digits), property link is MANDATORY
 Developer (Viewing)	2 fields	Standard Fee, payment terms	Registration Confirmation - [CLIENTS]	Use Dear XXXXXXXX placeholder, NEVER ask for developer name from notes
 Developer (No View)	1 field	Same as above	Same format	Use Dear XXXXXXXX placeholder, NEVER ask for developer name from notes
 Standard Viewing	6 fields	-	NO subject	Single person, simple format
@@ -1890,7 +1895,7 @@ LINK CHECK: If template requires [LINK] or [PROPERTY_LINK], link must be provide
 
 Subject line format confirmed
 
-Special rules checked (phone masking, clauses)
+Special rules checked (phone masking for banks, clauses)
 
 Template will be copied EXACTLY
 
@@ -1973,6 +1978,38 @@ Viewing: October 21, 2025 at 5:00 PM
 What Sophia asks (ONLY 2 fields missing - use SHORT format):
 
 "Please share property information and link."
+
+## Phone Number Masking Rules for Bank Registrations
+
+CRITICAL: Always mask client phone numbers in bank registrations:
+
+Phone Masking Format:
+- Cyprus mobile numbers: Mask the middle 2-4 digits
+- Example: 99 07 67 32 → 99 ** 67 32
+- Example: +357 99 07 67 32 → +357 99 ** 67 32
+- Example: 99995454 → 99 ** 54
+- Example: 9954 → ** 54 (short numbers)
+- Always preserve first 2 digits and last 2 digits
+- Mask middle digits with ** (double asterisks)
+
+Bank Detection Patterns:
+"remuproperties.com" → Auto-detect "Remu" bank
+"gordianproperties.com" → Auto-detect "Gordian" bank
+"altamiraproperties.com" → Auto-detect "Altamira" bank
+"altiabank.com" → Auto-detect "Altia" bank
+"bankofcyprus.com" → Auto-detect "Bank of Cyprus" bank
+"hellenicbank.com" → Auto-detect "Hellenic Bank" bank
+"gordianproperties.com" → Auto-detect "Gordian" bank
+"altamiraproperties.com" → Auto-detect "Altamira" bank
+"altiabank.com" → Auto-detect "Altia" bank
+"bankofcyprus.com" → Auto-detect "Bank of Cyprus" bank
+"hellenicbank.com" → Auto-detect "Hellenic Bank" bank
+
+Property Link Alternatives:
+If no property link is available, accept:
+- Registration Number: "Reg No. 0/1678 Tala, Paphos"
+- Property Description: "Limas Building, Unit No. 103 Tala, Paphos"
+- Always ask for link if available, but accept alternatives when needed
 
 Error Prevention Rules
 

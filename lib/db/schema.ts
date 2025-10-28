@@ -2,8 +2,11 @@ import type { InferSelectModel } from "drizzle-orm";
 import {
   boolean,
   foreignKey,
+  index,
+  integer,
   json,
   jsonb,
+  numeric,
   pgTable,
   primaryKey,
   text,
@@ -171,3 +174,80 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+// Property Listing Tables (Schema.org RealEstateListing compliant)
+// DISABLED - Uncomment after running migration in production
+/*
+export const propertyListing = pgTable(
+  "PropertyListing",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("userId")
+      .notNull()
+      .references(() => user.id),
+    chatId: uuid("chatId").references(() => chat.id),
+    name: text("name").notNull(),
+    description: text("description").notNull(),
+    address: jsonb("address").notNull(), // Schema.org PostalAddress
+    price: numeric("price").notNull(),
+    currency: varchar("currency", { length: 3 }).notNull().default("EUR"),
+    numberOfRooms: integer("numberOfRooms").notNull(), // bedrooms
+    numberOfBathroomsTotal: numeric("numberOfBathroomsTotal").notNull(),
+    floorSize: numeric("floorSize").notNull(), // in m²
+    propertyType: varchar("propertyType", { length: 50 }), // villa, apartment, etc.
+    amenityFeature: jsonb("amenityFeature"), // array of features
+    image: jsonb("image"), // array of image URLs
+    status: varchar("status", { length: 20 })
+      .notNull()
+      .default("draft"), // draft, queued, uploading, uploaded, failed, published
+    zyprusListingId: text("zyprusListingId"), // ID from zyprus.com
+    zyprusListingUrl: text("zyprusListingUrl"), // public URL
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+    publishedAt: timestamp("publishedAt"),
+    deletedAt: timestamp("deletedAt"), // soft delete
+    draftExpiresAt: timestamp("draftExpiresAt"), // auto-cleanup drafts after 7 days
+  },
+  (table) => ({
+    userIdx: index("PropertyListing_userId_idx").on(table.userId),
+    statusIdx: index("PropertyListing_status_idx").on(table.status),
+    createdAtIdx: index("PropertyListing_createdAt_idx").on(table.createdAt),
+    deletedAtIdx: index("PropertyListing_deletedAt_idx").on(table.deletedAt),
+    chatIdIdx: index("PropertyListing_chatId_idx").on(table.chatId),
+  })
+);
+
+export type PropertyListing = InferSelectModel<typeof propertyListing>;
+
+export const listingUploadAttempt = pgTable(
+  "ListingUploadAttempt",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    listingId: uuid("listingId")
+      .notNull()
+      .references(() => propertyListing.id),
+    attemptNumber: integer("attemptNumber").notNull(),
+    status: varchar("status", { length: 20 }).notNull(), // success, failed, timeout, rate_limited
+    errorMessage: text("errorMessage"),
+    errorCode: text("errorCode"),
+    apiResponse: jsonb("apiResponse"),
+    attemptedAt: timestamp("attemptedAt").notNull().defaultNow(),
+    completedAt: timestamp("completedAt"),
+    durationMs: integer("durationMs"),
+  },
+  (table) => ({
+    listingIdx: index("ListingUploadAttempt_listingId_idx").on(
+      table.listingId
+    ),
+    attemptedAtIdx: index("ListingUploadAttempt_attemptedAt_idx").on(
+      table.attemptedAt
+    ),
+  })
+);
+
+export type ListingUploadAttempt = InferSelectModel<
+  typeof listingUploadAttempt
+>;
+
+export type { InferInsertModel } from "drizzle-orm";
+*/

@@ -1,0 +1,152 @@
+import { tool } from "ai";
+import { z } from "zod";
+import {
+  getListingById,
+  getListingsByUserId,
+  logListingUploadAttempt,
+  updateListingStatus,
+} from "@/lib/db/queries";
+import { checkRateLimit } from "@/lib/listing/rate-limit";
+import {
+  isPermanentError,
+  uploadToZyprusAPI,
+  ZyprusAPIError,
+} from "@/lib/zyprus/client";
+
+export const uploadListingTool = tool({
+  description:
+    "Upload a property listing to zyprus.com. Uploads the most recent draft if no ID specified.",
+  parameters: z.object({
+    listingId: z
+      .string()
+      .uuid()
+      .optional()
+      .describe("Optional: Specific listing ID to upload"),
+  }),
+  execute: async (args: any, options: any) => {
+    const { listingId } = args;
+    const userId = options?.session?.user?.id;
+
+    if (!userId) {
+      return { success: false, error: "Authentication required" };
+    }
+
+    try {
+      // Rate limit check
+      const rateLimitOk = await checkRateLimit(userId);
+      if (!rateLimitOk) {
+        return {
+          success: false,
+          error:
+            "Rate limit exceeded. You can upload up to 10 listings per hour. Please try again later.",
+        };
+      }
+
+      // Get listing
+      let listing;
+      if (listingId) {
+        listing = await getListingById({ id: listingId });
+        if (listing && listing.userId !== userId) {
+          return {
+            success: false,
+            error: "You don't have permission to upload this listing",
+          };
+        }
+      } else {
+        const listings = await getListingsByUserId({ userId, limit: 1 });
+        listing = listings[0];
+      }
+
+      if (!listing) {
+        return {
+          success: false,
+          error:
+            "No listing found. Create a listing first by saying 'create a listing'.",
+        };
+      }
+
+      // Check if already uploaded
+      if (listing.status === "uploaded" || listing.status === "published") {
+        return {
+          success: false,
+          error: `This listing is already ${listing.status}${
+            listing.zyprusListingId
+              ? `. Listing ID: ${listing.zyprusListingId}`
+              : ""
+          }`,
+        };
+      }
+
+      // Update to uploading status
+      await updateListingStatus({ id: listing.id, status: "uploading" });
+
+      // Upload to zyprus.com
+      const startTime = Date.now();
+      try {
+        const result = await uploadToZyprusAPI(listing);
+        const durationMs = Date.now() - startTime;
+
+        // Success - update status
+        await updateListingStatus({
+          id: listing.id,
+          status: "uploaded",
+          zyprusListingId: result.listingId,
+          zyprusListingUrl: result.listingUrl,
+          publishedAt: new Date(),
+        });
+
+        // Log attempt
+        await logListingUploadAttempt({
+          listingId: listing.id,
+          attemptNumber: 1,
+          status: "success",
+          durationMs,
+          apiResponse: result,
+        });
+
+        return {
+          success: true,
+          message: `🎉 **Listing Published Successfully!**
+
+Property: ${listing.name}
+Zyprus Listing ID: #${result.listingId}
+View online: ${result.listingUrl}
+
+Your property is now live on zyprus.com!`,
+        };
+      } catch (error) {
+        const durationMs = Date.now() - startTime;
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        const errorCode =
+          error instanceof ZyprusAPIError ? error.code : "UNKNOWN";
+
+        // Log failed attempt
+        await logListingUploadAttempt({
+          listingId: listing.id,
+          attemptNumber: 1,
+          status: "failed",
+          errorMessage,
+          errorCode,
+          durationMs,
+        });
+
+        // Update status to failed
+        await updateListingStatus({ id: listing.id, status: "failed" });
+
+        return {
+          success: false,
+          error: `❌ Upload failed: ${errorMessage}
+
+The listing has been saved as "failed". You can retry by saying "upload listing" again.`,
+        };
+      }
+    } catch (error) {
+      console.error("Error uploading listing:", error);
+      return {
+        success: false,
+        error: "Failed to process upload. Please try again.",
+      };
+    }
+  },
+});
