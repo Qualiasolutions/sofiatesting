@@ -279,6 +279,29 @@ export async function POST(request: Request) {
       return new ChatSDKError("bad_request:activate_gateway").toResponse();
     }
 
+    // Check for AI Gateway configuration errors
+    if (
+      error instanceof Error &&
+      (error.message?.includes("AI Gateway") ||
+        error.message?.includes("gateway") ||
+        error.message?.includes("401") ||
+        error.message?.includes("403") ||
+        error.message?.includes("503"))
+    ) {
+      console.error("AI Gateway configuration error:", error.message);
+      return new Response(
+        JSON.stringify({
+          error: "AI Gateway configuration required",
+          message: "The AI Gateway is not properly configured. Please add an AI_GATEWAY_API_KEY environment variable or set up billing on your Vercel account.",
+          details: error.message,
+        }),
+        {
+          status: 503,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
     console.error("Unhandled error in chat API:", error, { vercelId });
     return new ChatSDKError("offline:chat").toResponse();
   }
