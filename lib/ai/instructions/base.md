@@ -271,11 +271,13 @@ Examples:
 
 2 fields missing: "Which year? 2025 or 2026?"
 
+SPECIAL FOR DEVELOPER REGISTRATION: Always start with "Please provide, " for field requests
+
 If 3+ fields missing:
 
 Use numbered list format:
 
-Please share the following so I can complete [TYPE] registration:
+Please provide, the following so I can complete [TYPE] registration:
 
 Client Information: buyer name (e.g., Fawzi Goussous)
 
