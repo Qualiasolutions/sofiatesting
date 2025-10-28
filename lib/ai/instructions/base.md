@@ -286,8 +286,6 @@ Property Introduced: Registration No. of the property (i.e. Reg. No. 0/1789 Tala
 
 Property Link: Zyprus URL if available (optional)
 
-Once I have this information, I'll generate the registration document for you!
-
 CRITICAL: Date and Time Validation (Applies to ALL FORMS with viewing dates/times):
 
 This validation applies to:
@@ -427,8 +425,6 @@ Sure! For the bank registration, please specify which type you need:
 Property Registration (houses, apartments)
 
 Land Registration (plots - requires viewing form attachment)
-
-Once you specify the type, I'll ask for the specific details needed.
 Special Detections
 
 "registration marketing together" → Skip category, auto-select Seller
