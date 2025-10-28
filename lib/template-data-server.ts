@@ -180,7 +180,7 @@ export function getTemplateData(): TemplateData {
         example: getFieldExample(fieldName, templateDef.id),
         required: true,
       })),
-      templateExample: getTemplateExample(templateDef.id, instructionsContent),
+      templateExample: getTemplateExampleFromInstructions(templateDef.id, instructionsContent),
     };
 
     templates.push(templateInfo);
@@ -292,9 +292,9 @@ function getFieldExample(fieldName: string, templateId: string): string {
 }
 
 /**
- * Get template example content
+ * Get template example content from instructions
  */
-function getTemplateExample(templateId: string, instructionsContent: string): string {
+function getTemplateExampleFromInstructions(templateId: string, instructionsContent: string): string {
   // Look for the template in the instructions content
   const templateRegex = new RegExp(`Template ${templateId}:([^]*?)(?=Template \\d+:|$)`, 'i');
   const match = instructionsContent.match(templateRegex);
