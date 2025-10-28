@@ -48,10 +48,14 @@ This is **SOFIA** - an AI Assistant for Zyprus Property Group (Cyprus Real Estat
 ```
 app/
 ├── (auth)/           # Authentication pages (login, register)
+│   └── api/auth/     # NextAuth.js routes (guest user, [...nextauth])
 ├── (chat)/           # Main chat interface
-│   ├── api/          # API routes (chat, document, suggestions)
-│   ├── chat/[id]/    # Individual chat sessions
+│   ├── api/          # Core API routes (chat, document, suggestions, files, history)
+│   ├── chat/[id]/    # Individual chat sessions with streaming
 │   └── page.tsx      # Chat interface
+├── api/              # Additional API endpoints
+│   ├── templates/    # Document template management
+│   └── telegram/     # Telegram bot webhook and setup
 └── layout.tsx        # Root layout with theme provider
 
 components/
@@ -61,10 +65,12 @@ components/
 └── *.tsx             # Main UI components (chat, sidebar, etc.)
 
 lib/
-├── ai/               # AI configuration, models, prompts, tools
-├── db/               # Database schema, queries, migrations
-├── telegram/         # Telegram bot integration (client, handlers, types)
-└── *.ts              # Utilities, types, constants
+├── ai/               # AI configuration, models, prompts, tools, providers
+├── db/               # Database schema, queries, migrations, client
+├── telegram/         # Telegram bot integration (client, handlers, types, user-mapping)
+├── editor/           # Rich text editor with suggestions and diff support
+├── zyprus/           # External service integrations
+└── *.ts              # Utilities, types, constants, usage tracking
 
 tests/
 ├── e2e/              # End-to-end Playwright tests
@@ -75,19 +81,23 @@ tests/
 ### Key Systems
 
 #### AI Integration (SOFIA Core)
-- **Primary Models**: xAI models via Vercel AI Gateway
-  - `grok-2-vision-1212` (main chat model)
-  - `grok-3-mini` (reasoning model)
-- **Prompts**: SOPHIA-specific instructions dynamically loaded from `SOPHIA_AI_ASSISTANT_INSTRUCTIONS_UPDATED.md`
+- **Primary Models**: Configurable via Vercel AI Gateway with fallbacks
+  - Default: Mistral models (Small, Medium 1.2, Large, Codestral)
+  - xAI models available: `grok-2-vision-1212`, `grok-3-mini`
+  - Mock models for testing: `mock-chat-model`, `mock-chat-model-reasoning`
+- **Model Configuration**: Models defined in `lib/ai/models.ts` with `DEFAULT_CHAT_MODEL` setting
+- **Chat Schema**: Request validation via `app/(chat)/api/chat/schema.ts` with message parts and file attachments
 - **Critical Constraint**: SOFIA NEVER uses tools, artifacts, or side-by-side editing - generates all documents directly in chat
 - **Real Estate Specialization**: 42+ document templates for Cyprus real estate (registrations, viewing forms, marketing agreements, client communications)
 
 #### Database Schema
-- **Message System**: v2 message parts system (deprecated v1 still present in schema)
-- **Document Management**: Real estate documents with suggestions system
-- **User Management**: Simple user auth with email/password
-- **Chat Persistence**: Chat history with visibility settings
-- **Stream Support**: Resumable streams with Redis backend
+- **Message System**: v2 message parts system (`Message_v2` table) - deprecated v1 still present in schema
+- **Document Management**: Real estate documents with collaborative suggestions system
+- **User Management**: Simple user auth with email/password and guest user support
+- **Chat Persistence**: Chat history with visibility settings and geographic context
+- **Stream Support**: Resumable streams with Redis backend and token tracking
+- **Property Listings**: Schema.org compliant real estate listing system (currently disabled)
+- **Vote System**: User feedback on messages with v2 implementation
 
 #### SOPHIA AI Behavior
 The AI assistant follows strict operating principles:
@@ -100,18 +110,20 @@ The AI assistant follows strict operating principles:
 ## Configuration Files
 
 ### Environment Variables (.env.local required)
-- `AUTH_SECRET` - NextAuth.js secret
-- `AI_GATEWAY_API_KEY` - Vercel AI Gateway key (non-Vercel deployments)
-- `POSTGRES_URL` - PostgreSQL database connection
-- `BLOB_READ_WRITE_TOKEN` - Vercel Blob storage
-- `REDIS_URL` - Redis session storage
+- `AUTH_SECRET` - NextAuth.js secret for session encryption
+- `AI_GATEWAY_API_KEY` - Vercel AI Gateway key (required for non-Vercel deployments)
+- `POSTGRES_URL` - PostgreSQL database connection string
+- `BLOB_READ_WRITE_TOKEN` - Vercel Blob storage token for file uploads
+- `REDIS_URL` - Redis connection for session storage and rate limiting
 - `TELEGRAM_BOT_TOKEN` - Telegram bot token from @BotFather (for Telegram integration)
+- `PLAYWRIGHT` - Set to "True" when running E2E tests
 
 ### Key Config Files
-- `drizzle.config.ts` - Database configuration (uses .env.local)
-- `next.config.ts` - Next.js with PPR (Partial Prerendering) enabled
-- `playwright.config.ts` - E2E testing setup with configurable timeouts
-- `.cursor/rules/ultracite.mdc` - Ultracite linting and formatting rules
+- `drizzle.config.ts` - Database configuration using environment variables
+- `next.config.ts` - Next.js with PPR (Partial Prerendering) enabled and AI SDK integration
+- `playwright.config.ts` - E2E testing setup with configurable timeouts and retries
+- `.cursor/rules/ultracite.mdc` - Comprehensive Ultracite linting and formatting rules
+- `app/(chat)/api/chat/schema.ts` - Chat API request validation with Zod schemas
 
 ## Development Notes
 
@@ -149,14 +161,15 @@ The project uses Message v2 system with parts-based architecture:
 - **Special Tests**: SOFIA formatting tests verify proper rendering of lists, bold text, and document structure
 
 ### Code Quality and Style
-The project uses Ultracite for code formatting and linting with strict rules:
-- TypeScript best practices and type safety
-- React and JSX patterns (no `<img>` or `<head>` in Next.js)
-- Accessibility compliance (a11y)
-- Code complexity limits and consistency
-- Next.js specific optimizations
+The project uses Ultracite for code formatting and linting with strict rules enforced via `.cursor/rules/ultracite.mdc`:
+- **TypeScript**: Strict type safety, no enums, no namespaces, `export type`/`import type` usage
+- **React**: No `<img>` or `<head>` in Next.js, proper hook dependencies, fragment usage
+- **Accessibility**: Comprehensive a11y rules for screen readers, keyboard navigation, ARIA attributes
+- **Code Quality**: Cognitive complexity limits, no console/debugger statements, proper error handling
+- **Style**: Consistent naming, arrow functions, proper imports/exports, no var/let misuse
+- **Security**: No hardcoded secrets, proper CSP, safe eval usage
 
-See `.cursor/rules/ultracite.mdc` for comprehensive rules and examples.
+Run `pnpm lint` to check and `pnpm format` to fix issues automatically.
 
 ### Critical Development Constraints
 - **SOFIA Never Uses Tools**: The AI assistant is configured to never use artifacts, tools, or side-by-side editing

@@ -38,3 +38,9 @@ export const geminiModel = createMockModel();
 export const claudeModel = createMockModel();
 export const titleModel = createMockModel();
 export const artifactModel = createMockModel();
+
+// Mock Mistral models for test environment
+export const mistralSmallModel = createMockModel();
+export const mistralMediumModel = createMockModel();
+export const mistralLargeModel = createMockModel();
+export const codestralModel = createMockModel();

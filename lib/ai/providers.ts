@@ -1,4 +1,4 @@
-import { gateway } from "@ai-sdk/gateway";
+import { mistral } from "@ai-sdk/mistral";
 import {
   customProvider,
   extractReasoningMiddleware,
@@ -15,30 +15,41 @@ export const myProvider = isTestEnvironment
         titleModel,
         geminiModel,
         claudeModel,
+        mistralSmallModel,
+        mistralMediumModel,
+        mistralLargeModel,
+        codestralModel,
       } = require("./models.mock");
       return customProvider({
         languageModels: {
-          "chat-model": chatModel,
-          "chat-model-reasoning": reasoningModel,
-          "chat-model-gemini": geminiModel,
-          "chat-model-claude": claudeModel,
-          "title-model": titleModel,
-          "artifact-model": artifactModel,
+          "chat-model": mistralMediumModel,
+          "chat-model-small": mistralSmallModel,
+          "chat-model-medium": mistralMediumModel,
+          "chat-model-large": mistralLargeModel,
+          "chat-model-code": codestralModel,
+          "title-model": mistralSmallModel,
+          "artifact-model": mistralLargeModel,
         },
       });
     })()
   : customProvider({
       languageModels: {
-        "chat-model": gateway.languageModel("xai/grok-2-vision-1212"),
-        "chat-model-reasoning": wrapLanguageModel({
-          model: gateway.languageModel("xai/grok-3-mini"),
+        "chat-model-small": mistral("mistral-small-latest"),
+        "chat-model-medium": mistral("mistral-medium-latest"),
+        "chat-model-large": wrapLanguageModel({
+          model: mistral("mistral-large-latest"),
           middleware: extractReasoningMiddleware({ tagName: "think" }),
         }),
-        "chat-model-gemini": gateway.languageModel("google/gemini-2.5-flash"),
-        "chat-model-claude": gateway.languageModel(
-          "anthropic/claude-3.7-sonnet"
-        ),
-        "title-model": gateway.languageModel("xai/grok-2-1212"),
-        "artifact-model": gateway.languageModel("xai/grok-2-1212"),
+        "chat-model-code": mistral("codestral-latest"),
+        "chat-model": wrapLanguageModel({
+          model: mistral("mistral-medium-latest"),
+          middleware: extractReasoningMiddleware({ tagName: "think" }),
+        }),
+        "chat-model-reasoning": wrapLanguageModel({
+          model: mistral("mistral-large-latest"),
+          middleware: extractReasoningMiddleware({ tagName: "think" }),
+        }),
+        "title-model": mistral("mistral-small-latest"),
+        "artifact-model": mistral("mistral-large-latest"),
       },
     });

@@ -128,7 +128,7 @@ export function getTemplateData(): TemplateData {
     { id: "04", name: "Advanced Seller Registration", category: "registration" as const, requiredFields: ["Buyer Names", "Property Registration Numbers", "Property Description", "Agency Fee", "Payment Percentage", "Owner Entities"] },
     { id: "05", name: "Bank Property Registration", category: "registration" as const, requiredFields: ["Client Name", "Client Phone", "Agent Mobile", "Property Link"] },
     { id: "06", name: "Bank Land Registration", category: "registration" as const, requiredFields: ["Client Name", "Client Phone", "Agent Mobile", "Property Link"] },
-    { id: "07", name: "Developer Registration (with Viewing)", category: "registration" as const, requiredFields: ["Client Names", "Viewing Date & Time"] },
+    { id: "07", name: "Developer Registration (with Viewing)", category: "registration" as const, requiredFields: ["Developer Contact Person's Name", "Client Names", "Viewing Date & Time"] },
     { id: "08", name: "Developer Registration (no Viewing)", category: "registration" as const, requiredFields: ["Client Names"] },
 
     // Viewing Form Templates (09-12)
@@ -138,7 +138,7 @@ export function getTemplateData(): TemplateData {
     { id: "12", name: "Property Reservation Agreement", category: "viewing" as const, requiredFields: ["Date Reservation Fee Received", "Prospective Buyer", "Vendor", "Property Details", "Reservation Fee", "Purchase Price", "Agent Name", "Company Name", "Banking Details", "Agreement Date"] },
 
     // Marketing Agreement Templates (13-15)
-    { id: "13", name: "Email Marketing Agreement", category: "marketing" as const, requiredFields: ["Seller Name", "Property Registration Number", "Property Location/Description", "Marketing Price"] },
+    { id: "13", name: "Email Marketing Agreement", category: "marketing" as const, requiredFields: ["Property Details", "Marketing Price"] },
     { id: "14", name: "Non-Exclusive Marketing Agreement", category: "marketing" as const, requiredFields: ["Date", "Seller Name", "Property Registration Number", "Property Location", "Marketing Price", "Agent Name"] },
     { id: "15", name: "Exclusive Marketing Agreement", category: "marketing" as const, requiredFields: ["Date", "Seller Name", "Country", "Passport Number", "Property Description", "Registration Number", "Marketing Price", "Price in Words", "Start Date"] },
 
@@ -244,6 +244,7 @@ function getFieldExample(fieldName: string, templateId: string): string {
     "Client Phone": "+357 99 123456",
     "Agent Mobile": "+357 99 654321",
     "Property Link": "https://www.zyprus.com/Cyprus/property/12345",
+    "Developer Contact Person's Name": "Fotis OR Aris",
     "Client Names": "Fawzi Goussous",
     "Date": "October 29, 2025",
     "Name": "Full name as on ID",
@@ -256,7 +257,6 @@ function getFieldExample(fieldName: string, templateId: string): string {
     "Date Reservation Fee Received": "October 29, 2025",
     "Prospective Buyers": "John Smith",
     "Vendors": "George Papas",
-    "Property Details": "Apartment 302, Ianou Str. Nr. 11, Nema Ekali Building, Limassol 3110, Cyprus",
     "Reservation Fee": "€5,000",
     "Purchase Price": "€350,000",
     "Special Conditions": "Subject to mortgage approval",
@@ -267,7 +267,7 @@ function getFieldExample(fieldName: string, templateId: string): string {
     "Banking Details": "Bank of Cyprus, Account #123456",
     "Agreement Date": "October 29, 2025",
     "Seller Name": "Marios Charalambous",
-    "Property Location/Description": "Your property with Registration No 0/1789 Paphos",
+    "Property Details": "3-bedroom apartment in Paphos with Registration No 0/1789",
     "Country": "Cyprus",
     "Passport Number": "K12345678",
     "Price in Words": "Three hundred fifty thousand Euros",
@@ -435,11 +435,11 @@ Looking forward to your prompt reply.
 
 ⚠️ REMINDER: Don't forget to attach viewing form when sending this registration email to bank!`,
 
-    "07": `Subject: Registration Confirmation - Fawzi Goussous
+    "07": `Subject: Registration – Fawzi Goussous – [PROJECT_NAME] – [LOCATION]
 
 Email Body:
 
-Dear XXXXXXXX,
+Dear [DEVELOPER_CONTACT_NAME],
 
 This email is to provide you with the registration of our below client, under our Estate Agency: CSC Zyprus Property Group LTD.
 
@@ -533,7 +533,7 @@ The Prospective Buyer: The Vendor:
 
 John Smith George Papas`,
 
-    "13": `Subject: Consent for Marketing – Marios Charalambous – Reg No 0/1789 – Paphos - Terms and Conditions
+    "13": `Subject: Consent for Marketing – Marios Charalambous – 3-bedroom apartment in Paphos - Terms and Conditions
 
 Email Body:
 
@@ -543,7 +543,7 @@ We hope this email finds you well.
 
 With this email we kindly request your approval for the marketing of your property with CSC Zyprus Property Group LTD under the following terms and conditions.
 
-Property: Your property with Registration No 0/1789 Paphos
+Property: 3-bedroom apartment in Paphos with Registration No 0/1789
 
 Marketing Price: €350,000EUR
 

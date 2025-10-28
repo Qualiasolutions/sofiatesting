@@ -98,9 +98,9 @@ export async function handleTelegramMessage(
     const assistantMessageId = generateUUID();
 
     const result = await streamText({
-      model: myProvider.languageModel("chat-model-gemini"), // Use Gemini for Telegram (fastest & cheapest)
+      model: myProvider.languageModel("chat-model-small"), // Use Mistral Small for Telegram (fastest & cheapest)
       system: `${systemPrompt({
-        selectedChatModel: "chat-model-gemini",
+        selectedChatModel: "chat-model-small",
         requestHints: {
           latitude: undefined,
           longitude: undefined,

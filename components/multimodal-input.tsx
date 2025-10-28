@@ -25,6 +25,7 @@ import { myProvider } from "@/lib/ai/providers";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { cn } from "@/lib/utils";
+import { getRandomTemplatePrompt } from "@/lib/random-data-generator";
 import { Context } from "./elements/context";
 import {
   PromptInput,
@@ -41,6 +42,7 @@ import {
   CpuIcon,
   PaperclipIcon,
   StopIcon,
+  DiceIcon,
 } from "./icons";
 import { PreviewAttachment } from "./preview-attachment";
 import { SuggestedActions } from "./suggested-actions";
@@ -320,6 +322,10 @@ function PureMultimodalInput({
               selectedModelId={selectedModelId}
               status={status}
             />
+            <RandomDataButton
+              setInput={setInput}
+              status={status}
+            />
             <ModelSelectorCompact
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}
@@ -477,3 +483,36 @@ function PureStopButton({
 }
 
 const StopButton = memo(PureStopButton);
+
+function PureRandomDataButton({
+  setInput,
+  status,
+}: {
+  setInput: Dispatch<SetStateAction<string>>;
+  status: UseChatHelpers<ChatMessage>["status"];
+}) {
+  const handleRandomData = useCallback(() => {
+    const templateTypes: Array<"registration" | "marketing" | "viewing"> = ["registration", "marketing", "viewing"];
+    const randomType = templateTypes[Math.floor(Math.random() * templateTypes.length)];
+    const randomPrompt = getRandomTemplatePrompt(randomType);
+    setInput(randomPrompt);
+  }, [setInput]);
+
+  return (
+    <Button
+      className="aspect-square h-8 rounded-lg p-1 transition-colors hover:bg-accent"
+      data-testid="random-data-button"
+      disabled={status !== "ready"}
+      onClick={(event) => {
+        event.preventDefault();
+        handleRandomData();
+      }}
+      title="Generate random template data"
+      variant="ghost"
+    >
+      <DiceIcon size={14} />
+    </Button>
+  );
+}
+
+const RandomDataButton = memo(PureRandomDataButton);

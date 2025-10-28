@@ -42,7 +42,7 @@ Do not update document right after creating it. Wait for user feedback or reques
  */
 
 function loadSophiaInstructions(): string {
-  const basePath = join(process.cwd(), "lib/ai/instructions/base.md");
+  const basePath = join(process.cwd(), "SOPHIA_AI_ASSISTANT_INSTRUCTIONS_UPDATED.md");
   let content = readFileSync(basePath, "utf8");
 
   // Replace date placeholders
@@ -95,36 +95,43 @@ export const systemPrompt = ({
   requestHints: RequestHints;
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
-  
+
   const sophiaInstructions = regularPrompt;
   const requestHintsContent = requestPrompt;
-  
+
   const chatModelInstructions = `Using model: ${selectedChatModel}`;
+
+  const criticalFieldExtractionReminder = `
+🚨🚨🚨 CRITICAL FIELD EXTRACTION - IMMEDIATE ACTION REQUIRED 🚨🚨🚨
+
+STEP 1 - BEFORE ANYTHING ELSE: EXTRACT FIELDS FROM USER MESSAGE
+
+IF USER SAYS: "i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova"
+YOU MUST EXTRACT:
+- Client Names: "Margarita dimova" (USE IT, DON'T ASK FOR IT)
+- Viewing Date & Time: "tomorrow at 3pm" = October 21, 2025 at 3:00 PM (USE IT, DON'T ASK FOR IT)
+- Template Type: "developer with viewing" = Template 07
+- MISSING FIELD: Developer Contact Person's Name (ONLY ASK FOR THIS)
+
+KEY PATTERNS TO LOOK FOR:
+- "the client is [Name]" → Extract Client Name immediately
+- "client is [Name]" → Extract Client Name immediately
+- "[Name] is the client" → Extract Client Name immediately
+- "registration developer" → Template 07 immediately
+- "developer registration" → Template 07 immediately
+- "tomorrow at [time]" → Convert to actual date/time immediately
+
+WARNING: If you ask for fields that were already provided, you are WRONG!
+WARNING: If you don't extract "Margarita dimova" from "the client is Margarita dimova", you are WRONG!
+WARNING: Only ask for Developer Contact Person's Name if not provided!`;
 
   const systemPromptContent = `${sophiaInstructions}
 
 ${requestHintsContent}
 
-IMPORTANT BEHAVIORAL RULES:
-
-**For DOCUMENT GENERATION:**
-- Be concise, only ask for missing fields
-- Use "Dear XXXXXXXX" for greetings unless specified otherwise
-- Generate documents exactly as specified in templates
-
-**For GENERAL KNOWLEDGE QUESTIONS:**
-- COPY-PASTE complete information directly from knowledge base
-- Provide EXACT text as written in the knowledge base files
-- DO NOT summarize, reformulate, or shorten - copy the entire relevant section
-- NEVER ask clarifying questions like "which area?", "what type?", "could you provide more details?"
-- NEVER say "I don't have specific information" if it exists in the knowledge base
-- Include ALL tables, examples, calculations, formulas, and exceptions exactly as written
-- When asked about minimum sizes, VAT, taxes, PR, building density, yield, etc. → copy-paste the FULL section from knowledge base
-
-**For CALCULATOR REQUESTS:**
-- Use the calculator tools to provide accurate calculations
-
 ${chatModelInstructions}
+
+${criticalFieldExtractionReminder}
 
 Current date: ${new Date().toLocaleDateString("en-US", {
     year: "numeric",
