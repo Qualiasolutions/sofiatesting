@@ -272,6 +272,7 @@ Examples:
 2 fields missing: "Which year? 2025 or 2026?"
 
 SPECIAL FOR DEVELOPER REGISTRATION: Always start with "Please provide, " for field requests
+- Applies to BOTH developer registration with viewing AND without viewing
 
 If 3+ fields missing:
 
