@@ -292,21 +292,349 @@ function getFieldExample(fieldName: string, templateId: string): string {
 }
 
 /**
- * Get template example content from instructions
+ * Get template example content from instructions - actual SOFIA output
  */
 function getTemplateExampleFromInstructions(templateId: string, instructionsContent: string): string {
-  // Look for the template in the instructions content
-  const templateRegex = new RegExp(`Template ${templateId}:([^]*?)(?=Template \\d+:|$)`, 'i');
-  const match = instructionsContent.match(templateRegex);
+  // Return actual SOFIA output examples for each template
+  const examples: Record<string, string> = {
+    "01": `Subject: Registration – John Smith – Reg No. 0/1789 – 3-bedroom apartment in Paphos
 
-  if (match) {
-    // Extract the first few lines of the template as an example
-    const templateContent = match[1].trim();
-    const lines = templateContent.split('\n').slice(0, 5);
-    return lines.join('\n').trim();
-  }
+Email Body:
 
-  return "Template content available in SOPFIA instructions";
+Dear XXXXXXXX, (Seller)
+
+This email is to provide you with a registration.
+
+Client Information: John Smith
+
+Property Introduced: Your Property in Paphos with Registration No. 0/1789
+
+Property Link: https://www.zyprus.com/Cyprus/property/12345
+
+Viewing Arranged for: October 29, 2025 at 5:00 PM
+
+Please confirm Registration and Viewing.
+
+For the confirmation, Could you please reply ''Yes I confirm''
+
+Looking forward to your prompt confirmation.`,
+
+    "02": `Subject: Registration – John Smith – Reg No. 0/1789 – 3-bedroom apartment in Paphos
+
+Email Body:
+
+Dear XXXXXXXX, (Seller)
+
+Following our communication,
+
+With this email, we kindly ask for your approval for the below registration and viewing.
+
+Client Information: John Smith
+
+Property Introduced: Your property with Registration No.0/1789 Paphos
+
+Property Link: https://www.zyprus.com/Cyprus/property/12345
+
+Viewing arranged for: October 29, 2025 at 5:00 PM.
+
+Fees: Standard agency fee based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD.
+
+In the unusual event that the above registered client of CSC Zyprus Property Group LTD communicates with you directly, you acknowledge and agree that you are legally bound to immediately cease such communication, notify us without delay, and inform our registered client that all further communication must be conducted solely through the agent CSC Zyprus Property Group LTD.
+
+If you agree with the above terms and conditions, could you please reply to this email stating: ''Yes I confirm''`,
+
+    "03": `Subject: Registration – John Doe – 3-bedroom apartment in Paphos
+
+Email Body:
+
+Dear XXXXXXXX, (landlord)
+
+This email is to provide you with a registration.
+
+Client Information: John Doe (potential tenant name)
+
+Property Introduced: Your Property in 3-bedroom apartment in Paphos
+
+Property Link: https://www.zyprus.com/Cyprus/property/12345
+
+Viewing Arranged for: October 29, 2025 at 5:00 PM
+
+Fees: The first agreed monthly rental amount of the property. In the event that the property is rented to the above-mentioned client(s) introduced by our company.
+
+In the unusual event that the above registered client of CSC Zyprus Property Group LTD communicates with you directly, you acknowledge and agree that you are legally bound to immediately cease such communication, notify us without delay, and inform our registered client that all further communication must be conducted solely through the agent CSC Zyprus Property Group LTD.
+
+Please confirm Registration and Viewing.
+
+For the confirmation, Could you please reply ''Yes I confirm''
+
+Looking forward to your prompt confirmation.`,
+
+    "04": `Subject: Registration – John Smith – Reg. Nos. 0/1789, 0/1790 – 3-bedroom apartment in Paphos
+
+Email Body:
+
+Dear XXXXXXXX,
+
+This email is to provide you with the full registration of our below client, under our Estate Agency: CSC Zyprus Property Group LTD.
+
+Client Information: John Smith and any directly related company in which he/she/they is/are a sole shareholder or co-shareholder.
+
+Property Introduced: Your property in Paphos, with the following Registration Numbers: 0/1789, 0/1790 (3-bedroom apartment in Paphos)
+
+Our Agency Fees: **5.0% + VAT** based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD.
+
+Our fee becomes payable in full upon your receipt of the initial **30%** payment of the agreed purchase price.
+
+Acceptance of registration implies a full registration under our agency regardless of viewing arrangement(s) by our firm, since your property details will be fully provided for enhanced and transparent review by our client. Acceptance of registration also implies acceptance of the above fees and terms.
+
+By confirming this email you also confirm that you legally represent the following owner entities: John Smith (sole owner)
+
+Please confirm registration.
+
+For the confirmation, please reply ''Yes I confirm''
+
+Looking forward to your prompt reply.`,
+
+    "05": `Subject: Registration Confirmation - Andreas Andreou
+
+Email Body:
+
+Dear Bank of Cyprus Team,
+
+This email is to provide you with a registration.
+
+Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
+
+My Mobile: +357 99 654321 (please call me to arrange a viewing)
+
+Registration Details: Andreas Andreou +357 99 123456
+
+Property: https://www.remuproperties.com/Cyprus/listing-29190
+
+Looking forward to your prompt reply.`,
+
+    "06": `Subject: Registration Confirmation - Andreas Andreou
+
+Email Body:
+
+Dear Bank of Cyprus Team,
+
+This email is to provide you with a registration.
+
+Please find attached the viewing form for the below Land.
+
+Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
+
+My Mobile: +357 99 654321 (please call me for any further information)
+
+Registration Details: Andreas Andreou +357 99 123456
+
+Property: https://www.remuproperties.com/Cyprus/listing-29190
+
+Looking forward to your prompt reply.
+
+⚠️ REMINDER: Don't forget to attach viewing form when sending this registration email to bank!`,
+
+    "07": `Subject: Registration Confirmation - Fawzi Goussous
+
+Email Body:
+
+Dear XXXXXXXX,
+
+This email is to provide you with the registration of our below client, under our Estate Agency: CSC Zyprus Property Group LTD.
+
+Registration Details: Fawzi Goussous
+
+Viewing Arranged for: October 29, 2025 at 5:00 PM
+
+Fees: **8%+VAT** on the Agreed/Accepted Sold price
+
+Payable in full on the first 30% payment
+
+Please confirm registration
+
+Acceptance of registration implies the acceptance of the fees, terms and content of this email.`,
+
+    "08": `Subject: Registration Confirmation - Fawzi Goussous
+
+Email Body:
+
+Dear XXXXXXXX,
+
+This email is to provide you with the registration of our below client, under our Estate Agency: CSC Zyprus Property Group LTD.
+
+Registration Details: Fawzi Goussous
+
+Fees: **8%+VAT** on the Agreed/Accepted Sold price
+
+Payable in full on the first 30% payment
+
+Please confirm registration
+
+Acceptance of registration implies a full registration under our agency regardless of viewing arrangement(s) by our firm, since your Company's full details and/or the location of a property will be fully provided for enhanced and transparent review by our client. Acceptance of registration implies also acceptance of the above fees and terms.
+
+Looking forward to your prompt reply.`,
+
+    "09": `Viewing Form
+
+Date: October 29, 2025
+
+Herein, I…………………………………………………………… with ID……………………. Issued By: confirm that CSC Zyprus Property Group LTD (Reg. No. 742, Lic. No. 378/E), has introduced to me with a viewing the property with the following Registry details
+
+Registration No.: 0/1789
+
+District: Paphos
+
+Municipality: Tala
+
+Locality: Agios Neophytos area
+
+Signature: _________________________`,
+
+    "10": `Viewing/Introduction Form
+
+Date: October 29, 2025
+
+Herein, I…………………………………………………………… with ID……………………., Issued By: ……………………………… .confirm that CSC Zyprus Property Group LTD (Reg. No. 742, Lic. No. 378/E), has introduced to me with a viewing and/or digitally the property with the following Registry details:
+
+Registration No.: 0/1789
+
+District: Paphos
+
+Municipality: Tala
+
+Locality: Agios Neophytos area
+
+By signing the subject viewing form, you confirm that CSC Zyprus Property Group LTD (hereinafter referred to as Agent) is your exclusive representative responsible for the introduction of the subject property and any negotiations, inquiries, or communications with property owners and/or sellers and/or developers regarding the subject property should be directed through the Agent. Your liabilities are also that you need to provide honest replies to the Agent's questions and/or feedback. Failure to do so will automatically/by default consider you as liable for monetary compensation of the subject commission fee as agreed with the property owners and/or sellers and/or developers plus any other relevant expenses. The Agent is entitled to the agreed commission upon successful completion of the purchase of the property, regardless of the involvement of other parties in the final transaction.
+
+Signature: _________________________`,
+
+    "11": `PROPERTY RESERVATION
+
+Date Reservation Fee Received: October 29, 2025
+
+Prospective Buyer(s): John Smith
+
+Vendor(s): George Papas
+
+Property Details: Apartment 302, Ianou Str. Nr. 11, Nema Ekali Building, Limassol 3110, Cyprus
+
+Reservation Fee: €5,000 (In words Five thousand Euros)
+
+Purchase Price: €350,000 (In words Three hundred fifty thousand Euros)
+
+Special Conditions: Subject to mortgage approval
+
+The prospective buyer agrees that the reservation fee to the amount €5,000 will be held by the Estate Agent in order to guarantee that the above property is taken off the market, and reserved exclusively for the Prospective buyer until the Sales Agreement is signed and the Reservation fee becomes part of the Deposit.
+
+If for any reason, the Prospective buyer does not conclude the purchase of the above-mentioned property, through his own fault, then the 50% of the Reservation fee will be forfeited by the Estate Agent to cover his administration expenses and the remaining 50% will be provided to the vendor.
+
+The Prospective Buyer: The Vendor:
+
+John Smith George Papas`,
+
+    "13": `Subject: Consent for Marketing – Marios Charalambous – Reg No 0/1789 – Paphos - Terms and Conditions
+
+Email Body:
+
+Dear XXXXXXXX,
+
+We hope this email finds you well.
+
+With this email we kindly request your approval for the marketing of your property with CSC Zyprus Property Group LTD under the following terms and conditions.
+
+Property: Your property with Registration No 0/1789 Paphos
+
+Marketing Price: €350,000EUR
+
+Fees: **5% + VAT** based on the final agreed sold price. If sold to a purchaser introduced to you by CSC Zyprus Property Group LTD.
+
+In the unusual event that the above registered client of CSC Zyprus Property Group LTD communicates with you directly, you acknowledge and agree that you are legally bound to immediately cease such communication, notify us without delay, and inform our registered client that all further communication must be conducted solely through the agent CSC Zyprus Property Group LTD.
+
+If you agree with the above terms and conditions, could you please reply to this email stating: ''Yes I confirm''
+
+⚠️ REMINDER: Don't forget to attach the title deed when sending this marketing agreement email to the seller!`,
+
+    "16": `Subject: Request - Andreas Andreou – House – Limassol
+
+Dear Andreas Andreou,
+
+We hope this email finds you well. We would like to confirm the receipt of your request for the subject property:
+
+https://www.zyprus.com/Cyprus/property/12345
+
+To ensure efficient communication and personalized service, we kindly request a phone call.
+
+Please let us know your preferred date and time for a phone call. To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.
+
+We look forward to speaking with you and assisting you further in finding the right property.
+
+Phone-Only Addon (if client refuses):
+
+Please note that as a standard practice, we exclusively handle requests through phone communication. Regrettably, if it is not feasible for you to proceed with a phone call, we won't be able to facilitate your request at this time.`,
+
+    "18": `Subject: Valuation Quote – Elena Petrou
+
+Dear Elena Petrou,
+
+We hope this email finds you well. We are pleased to provide you with a quote for the valuation of your property.
+
+Our valuation reports are accredited by the professional bodies of the Royal Institution of Chartered Surveyors (RICS) and the Cyprus Scientific and Technical Chamber (ETEK), reflecting our commitment to maintaining the highest standards of quality and professionalism.
+
+To ensure accurate and reliable results, our valuation reports are delivered by two experienced valuers who conduct a thorough review, providing an added layer of quality control.
+
+As requested, our valuation fee for your property is **€250 + VAT**. We believe our services provide excellent value for the level of expertise and professionalism we offer.
+
+For your reference, you can view an example of our valuation report by clicking on the following link:
+
+https://www.zyprus.com/sites/all/themes/zyprus/files/Property_Valuation_Sample_Cyprus_RICS_ETEK.pdf
+
+Please note that our valuation report will be detailed and will provide you with valuable insights into the current market value of your property. Our team is always available to discuss any questions or concerns you may have regarding the valuation process or the valuation report.
+
+If you have any further questions or would like to proceed with our services, please do not hesitate to contact us. We would be delighted to assist you with your valuation needs.
+
+Thank you for considering our services.`,
+
+    "25": `Subject: Adjustments required – John Smith
+
+Dear John Smith,
+
+We hope this email finds you well. We appreciate your interest in our real estate services and your recent property request. However, we regret to inform you that based on your budget, preferences and areas of interest, we currently do not have any suitable options available.
+
+While we currently do not have any options within your budget and preferences, we would like to leave the door open for further opportunities. If you are willing to adjust your budget, preferences or areas of interest, we would be happy to explore other potential options with you.
+
+Thank you for your understanding, and we are looking forward to your reply.`,
+
+    "32": `Subject: Selling Request – Marios Charalambous
+
+Dear Marios Charalambous,
+
+I hope this email finds you well.
+
+After conducting a thorough analysis of the market and comparable properties, we believe that the recommended asking price for your property is **€350,000**.
+
+In addition, based on our experience and market trends, we estimate that the likely selling price for your property will be in the range of **€320,000 - €340,000**.
+
+We understand that selling a property can be a complex process, and we are here to guide you every step of the way. Please do not hesitate to reach out if you have any questions or concerns.
+
+Thank you for considering our agency for your real estate needs.`,
+
+    "33": `Subject: Selling Request – Marios Charalambous
+
+Dear Marios Charalambous,
+
+Thank you for considering us to market your property.
+
+However, after carefully evaluating your property with the expertise of our team, in our opinion, we regret to inform you that the asking price you provided is significantly above the current market value. As a result, we are unable to effectively market and introduce your property at this price.
+
+We understand that setting a realistic asking price is essential for a successful sale, and we would be delighted to assist you in determining a price that reflects current market conditions.
+
+Should you wish to discuss further, please do not hesitate to contact us — we would be glad to explore with you the available options for marketing, adjusting the asking price, and ultimately achieving the sale of your property.
+
+Thank you for your understanding, and we remain at your disposal.`
+  };
+
+  return examples[templateId] || `Example output for Template ${templateId} will be shown here. This is what SOFIA generates when all required fields are provided.`;
 }
 
 // Old implementation below - disabled for now
