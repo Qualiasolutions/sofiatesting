@@ -32,4 +32,9 @@ export const chatModels: ChatModel[] = [
     name: "Mistral Large (Reasoning)",
     description: "Advanced reasoning with thinking process - $3/M in, $9/M out",
   },
+  {
+    id: "chat-model-flagship",
+    name: "Pixtral Large (Most Capable)",
+    description: "Flagship multimodal model with vision - $8/M in, $24/M out",
+  },
 ];

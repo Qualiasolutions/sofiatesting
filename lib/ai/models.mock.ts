@@ -44,3 +44,4 @@ export const mistralSmallModel = createMockModel();
 export const mistralMediumModel = createMockModel();
 export const mistralLargeModel = createMockModel();
 export const codestralModel = createMockModel();
+export const pixtralLargeModel = createMockModel();

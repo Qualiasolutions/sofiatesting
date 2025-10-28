@@ -19,6 +19,7 @@ export const myProvider = isTestEnvironment
         mistralMediumModel,
         mistralLargeModel,
         codestralModel,
+        pixtralLargeModel,
       } = require("./models.mock");
       return customProvider({
         languageModels: {
@@ -27,6 +28,7 @@ export const myProvider = isTestEnvironment
           "chat-model-medium": mistralMediumModel,
           "chat-model-large": mistralLargeModel,
           "chat-model-code": codestralModel,
+          "chat-model-flagship": pixtralLargeModel,
           "title-model": mistralSmallModel,
           "artifact-model": mistralLargeModel,
         },
@@ -41,6 +43,7 @@ export const myProvider = isTestEnvironment
           middleware: extractReasoningMiddleware({ tagName: "think" }),
         }),
         "chat-model-code": mistral("codestral-latest"),
+        "chat-model-flagship": mistral("pixtral-large-latest"),
         "chat-model": wrapLanguageModel({
           model: mistral("mistral-medium-latest"),
           middleware: extractReasoningMiddleware({ tagName: "think" }),
