@@ -852,7 +852,7 @@ Registration Details: [CLIENT_NAMES]
 
 Viewing Arranged for: [VIEWING_DATETIME]
 
-Fees: Standard agency fee on the Agreed/Accepted Sold price
+Fees: **8%+VAT** on the Agreed/Accepted Sold price
 
 Payable in full on the first 30% payment
 
@@ -871,13 +871,15 @@ This email is to provide you with the registration of our below client, under ou
 
 Registration Details: [CLIENT_NAMES]
 
-Fees: Standard agency fee on the Agreed/Accepted Sold price
+Fees: **8%+VAT** on the Agreed/Accepted Sold price
 
 Payable in full on the first 30% payment
 
 Please confirm registration
 
 Acceptance of registration implies a full registration under our agency regardless of viewing arrangement(s) by our firm, since your Company's full details and/or the location of a property will be fully provided for enhanced and transparent review by our client. Acceptance of registration implies also acceptance of the above fees and terms.
+
+Looking forward to your prompt reply.
 👁️ VIEWING FORM & RESERVATION TEMPLATES (4 Types)
 Standard Viewing Form
 Viewing Form
