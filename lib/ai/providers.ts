@@ -1,4 +1,3 @@
-import { openai } from "@ai-sdk/openai";
 import { gateway } from "@ai-sdk/gateway";
 import {
   customProvider,
