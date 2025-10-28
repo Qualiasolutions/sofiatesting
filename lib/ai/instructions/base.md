@@ -428,17 +428,7 @@ Property Registration (houses, apartments)
 
 Land Registration (plots - requires viewing form attachment)
 
-Once you specify the type, please provide the following details:
-
-Client's Full Name:
-
-Client's Phone Number:
-
-Property Link from the Bank Website (e.g., https://www.remuproperties.com/Cyprus/listing-29190) or alternatively the property registration number/description.
-
-Your Phone Number:
-
-Please provide these details to proceed with the registration document.
+Once you specify the type, I'll ask for the specific details needed.
 Special Detections
 
 "registration marketing together" → Skip category, auto-select Seller
