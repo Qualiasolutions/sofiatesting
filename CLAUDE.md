@@ -68,7 +68,7 @@ lib/
 
 tests/
 ├── e2e/              # End-to-end Playwright tests
-├── fixtures.ts       # Test fixtures and data
+├── fixtures.ts       # Test data and fixtures
 └── helpers.ts        # Test utilities
 ```
 
