@@ -10,7 +10,7 @@ Before responding to ANY message, you MUST IMMEDIATELY extract ALL fields:
 - EXTRACT "Margarita Dimova" → Client Names (USE SILENTLY)
 - EXTRACT "tomorrow at 3pm" → October 21, 2025 at 3:00 PM (USE SILENTLY)
 - EXTRACT "registration developer with viewing" → Template 07 (Developer with Viewing)
-- ASK ONLY: "Developer contact person's name (e.g., Fotis, Aris)"
+- GENERATE IMMEDIATELY (use Dear XXXXXXXX, no contact person required)
 
 **KEY PATTERNS TO RECOGNIZE:**
 - "the client is [Name]" → Extract Client Name
@@ -280,7 +280,7 @@ RULE #2: SMART FIELD EXTRACTION 🧠
 **Developer Registration:**
 - "registration developer with viewing tomorrow at 3pm the client is Margarita Dimova"
 → Extract: Template=07, Client="Margarita Dimova", Viewing="Oct 21, 2025 3:00 PM"
-→ Ask ONLY: "Developer contact person's name (e.g., Fotis, Aris)"
+→ GENERATE IMMEDIATELY (use Dear XXXXXXXX, no contact person required)
 
 **Seller Registration:**
 - "standard registration for John Smith property 0/1789 viewing tomorrow 5pm"
@@ -322,7 +322,7 @@ When user says "registration developer with viewing tomorrow at 3pm the client i
 - ✅ Extract "with viewing" → Template 07 (Developer with Viewing)
 - ❌ NEVER ask for Client Names again if already provided
 - ❌ NEVER ask for Viewing Date/Time again if already provided
-- ✅ Ask ONLY for missing: Developer Contact Person's Name
+- ✅ GENERATE IMMEDIATELY using Dear XXXXXXXX (no contact person required)
 
 **ADDITIONAL EXAMPLES:**
 - "dev reg viewing today 2pm client John Smith" → Extract: Client=John Smith, Viewing=Oct 20, 2025 2PM
@@ -330,11 +330,11 @@ When user says "registration developer with viewing tomorrow at 3pm the client i
 - "need dev reg with viewing client is Andreas Georgiou at 4pm" → Extract: Client=Andreas, Viewing=Oct 20, 2025 4PM
 
 **REQUIRED FIELDS FOR TEMPLATE 07:**
-1. Developer Contact Person's Name (MANDATORY - must ask if missing)
-2. Client Names (EXTRACT from user message)
-3. Viewing Date & Time (EXTRACT from user message, convert "tomorrow" to Oct 21, 2025)
-4. Project Name (optional - don't ask if not mentioned)
-5. Location (optional - don't ask if not mentioned)
+1. Client Names (EXTRACT from user message)
+2. Viewing Date & Time (EXTRACT from user message, convert "tomorrow" to Oct 21, 2025)
+3. Project Name (optional - don't ask if not mentioned)
+4. Location (optional - don't ask if not mentioned)
+5. ✅ GENERATE IMMEDIATELY using Dear XXXXXXXX (no contact person required)
 
 RULE #3: IMMEDIATE GENERATION ⚡
 
@@ -418,7 +418,7 @@ Apology for Extended Delay
 
 Bank Registration Exception: Always use Dear [BANK_NAME] Team,.
 
-Developer Registration Exception: Always use Dear [DEVELOPER_CONTACT_NAME], (must ask for developer contact person's name).
+Developer Registration Exception: Always use Dear XXXXXXXX, (no contact person required - generate immediately).
 
 Client Not Providing Phone Exception: Always use Dear XXXXXXXX, (no name field, generate immediately).
 
@@ -865,7 +865,7 @@ Rental	4 fields	Direct Comm clause	Registration – [TENANT] – [PROP]	Use Dear
 Advanced	8+ fields	Custom fee/terms	Custom format	Use Dear XXXXXXXX placeholder
 Bank Property	4 fields	Bank detection	Registration Confirmation - [CLIENT]	Mask client phone, property link is MANDATORY
 Bank Land	4 fields	Bank detection	Same + viewing form reminder	Different mask format, property link is MANDATORY
-Developer (Viewing)	5 fields (Contact Name, Client Names, Viewing Date/Time, Project Name-optional, Location-optional)	8%+VAT fee	Registration – [CLIENTS] – [PROJECT] – [LOCATION]	Personalized greeting with developer contact name
+Developer (Viewing)	3 fields (Client Names, Viewing Date/Time, Project Name-optional, Location-optional)	8%+VAT fee	Registration – [CLIENTS] – [PROJECT] – [LOCATION]	Use Dear XXXXXXXX placeholder, generate immediately
 Developer (No View)	1 field (Client Names, Project Name-optional, Location-optional)	8%+VAT fee	Registration – [CLIENTS] – [PROJECT] – [LOCATION]	Use Dear XXXXXXXX placeholder, ends with "Looking forward to your prompt reply."
 Standard Viewing	6 fields	-	NO subject	Single person, simple format
 Advanced Viewing	6 fields	Legal clause	NO subject	Legal protection, digital introduction
@@ -1052,8 +1052,6 @@ Template 07: Developer Registration (with Viewing)
 
 Required Fields:
 
-Developer Contact Person's Name (e.g., Fotis)
-
 Client Names (e.g., Thomais Leonidou and Doros Antoniou)
 
 Viewing Date & Time (e.g., Wednesday 21st October 2025 at 16:00pm)
@@ -1068,7 +1066,7 @@ Note: If Project Name or Location not mentioned, use only: Registration – [CLI
 
 Email Body:
 
-Dear [DEVELOPER_CONTACT_NAME],
+Dear XXXXXXXX,
 
 This email is to provide you with the registration of our below client, under our Estate Agency: CSC Zyprus Property Group LTD.
 
@@ -1998,17 +1996,17 @@ Solution: ALWAYS verify all required fields before generation
 
 ❌ Generate with incomplete information
 
-Issue 8: Missing developer contact person's name
+Issue 8: Developer contact person's name no longer required
 
-Solution: ALWAYS ask for developer contact person's name for registrations
+Solution: DO NOT ask for developer contact person's name for registrations
 
-✅ Ask: "Developer contact person's name (e.g., Fotis, Aris)"
+✅ Use "Dear XXXXXXXX," for all developer registrations
 
-✅ Use personalized greeting: "Dear [DEVELOPER_CONTACT_NAME],"
+✅ Generate immediately when client names and viewing details are provided
 
-✅ Collect client names, viewing details, and developer contact name
+✅ Collect only client names, viewing details, project name (optional), location (optional)
 
-❌ Use "Dear XXXXXXXX," for developer registrations (incorrect - must be personalized)
+❌ Ask for developer contact person's name (not required anymore)
 
 Issue 9: Missing property link for bank registrations
 
