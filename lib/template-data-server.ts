@@ -433,7 +433,7 @@ Property: https://www.remuproperties.com/Cyprus/listing-29190
 
 Looking forward to your prompt reply.
 
-⚠️ REMINDER: Don't forget to attach viewing form when sending this registration email to bank!`,
+⚠️ REMINDER: Don't forget to attach viewing form when sending this registration email to bank! (Banks don't attend viewings WHEN IT IS A LAND, so they require viewing form as proof of viewing.)`,
 
     "07": `Subject: Registration – Fawzi Goussous – [PROJECT_NAME] – [LOCATION]
 

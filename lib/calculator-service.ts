@@ -284,13 +284,19 @@ Note: This is an estimate. Consult a tax professional for accurate assessment.`;
 }
 
 /**
- * VAT Calculator for Houses/Apartments
- * Source: https://www.mof.gov.cy/mof/tax/taxdep.nsf/vathousecalc_gr/vathousecalc_gr?openform
+ * Deterministic VAT Calculator for Cyprus Primary Residence
+ * Source: Cyprus Tax Department VAT 5% calculation tool
+ * References:
+ * - https://www.mof.gov.cy/mof/tax/taxdep.nsf/vathousecalc_gr/vathousecalc_gr?openform
+ * - VAT Circular 11/2023, Post-reform rules (≤190 m², €350k/€475k thresholds)
  *
- * Calculation Rules:
- * - Standard VAT Rate: 19%
- * - Reduced VAT Rate (5%): First 200m² for first home (before Nov 1, 2023)
- * - NEW Policy (from Nov 1, 2023): Reduced rate applies to properties up to €350,000
+ * Authoritative Rules (Must Enforce):
+ * 1. Reduced 5% VAT applies only to first 130 m² of qualifying primary residence
+ * 2. Property total area must be ≤ 190 m² to be eligible for reduced scheme
+ * 3. Reduced rate capped at €350,000 of value
+ * 4. Total transaction value must be ≤ €475,000
+ * 5. If price > €475,000 → no 5% applies (entire taxable amount at 19%)
+ * 6. If price ≤ €475,000 but > €350,000, only eligible portion at 5%, remainder at 19%
  */
 export function calculateVAT(
   inputs: Record<string, any>
@@ -298,49 +304,16 @@ export function calculateVAT(
   const startTime = Date.now();
 
   try {
-    const buildableArea = Number.parseFloat(inputs.buildable_area);
-    const propertyValue = Number.parseFloat(inputs.price);
+    const totalArea = Number.parseFloat(inputs.buildable_area);
+    const price = Number.parseFloat(inputs.price);
+    const isMainResidence = inputs.is_main_residence !== false; // default true
 
-    // Parse planning application date (DD/MM/YYYY format)
-    const planningApplicationDateStr = inputs.planning_application_date;
-    if (!planningApplicationDateStr) {
-      return {
-        success: false,
-        calculator_name: "vat_calculator",
-        inputs,
-        error: {
-          code: "INVALID_INPUT",
-          message: "Planning application date is required",
-        },
-        execution_time_ms: Date.now() - startTime,
-      };
-    }
-
-    // Parse DD/MM/YYYY to Date object
-    const dateParts = planningApplicationDateStr.split("/");
-    if (dateParts.length !== 3) {
-      return {
-        success: false,
-        calculator_name: "vat_calculator",
-        inputs,
-        error: {
-          code: "INVALID_INPUT",
-          message: "Date must be in DD/MM/YYYY format",
-        },
-        execution_time_ms: Date.now() - startTime,
-      };
-    }
-
-    const day = Number.parseInt(dateParts[0]);
-    const month = Number.parseInt(dateParts[1]);
-    const year = Number.parseInt(dateParts[2]);
-    const planningApplicationDate = new Date(year, month - 1, day);
-
+    // Input validation
     if (
-      isNaN(buildableArea) ||
-      buildableArea <= 0 ||
-      isNaN(propertyValue) ||
-      propertyValue <= 0
+      isNaN(totalArea) ||
+      totalArea <= 0 ||
+      isNaN(price) ||
+      price <= 0
     ) {
       return {
         success: false,
@@ -348,129 +321,145 @@ export function calculateVAT(
         inputs,
         error: {
           code: "INVALID_INPUT",
-          message: "Buildable area and price must be positive numbers",
+          message: "Total area and price must be positive numbers",
+          fallback_url:
+            "https://www.mof.gov.cy/mof/tax/taxdep.nsf/vathousecalc_gr/vathousecalc_gr?openform",
         },
         execution_time_ms: Date.now() - startTime,
       };
     }
 
-    // Check if invalid date
-    if (isNaN(planningApplicationDate.getTime())) {
+    // Investment properties always pay 19% VAT
+    if (!isMainResidence) {
+      const vat19 = price * 0.19;
       return {
-        success: false,
+        success: true,
         calculator_name: "vat_calculator",
         inputs,
-        error: {
-          code: "INVALID_INPUT",
-          message: "Invalid date provided",
+        result: {
+          summary: `€${vat19.toLocaleString()}`,
+          details: {
+            eligible: false,
+            inputs: { price, total_area: totalArea },
+            computed: {
+              area_ratio: 0,
+              reduced_value_base: 0,
+              vat_5: 0,
+              vat_19: vat19,
+            },
+            final_vat: vat19,
+            notes: ["Investment property - 19% VAT rate applies to entire amount"],
+          },
+          formatted_output: `💵 VAT Calculation - Investment Property
+
+Property Details:
+- Total Area: ${totalArea}m²
+- Price: €${price.toLocaleString()}
+- Property Type: Investment Property
+
+Calculation:
+- Investment properties are not eligible for reduced VAT rates
+- VAT Rate: 19% on entire purchase price
+- VAT Amount: €${vat19.toLocaleString()}
+
+📊 Total VAT: €${vat19.toLocaleString()}
+
+Note: Only primary residences may qualify for reduced 5% VAT rates under Cyprus tax law.`,
         },
         execution_time_ms: Date.now() - startTime,
       };
     }
 
-    // Policy cutoff date: November 1, 2023
-    const policyCutoffDate = new Date(2023, 10, 1); // Month is 0-indexed
-    const isNewPolicy = planningApplicationDate >= policyCutoffDate;
+    // Eligibility checks for primary residence
+    const eligible =
+      totalArea <= 190 &&
+      price <= 475000;
 
-    // Calculate VAT for MAIN RESIDENCE based on policy
+    let vat5 = 0;
+    let vat19 = 0;
+    let areaRatio = 0;
+    let reducedValueBase = 0;
+    const notes: string[] = [];
 
-    let totalVAT: number;
-    const breakdown: string[] = [];
+    if (!eligible) {
+      // Ineligible - entire amount at 19%
+      vat19 = price * 0.19;
 
-    if (isNewPolicy) {
-      // NEW POLICY (from Nov 1, 2023) - For Main Residence
-      // Government formula based on buildable area and €350k threshold
-      
-      const areaFactor = Math.min(buildableArea, 200) / 200;
-      
-      // Calculate value eligible for 5% rate
-      let reducedRateValue: number;
-      if (propertyValue <= 350_000) {
-        // If property ≤ €350k, apply area factor to entire value
-        reducedRateValue = propertyValue * areaFactor;
-      } else {
-        // If property > €350k, use government formula:
-        // Base amount at 5% = €350k × area_factor
-        // Plus additional amount from excess = (price - €350k) × area_factor × 0.13671875
-        const baseAmount = 350_000 * areaFactor;
-        const excess = propertyValue - 350_000;
-        const excessAtReducedRate = excess * areaFactor * 0.13671875;
-        reducedRateValue = baseAmount + excessAtReducedRate;
+      if (totalArea > 190) {
+        notes.push("Property area exceeds 190 m² limit - reduced scheme inapplicable");
+      } else if (price > 475000) {
+        notes.push("Property price exceeds €475,000 limit - reduced scheme inapplicable");
       }
-      
-      const standardRateValue = propertyValue - reducedRateValue;
-      
-      const reducedVAT = reducedRateValue * 0.05;
-      const standardVAT = standardRateValue * 0.19;
-      totalVAT = reducedVAT + standardVAT;
-      
-      breakdown.push(`Property Value: €${propertyValue.toLocaleString()}`);
-      breakdown.push(`Buildable Area: ${buildableArea}m²`);
-      breakdown.push(`€${reducedRateValue.toLocaleString()} at 5% = €${reducedVAT.toLocaleString()}`);
-      breakdown.push(`€${standardRateValue.toLocaleString()} at 19% = €${standardVAT.toLocaleString()}`);
-      breakdown.push(`Total VAT: €${totalVAT.toLocaleString()}`)
     } else {
-      // OLD POLICY (before Nov 1, 2023)
-      const reducedRateArea = Math.min(buildableArea, 200);
-      const standardRateArea = Math.max(0, buildableArea - 200);
+      // Eligible - apply proportional 5% base formula
+      areaRatio = Math.min(130, totalArea) / totalArea;
+      reducedValueBase = areaRatio * Math.min(price, 350000);
 
-      if (buildableArea <= 200) {
-        totalVAT = propertyValue * 0.05;
-        breakdown.push(
-          `Buildable area (${buildableArea}m²) is within 200m² limit`
-        );
-        breakdown.push("VAT Rate: 5% (reduced rate under old policy)");
-        breakdown.push(`VAT Amount: €${totalVAT.toLocaleString()}`);
-      } else {
-        const pricePerSqm = propertyValue / buildableArea;
-        const reducedRateValue = reducedRateArea * pricePerSqm;
-        const standardRateValue = standardRateArea * pricePerSqm;
+      vat5 = reducedValueBase * 0.05;
+      vat19 = (price - reducedValueBase) * 0.19;
 
-        const reducedVAT = reducedRateValue * 0.05;
-        const standardVAT = standardRateValue * 0.19;
-        totalVAT = reducedVAT + standardVAT;
+      notes.push(`Area ratio: min(130, ${totalArea}) / ${totalArea} = ${areaRatio.toFixed(6)}`);
+      notes.push(`Reduced value base: ${areaRatio.toFixed(6)} × min(€${price.toLocaleString()}, €350,000) = €${reducedValueBase.toFixed(2)}`);
+      notes.push(`5% VAT on eligible portion: €${reducedValueBase.toFixed(2)} × 0.05 = €${vat5.toFixed(2)}`);
+      notes.push(`19% VAT on remaining: €${(price - reducedValueBase).toFixed(2)} × 0.19 = €${vat19.toFixed(2)}`);
 
-        breakdown.push(
-          `First 200m² at 5%: ${reducedRateArea}m² × €${pricePerSqm.toFixed(2)}/m² = €${reducedVAT.toLocaleString()}`
-        );
-        breakdown.push(
-          `Remaining area at 19%: ${standardRateArea}m² × €${pricePerSqm.toFixed(2)}/m² = €${standardVAT.toLocaleString()}`
-        );
-        breakdown.push(`Total VAT: €${totalVAT.toLocaleString()}`);
+      if (price > 350000) {
+        notes.push("Property price exceeds €350,000 - only eligible portion gets 5% rate");
+      }
+      if (totalArea > 130) {
+        notes.push("Property area exceeds 130 m² - reduced rate applies proportionally");
       }
     }
 
-    const policyType = isNewPolicy
-      ? "New Policy (from Nov 1, 2023)"
-      : "Old Policy (before Nov 1, 2023)";
-    const formattedOutput = `💵 VAT Calculation
+    const finalVAT = vat5 + vat19;
+
+    const formattedOutput = `💵 VAT Calculation - Cyprus Primary Residence
 
 Property Details:
-- Buildable Area: ${buildableArea}m²
-- Price: €${propertyValue.toLocaleString()}
-- Planning Application Date: ${planningApplicationDateStr}
-- Applied Policy: ${policyType}
+- Total Area: ${totalArea}m²
+- Price: €${price.toLocaleString()}
+- Property Type: ${isMainResidence ? "Primary Residence" : "Investment Property"}
+- Eligible for Reduced Rate: ${eligible ? "Yes" : "No"}
 
-Calculation Breakdown:
-${breakdown.map((line) => `• ${line}`).join("\n")}
+${eligible ?
+  `Calculation Breakdown:
+• Area Ratio: min(130, ${totalArea}) ÷ ${totalArea} = ${areaRatio.toFixed(6)}
+• Reduced Value Base: ${areaRatio.toFixed(6)} × €${Math.min(price, 350000).toLocaleString()} = €${reducedValueBase.toFixed(2)}
+• VAT at 5%: €${reducedValueBase.toFixed(2)} × 0.05 = €${vat5.toFixed(2)}
+• VAT at 19%: €${(price - reducedValueBase).toFixed(2)} × 0.19 = €${vat19.toFixed(2)}` :
+  `Calculation:
+• VAT Rate: 19% on entire purchase price
+• VAT Amount: €${price.toLocaleString()} × 0.19 = €${vat19.toFixed(2)}`
+}
 
-📊 Total VAT: €${totalVAT.toLocaleString()}
+📊 Total VAT: €${finalVAT.toFixed(2)}
 
-Note: This calculation is for new builds only. Resale properties are exempt from VAT. Reduced rates apply for first home/main residence purchases in Cyprus.`;
+${eligible ?
+  `Note: Reduced 5% VAT applies to first 130 m² only, capped at €350,000 value. ` +
+  `Property must be ≤190 m² and ≤€475,000 to qualify.` :
+  `Note: Property does not meet criteria for reduced VAT rate. ` +
+  `Requirements: ≤190 m² total area and ≤€475,000 purchase price.`
+}
+
+Official calculator: https://www.mof.gov.cy/mof/tax/taxdep.nsf/vathousecalc_gr/vathousecalc_gr?openform`;
 
     return {
       success: true,
       calculator_name: "vat_calculator",
       inputs,
       result: {
-        summary: `€${totalVAT.toLocaleString()}`,
+        summary: `€${finalVAT.toFixed(2)}`,
         details: {
-          buildable_area: buildableArea,
-          price: propertyValue,
-          planning_application_date: planningApplicationDateStr,
-          is_new_policy: isNewPolicy,
-          total_vat: totalVAT,
-          breakdown,
+          eligible,
+          inputs: { price, total_area: totalArea },
+          computed: {
+            area_ratio: areaRatio,
+            reduced_value_base: reducedValueBase,
+            vat_5: vat5,
+            vat_19: vat19,
+          },
+          final_vat: finalVAT,
+          notes,
         },
         formatted_output: formattedOutput,
       },
