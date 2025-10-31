@@ -67,6 +67,10 @@ export const createListingTool = tool({
       .array(z.string())
       .optional()
       .describe("Property features/amenities (e.g., ['sea view', 'pool'])"),
+    imageUrls: z
+      .array(z.string().url())
+      .optional()
+      .describe("Property image URLs (from chat uploads or external URLs)"),
   }),
   execute: async ({
     name,
@@ -78,6 +82,7 @@ export const createListingTool = tool({
     squareFootage,
     propertyType,
     features,
+    imageUrls,
   }) => {
 
     try {
@@ -119,6 +124,7 @@ export const createListingTool = tool({
         floorSize: squareFootage.toString(),
         propertyType,
         amenityFeature: features || [],
+        image: imageUrls || [], // Store image URLs
         status: "draft",
         draftExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       });
@@ -136,6 +142,7 @@ ${name}
 📐 ${squareFootage}m²
 ${propertyType ? `🏠 Type: ${propertyType}` : ""}
 ${features && features.length > 0 ? `✨ Features: ${features.join(", ")}` : ""}
+${imageUrls && imageUrls.length > 0 ? `📸 Images: ${imageUrls.length} photo${imageUrls.length > 1 ? "s" : ""}` : ""}
 
 Status: **Draft** (expires in 7 days)
 

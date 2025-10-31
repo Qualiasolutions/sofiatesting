@@ -239,28 +239,52 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
   // Upload images to field_gallery_ endpoint if present
   let imageIds: string[] = [];
   if (listing.image && Array.isArray(listing.image)) {
+    console.log(`Starting upload of ${listing.image.length} images to Zyprus`);
     try {
-      for (const imageUrl of listing.image as string[]) {
-        const imageResponse = await fetch(imageUrl);
-        const imageBlob = await imageResponse.blob();
+      for (let i = 0; i < listing.image.length; i++) {
+        const imageUrl = (listing.image as string[])[i];
+        console.log(`Uploading image ${i + 1}/${listing.image.length}: ${imageUrl}`);
 
-        const formData = new FormData();
-        formData.append('file', imageBlob, 'property-image.jpg');
+        try {
+          // Fetch image from URL (supports both external URLs and Vercel Blob URLs)
+          const imageResponse = await fetch(imageUrl);
+          if (!imageResponse.ok) {
+            console.error(`Failed to fetch image ${imageUrl}: ${imageResponse.status}`);
+            continue;
+          }
 
-        const uploadResponse = await fetch(`${apiUrl}/jsonapi/node/property/field_gallery_`, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "User-Agent": "SophiaAI/1.0",
-          },
-          body: formData,
-        });
+          const imageBlob = await imageResponse.blob();
+          const contentType = imageResponse.headers.get('content-type') || 'image/jpeg';
 
-        if (uploadResponse.ok) {
-          const data = await uploadResponse.json();
-          imageIds.push(data.data.id);
+          // Determine file extension from content type
+          const ext = contentType.split('/')[1] || 'jpg';
+          const filename = `property-image-${i + 1}.${ext}`;
+
+          const formData = new FormData();
+          formData.append('file', imageBlob, filename);
+
+          const uploadResponse = await fetch(`${apiUrl}/jsonapi/node/property/field_gallery_`, {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "User-Agent": "SophiaAI/1.0",
+            },
+            body: formData,
+          });
+
+          if (uploadResponse.ok) {
+            const data = await uploadResponse.json();
+            imageIds.push(data.data.id);
+            console.log(`Successfully uploaded image ${i + 1}: ${data.data.id}`);
+          } else {
+            const errorText = await uploadResponse.text();
+            console.error(`Failed to upload image ${i + 1}: ${uploadResponse.status} - ${errorText}`);
+          }
+        } catch (imgError) {
+          console.error(`Error processing image ${i + 1}:`, imgError);
         }
       }
+      console.log(`Image upload complete: ${imageIds.length}/${listing.image.length} successful`);
     } catch (error) {
       console.error('Image upload error:', error);
     }
