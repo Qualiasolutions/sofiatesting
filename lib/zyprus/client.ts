@@ -279,14 +279,14 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
         },
         field_ai_state: "draft", // CRUCIAL: track AI-generated properties
         field_price: String(listing.price), // Price as string
-        field_covered_area: Number(listing.floorSize), // Ensure number
-        field_land_size: Number((listing as any).landSize || listing.floorSize), // Ensure number
-        field_no_bedrooms: Number(listing.numberOfRooms), // Ensure number
-        field_no_bathrooms: Number(listing.numberOfBathroomsTotal), // Ensure number
-        field_no_kitchens: Number((listing as any).numberOfKitchens || 1), // Ensure number
-        field_no_living_rooms: Number((listing as any).numberOfLivingRooms || 1), // Ensure number
+        field_covered_area: parseFloat(String(listing.floorSize)), // Parse as float
+        field_land_size: parseFloat(String((listing as any).landSize || listing.floorSize)), // Parse as float
+        field_no_bedrooms: parseInt(String(listing.numberOfRooms), 10), // Parse as integer
+        field_no_bathrooms: parseFloat(String(listing.numberOfBathroomsTotal)), // Parse as float (allows 2.5, etc.)
+        field_no_kitchens: parseInt(String((listing as any).numberOfKitchens || 1), 10), // Parse as integer
+        field_no_living_rooms: parseInt(String((listing as any).numberOfLivingRooms || 1), 10), // Parse as integer
         field_own_reference_id: listing.referenceId || `AI-${Date.now()}`,
-        field_year_built: Number(listing.yearBuilt || new Date().getFullYear()), // Ensure number
+        field_year_built: parseInt(String(listing.yearBuilt || new Date().getFullYear()), 10), // Parse as integer
         field_new_build: false,
         field_map: (listing.address as any)?.geo ? {
           value: `POINT (${(listing.address as any).geo.longitude} ${(listing.address as any).geo.latitude})`,
