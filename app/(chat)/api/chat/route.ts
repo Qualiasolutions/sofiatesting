@@ -26,6 +26,9 @@ import {
   calculateCapitalGainsTool,
   calculateTransferFeesTool,
   calculateVATTool,
+  createListingTool,
+  listListingsTool,
+  uploadListingTool,
 } from "@/lib/ai/tools";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
@@ -169,13 +172,19 @@ export async function POST(request: Request) {
             "calculateTransferFees",
             "calculateCapitalGains",
             "calculateVAT",
-          ], // SOFIA can use calculator tools only
+            "createListing",
+            "listListings",
+            "uploadListing",
+          ], // SOFIA can use calculator and property listing tools
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             calculateTransferFees: calculateTransferFeesTool,
             calculateCapitalGains: calculateCapitalGainsTool,
             calculateVAT: calculateVATTool,
-          }, // Calculator tools for Cyprus real estate
+            createListing: createListingTool,
+            listListings: listListingsTool,
+            uploadListing: uploadListingTool,
+          }, // Cyprus real estate tools: calculators and property listings
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
             functionId: "stream-text",

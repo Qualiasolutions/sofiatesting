@@ -19,10 +19,10 @@ export { calculateCapitalGainsTool } from "./calculate-capital-gains";
 export { calculateTransferFeesTool } from "./calculate-transfer-fees";
 export { calculateVATTool } from "./calculate-vat";
 
-// Property Listing Tools (disabled until context passing fixed)
-// export { createListingTool } from "./create-listing";
-// export { listListingsTool } from "./list-listings";
-// export { uploadListingTool } from "./upload-listing";
+// Property Listing Tools (use API routes for authentication)
+export { createListingTool } from "./create-listing";
+export { listListingsTool } from "./list-listings";
+export { uploadListingTool } from "./upload-listing";
 
 // Document Tools
 export { createDocument } from "./create-document";

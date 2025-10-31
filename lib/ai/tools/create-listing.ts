@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { createPropertyListing } from "@/lib/db/queries";
+import { auth } from "@/app/(auth)/auth";
 
 // Cyprus cities for validation
 const CYPRUS_LOCATIONS = [
@@ -19,7 +20,7 @@ const CYPRUS_LOCATIONS = [
 export const createListingTool = tool({
   description:
     "Create a property listing draft for zyprus.com with all required property details",
-  parameters: z.object({
+  inputSchema: z.object({
     name: z
       .string()
       .min(10)
@@ -67,30 +68,28 @@ export const createListingTool = tool({
       .optional()
       .describe("Property features/amenities (e.g., ['sea view', 'pool'])"),
   }),
-  execute: async (args: any, options: any) => {
-    const {
-      name,
-      description,
-      location,
-      price,
-      bedrooms,
-      bathrooms,
-      squareFootage,
-      propertyType,
-      features,
-    } = args;
-    
-    const userId = options?.session?.user?.id;
-    const currentChatId = options?.chatId;
-
-    if (!userId) {
-      return {
-        success: false,
-        error: "Authentication required to create listing",
-      };
-    }
+  execute: async ({
+    name,
+    description,
+    location,
+    price,
+    bedrooms,
+    bathrooms,
+    squareFootage,
+    propertyType,
+    features,
+  }) => {
 
     try {
+      // Get session for user authentication
+      const session = await auth();
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: "Authentication required to create listing",
+        };
+      }
+
       // Validate Cyprus location
       const isValidLocation = CYPRUS_LOCATIONS.some((loc: string) =>
         location.toLowerCase().includes(loc)
@@ -103,22 +102,24 @@ export const createListingTool = tool({
         };
       }
 
-      // Create listing in database
+      // Create listing directly in database
       const listing = await createPropertyListing({
-        userId,
-        chatId: currentChatId,
+        userId: session.user.id,
         name,
         description,
         address: {
+          streetAddress: "",
           addressLocality: location,
-          addressCountry: "Cyprus",
+          addressCountry: "CY",
         },
         price: price.toString(),
+        currency: "EUR",
         numberOfRooms: bedrooms,
         numberOfBathroomsTotal: bathrooms.toString(),
         floorSize: squareFootage.toString(),
         propertyType,
         amenityFeature: features || [],
+        status: "draft",
         draftExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       });
 

@@ -131,7 +131,7 @@ tests/
 - **User Management**: Simple authentication with guest user support and role-based access
 - **Chat Persistence**: Chat history with visibility settings, geographic context, and metadata
 - **Stream Support**: Resumable streams with Redis backend and comprehensive token tracking
-- **Property Listings**: Schema.org compliant real estate listing system (currently disabled)
+- **Property Listings**: Schema.org compliant real estate listing system with Zyprus.com integration (active)
 - **Vote System**: User feedback on messages with v2 implementation for better analytics
 
 #### SOFIA AI Behavior (Production Rules)
@@ -154,6 +154,10 @@ Critical environment variables for operation:
 - `BLOB_READ_WRITE_TOKEN` - Vercel Blob storage token for file uploads
 - `REDIS_URL` - Redis connection for session storage and rate limiting
 - `TELEGRAM_BOT_TOKEN` - Telegram bot token from @BotFather (for Telegram integration)
+- `ZYPRUS_API_URL` - Zyprus API base URL (default: https://dev9.zyprus.com)
+- `ZYPRUS_SITE_URL` - Zyprus frontend URL for property links
+- `ZYPRUS_CLIENT_ID` - OAuth client ID for Zyprus API
+- `ZYPRUS_CLIENT_SECRET` - OAuth client secret for Zyprus API
 - `PLAYWRIGHT` - Set to "True" when running E2E tests
 
 ### Key Configuration Files
@@ -177,8 +181,8 @@ The core AI behavior is comprehensively documented in `SOPHIA_AI_ASSISTANT_INSTR
 
 ### Chat API Architecture
 - **Route**: `app/(chat)/api/chat/route.ts` handles all chat interactions with streaming
-- **Tools Disabled**: `experimental_activeTools: []` and empty tools object for SOFIA
-- **Streaming**: Real-time streaming with TokenLens usage tracking and error handling
+- **Active Tools**: Calculator tools (transfer fees, capital gains, VAT) and property listing tools (create, upload, list)
+- **Streaming**: Real-time token streaming with TokenLens usage tracking and error handling
 - **Rate Limiting**: Message limits based on user type and authentication status
 - **Context Management**: Geographic hints from request location and user preferences
 
@@ -231,6 +235,54 @@ Run `pnpm lint` to check and `pnpm format` to fix issues automatically.
 - **Calculator Tools**: Full support for transfer fees, capital gains, and VAT calculations
 - **Setup Scripts**: `scripts/setup-telegram-bot.sh` and `scripts/deploy-with-telegram.sh`
 - **Documentation**: Complete setup guide in `TELEGRAM_BOT_SETUP.md`
+
+### Property Listing Tools (Production Ready)
+SOFIA includes AI-powered property listing tools that are **now active** in production:
+- **Architecture**: Tools use server-side auth via NextAuth to access user context
+- **Database Integration**: Direct database calls (not HTTP) for performance and reliability
+- **API Routes**: Available at `/api/listings/*` for external integrations
+- **Available Tools**:
+  - `createListing` - Create property listing drafts with validation
+  - `uploadListing` - Upload listings to Zyprus.com with rate limiting
+  - `listListings` - Show user's property listings with status tracking
+- **Key Features**:
+  - User authentication via NextAuth session
+  - Cyprus location validation
+  - Draft expiration (7 days)
+  - Comprehensive error handling
+  - Rate limiting (10 uploads/hour/user)
+  - Zyprus API integration with OAuth
+- **Files**:
+  - `lib/ai/tools/create-listing.ts` - Draft creation with validation
+  - `lib/ai/tools/upload-listing.ts` - Zyprus upload with retry logic
+  - `lib/ai/tools/list-listings.ts` - Listing display with formatting
+  - `app/api/listings/` - REST API endpoints for external access
+- **Usage**: Registered in `app/(chat)/api/chat/route.ts` alongside calculator tools
+
+### Zyprus API Integration (Property Management System)
+SOFIA integrates with the Zyprus Property Management System via JSON:API for property listings:
+- **Authentication**: OAuth 2.0 client credentials flow with automatic token caching and refresh
+- **Critical Headers**: `User-Agent: SophiaAI/1.0` header is **mandatory** to bypass Cloudflare protection
+- **API Client**: `lib/zyprus/client.ts` provides comprehensive integration functions
+- **Key Functions**:
+  - `uploadToZyprusAPI()` - Upload property listings with JSON:API format (includes mandatory relationships)
+  - `getZyprusLocations()` - Fetch available property locations (districts/areas)
+  - `getZyprusTaxonomyTerms()` - Fetch property features, types, and classification terms
+  - `getZyprusListings()` - Retrieve existing property listings
+- **Environment Variables**:
+  - `ZYPRUS_API_URL` - API base URL (default: https://dev9.zyprus.com)
+  - `ZYPRUS_SITE_URL` - Frontend URL for property links
+  - `ZYPRUS_CLIENT_ID` - OAuth client ID
+  - `ZYPRUS_CLIENT_SECRET` - OAuth client secret
+- **JSON:API Requirements**:
+  - Status must be `false` for draft properties (prevents unwanted public display)
+  - `field_ai_state: "draft"` tracks AI-generated properties
+  - Mandatory relationships: `field_location` and `field_property_type` (defaults provided)
+  - Proper data types: numbers for counts/areas, strings for price/references
+  - Relationships use format: `{type: "node--property", id: "uuid"}`
+- **Error Handling**: Custom `ZyprusAPIError` class with error codes, retry logic, and detailed validation errors
+- **Image Uploads**: Separate endpoint `/jsonapi/node/property/field_gallery_` for property images
+- **Timeout**: 30-second timeout on property uploads to prevent hanging requests
 
 ## Advanced Features
 

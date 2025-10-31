@@ -1,5 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { auth } from "@/app/(auth)/auth";
 import { getListingsByUserId } from "@/lib/db/queries";
 
 const STATUS_EMOJIS: Record<string, string> = {
@@ -14,7 +15,7 @@ const STATUS_EMOJIS: Record<string, string> = {
 export const listListingsTool = tool({
   description:
     "Show user's property listings with status. Displays recent listings created by the user.",
-  parameters: z.object({
+  inputSchema: z.object({
     limit: z
       .number()
       .int()
@@ -23,16 +24,22 @@ export const listListingsTool = tool({
       .default(10)
       .describe("Number of listings to show (max 50)"),
   }),
-  execute: async (args: any, options: any) => {
-    const { limit } = args;
-    const userId = options?.session?.user?.id;
-
-    if (!userId) {
-      return { success: false, error: "Authentication required" };
-    }
-
+  execute: async ({ limit }) => {
     try {
-      const listings = await getListingsByUserId({ userId, limit });
+      // Get session for user authentication
+      const session = await auth();
+      if (!session?.user?.id) {
+        return {
+          success: false,
+          error: "Authentication required to view listings",
+        };
+      }
+
+      // Get listings from database
+      const listings = await getListingsByUserId({
+        userId: session.user.id,
+        limit: Math.min(limit, 100), // Max 100 listings
+      });
 
       if (listings.length === 0) {
         return {
@@ -43,18 +50,18 @@ export const listListingsTool = tool({
       }
 
       const formatted = listings
-        .map((listing: any, index: number) => {
+        .map((listing, index: number) => {
           const emoji = STATUS_EMOJIS[listing.status] || "❓";
           const price = parseFloat(listing.price);
           const createdDate = new Date(listing.createdAt).toLocaleDateString();
 
           let statusLine = `Status: ${listing.status}`;
-          if (listing.zyprusListingId) {
-            statusLine += ` | ID: #${listing.zyprusListingId}`;
+          if (listing.zyprusListingUrl) {
+            statusLine += ` | [View Listing](${listing.zyprusListingUrl})`;
           }
 
           return `${index + 1}. ${emoji} **${listing.name}**
-   📍 ${listing.address.addressLocality} | 💰 €${price.toLocaleString()}
+   📍 ${(listing.address as any).addressLocality} | 💰 €${price.toLocaleString()}
    🛏️ ${listing.numberOfRooms} bed | 🚿 ${listing.numberOfBathroomsTotal} bath | 📐 ${listing.floorSize}m²
    ${statusLine}
    Created: ${createdDate}`;

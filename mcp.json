@@ -1,20 +1,14 @@
 {
     "servers": {
-        "postman-api-http-server": {
-            "type": "sse",
-            "url": "https://mcp.postman.com/{minimal OR mcp}",
-            // Use "https://mcp.postman.com/mcp" for full or "https://mcp.postman.com/minimal" for minimal mode.
-            // For the EU server, use the "https://mcp.eu.postman.com" URL.
-            "headers": {
-                "Authorization": "Bearer ${input:postman-api-key}"
+        "postman": {
+            "type": "stdio",
+            "command": "npx",
+            "args": [
+                "@postman/postman-mcp-server@latest"
+            ],
+            "env": {
+                "POSTMAN_API_KEY": "PMAK-6904fc7359d53a00010abcfe-d4c8802943506fd4231648b59c7932e89b"
             }
         }
-    },
-    "inputs": [
-        {
-            "id": "postman-api-key",
-            "type": "promptString",
-            "description": "Enter your Postman API key"
-        }
-    ]
+    }
 }

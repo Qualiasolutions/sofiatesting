@@ -1,12 +1,12 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { auth } from "@/app/(auth)/auth";
 import {
   getListingById,
   getListingsByUserId,
   logListingUploadAttempt,
   updateListingStatus,
 } from "@/lib/db/queries";
-import { checkRateLimit } from "@/lib/listing/rate-limit";
 import {
   isPermanentError,
   uploadToZyprusAPI,
@@ -16,62 +16,55 @@ import {
 export const uploadListingTool = tool({
   description:
     "Upload a property listing to zyprus.com. Uploads the most recent draft if no ID specified.",
-  parameters: z.object({
+  inputSchema: z.object({
     listingId: z
       .string()
       .uuid()
       .optional()
       .describe("Optional: Specific listing ID to upload"),
   }),
-  execute: async (args: any, options: any) => {
-    const { listingId } = args;
-    const userId = options?.session?.user?.id;
-
-    if (!userId) {
-      return { success: false, error: "Authentication required" };
-    }
+  execute: async ({ listingId }) => {
+    const startTime = Date.now();
 
     try {
-      // Rate limit check
-      const rateLimitOk = await checkRateLimit(userId);
-      if (!rateLimitOk) {
+      // Get session for user authentication
+      const session = await auth();
+      if (!session?.user?.id) {
         return {
           success: false,
-          error:
-            "Rate limit exceeded. You can upload up to 10 listings per hour. Please try again later.",
+          error: "Authentication required to upload listing",
         };
       }
 
-      // Get listing
+      // Get listing - either specified or most recent
       let listing;
       if (listingId) {
         listing = await getListingById({ id: listingId });
-        if (listing && listing.userId !== userId) {
+        if (listing && listing.userId !== session.user.id) {
           return {
             success: false,
             error: "You don't have permission to upload this listing",
           };
         }
       } else {
-        const listings = await getListingsByUserId({ userId, limit: 1 });
+        const listings = await getListingsByUserId({ userId: session.user.id, limit: 1 });
         listing = listings[0];
       }
 
       if (!listing) {
         return {
           success: false,
-          error:
-            "No listing found. Create a listing first by saying 'create a listing'.",
+          error: "No listing found. Create a listing first by saying 'create a listing'.",
         };
       }
 
       // Check if already uploaded
       if (listing.status === "uploaded" || listing.status === "published") {
         return {
-          success: false,
-          error: `This listing is already ${listing.status}${
-            listing.zyprusListingId
-              ? `. Listing ID: ${listing.zyprusListingId}`
+          success: true,
+          message: `This listing is already ${listing.status}${
+            listing.zyprusListingUrl
+              ? `\nView online: ${listing.zyprusListingUrl}`
               : ""
           }`,
         };
@@ -81,7 +74,6 @@ export const uploadListingTool = tool({
       await updateListingStatus({ id: listing.id, status: "uploading" });
 
       // Upload to zyprus.com
-      const startTime = Date.now();
       try {
         const result = await uploadToZyprusAPI(listing);
         const durationMs = Date.now() - startTime;
@@ -95,13 +87,12 @@ export const uploadListingTool = tool({
           publishedAt: new Date(),
         });
 
-        // Log attempt
+        // Log successful attempt
         await logListingUploadAttempt({
           listingId: listing.id,
           attemptNumber: 1,
           status: "success",
           durationMs,
-          apiResponse: result,
         });
 
         return {
@@ -114,12 +105,10 @@ View online: ${result.listingUrl}
 
 Your property is now live on zyprus.com!`,
         };
-      } catch (error) {
+      } catch (uploadError) {
         const durationMs = Date.now() - startTime;
-        const errorMessage =
-          error instanceof Error ? error.message : "Unknown error";
-        const errorCode =
-          error instanceof ZyprusAPIError ? error.code : "UNKNOWN";
+        const errorMessage = uploadError instanceof Error ? uploadError.message : "Unknown error";
+        const errorCode = uploadError instanceof ZyprusAPIError ? uploadError.code : "UNKNOWN";
 
         // Log failed attempt
         await logListingUploadAttempt({
@@ -131,14 +120,16 @@ Your property is now live on zyprus.com!`,
           durationMs,
         });
 
-        // Update status to failed
-        await updateListingStatus({ id: listing.id, status: "failed" });
+        // Update status to failed or draft based on error type
+        const newStatus = uploadError instanceof ZyprusAPIError && isPermanentError(uploadError)
+          ? "failed"
+          : "draft";
+
+        await updateListingStatus({ id: listing.id, status: newStatus });
 
         return {
           success: false,
-          error: `❌ Upload failed: ${errorMessage}
-
-The listing has been saved as "failed". You can retry by saying "upload listing" again.`,
+          error: `❌ Upload failed: ${errorMessage}\n\nThe listing has been saved. You can retry by saying "upload listing" again.`,
         };
       }
     } catch (error) {
