@@ -45,7 +45,7 @@ async function getAccessToken(): Promise<string> {
     return cachedToken.access_token;
   }
 
-  const apiUrl = process.env.ZYPRUS_API_URL || "https://api.zyprus.com";
+  const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
   const clientId = process.env.ZYPRUS_CLIENT_ID;
   const clientSecret = process.env.ZYPRUS_CLIENT_SECRET;
 
@@ -61,6 +61,7 @@ async function getAccessToken(): Promise<string> {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
+        "User-Agent": "SophiaAI/1.0",
       },
       body: new URLSearchParams({
         grant_type: "client_credentials",
@@ -99,7 +100,7 @@ async function getAccessToken(): Promise<string> {
  * Get available locations from Zyprus
  */
 export async function getZyprusLocations(): Promise<any[]> {
-  const apiUrl = process.env.ZYPRUS_API_URL || "https://api.zyprus.com";
+  const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
   const token = await getAccessToken();
 
   try {
@@ -108,6 +109,7 @@ export async function getZyprusLocations(): Promise<any[]> {
       headers: {
         "Content-Type": "application/vnd.api+json",
         "Authorization": `Bearer ${token}`,
+        "User-Agent": "SophiaAI/1.0",
       },
     });
 
@@ -138,7 +140,7 @@ export async function getZyprusLocations(): Promise<any[]> {
  * Get taxonomy terms for property features
  */
 export async function getZyprusTaxonomyTerms(vocabularyType: string): Promise<any[]> {
-  const apiUrl = process.env.ZYPRUS_API_URL || "https://api.zyprus.com";
+  const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
   const token = await getAccessToken();
 
   try {
@@ -147,6 +149,7 @@ export async function getZyprusTaxonomyTerms(vocabularyType: string): Promise<an
       headers: {
         "Content-Type": "application/vnd.api+json",
         "Authorization": `Bearer ${token}`,
+        "User-Agent": "SophiaAI/1.0",
       },
     });
 
@@ -177,7 +180,7 @@ export async function getZyprusTaxonomyTerms(vocabularyType: string): Promise<an
  * Upload property images to Zyprus
  */
 async function uploadPropertyImages(images: string[]): Promise<string[]> {
-  const apiUrl = process.env.ZYPRUS_API_URL || "https://api.zyprus.com";
+  const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
   const token = await getAccessToken();
   const uploadedUrls: string[] = [];
 
@@ -230,7 +233,7 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
   listingId: string;
   listingUrl: string;
 }> {
-  const apiUrl = process.env.ZYPRUS_API_URL || "https://api.zyprus.com";
+  const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
   const token = await getAccessToken();
 
   // Upload images to field_gallery_ endpoint if present
@@ -248,6 +251,7 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${token}`,
+            "User-Agent": "SophiaAI/1.0",
           },
           body: formData,
         });
@@ -385,6 +389,7 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
         "Content-Type": "application/vnd.api+json",
         "Authorization": `Bearer ${token}`,
         "Accept": "application/vnd.api+json",
+        "User-Agent": "SophiaAI/1.0",
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
@@ -409,7 +414,7 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
 
     return {
       listingId: propertyData.id || "",
-      listingUrl: `${process.env.ZYPRUS_SITE_URL || 'https://www.zyprus.com'}/property/${propertyData.id}`,
+      listingUrl: `${process.env.ZYPRUS_SITE_URL || 'https://dev9.zyprus.com'}/property/${propertyData.id}`,
     };
   } catch (error) {
     if (error instanceof ZyprusAPIError) {
@@ -440,7 +445,7 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
  * Get existing property listings from Zyprus
  */
 export async function getZyprusListings(): Promise<any[]> {
-  const apiUrl = process.env.ZYPRUS_API_URL || "https://api.zyprus.com";
+  const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
   const token = await getAccessToken();
 
   try {
@@ -449,6 +454,7 @@ export async function getZyprusListings(): Promise<any[]> {
       headers: {
         "Content-Type": "application/vnd.api+json",
         "Authorization": `Bearer ${token}`,
+        "User-Agent": "SophiaAI/1.0",
       },
     });
 

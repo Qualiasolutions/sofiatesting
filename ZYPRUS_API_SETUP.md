@@ -4,6 +4,15 @@
 
 The system is configured to use the Zyprus development environment at `https://dev9.zyprus.com`.
 
+## CRITICAL: User-Agent Header Requirement
+
+**All API requests MUST include the following header to bypass Cloudflare protection:**
+```
+User-Agent: SophiaAI/1.0
+```
+
+Without this header, all requests will return a 403 Forbidden error with a Cloudflare challenge page.
+
 ## API Endpoints
 
 ### Drupal JSON:API Endpoints
