@@ -39,7 +39,7 @@ This is **SOFIA** (Sophisticated Optimized Functionality for Intelligent Assista
 
 ### Tech Stack
 - **Framework**: Next.js 15 with App Router, React 19 RC, and PPR (Partial Prerendering)
-- **AI**: AI SDK 5.0 with Vercel AI Gateway (supports Mistral, xAI, OpenAI models)
+- **AI**: AI SDK 5.0 with Vercel AI Gateway (Mistral models via @ai-sdk/mistral)
 - **Database**: PostgreSQL with Drizzle ORM and comprehensive migration system
 - **Auth**: NextAuth.js 5.0 beta with custom user management
 - **UI**: shadcn/ui components with Tailwind CSS 4.x
@@ -109,10 +109,17 @@ tests/
 
 #### AI Integration (SOFIA Core)
 - **Primary Models**: Configurable via Vercel AI Gateway with intelligent fallbacks
-  - Default: Mistral models (Small, Medium 1.2, Large, Codestral)
-  - xAI models: `grok-2-vision-1212`, `grok-3-mini`
-  - Mock models: `mock-chat-model`, `mock-chat-model-reasoning` (for testing)
+  - Default: `chat-model-small` (Mistral Small) - Fast and efficient ($0.6/M in, $1.8/M out)
+  - Available models:
+    - `chat-model-small`: Mistral Small
+    - `chat-model-medium`: Mistral Medium 1.2 ($2/M in, $6/M out)
+    - `chat-model-large`: Mistral Large ($3/M in, $9/M out)
+    - `chat-model-code`: Codestral - Optimized for code ($0.3/M in, $0.9/M out)
+    - `chat-model-reasoning`: Mistral Large with reasoning middleware
+    - `chat-model-flagship`: Pixtral Large - Multimodal with vision ($8/M in, $24/M out)
+  - Test environment: Automatically uses mock models when `PLAYWRIGHT=True`
 - **Model Configuration**: Centralized in `lib/ai/models.ts` with `DEFAULT_CHAT_MODEL`
+- **Provider Setup**: `lib/ai/providers.ts` configures models with reasoning middleware for enhanced capabilities
 - **Chat Schema**: Request validation via `app/(chat)/api/chat/schema.ts` with message parts and file attachments
 - **Critical Constraint**: SOFIA NEVER uses tools, artifacts, or side-by-side editing - generates all documents directly in chat
 - **Real Estate Specialization**: 47 document templates for Cyprus real estate operations
@@ -219,7 +226,7 @@ Run `pnpm lint` to check and `pnpm format` to fix issues automatically.
 - **Webhook System**: Telegram sends updates to `/api/telegram/webhook` with secure validation
 - **User Mapping**: Each Telegram user gets a database user (`telegram_<id>@sofia.bot`)
 - **Persistent Chats**: One continuous conversation per Telegram user with history
-- **Model Selection**: Uses Gemini 2.5 Flash by default (8x cheaper than Grok for high-volume)
+- **Model Selection**: Uses configured Mistral models for consistent behavior across platforms
 - **Message Flow**: Telegram → Webhook → SOFIA AI → Database → Response to Telegram
 - **Calculator Tools**: Full support for transfer fees, capital gains, and VAT calculations
 - **Setup Scripts**: `scripts/setup-telegram-bot.sh` and `scripts/deploy-with-telegram.sh`

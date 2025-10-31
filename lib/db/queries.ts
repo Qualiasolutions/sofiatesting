@@ -9,7 +9,7 @@ import {
   gt,
   gte,
   inArray,
-  // isNull, // Used for property listings (disabled)
+  isNull,
   lt,
   type SQL,
 } from "drizzle-orm";
@@ -25,16 +25,16 @@ import {
   chat,
   type DBMessage,
   document,
-  // listingUploadAttempt,
+  listingUploadAttempt,
   message,
-  // propertyListing,
+  propertyListing,
   stream,
   type Suggestion,
   suggestion,
   type User,
   user,
   vote,
-  // type InferInsertModel,
+  type InferInsertModel,
 } from "./schema";
 import { generateHashedPassword } from "./utils";
 
@@ -596,10 +596,7 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
   }
 }
 
-// Property Listing Management Functions (DISABLED - Tables not in production yet)
-// Uncomment after running migration 0008_brave_deathbird.sql in production
-
-/*
+// Property Listing Management Functions
 export async function createPropertyListing(
   data: InferInsertModel<typeof propertyListing>
 ) {
@@ -716,4 +713,3 @@ export async function logListingUploadAttempt(data: {
     );
   }
 }
-*/

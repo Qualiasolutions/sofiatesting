@@ -176,8 +176,6 @@ export const stream = pgTable(
 export type Stream = InferSelectModel<typeof stream>;
 
 // Property Listing Tables (Schema.org RealEstateListing compliant)
-// DISABLED - Uncomment after running migration in production
-/*
 export const propertyListing = pgTable(
   "PropertyListing",
   {
@@ -250,4 +248,3 @@ export type ListingUploadAttempt = InferSelectModel<
 >;
 
 export type { InferInsertModel } from "drizzle-orm";
-*/
