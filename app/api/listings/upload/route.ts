@@ -124,9 +124,20 @@ export async function POST(req: Request) {
     }
 
     if (error instanceof ZyprusAPIError) {
+      console.error("Zyprus API Error Details:", {
+        message: error.message,
+        code: error.code,
+        statusCode: error.statusCode,
+        fullError: error
+      });
       const statusCode = error.statusCode || 500;
       return NextResponse.json(
-        { error: error.message, code: error.code },
+        {
+          error: error.message,
+          code: error.code,
+          details: error.message,
+          statusCode: statusCode
+        },
         { status: statusCode }
       );
     }

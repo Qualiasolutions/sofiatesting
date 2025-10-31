@@ -302,11 +302,24 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
   // Add relationships only if IDs are provided
   const relationships: any = {};
 
+  // Use a default location if not provided (first available location)
+  // You should ideally fetch this dynamically or configure it
+  const DEFAULT_LOCATION_ID = "7dbc931e-90eb-4b89-9ac8-b5e593831cf8"; // Acropolis, Strovolos
+  const DEFAULT_PROPERTY_TYPE_ID = "e3c4bd56-f8c4-4672-b4a2-23d6afe6ca44"; // Apartment
+
   if (listing.locationId) {
     relationships.field_location = {
       data: {
         type: "node--location",
         id: listing.locationId,
+      },
+    };
+  } else {
+    // Use default location if not provided
+    relationships.field_location = {
+      data: {
+        type: "node--location",
+        id: DEFAULT_LOCATION_ID,
       },
     };
   }
@@ -345,6 +358,14 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
         id: listing.propertyTypeId,
       },
     };
+  } else {
+    // Use default property type if not provided
+    relationships.field_property_type = {
+      data: {
+        type: "taxonomy_term--property_type",
+        id: DEFAULT_PROPERTY_TYPE_ID,
+      },
+    };
   }
 
   if (listing.priceModifierId) {
@@ -374,10 +395,15 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
     };
   }
 
-  // Only add relationships if there are any
-  if (Object.keys(relationships).length > 0) {
-    (payload.data as JsonApiResource).relationships = relationships;
+  // Add default empty array for gallery if no images
+  if (!relationships.field_gallery_) {
+    relationships.field_gallery_ = {
+      data: []
+    };
   }
+
+  // Always add relationships (even if some are empty)
+  (payload.data as JsonApiResource).relationships = relationships;
 
   try {
     const controller = new AbortController();
@@ -399,14 +425,33 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.errors?.[0]?.title ||
-                          errorData.errors?.[0]?.detail ||
-                          `API error: ${response.status}`;
-      throw new ZyprusAPIError(
+      console.error("Zyprus API Response Error:", {
+        status: response.status,
+        errors: errorData.errors,
+        fullResponse: errorData
+      });
+
+      // Build detailed error message
+      let errorMessage = `API error: ${response.status}`;
+      let errorDetails = "";
+
+      if (errorData.errors && Array.isArray(errorData.errors)) {
+        const errors = errorData.errors.map((err: any) =>
+          `${err.title || ''} - ${err.detail || ''} (${err.source?.pointer || 'unknown field'})`
+        ).join('; ');
+        errorMessage = errors || errorMessage;
+        errorDetails = JSON.stringify(errorData.errors);
+      }
+
+      const error = new ZyprusAPIError(
         errorMessage,
         errorData.errors?.[0]?.code || "API_ERROR",
         response.status
       );
+      // Add extra details to the error object
+      (error as any).details = errorDetails;
+      (error as any).errors = errorData.errors;
+      throw error;
     }
 
     const responseData: JsonApiDocument = await response.json();
