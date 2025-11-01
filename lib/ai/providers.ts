@@ -1,5 +1,4 @@
-import { anthropic } from "@ai-sdk/anthropic";
-import { openai } from "@ai-sdk/openai";
+import { gateway } from "@ai-sdk/gateway";
 import {
   customProvider,
   extractReasoningMiddleware,
@@ -36,16 +35,16 @@ export const myProvider = isTestEnvironment
   : customProvider({
       languageModels: {
         "chat-model-sonnet": wrapLanguageModel({
-          model: anthropic("claude-3-5-sonnet-20241022"),
+          model: gateway("anthropic/claude-3-5-sonnet-20241022"),
           middleware: extractReasoningMiddleware({ tagName: "thinking" }),
         }),
-        "chat-model-gpt4o": openai("gpt-4o"),
-        "chat-model-gpt4o-mini": openai("gpt-4o-mini"),
+        "chat-model-gpt4o": gateway("openai/gpt-4o"),
+        "chat-model-gpt4o-mini": gateway("openai/gpt-4o-mini"),
         "chat-model": wrapLanguageModel({
-          model: anthropic("claude-3-5-sonnet-20241022"),
+          model: gateway("anthropic/claude-3-5-sonnet-20241022"),
           middleware: extractReasoningMiddleware({ tagName: "thinking" }),
         }),
-        "title-model": openai("gpt-4o-mini"),
-        "artifact-model": anthropic("claude-3-5-sonnet-20241022"),
+        "title-model": gateway("openai/gpt-4o-mini"),
+        "artifact-model": gateway("anthropic/claude-3-5-sonnet-20241022"),
       },
     });
