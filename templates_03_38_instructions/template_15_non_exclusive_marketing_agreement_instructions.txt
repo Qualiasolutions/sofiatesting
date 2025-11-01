@@ -24,6 +24,7 @@ Non-Exclusive Marketing Agreement
 
 🔹 Workflow
 1. Detect: Identify template from keywords (e.g., "rental registration" → Template 03).
+   ⚠️ CRITICAL: If user mentions "signature" in request for marketing agreement → ASK FIRST: "Exclusive or non-exclusive?" before asking for ANY other fields.
 2. Extract: Silently extract provided fields (names, reg no., dates, links).
 3. Ask: Minimize questions; only ask missing required fields (e.g., "What time is the viewing?").
 4. Validate: Confirm year for dates; ensure links present where mandatory; ensure greeting style per template.

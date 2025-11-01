@@ -8,9 +8,9 @@
 - ID/Passport Number (e.g., K1234567)
 - Issued By (e.g., Cyprus)
 - Registration No. (e.g., 0/1789)
-- District (e.g., Paphos)
-- Municipality (e.g., Tala)
-- Locality (e.g., Agios Neophytos)
+- District (e.g., Limassol)
+- Municipality (e.g., Germasogeia)
+- Locality (e.g., Potamos Germasogeias)
 
 🔹 Critical Rules
 - Greeting: Default `Dear XXXXXXXX,` (placeholder) unless template requires personalization; follow template-specific overrides.
@@ -129,13 +129,13 @@ Dear XXXXXXXX, (Seller)
 
 This email is to provide you with a registration.
 
-Client Information: [BUYER_NAMES]
+**Client Information:** [BUYER_NAMES]
 
-Property Introduced: Your Property in [LOCATION] with Registration No. [REG_NUMBER]
+**Property Introduced:** Your Property in [LOCATION] with Registration No. [REG_NUMBER]
 
-Property Link: [PROPERTY_LINK] (optional - omit if not provided)
+**Property Link:** [PROPERTY_LINK] (optional - omit if not provided)
 
-Viewing Arranged for: [VIEWING_DATETIME]
+**Viewing Arranged for:** [VIEWING_DATETIME]
 
 Please confirm Registration and Viewing.
 
@@ -154,15 +154,15 @@ Following our communication,
 
 With this email, we kindly ask for your approval for the below registration and viewing.
 
-Client Information: [BUYER_NAMES]
+**Client Information:** [BUYER_NAMES]
 
-Property Introduced: Your property with Registration No.[REG_NUMBER] [LOCATION] OR Your property within the project [PROJECT_NAME] with Unit No. [UNIT_NUMBER] at [LOCATION]
+**Property Introduced:** Your property with Registration No.[REG_NUMBER] [LOCATION] OR Your property within the project [PROJECT_NAME] with Unit No. [UNIT_NUMBER] at [LOCATION]
 
-Property Link: [PROPERTY_LINK] (optional - omit if not provided)
+**Property Link:** [PROPERTY_LINK] (optional - omit if not provided)
 
-Viewing arranged for: [VIEWING_DATETIME].
+**Viewing arranged for:** [VIEWING_DATETIME].
 
-Fees: Standard agency fee based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD.
+**Fees:** Standard agency fee based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD.
 
 In the unusual event that the above registered client of CSC Zyprus Property Group LTD communicates with you directly, you acknowledge and agree that you are legally bound to immediately cease such communication, notify us without delay, and inform our registered client that all further communication must be conducted solely through the agent CSC Zyprus Property Group LTD (they might ask Sophia to remove this at a later discussion with her.. is optional if they ask her to do so. But only then Sophia will remove it..)
 
@@ -177,15 +177,15 @@ Dear XXXXXXXX, (landlord)
 
 This email is to provide you with a registration.
 
-Client Information: [TENANT_NAMES] (potential tenant name) or potential tenants names i.e. husband & wife
+**Client Information:** [TENANT_NAMES] (potential tenant name) or potential tenants names i.e. husband & wife
 
-Property Introduced: Your Property in [PROPERTY_DESCRIPTION]
+**Property Introduced:** Your Property in [PROPERTY_DESCRIPTION]
 
-Property Link: [PROPERTY_LINK] (optional - omit if not provided)
+**Property Link:** [PROPERTY_LINK] (optional - omit if not provided)
 
-Viewing Arranged for: [VIEWING_DATETIME]
+**Viewing Arranged for:** [VIEWING_DATETIME]
 
-Fees: The first agreed monthly rental amount of the property. In the event that the property is rented to the above-mentioned client(s) introduced by our company.
+**Fees:** The first agreed monthly rental amount of the property. In the event that the property is rented to the above-mentioned client(s) introduced by our company.
 
 In the unusual event that the above registered client of CSC Zyprus Property Group LTD communicates with you directly, you acknowledge and agree that you are legally bound to immediately cease such communication, notify us without delay, and inform our registered client that all further communication must be conducted solely through the agent CSC Zyprus Property Group LTD (they might ask Sophia to remove this at a later discussion with her.. is optional if they ask her to do so. But only then Sophia will remove it..)
 
@@ -204,11 +204,11 @@ Dear XXXXXXXX,
 
 This email is to provide you with the full registration of our below client, under our Estate Agency: CSC Zyprus Property Group LTD.
 
-Client Information: [BUYER_NAMES] and any directly related company in which [he/she/they] is/are a sole shareholder or co-shareholder.
+**Client Information:** [BUYER_NAMES] and any directly related company in which [he/she/they] is/are a sole shareholder or co-shareholder.
 
-Property Introduced: Your property in [LOCATION], with the following Registration Numbers: [REG_NUMBERS] ([PROPERTY_DESCRIPTION])
+**Property Introduced:** Your property in [LOCATION], with the following Registration Numbers: [REG_NUMBERS] ([PROPERTY_DESCRIPTION])
 
-Our Agency Fees: [AGENCY_FEE]% + VAT based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD.
+Our Agency **Fees:** [AGENCY_FEE]% + VAT based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD.
 
 Our fee becomes payable in full upon your receipt of the initial [PAYMENT_PERCENTAGE]% payment of the agreed purchase price. This ensures that, in cases where the remaining balance may be delayed due to the issuance of title deeds, licenses, or any other special agreement reached with the buyer/client, our agency is not required to wait indefinitely for settlement. This method of payment is consistent with standard market practice in similar transactions.
 
@@ -233,11 +233,11 @@ This email is to provide you with a registration.
 
 Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
 
-My Mobile: [AGENT_MOBILE] (please call me to arrange a viewing)
+**My Mobile:** [AGENT_MOBILE] (please call me to arrange a viewing)
 
-Registration Details: [CLIENT_NAME] [CLIENT_PHONE_MASKED]
+**Registration Details:** [CLIENT_NAME] [CLIENT_PHONE_MASKED]
 
-Property: [PROPERTY_LINK]
+**Property:** [PROPERTY_LINK]
 
 Looking forward to your prompt reply.
 Template 06: Bank Land Registration
@@ -254,11 +254,11 @@ Please find attached the viewing form for the below Land.
 
 Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
 
-My Mobile: [AGENT_MOBILE] (please call me for any further information)
+**My Mobile:** [AGENT_MOBILE] (please call me for any further information)
 
-Registration Details: [CLIENT_NAME] [CLIENT_PHONE_MASKED]
+**Registration Details:** [CLIENT_NAME] [CLIENT_PHONE_MASKED]
 
-Property: [PROPERTY_LINK]
+**Property:** [PROPERTY_LINK]
 
 Looking forward to your prompt reply.
 
@@ -276,11 +276,11 @@ Dear XXXXXXXX,
 
 This email is to provide you with the registration of our below client, under our Estate Agency: CSC Zyprus Property Group LTD.
 
-Registration Details: [CLIENT_NAMES]
+**Registration Details:** [CLIENT_NAMES]
 
-Viewing Arranged for: [VIEWING_DATETIME]
+**Viewing Arranged for:** [VIEWING_DATETIME]
 
-Fees: Standard agency fee on the Agreed/Accepted Sold price
+**Fees:** Standard agency fee on the Agreed/Accepted Sold price
 
 Payable in full on the first 30% payment
 
@@ -297,9 +297,9 @@ Dear XXXXXXXX,
 
 This email is to provide you with the registration of our below client, under our Estate Agency: CSC Zyprus Property Group LTD.
 
-Registration Details: [CLIENT_NAMES]
+**Registration Details:** [CLIENT_NAMES]
 
-Fees: Standard agency fee on the Agreed/Accepted Sold price
+**Fees:** Standard agency fee on the Agreed/Accepted Sold price
 
 Payable in full on the first 30% payment
 
@@ -310,19 +310,19 @@ Acceptance of registration implies a full registration under our agency regardle
 Standard Viewing Form
 Viewing Form
 
-Date: [DATE]
+**Date:** [DATE]
 
 Herein, I…………………………………………………………… with ID……………………. Issued By: confirm that CSC Zyprus Property Group LTD (Reg. No. 742, Lic. No. 378/E), has introduced to me with a viewing the property with the following Registry details
 
-Registration No.: [REGISTRATION_NO]
+**Registration No.:** [REGISTRATION_NO]
 
-District: [DISTRICT]
+**District:** [DISTRICT]
 
-Municipality: [MUNICIPALITY]
+**Municipality:** [MUNICIPALITY]
 
-Locality: [LOCALITY]
+**Locality:** [LOCALITY]
 
-Signature: _________________________
+**Signature:** _________________________
 
 🔹 Workflow
 1. Detect: Identify template from keywords (e.g., "rental registration" → Template 03).

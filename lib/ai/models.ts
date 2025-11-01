@@ -9,8 +9,13 @@ export type ChatModel = {
 export const chatModels: ChatModel[] = [
   {
     id: "chat-model-sonnet",
-    name: "Claude 3.5 Sonnet",
+    name: "Claude Sonnet 4.5",
     description: "Anthropic's most intelligent model - $3/M in, $15/M out",
+  },
+  {
+    id: "chat-model-haiku",
+    name: "Claude 3.5 Haiku",
+    description: "Anthropic's fastest model - $0.25/M in, $1.25/M out",
   },
   {
     id: "chat-model-gpt4o",

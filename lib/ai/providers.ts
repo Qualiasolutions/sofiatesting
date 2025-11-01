@@ -35,16 +35,17 @@ export const myProvider = isTestEnvironment
   : customProvider({
       languageModels: {
         "chat-model-sonnet": wrapLanguageModel({
-          model: gateway("anthropic/claude-3-5-sonnet-20241022"),
+          model: gateway("anthropic/claude-sonnet-4.5"),
           middleware: extractReasoningMiddleware({ tagName: "thinking" }),
         }),
+        "chat-model-haiku": gateway("anthropic/claude-3-5-haiku-20241022"),
         "chat-model-gpt4o": gateway("openai/gpt-4o"),
         "chat-model-gpt4o-mini": gateway("openai/gpt-4o-mini"),
         "chat-model": wrapLanguageModel({
-          model: gateway("anthropic/claude-3-5-sonnet-20241022"),
+          model: gateway("anthropic/claude-sonnet-4.5"),
           middleware: extractReasoningMiddleware({ tagName: "thinking" }),
         }),
         "title-model": gateway("openai/gpt-4o-mini"),
-        "artifact-model": gateway("anthropic/claude-3-5-sonnet-20241022"),
+        "artifact-model": gateway("anthropic/claude-sonnet-4.5"),
       },
     });

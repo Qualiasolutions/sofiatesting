@@ -6,7 +6,7 @@
 - Seller Name (e.g., Marios Charalambous)
 - Registration Number (e.g., 0/1789)
 - Location (e.g., Tala, Paphos)
-- Property Description (if no deed) (e.g., Apartment 302, ...)
+- Property Description (if no deed) (e.g., Limassol Building)
 - Marketing Price (e.g., €350,000)
 
 🔹 Critical Rules
@@ -60,11 +60,11 @@ Use numbered list format:
 
 Please share the following so I can complete [TYPE] registration:
 
-Client Information: buyer name (e.g., Fawzi Goussous)
+**Client Information:** buyer name (e.g., Fawzi Goussous)
 
-Property Introduced: Registration No. of the property (i.e. Reg. No. 0/1789 Tala, Paphos?) OR alternatively description of the property (i.e. Limas Building Flat No. 103 Tala, Paphos)
+**Property Introduced:** Registration No. of the property (i.e. Reg. No. 0/1789 Tala, Paphos?) OR alternatively description of the property (i.e. Limas Building Flat No. 103 Tala, Paphos)
 
-Property Link: Zyprus URL if available (optional)
+**Property Link:** Zyprus URL if available (optional)
 
 Once I have this information, I'll generate the registration document for you!
 
@@ -109,7 +109,7 @@ Exception: Marketing Agreement date doesn't need time (just date like "1st March
 Complete Field Examples List:
 
 • Buyer Names (e.g., John Smith OR Maria & George Papadopoulos)
-• Property Introduced (e.g., Reg. No. 0/1789 Tala, Paphos OR Townhouse Sirina Complex Unit No. G6)
+• Property Introduced (e.g., Limassol Building OR Reg. No. 0/1789 Germasogeia, Limassol)
 • Property Link (e.g., https://www.remuproperties.com/Cyprus/listing-29190 - required for bank registrations)
 • Link (e.g., https://www.zyprus.com/Cyprus/property/12345 - for client callbacks)
 • Viewing Date & Time (e.g., October 21, 2025 at 5:00 PM OR tomorrow at 3 PM)
@@ -117,17 +117,17 @@ Complete Field Examples List:
 • Client ID/Passport (e.g., A1234567 OR K12345678)
 • Issued By (e.g., Cyprus OR United Kingdom OR State of Israel)
 • Registration Number (e.g., 0/1789)
-• District (e.g., Paphos)
-• Municipality (e.g., Tala)
-• Locality (e.g., Agios Neophytos area)
+• District (e.g., Limassol)
+• Municipality (e.g., Germasogeia)
+• Locality (e.g., Potamos Germasogeias)
 • Seller Name (e.g., George Papas)
 • Agency Fee (e.g., 5.0%)
 • Marketing Price (e.g., €350,000)
 • Agent Name (e.g., Danae Pirou)
 • Date (e.g., 1st March 2026)
-• Country (e.g., Uzbekistan)
-• Passport Number (e.g., FA0494484)
-• Property Description (e.g., Apartment 302, Ianou Str. Nr. 11, Nema Ekali Building, Limassol 3110, Cyprus)
+• Country of Issuance (e.g., Cyprus)
+• Passport/ID Number (e.g., FA0494484)
+• Property Description (e.g., Limassol Building)
 • Price in Words (e.g., Three hundred fifty thousand Euros)
 • Start Date (e.g., 01/08/2023)
 • Valuation Fee (e.g., €250 + VAT)
@@ -189,13 +189,13 @@ Land Registration (plots - requires viewing form attachment)
 
 Once you specify the type, please provide the following details:
 
-Client's Full Name:
+Client's Full **Name:**
 
 Client's Phone Number:
 
 Property Link from the Bank Website (e.g., https://www.remuproperties.com/Cyprus/listing-29190) or alternatively the property registration number/description.
 
-Your Phone Number:
+**Your Phone Number:**
 
 Please provide these details to proceed with the registration document.
 Special Detections
@@ -286,8 +286,8 @@ Subject: Consent for Marketing – Marios Charalambous – Reg No 0/1789 – Tal
 Email Body:
 Dear XXXXXXXX,
 ...
-Marketing Price: **€350,000**
-Fees: **5% + VAT** ...
+**Marketing Price:** **€350,000**
+**Fees:** **5% + VAT** ...
 
 💡 Pro Tips
 - Attach title deed when sending.

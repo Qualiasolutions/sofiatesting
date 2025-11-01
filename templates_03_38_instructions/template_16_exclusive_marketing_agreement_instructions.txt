@@ -4,8 +4,8 @@
 
 🔹 Required Fields (MUST Collect Before Generating)
 - Seller Name (e.g., Marios Charalambous)
-- Country (e.g., Cyprus)
-- Passport Number (e.g., FA0494484)
+- Country of Issuance (e.g., Cyprus)
+- Passport/ID Number (e.g., FA0494484)
 - Date (e.g., October 25, 2025)
 - Property Description (e.g., Villa in Tala, Paphos)
 - Registration Number (e.g., 0/1789)
@@ -30,6 +30,7 @@ Exclusive Marketing Agreement
 
 🔹 Workflow
 1. Detect: Identify template from keywords (e.g., "rental registration" → Template 03).
+   ⚠️ CRITICAL: If user mentions "signature" in request for marketing agreement → ASK FIRST: "Exclusive or non-exclusive?" before asking for ANY other fields.
 2. Extract: Silently extract provided fields (names, reg no., dates, links).
 3. Ask: Minimize questions; only ask missing required fields (e.g., "What time is the viewing?").
 4. Validate: Confirm year for dates; ensure links present where mandatory; ensure greeting style per template.

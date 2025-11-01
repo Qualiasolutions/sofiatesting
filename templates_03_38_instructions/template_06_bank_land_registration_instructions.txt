@@ -35,11 +35,11 @@ Please find attached the viewing form for the below Land.
 
 Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
 
-My Mobile: [AGENT_MOBILE] (please call me for any further information)
+**My Mobile:** [AGENT_MOBILE] (please call me for any further information)
 
-Registration Details: [CLIENT_NAME] [CLIENT_PHONE_MASKED]
+**Registration Details:** [CLIENT_NAME] [CLIENT_PHONE_MASKED]
 
-Property: [PROPERTY_LINK]
+**Property:** [PROPERTY_LINK]
 
 Looking forward to your prompt reply.
 
@@ -71,9 +71,9 @@ This email is to provide you with a registration.
 Please find attached the viewing form for the below Land.
 Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
 
-My Mobile: +357 99 998877 (please call me for any further information)
-Registration Details: Elena Petrou +357 96 ** ***22
-Property: https://www.gogordian.com/listing/12345
+**My Mobile:** +357 99 998877 (please call me for any further information)
+**Registration Details:** Elena Petrou +357 96 ** ***22
+**Property:** https://www.gogordian.com/listing/12345
 
 Looking forward to your prompt reply.
 

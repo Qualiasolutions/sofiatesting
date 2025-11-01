@@ -14,6 +14,7 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
     maxMessagesPerDay: 100,
     availableChatModelIds: [
       "chat-model-sonnet",
+      "chat-model-haiku",
       "chat-model-gpt4o",
       "chat-model-gpt4o-mini",
       "chat-model",
@@ -27,6 +28,7 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
     maxMessagesPerDay: 10_000,
     availableChatModelIds: [
       "chat-model-sonnet",
+      "chat-model-haiku",
       "chat-model-gpt4o",
       "chat-model-gpt4o-mini",
       "chat-model",

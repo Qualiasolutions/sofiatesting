@@ -6,7 +6,7 @@
 - Tenant Names (e.g., Alex & Maria)
 - Property Introduced (e.g., Apartment in Limassol)
 - Property Link (e.g., https://www.zyprus.com/Cyprus/property/12345 (optional))
-- Viewing Date & Time (e.g., October 25, 2025 at 3:00 PM)
+- Viewing Date & Time (e.g., Friday, October 25, 2025 at 3:00 PM)
 
 🔹 Critical Rules
 - Greeting: Default `Dear XXXXXXXX,` (placeholder) unless template requires personalization; follow template-specific overrides.
@@ -27,15 +27,15 @@ Dear XXXXXXXX, (landlord)
 
 This email is to provide you with a registration.
 
-Client Information: [TENANT_NAMES] (potential tenant name) or potential tenants names i.e. husband & wife
+**Client Information:** [TENANT_NAMES] (potential tenant name) or potential tenants names i.e. husband & wife
 
-Property Introduced: Your Property in [PROPERTY_DESCRIPTION]
+**Property Introduced:** Your Property in [PROPERTY_DESCRIPTION]
 
-Property Link: [PROPERTY_LINK] (optional - omit if not provided)
+**Property Link:** [PROPERTY_LINK] (optional - omit if not provided)
 
-Viewing Arranged for: [VIEWING_DATETIME]
+**Viewing Arranged for:** [VIEWING_DATETIME]
 
-Fees: The first agreed monthly rental amount of the property. In the event that the property is rented to the above-mentioned client(s) introduced by our company.
+**Fees:** The first agreed monthly rental amount of the property. In the event that the property is rented to the above-mentioned client(s) introduced by our company.
 
 In the unusual event that the above registered client of CSC Zyprus Property Group LTD communicates with you directly, you acknowledge and agree that you are legally bound to immediately cease such communication, notify us without delay, and inform our registered client that all further communication must be conducted solely through the agent CSC Zyprus Property Group LTD (they might ask Sophia to remove this at a later discussion with her.. is optional if they ask her to do so. But only then Sophia will remove it..)
 
@@ -66,15 +66,15 @@ Dear XXXXXXXX,
 
 This email is to provide you with a registration.
 
-Client Information: Alex & Maria
-Property Introduced: Your Property in Apartment in Limassol
-Viewing Arranged for: October 25, 2025 at 3:00 PM
+**Client Information:** Alex & Maria
+**Property Introduced:** Your Property in Apartment in Limassol
+**Viewing Arranged for:** Friday, October 25, 2025 at 3:00 PM
 
-Fees: The **first agreed monthly rental amount** of the property. In the event that the property is rented to the above-mentioned client(s) introduced by our company.
+**Fees:** The **first agreed monthly rental amount** of the property. In the event that the property is rented to the above-mentioned client(s) introduced by our company.
 
 Please confirm Registration and Viewing.
 For the confirmation, Could you please reply ''Yes I confirm''
 
 💡 Pro Tips
-- Omit `Property Link:` if no link provided.
+- Omit `**Property Link:**` if no link provided.
 - Auto-detect multiple tenants via '&' or 'and'.

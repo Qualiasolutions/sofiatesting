@@ -32,11 +32,11 @@ This email is to provide you with a registration.
 
 Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
 
-My Mobile: [AGENT_MOBILE] (please call me to arrange a viewing)
+**My Mobile:** [AGENT_MOBILE] (please call me to arrange a viewing)
 
-Registration Details: [CLIENT_NAME] [CLIENT_PHONE_MASKED]
+**Registration Details:** [CLIENT_NAME] [CLIENT_PHONE_MASKED]
 
-Property: [PROPERTY_LINK]
+**Property:** [PROPERTY_LINK]
 
 Looking forward to your prompt reply.
 
@@ -63,9 +63,9 @@ This email is to provide you with a registration.
 
 Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
 
-My Mobile: +357 99 998877 (please call me to arrange a viewing)
-Registration Details: Andreas Andreou +357 99 ** ***56
-Property: https://www.remuproperties.com/Cyprus/listing-29190
+**My Mobile:** +357 99 998877 (please call me to arrange a viewing)
+**Registration Details:** Andreas Andreou +357 99 ** ***56
+**Property:** https://www.remuproperties.com/Cyprus/listing-29190
 
 Looking forward to your prompt reply.
 

@@ -9,6 +9,7 @@ Buyer Names (e.g., Fawzi Goussous OR Maria & George Papadopoulos)
 Property Introduced (one of these formats):
 Registration No. [REG_NUMBER] [LOCATION] (e.g., Reg. No. 0/1789 Tala, Paphos)
 Unit No. [UNIT_NUMBER] at [PROJECT_NAME], [LOCATION] (e.g., Unit No. G6 at Sirina Complex, Limassol)
+Marketing Price (e.g., €350,000)
 Property Link (e.g., https://www.zyprus.com/Cyprus/property/12345) (optional)
 Viewing Date & Time (e.g., October 21, 2025 at 5:00 PM)
 🔹 Critical Rules (MUST Follow)
@@ -31,7 +32,7 @@ Fees Section:
 
 ALWAYS use the standard fee text:
 
-Fees: Standard agency fee based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD.
+**Fees:** Standard agency fee based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD.
 No bolding (fees are not monetary values here; they’re described in text).
 Subject Line:
 
@@ -60,15 +61,15 @@ Following our communication,
 
 With this email, we kindly ask for your approval for the below registration and viewing.
 
-Client Information: [BUYER_NAMES]
+**Client Information:** [BUYER_NAMES]
 
-Property Introduced: Your property with Registration No.[REG_NUMBER] [LOCATION] OR Your property within the project [PROJECT_NAME] with Unit No. [UNIT_NUMBER] at [LOCATION]
+**Property Introduced:** Your property with Registration No.[REG_NUMBER] [LOCATION] OR Your property within the project [PROJECT_NAME] with Unit No. [UNIT_NUMBER] at [LOCATION]
 
-Property Link: [PROPERTY_LINK] (optional - omit if not provided)
+**Property Link:** [PROPERTY_LINK] (optional - omit if not provided)
 
-Viewing arranged for: [VIEWING_DATETIME].
+**Viewing arranged for:** [VIEWING_DATETIME].
 
-Fees: Standard agency fee based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD.
+**Fees:** Standard agency fee based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD.
 
 In the unusual event that the above registered client of CSC Zyprus Property Group LTD communicates with you directly, you acknowledge and agree that you are legally bound to immediately cease such communication, notify us without delay, and inform our registered client that all further communication must be conducted solely through the agent CSC Zyprus Property Group LTD (they might ask Sophia to remove this at a later discussion with her.. is optional if they ask her to do so. But only then Sophia will remove it..)
 
@@ -91,6 +92,7 @@ Validate All Fields:
 Checklist:
  Buyer names (single or multiple).
  Property details (Reg No. + location OR Unit No. + project name).
+ Marketing price (e.g., €350,000).
  Viewing date/time (full date + year + time).
  Link (optional; omit if missing).
 Generate Instantly:
@@ -136,15 +138,15 @@ Following our communication,
 
 With this email, we kindly ask for your approval for the below registration and viewing.
 
-Client Information: Elena & Costas
+**Client Information:** Elena & Costas
 
-Property Introduced: Your property within the project Limas Building with Unit No. 10 at Paphos
+**Property Introduced:** Your property within the project Limas Building with Unit No. 10 at Paphos
 
-Property Link: https://www.zyprus.com/property/12345
+**Property Link:** https://www.zyprus.com/property/12345
 
-Viewing arranged for: October 25, 2025 at 11:00 AM.
+**Viewing arranged for:** October 25, 2025 at 11:00 AM.
 
-Fees: Standard agency fee based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD.
+**Fees:** Standard agency fee based on the final agreed sold price. If sold to the above-mentioned purchaser introduced to you by CSC Zyprus Property Group LTD.
 
 In the unusual event that the above registered client of CSC Zyprus Property Group LTD communicates with you directly, you acknowledge and agree that you are legally bound to immediately cease such communication, notify us without delay, and inform our registered client that all further communication must be conducted solely through the agent CSC Zyprus Property Group LTD (they might ask Sophia to remove this at a later discussion with her.. is optional if they ask her to do so. But only then Sophia will remove it..)
 

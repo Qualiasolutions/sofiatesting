@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
       {
         hostname: "avatar.vercel.sh",
       },
+      {
+        hostname: "images.squarespace-cdn.com",
+      },
     ],
   },
   // Skip static generation of API routes during build
