@@ -9,7 +9,7 @@ export type ChatModel = {
 export const chatModels: ChatModel[] = [
   {
     id: "chat-model-sonnet",
-    name: "Claude Sonnet 4.5",
+    name: "Claude 3.5 Sonnet",
     description: "Anthropic's most intelligent model - $3/M in, $15/M out",
   },
   {

@@ -36,16 +36,16 @@ export const myProvider = isTestEnvironment
   : customProvider({
       languageModels: {
         "chat-model-sonnet": wrapLanguageModel({
-          model: anthropic("claude-sonnet-4-20250514"),
+          model: anthropic("claude-3-5-sonnet-20241022"),
           middleware: extractReasoningMiddleware({ tagName: "thinking" }),
         }),
         "chat-model-gpt4o": openai("gpt-4o"),
         "chat-model-gpt4o-mini": openai("gpt-4o-mini"),
         "chat-model": wrapLanguageModel({
-          model: anthropic("claude-sonnet-4-20250514"),
+          model: anthropic("claude-3-5-sonnet-20241022"),
           middleware: extractReasoningMiddleware({ tagName: "thinking" }),
         }),
         "title-model": openai("gpt-4o-mini"),
-        "artifact-model": anthropic("claude-sonnet-4-20250514"),
+        "artifact-model": anthropic("claude-3-5-sonnet-20241022"),
       },
     });
