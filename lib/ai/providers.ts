@@ -1,4 +1,5 @@
-import { mistral } from "@ai-sdk/mistral";
+import { anthropic } from "@ai-sdk/anthropic";
+import { openai } from "@ai-sdk/openai";
 import {
   customProvider,
   extractReasoningMiddleware,
@@ -23,36 +24,28 @@ export const myProvider = isTestEnvironment
       } = require("./models.mock");
       return customProvider({
         languageModels: {
-          "chat-model": mistralMediumModel,
-          "chat-model-small": mistralSmallModel,
-          "chat-model-medium": mistralMediumModel,
-          "chat-model-large": mistralLargeModel,
-          "chat-model-code": codestralModel,
-          "chat-model-flagship": pixtralLargeModel,
+          "chat-model": claudeModel,
+          "chat-model-sonnet": claudeModel,
+          "chat-model-gpt4o": chatModel,
+          "chat-model-gpt4o-mini": mistralSmallModel,
           "title-model": mistralSmallModel,
-          "artifact-model": mistralLargeModel,
+          "artifact-model": claudeModel,
         },
       });
     })()
   : customProvider({
       languageModels: {
-        "chat-model-small": mistral("mistral-small-latest"),
-        "chat-model-medium": mistral("mistral-medium-latest"),
-        "chat-model-large": wrapLanguageModel({
-          model: mistral("mistral-large-latest"),
-          middleware: extractReasoningMiddleware({ tagName: "think" }),
+        "chat-model-sonnet": wrapLanguageModel({
+          model: anthropic("claude-sonnet-4-20250514"),
+          middleware: extractReasoningMiddleware({ tagName: "thinking" }),
         }),
-        "chat-model-code": mistral("codestral-latest"),
-        "chat-model-flagship": mistral("pixtral-large-latest"),
+        "chat-model-gpt4o": openai("gpt-4o"),
+        "chat-model-gpt4o-mini": openai("gpt-4o-mini"),
         "chat-model": wrapLanguageModel({
-          model: mistral("mistral-medium-latest"),
-          middleware: extractReasoningMiddleware({ tagName: "think" }),
+          model: anthropic("claude-sonnet-4-20250514"),
+          middleware: extractReasoningMiddleware({ tagName: "thinking" }),
         }),
-        "chat-model-reasoning": wrapLanguageModel({
-          model: mistral("mistral-large-latest"),
-          middleware: extractReasoningMiddleware({ tagName: "think" }),
-        }),
-        "title-model": mistral("mistral-small-latest"),
-        "artifact-model": mistral("mistral-large-latest"),
+        "title-model": openai("gpt-4o-mini"),
+        "artifact-model": anthropic("claude-sonnet-4-20250514"),
       },
     });

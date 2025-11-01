@@ -1,4 +1,4 @@
-export const DEFAULT_CHAT_MODEL: string = "chat-model-small";
+export const DEFAULT_CHAT_MODEL: string = "chat-model-sonnet";
 
 export type ChatModel = {
   id: string;
@@ -8,33 +8,18 @@ export type ChatModel = {
 
 export const chatModels: ChatModel[] = [
   {
-    id: "chat-model-small",
-    name: "Mistral Small",
-    description: "Fast and efficient - $0.6/M in, $1.8/M out",
+    id: "chat-model-sonnet",
+    name: "Claude Sonnet 4.5",
+    description: "Anthropic's most intelligent model - $3/M in, $15/M out",
   },
   {
-    id: "chat-model-medium",
-    name: "Mistral Medium 1.2",
-    description: "Balanced performance - $2/M in, $6/M out",
+    id: "chat-model-gpt4o",
+    name: "GPT-4o",
+    description: "OpenAI's flagship multimodal model - $2.50/M in, $10/M out",
   },
   {
-    id: "chat-model-large",
-    name: "Mistral Large",
-    description: "High performance - $3/M in, $9/M out",
-  },
-  {
-    id: "chat-model-code",
-    name: "Codestral",
-    description: "Optimized for code generation - $0.3/M in, $0.9/M out",
-  },
-  {
-    id: "chat-model-reasoning",
-    name: "Mistral Large (Reasoning)",
-    description: "Advanced reasoning with thinking process - $3/M in, $9/M out",
-  },
-  {
-    id: "chat-model-flagship",
-    name: "Pixtral Large (Most Capable)",
-    description: "Flagship multimodal model with vision - $8/M in, $24/M out",
+    id: "chat-model-gpt4o-mini",
+    name: "GPT-4o Mini",
+    description: "Fast and affordable - $0.15/M in, $0.60/M out",
   },
 ];
