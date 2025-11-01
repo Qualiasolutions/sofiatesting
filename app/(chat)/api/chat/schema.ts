@@ -23,12 +23,9 @@ export const postRequestBodySchema = z.object({
   }),
   selectedChatModel: z.enum([
     "chat-model",
-    "chat-model-small",
-    "chat-model-medium",
-    "chat-model-large",
-    "chat-model-code",
-    "chat-model-reasoning",
-    "chat-model-flagship",
+    "chat-model-sonnet",
+    "chat-model-gpt4o",
+    "chat-model-gpt4o-mini",
   ]),
   selectedVisibilityType: z.enum(["public", "private"]),
 });
