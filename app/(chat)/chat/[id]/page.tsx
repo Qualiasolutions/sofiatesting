@@ -42,21 +42,26 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get("chat-model");
 
-  if (!chatModelFromCookie) {
-    return (
-      <>
-        <Chat
-          autoResume={true}
-          id={chat.id}
-          initialChatModel={DEFAULT_CHAT_MODEL}
-          initialLastContext={chat.lastContext ?? undefined}
-          initialMessages={uiMessages}
-          initialVisibilityType={chat.visibility}
-          isReadonly={session?.user?.id !== chat.userId}
-        />
-        <DataStreamHandler />
-      </>
-    );
+  // Map old model names to new ones
+  const modelMapping: Record<string, string> = {
+    "chat-model-small": "chat-model-gpt4o-mini",
+    "chat-model-medium": "chat-model-gpt4o",
+    "chat-model-large": "chat-model-sonnet",
+    "chat-model-code": "chat-model-gpt4o",
+    "chat-model-reasoning": "chat-model-sonnet",
+    "chat-model-flagship": "chat-model-sonnet",
+  };
+
+  let selectedModel = DEFAULT_CHAT_MODEL;
+
+  if (chatModelFromCookie) {
+    // Check if it's an old model name and map it
+    selectedModel = modelMapping[chatModelFromCookie.value] || chatModelFromCookie.value;
+
+    // If the model was mapped, update the cookie with the new value
+    if (modelMapping[chatModelFromCookie.value]) {
+      cookieStore.set("chat-model", selectedModel);
+    }
   }
 
   return (
@@ -64,7 +69,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       <Chat
         autoResume={true}
         id={chat.id}
-        initialChatModel={chatModelFromCookie.value}
+        initialChatModel={selectedModel}
         initialLastContext={chat.lastContext ?? undefined}
         initialMessages={uiMessages}
         initialVisibilityType={chat.visibility}
