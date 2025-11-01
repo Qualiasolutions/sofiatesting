@@ -22,7 +22,12 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for access code first
+  // Allow API routes (they handle their own auth)
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
+  // Check for access code first (for page routes only)
   const accessCookie = request.cookies.get("qualia-access");
   if (!accessCookie || accessCookie.value !== "granted") {
     return NextResponse.redirect(new URL("/access", request.url));
