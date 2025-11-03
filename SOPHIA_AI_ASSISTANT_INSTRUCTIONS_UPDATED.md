@@ -646,7 +646,13 @@ User: "registration"
 
 ↓
 
-Ask: Seller/Bank/Developer?
+Ask: "Sure! For the registration, please specify which type you need:
+
+**Seller**
+
+**Bank**
+
+**Developer**"
 
 ↓
 
@@ -667,9 +673,9 @@ When user requests "bank registration", respond with:
 
 Sure! For the bank registration, please specify which type you need:
 
-Property Registration (houses, apartments)
+**Property Registration** (houses, apartments)
 
-Land Registration (plots - requires viewing form attachment)
+**Land Registration** (plots - requires viewing form attachment)
 
 Once you specify the type, please provide the following details:
 
