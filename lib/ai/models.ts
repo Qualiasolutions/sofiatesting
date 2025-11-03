@@ -1,4 +1,4 @@
-export const DEFAULT_CHAT_MODEL: string = "chat-model-sonnet";
+export const DEFAULT_CHAT_MODEL: string = "chat-model-gemini";
 
 export type ChatModel = {
   id: string;
@@ -7,6 +7,11 @@ export type ChatModel = {
 };
 
 export const chatModels: ChatModel[] = [
+  {
+    id: "chat-model-gemini",
+    name: "Gemini 2.5 Flash",
+    description: "Google's latest intelligent model - Fast and affordable",
+  },
   {
     id: "chat-model-sonnet",
     name: "Claude Sonnet 4.5",
