@@ -9,8 +9,8 @@ export type ChatModel = {
 export const chatModels: ChatModel[] = [
   {
     id: "chat-model-gemini",
-    name: "Gemini 2.5 Flash",
-    description: "Google's latest intelligent model - Fast and affordable",
+    name: "Gemini 1.5 Flash",
+    description: "Google's latest stable model - Fast and affordable",
   },
   {
     id: "chat-model-sonnet",

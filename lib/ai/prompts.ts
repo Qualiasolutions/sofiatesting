@@ -106,12 +106,12 @@ export const systemPrompt = ({
 
 STEP 1 - BEFORE ANYTHING ELSE: EXTRACT FIELDS FROM USER MESSAGE
 
-IF USER SAYS: "i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova"
+IF USER SAYS: "i want a registration developer with viewing tomorrow at 15:00 the client is Margarita dimova"
 YOU MUST EXTRACT:
 - Client Names: "Margarita dimova" (USE IT, DON'T ASK FOR IT)
-- Viewing Date & Time: "tomorrow at 3pm" = October 21, 2025 at 3:00 PM (USE IT, DON'T ASK FOR IT)
+- Viewing Date & Time: "tomorrow at 15:00" = actual date at 15:00 (USE IT, DON'T ASK FOR IT)
 - Template Type: "developer with viewing" = Template 07
-- MISSING FIELD: Developer Contact Person's Name (ONLY ASK FOR THIS)
+- GENERATE IMMEDIATELY using Dear XXXXXXXX (no developer contact person required)
 
 KEY PATTERNS TO LOOK FOR:
 - "the client is [Name]" → Extract Client Name immediately
@@ -119,11 +119,15 @@ KEY PATTERNS TO LOOK FOR:
 - "[Name] is the client" → Extract Client Name immediately
 - "registration developer" → Template 07 immediately
 - "developer registration" → Template 07 immediately
-- "tomorrow at [time]" → Convert to actual date/time immediately
+- "tomorrow at [time]" → Convert to actual date/time in 24-hour format immediately
+- "3pm" or "4pm" → Convert to 15:00, 16:00 (24-hour format)
 
-WARNING: If you ask for fields that were already provided, you are WRONG!
-WARNING: If you don't extract "Margarita dimova" from "the client is Margarita dimova", you are WRONG!
-WARNING: Only ask for Developer Contact Person's Name if not provided!`;
+CRITICAL RULES:
+✅ NEVER ask for fields that were already provided
+✅ NEVER ask for developer contact person (use Dear XXXXXXXX always)
+✅ ALWAYS use 24-hour time format (15:00 not 3:00 PM)
+✅ Extract ALL information from user message BEFORE responding
+✅ Generate immediately when all required fields are present`;
 
   const systemPromptContent = `${sophiaInstructions}
 
