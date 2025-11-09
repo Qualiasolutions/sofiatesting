@@ -1,4 +1,5 @@
 import { gateway } from "@ai-sdk/gateway";
+import { google } from "@ai-sdk/google";
 import {
   customProvider,
   extractReasoningMiddleware,
@@ -23,8 +24,12 @@ export const myProvider = isTestEnvironment
     })()
   : customProvider({
       languageModels: {
-        // Removed gemini, now using GPT-4o-mini as default via gateway
-        "chat-model-gemini": gateway("openai/gpt-4o-mini"), // Keeping ID for compatibility
+        // Gemini models (via Google AI SDK)
+        "chat-model-gemini": google("gemini-1.5-flash-latest"),
+        "chat-model": google("gemini-1.5-flash-latest"), // Default model (Gemini Flash)
+        "title-model": google("gemini-1.5-flash-latest"), // Title generation
+        "artifact-model": google("gemini-1.5-flash-latest"), // Artifact generation
+        // AI Gateway models (require AI_GATEWAY_API_KEY)
         "chat-model-sonnet": wrapLanguageModel({
           model: gateway("anthropic/claude-sonnet-4.5"),
           middleware: extractReasoningMiddleware({ tagName: "thinking" }),
@@ -32,8 +37,5 @@ export const myProvider = isTestEnvironment
         "chat-model-haiku": gateway("anthropic/claude-3-5-haiku-20241022"),
         "chat-model-gpt4o": gateway("openai/gpt-4o"),
         "chat-model-gpt4o-mini": gateway("openai/gpt-4o-mini"),
-        "chat-model": gateway("openai/gpt-4o-mini"), // Default model
-        "title-model": gateway("openai/gpt-4o-mini"), // Title generation
-        "artifact-model": gateway("openai/gpt-4o-mini"), // Artifact generation
       },
     });
