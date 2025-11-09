@@ -7,12 +7,12 @@
  * Run with: npx tsx scripts/extract-templates.ts
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { join } from "path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 const SOURCE_FILE = join(
   process.cwd(),
-  "SOPHIA_AI_ASSISTANT_INSTRUCTIONS_UPDATED.md"
+  "docs/knowledge/sophia-ai-assistant-instructions.md"
 );
 const TEMPLATES_DIR = join(process.cwd(), "lib/ai/instructions/templates");
 

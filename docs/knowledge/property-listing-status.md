@@ -61,7 +61,7 @@
   - Smart extraction examples
   - Conversation flow
   - Error handling
-- ✅ Implementation docs created (`PROPERTY_LISTING_IMPLEMENTATION.md`)
+- ✅ Implementation guide documented (`./property-listing-implementation.md`)
 - ✅ Status file created (this file)
 
 ### 8. Build Success ✓

@@ -2,11 +2,9 @@ import "server-only";
 import { convertToModelMessages, streamText } from "ai";
 import { systemPrompt } from "../ai/prompts";
 import { myProvider } from "../ai/providers";
-import {
-  calculateCapitalGainsTool,
-  calculateTransferFeesTool,
-  calculateVATTool,
-} from "../ai/tools";
+import { calculateCapitalGainsTool } from "../ai/tools/calculate-capital-gains";
+import { calculateTransferFeesTool } from "../ai/tools/calculate-transfer-fees";
+import { calculateVATTool } from "../ai/tools/calculate-vat";
 import { isProductionEnvironment } from "../constants";
 import {
   getChatById,

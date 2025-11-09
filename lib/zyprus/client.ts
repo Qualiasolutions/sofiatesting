@@ -1,38 +1,39 @@
 import type { PropertyListing } from "@/lib/db/schema";
 
 export class ZyprusAPIError extends Error {
-  constructor(
-    message: string,
-    public code: string,
-    public statusCode?: number
-  ) {
+  code: string;
+  statusCode?: number;
+
+  constructor(message: string, code: string, statusCode?: number) {
     super(message);
     this.name = "ZyprusAPIError";
+    this.code = code;
+    this.statusCode = statusCode;
   }
 }
 
-interface OAuthToken {
+type OAuthToken = {
   access_token: string;
   token_type: string;
   expires_in: number;
   refresh_token?: string;
-}
+};
 
-interface JsonApiResource {
+type JsonApiResource = {
   type: string;
   id?: string;
   attributes: Record<string, any>;
   relationships?: Record<string, any>;
-}
+};
 
-interface JsonApiDocument {
+type JsonApiDocument = {
   data: JsonApiResource | JsonApiResource[];
   included?: JsonApiResource[];
   meta?: Record<string, any>;
-}
+};
 
 let cachedToken: OAuthToken | null = null;
-let tokenExpiresAt: number = 0;
+let tokenExpiresAt = 0;
 
 /**
  * Get OAuth token for API authentication
@@ -41,7 +42,7 @@ async function getAccessToken(): Promise<string> {
   const now = Date.now();
 
   // Return cached token if still valid (with 5 minute buffer)
-  if (cachedToken && tokenExpiresAt > now + 300000) {
+  if (cachedToken && tokenExpiresAt > now + 300_000) {
     return cachedToken.access_token;
   }
 
@@ -81,7 +82,7 @@ async function getAccessToken(): Promise<string> {
 
     const tokenData: OAuthToken = await response.json();
     cachedToken = tokenData;
-    tokenExpiresAt = now + (tokenData.expires_in * 1000);
+    tokenExpiresAt = now + tokenData.expires_in * 1000;
 
     return tokenData.access_token;
   } catch (error) {
@@ -90,7 +91,7 @@ async function getAccessToken(): Promise<string> {
     }
 
     throw new ZyprusAPIError(
-      `OAuth token error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `OAuth token error: ${error instanceof Error ? error.message : "Unknown error"}`,
       "OAUTH_ERROR"
     );
   }
@@ -108,7 +109,7 @@ export async function getZyprusLocations(): Promise<any[]> {
       method: "GET",
       headers: {
         "Content-Type": "application/vnd.api+json",
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "User-Agent": "SophiaAI/1.0",
       },
     });
@@ -130,7 +131,7 @@ export async function getZyprusLocations(): Promise<any[]> {
     }
 
     throw new ZyprusAPIError(
-      `Failed to fetch locations: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to fetch locations: ${error instanceof Error ? error.message : "Unknown error"}`,
       "NETWORK_ERROR"
     );
   }
@@ -139,19 +140,24 @@ export async function getZyprusLocations(): Promise<any[]> {
 /**
  * Get taxonomy terms for property features
  */
-export async function getZyprusTaxonomyTerms(vocabularyType: string): Promise<any[]> {
+export async function getZyprusTaxonomyTerms(
+  vocabularyType: string
+): Promise<any[]> {
   const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
   const token = await getAccessToken();
 
   try {
-    const response = await fetch(`${apiUrl}/jsonapi/taxonomy_term/${vocabularyType}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/vnd.api+json",
-        "Authorization": `Bearer ${token}`,
-        "User-Agent": "SophiaAI/1.0",
-      },
-    });
+    const response = await fetch(
+      `${apiUrl}/jsonapi/taxonomy_term/${vocabularyType}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/vnd.api+json",
+          Authorization: `Bearer ${token}`,
+          "User-Agent": "SophiaAI/1.0",
+        },
+      }
+    );
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -170,66 +176,28 @@ export async function getZyprusTaxonomyTerms(vocabularyType: string): Promise<an
     }
 
     throw new ZyprusAPIError(
-      `Failed to fetch taxonomy terms: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to fetch taxonomy terms: ${error instanceof Error ? error.message : "Unknown error"}`,
       "NETWORK_ERROR"
     );
   }
 }
 
 /**
- * Upload property images to Zyprus
- */
-async function uploadPropertyImages(images: string[]): Promise<string[]> {
-  const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
-  const token = await getAccessToken();
-  const uploadedUrls: string[] = [];
-
-  for (const imageUrl of images) {
-    try {
-      // First fetch the image data
-      const imageResponse = await fetch(imageUrl);
-      const imageBlob = await imageResponse.blob();
-
-      const formData = new FormData();
-      formData.append('file', imageBlob, 'property-image.jpg');
-
-      const response = await fetch(`${apiUrl}/jsonapi/node/property/field_images`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        console.error(`Failed to upload image: ${response.status}`);
-        continue;
-      }
-
-      const data = await response.json();
-      uploadedUrls.push(data.data.id || data.data.attributes.uri.url);
-    } catch (error) {
-      console.error('Image upload error:', error);
-    }
-  }
-
-  return uploadedUrls;
-}
-
-/**
  * Upload property listing to Zyprus API using JSON:API format
  */
-export async function uploadToZyprusAPI(listing: PropertyListing & {
-  locationId?: string;
-  indoorFeatures?: string[];
-  outdoorFeatures?: string[];
-  listingTypeId?: string;
-  propertyTypeId?: string;
-  priceModifierId?: string;
-  titleDeedId?: string;
-  yearBuilt?: number;
-  referenceId?: string;
-}): Promise<{
+export async function uploadToZyprusAPI(
+  listing: PropertyListing & {
+    locationId?: string;
+    indoorFeatures?: string[];
+    outdoorFeatures?: string[];
+    listingTypeId?: string;
+    propertyTypeId?: string;
+    priceModifierId?: string;
+    titleDeedId?: string;
+    yearBuilt?: number;
+    referenceId?: string;
+  }
+): Promise<{
   listingId: string;
   listingUrl: string;
 }> {
@@ -237,56 +205,70 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
   const token = await getAccessToken();
 
   // Upload images to field_gallery_ endpoint if present
-  let imageIds: string[] = [];
+  const imageIds: string[] = [];
   if (listing.image && Array.isArray(listing.image)) {
     console.log(`Starting upload of ${listing.image.length} images to Zyprus`);
     try {
       for (let i = 0; i < listing.image.length; i++) {
         const imageUrl = (listing.image as string[])[i];
-        console.log(`Uploading image ${i + 1}/${listing.image.length}: ${imageUrl}`);
+        console.log(
+          `Uploading image ${i + 1}/${listing.image.length}: ${imageUrl}`
+        );
 
         try {
           // Fetch image from URL (supports both external URLs and Vercel Blob URLs)
           const imageResponse = await fetch(imageUrl);
           if (!imageResponse.ok) {
-            console.error(`Failed to fetch image ${imageUrl}: ${imageResponse.status}`);
+            console.error(
+              `Failed to fetch image ${imageUrl}: ${imageResponse.status}`
+            );
             continue;
           }
 
           const imageBlob = await imageResponse.blob();
-          const contentType = imageResponse.headers.get('content-type') || 'image/jpeg';
+          const contentType =
+            imageResponse.headers.get("content-type") || "image/jpeg";
 
           // Determine file extension from content type
-          const ext = contentType.split('/')[1] || 'jpg';
+          const ext = contentType.split("/")[1] || "jpg";
           const filename = `property-image-${i + 1}.${ext}`;
 
           const formData = new FormData();
-          formData.append('file', imageBlob, filename);
+          formData.append("file", imageBlob, filename);
 
-          const uploadResponse = await fetch(`${apiUrl}/jsonapi/node/property/field_gallery_`, {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${token}`,
-              "User-Agent": "SophiaAI/1.0",
-            },
-            body: formData,
-          });
+          const uploadResponse = await fetch(
+            `${apiUrl}/jsonapi/node/property/field_gallery_`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "User-Agent": "SophiaAI/1.0",
+              },
+              body: formData,
+            }
+          );
 
           if (uploadResponse.ok) {
             const data = await uploadResponse.json();
             imageIds.push(data.data.id);
-            console.log(`Successfully uploaded image ${i + 1}: ${data.data.id}`);
+            console.log(
+              `Successfully uploaded image ${i + 1}: ${data.data.id}`
+            );
           } else {
             const errorText = await uploadResponse.text();
-            console.error(`Failed to upload image ${i + 1}: ${uploadResponse.status} - ${errorText}`);
+            console.error(
+              `Failed to upload image ${i + 1}: ${uploadResponse.status} - ${errorText}`
+            );
           }
         } catch (imgError) {
           console.error(`Error processing image ${i + 1}:`, imgError);
         }
       }
-      console.log(`Image upload complete: ${imageIds.length}/${listing.image.length} successful`);
+      console.log(
+        `Image upload complete: ${imageIds.length}/${listing.image.length} successful`
+      );
     } catch (error) {
-      console.error('Image upload error:', error);
+      console.error("Image upload error:", error);
     }
   }
 
@@ -303,21 +285,36 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
         },
         field_ai_state: "draft", // CRUCIAL: track AI-generated properties
         field_price: String(listing.price), // Price as string
-        field_covered_area: parseFloat(String(listing.floorSize)), // Parse as float
-        field_land_size: parseFloat(String((listing as any).landSize || listing.floorSize)), // Parse as float
-        field_no_bedrooms: parseInt(String(listing.numberOfRooms), 10), // Parse as integer
-        field_no_bathrooms: parseFloat(String(listing.numberOfBathroomsTotal)), // Parse as float (allows 2.5, etc.)
-        field_no_kitchens: parseInt(String((listing as any).numberOfKitchens || 1), 10), // Parse as integer
-        field_no_living_rooms: parseInt(String((listing as any).numberOfLivingRooms || 1), 10), // Parse as integer
+        field_covered_area: Number.parseFloat(String(listing.floorSize)), // Parse as float
+        field_land_size: Number.parseFloat(
+          String((listing as any).landSize || listing.floorSize)
+        ), // Parse as float
+        field_no_bedrooms: Number.parseInt(String(listing.numberOfRooms), 10), // Parse as integer
+        field_no_bathrooms: Number.parseFloat(
+          String(listing.numberOfBathroomsTotal)
+        ), // Parse as float (allows 2.5, etc.)
+        field_no_kitchens: Number.parseInt(
+          String((listing as any).numberOfKitchens || 1),
+          10
+        ), // Parse as integer
+        field_no_living_rooms: Number.parseInt(
+          String((listing as any).numberOfLivingRooms || 1),
+          10
+        ), // Parse as integer
         field_own_reference_id: listing.referenceId || `AI-${Date.now()}`,
-        field_year_built: parseInt(String(listing.yearBuilt || new Date().getFullYear()), 10), // Parse as integer
+        field_year_built: Number.parseInt(
+          String(listing.yearBuilt || new Date().getFullYear()),
+          10
+        ), // Parse as integer
         field_new_build: false,
-        field_map: (listing.address as any)?.geo ? {
-          value: `POINT (${(listing.address as any).geo.longitude} ${(listing.address as any).geo.latitude})`,
-          geo_type: "Point",
-          lat: (listing.address as any).geo.latitude,
-          lon: (listing.address as any).geo.longitude,
-        } : undefined,
+        field_map: (listing.address as any)?.geo
+          ? {
+              value: `POINT (${(listing.address as any).geo.longitude} ${(listing.address as any).geo.latitude})`,
+              geo_type: "Point",
+              lat: (listing.address as any).geo.latitude,
+              lon: (listing.address as any).geo.longitude,
+            }
+          : undefined,
       },
       relationships: {},
     },
@@ -350,18 +347,18 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
 
   if (listing.indoorFeatures?.length) {
     relationships.field_indoor_property_features = {
-      data: listing.indoorFeatures.map(id => ({
+      data: listing.indoorFeatures.map((id) => ({
         type: "taxonomy_term--indoor_property_views",
-        id: id,
+        id,
       })),
     };
   }
 
   if (listing.outdoorFeatures?.length) {
     relationships.field_outdoor_property_features = {
-      data: listing.outdoorFeatures.map(id => ({
+      data: listing.outdoorFeatures.map((id) => ({
         type: "taxonomy_term--outdoor_property_features",
-        id: id,
+        id,
       })),
     };
   }
@@ -412,9 +409,9 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
 
   if (imageIds.length > 0) {
     relationships.field_gallery_ = {
-      data: imageIds.map(id => ({
+      data: imageIds.map((id) => ({
         type: "file--file",
-        id: id,
+        id,
       })),
     };
   }
@@ -422,7 +419,7 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
   // Add default empty array for gallery if no images
   if (!relationships.field_gallery_) {
     relationships.field_gallery_ = {
-      data: []
+      data: [],
     };
   }
 
@@ -431,14 +428,14 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 30_000); // 30s timeout
 
     const response = await fetch(`${apiUrl}/jsonapi/node/property`, {
       method: "POST",
       headers: {
         "Content-Type": "application/vnd.api+json",
-        "Authorization": `Bearer ${token}`,
-        "Accept": "application/vnd.api+json",
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.api+json",
         "User-Agent": "SophiaAI/1.0",
       },
       body: JSON.stringify(payload),
@@ -452,7 +449,7 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
       console.error("Zyprus API Response Error:", {
         status: response.status,
         errors: errorData.errors,
-        fullResponse: errorData
+        fullResponse: errorData,
       });
 
       // Build detailed error message
@@ -460,9 +457,12 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
       let errorDetails = "";
 
       if (errorData.errors && Array.isArray(errorData.errors)) {
-        const errors = errorData.errors.map((err: any) =>
-          `${err.title || ''} - ${err.detail || ''} (${err.source?.pointer || 'unknown field'})`
-        ).join('; ');
+        const errors = errorData.errors
+          .map(
+            (err: any) =>
+              `${err.title || ""} - ${err.detail || ""} (${err.source?.pointer || "unknown field"})`
+          )
+          .join("; ");
         errorMessage = errors || errorMessage;
         errorDetails = JSON.stringify(errorData.errors);
       }
@@ -483,7 +483,7 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
 
     return {
       listingId: propertyData.id || "",
-      listingUrl: `${process.env.ZYPRUS_SITE_URL || 'https://dev9.zyprus.com'}/property/${propertyData.id}`,
+      listingUrl: `${process.env.ZYPRUS_SITE_URL || "https://dev9.zyprus.com"}/property/${propertyData.id}`,
     };
   } catch (error) {
     if (error instanceof ZyprusAPIError) {
@@ -492,10 +492,7 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
 
     if (error instanceof Error) {
       if (error.name === "AbortError") {
-        throw new ZyprusAPIError(
-          "Request timeout after 30 seconds",
-          "TIMEOUT"
-        );
+        throw new ZyprusAPIError("Request timeout after 30 seconds", "TIMEOUT");
       }
       throw new ZyprusAPIError(
         `Network error: ${error.message}`,
@@ -503,10 +500,7 @@ export async function uploadToZyprusAPI(listing: PropertyListing & {
       );
     }
 
-    throw new ZyprusAPIError(
-      "Unknown error occurred",
-      "UNKNOWN"
-    );
+    throw new ZyprusAPIError("Unknown error occurred", "UNKNOWN");
   }
 }
 
@@ -522,7 +516,7 @@ export async function getZyprusListings(): Promise<any[]> {
       method: "GET",
       headers: {
         "Content-Type": "application/vnd.api+json",
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         "User-Agent": "SophiaAI/1.0",
       },
     });
@@ -544,7 +538,7 @@ export async function getZyprusListings(): Promise<any[]> {
     }
 
     throw new ZyprusAPIError(
-      `Failed to fetch listings: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Failed to fetch listings: ${error instanceof Error ? error.message : "Unknown error"}`,
       "NETWORK_ERROR"
     );
   }

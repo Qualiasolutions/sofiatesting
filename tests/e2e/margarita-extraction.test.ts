@@ -20,7 +20,9 @@ test.describe("SOFIA Margarita Dimova Extraction Test", () => {
   }) => {
     // Send the exact user query that was failing
     const input = page.locator('[data-testid="multimodal-input"] textarea');
-    await input.fill("i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova");
+    await input.fill(
+      "i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova"
+    );
 
     // Click the send button
     const sendButton = page.locator(
@@ -56,8 +58,8 @@ test.describe("SOFIA Margarita Dimova Extraction Test", () => {
 
     // Take screenshot for visual verification
     await page.screenshot({
-      path: 'test-results/margarita-extraction-response.png',
-      fullPage: false
+      path: "test-results/margarita-extraction-response.png",
+      fullPage: false,
     });
   });
 
@@ -66,7 +68,9 @@ test.describe("SOFIA Margarita Dimova Extraction Test", () => {
   }) => {
     // Send the complete request with developer contact name
     const input = page.locator('[data-testid="multimodal-input"] textarea');
-    await input.fill("i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova contact person is Fotis");
+    await input.fill(
+      "i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova contact person is Fotis"
+    );
 
     // Click the send button
     const sendButton = page.locator(
@@ -88,14 +92,16 @@ test.describe("SOFIA Margarita Dimova Extraction Test", () => {
     // Should generate the complete developer registration document
     expect(responseText).toContain("Dear Fotis,");
     expect(responseText).toContain("Registration Details: Margarita dimova");
-    expect(responseText).toContain("Viewing Arranged for: October 21, 2025 at 3:00 PM");
+    expect(responseText).toContain(
+      "Viewing Arranged for: October 21, 2025 at 3:00 PM"
+    );
     expect(responseText).toContain("**8%+VAT**");
     expect(responseText).toContain("CSC Zyprus Property Group LTD");
 
     // Take screenshot for visual verification
     await page.screenshot({
-      path: 'test-results/margarita-complete-document.png',
-      fullPage: false
+      path: "test-results/margarita-complete-document.png",
+      fullPage: false,
     });
   });
 
@@ -104,20 +110,23 @@ test.describe("SOFIA Margarita Dimova Extraction Test", () => {
   }) => {
     const testCases = [
       {
-        input: "registration developer with viewing tomorrow at 3pm the client is Margarita dimova",
+        input:
+          "registration developer with viewing tomorrow at 3pm the client is Margarita dimova",
         expectedAskFor: ["developer", "contact", "name"],
-        shouldNotContain: ["margarita", "3pm", "client", "viewing"]
+        shouldNotContain: ["margarita", "3pm", "client", "viewing"],
       },
       {
-        input: "developer registration tomorrow at 2pm client is Maria Papadopoulos",
+        input:
+          "developer registration tomorrow at 2pm client is Maria Papadopoulos",
         expectedAskFor: ["developer", "contact", "name"],
-        shouldNotContain: ["maria", "2pm", "client", "viewing"]
+        shouldNotContain: ["maria", "2pm", "client", "viewing"],
       },
       {
-        input: "dev reg with viewing today at 4pm the client is Andreas Georgiou",
+        input:
+          "dev reg with viewing today at 4pm the client is Andreas Georgiou",
         expectedAskFor: ["developer", "contact", "name"],
-        shouldNotContain: ["andreas", "4pm", "client", "viewing"]
-      }
+        shouldNotContain: ["andreas", "4pm", "client", "viewing"],
+      },
     ];
 
     for (let i = 0; i < testCases.length; i++) {
@@ -137,7 +146,9 @@ test.describe("SOFIA Margarita Dimova Extraction Test", () => {
       );
       await sendButton.click();
 
-      await page.waitForSelector('[data-role="assistant"]', { timeout: 15_000 });
+      await page.waitForSelector('[data-role="assistant"]', {
+        timeout: 15_000,
+      });
 
       const response = page
         .locator('[data-role="assistant"] .sophia-response')
@@ -158,7 +169,7 @@ test.describe("SOFIA Margarita Dimova Extraction Test", () => {
       // Take screenshot for each test case
       await page.screenshot({
         path: `test-results/variation-test-${i + 1}.png`,
-        fullPage: false
+        fullPage: false,
       });
     }
   });

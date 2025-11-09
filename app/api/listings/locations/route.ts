@@ -1,8 +1,8 @@
+import { NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 import { getZyprusLocations } from "@/lib/zyprus/client";
-import { NextResponse } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   try {
     const session = await auth();
 

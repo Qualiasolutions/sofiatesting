@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
-import { getZyprusTaxonomyTerms } from "@/lib/zyprus/client";
 import { auth } from "@/app/(auth)/auth";
+import { getZyprusTaxonomyTerms } from "@/lib/zyprus/client";
 
 export async function GET(req: Request) {
   const session = await auth();
 
   if (!session?.user?.id) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const { searchParams } = new URL(req.url);
@@ -42,14 +39,28 @@ export async function GET(req: Request) {
   try {
     const terms = await getZyprusTaxonomyTerms(vocabularyType);
     return NextResponse.json({ success: true, terms });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Failed to fetch taxonomy terms:", error);
+
+    const message =
+      error instanceof Error && error.message
+        ? error.message
+        : "Failed to fetch taxonomy terms";
+    const code =
+      typeof (error as { code?: string })?.code === "string"
+        ? (error as { code?: string }).code
+        : "FETCH_ERROR";
+    const statusCode =
+      typeof (error as { statusCode?: number })?.statusCode === "number"
+        ? (error as { statusCode?: number }).statusCode
+        : 500;
+
     return NextResponse.json(
       {
-        error: error.message || "Failed to fetch taxonomy terms",
-        code: error.code || "FETCH_ERROR"
+        error: message,
+        code,
       },
-      { status: error.statusCode || 500 }
+      { status: statusCode }
     );
   }
 }

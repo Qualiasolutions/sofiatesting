@@ -1,5 +1,4 @@
 import { gateway } from "@ai-sdk/gateway";
-import { google } from "@ai-sdk/google";
 import {
   customProvider,
   extractReasoningMiddleware,
@@ -9,19 +8,8 @@ import { isTestEnvironment } from "../constants";
 
 export const myProvider = isTestEnvironment
   ? (() => {
-      const {
-        artifactModel,
-        chatModel,
-        reasoningModel,
-        titleModel,
-        geminiModel,
-        claudeModel,
-        mistralSmallModel,
-        mistralMediumModel,
-        mistralLargeModel,
-        codestralModel,
-        pixtralLargeModel,
-      } = require("./models.mock");
+      const { chatModel, claudeModel, mistralSmallModel } =
+        require("./models.mock");
       return customProvider({
         languageModels: {
           "chat-model": claudeModel,
@@ -35,7 +23,8 @@ export const myProvider = isTestEnvironment
     })()
   : customProvider({
       languageModels: {
-        "chat-model-gemini": google("gemini-1.5-flash-latest"),
+        // Removed gemini, now using GPT-4o-mini as default via gateway
+        "chat-model-gemini": gateway("openai/gpt-4o-mini"), // Keeping ID for compatibility
         "chat-model-sonnet": wrapLanguageModel({
           model: gateway("anthropic/claude-sonnet-4.5"),
           middleware: extractReasoningMiddleware({ tagName: "thinking" }),
@@ -43,8 +32,8 @@ export const myProvider = isTestEnvironment
         "chat-model-haiku": gateway("anthropic/claude-3-5-haiku-20241022"),
         "chat-model-gpt4o": gateway("openai/gpt-4o"),
         "chat-model-gpt4o-mini": gateway("openai/gpt-4o-mini"),
-        "chat-model": google("gemini-1.5-flash-latest"),
-        "title-model": google("gemini-1.5-flash-latest"),
-        "artifact-model": google("gemini-1.5-flash-latest"),
+        "chat-model": gateway("openai/gpt-4o-mini"), // Default model
+        "title-model": gateway("openai/gpt-4o-mini"), // Title generation
+        "artifact-model": gateway("openai/gpt-4o-mini"), // Artifact generation
       },
     });

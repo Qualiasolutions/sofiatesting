@@ -4,7 +4,7 @@
  * Based on calculation rules from zyprus.com and mof.gov.cy
  */
 
-export interface CalculatorExecutionResult {
+export type CalculatorExecutionResult = {
   success: boolean;
   calculator_name: string;
   inputs: Record<string, any>;
@@ -19,12 +19,12 @@ export interface CalculatorExecutionResult {
     fallback_url?: string;
   };
   execution_time_ms?: number;
-}
+};
 
-export interface CalculatorExecutionRequest {
+export type CalculatorExecutionRequest = {
   calculator_name: string;
   inputs: Record<string, any>;
-}
+};
 
 /**
  * Transfer Fees Calculator
@@ -47,7 +47,7 @@ export function calculateTransferFees(
     const jointNames =
       inputs.joint_names === true || inputs.joint_names === "true";
 
-    if (isNaN(propertyValue) || propertyValue <= 0) {
+    if (Number.isNaN(propertyValue) || propertyValue <= 0) {
       return {
         success: false,
         calculator_name: "transfer_fees",
@@ -78,7 +78,7 @@ export function calculateTransferFees(
     }
 
     // Multiply by number of persons
-    fees = fees * numberOfPersons;
+    fees *= numberOfPersons;
 
     // Apply 50% exemption for resale properties
     const exemptionApplied = fees * 0.5;
@@ -148,8 +148,8 @@ export function calculateCapitalGainsTax(
   try {
     const salePrice = Number.parseFloat(inputs.sale_price);
     const purchasePrice = Number.parseFloat(inputs.purchase_price);
-    const purchaseYear = Number.parseInt(inputs.purchase_year);
-    const saleYear = Number.parseInt(inputs.sale_year);
+    const purchaseYear = Number.parseInt(inputs.purchase_year, 10);
+    const saleYear = Number.parseInt(inputs.sale_year, 10);
 
     // Optional expenses
     const costOfImprovements = Number.parseFloat(
@@ -165,8 +165,8 @@ export function calculateCapitalGainsTax(
     const allowanceType = inputs.allowance_type || "any_other_sale";
 
     if (
-      isNaN(salePrice) ||
-      isNaN(purchasePrice) ||
+      Number.isNaN(salePrice) ||
+      Number.isNaN(purchasePrice) ||
       salePrice <= 0 ||
       purchasePrice <= 0
     ) {
@@ -310,9 +310,9 @@ export function calculateVAT(
 
     // Input validation
     if (
-      isNaN(totalArea) ||
+      Number.isNaN(totalArea) ||
       totalArea <= 0 ||
-      isNaN(price) ||
+      Number.isNaN(price) ||
       price <= 0
     ) {
       return {
@@ -348,7 +348,9 @@ export function calculateVAT(
               vat_19: vat19,
             },
             final_vat: vat19,
-            notes: ["Investment property - 19% VAT rate applies to entire amount"],
+            notes: [
+              "Investment property - 19% VAT rate applies to entire amount",
+            ],
           },
           formatted_output: `💵 VAT Calculation - Investment Property
 
@@ -371,9 +373,7 @@ Note: Only primary residences may qualify for reduced 5% VAT rates under Cyprus 
     }
 
     // Eligibility checks for primary residence
-    const eligible =
-      totalArea <= 190 &&
-      price <= 475000;
+    const eligible = totalArea <= 190 && price <= 475_000;
 
     let vat5 = 0;
     let vat19 = 0;
@@ -381,33 +381,49 @@ Note: Only primary residences may qualify for reduced 5% VAT rates under Cyprus 
     let reducedValueBase = 0;
     const notes: string[] = [];
 
-    if (!eligible) {
-      // Ineligible - entire amount at 19%
-      vat19 = price * 0.19;
-
-      if (totalArea > 190) {
-        notes.push("Property area exceeds 190 m² limit - reduced scheme inapplicable");
-      } else if (price > 475000) {
-        notes.push("Property price exceeds €475,000 limit - reduced scheme inapplicable");
-      }
-    } else {
+    if (eligible) {
       // Eligible - apply proportional 5% base formula
       areaRatio = Math.min(130, totalArea) / totalArea;
-      reducedValueBase = areaRatio * Math.min(price, 350000);
+      reducedValueBase = areaRatio * Math.min(price, 350_000);
 
       vat5 = reducedValueBase * 0.05;
       vat19 = (price - reducedValueBase) * 0.19;
 
-      notes.push(`Area ratio: min(130, ${totalArea}) / ${totalArea} = ${areaRatio.toFixed(6)}`);
-      notes.push(`Reduced value base: ${areaRatio.toFixed(6)} × min(€${price.toLocaleString()}, €350,000) = €${reducedValueBase.toFixed(2)}`);
-      notes.push(`5% VAT on eligible portion: €${reducedValueBase.toFixed(2)} × 0.05 = €${vat5.toFixed(2)}`);
-      notes.push(`19% VAT on remaining: €${(price - reducedValueBase).toFixed(2)} × 0.19 = €${vat19.toFixed(2)}`);
+      notes.push(
+        `Area ratio: min(130, ${totalArea}) / ${totalArea} = ${areaRatio.toFixed(6)}`
+      );
+      notes.push(
+        `Reduced value base: ${areaRatio.toFixed(6)} × min(€${price.toLocaleString()}, €350,000) = €${reducedValueBase.toFixed(2)}`
+      );
+      notes.push(
+        `5% VAT on eligible portion: €${reducedValueBase.toFixed(2)} × 0.05 = €${vat5.toFixed(2)}`
+      );
+      notes.push(
+        `19% VAT on remaining: €${(price - reducedValueBase).toFixed(2)} × 0.19 = €${vat19.toFixed(2)}`
+      );
 
-      if (price > 350000) {
-        notes.push("Property price exceeds €350,000 - only eligible portion gets 5% rate");
+      if (price > 350_000) {
+        notes.push(
+          "Property price exceeds €350,000 - only eligible portion gets 5% rate"
+        );
       }
       if (totalArea > 130) {
-        notes.push("Property area exceeds 130 m² - reduced rate applies proportionally");
+        notes.push(
+          "Property area exceeds 130 m² - reduced rate applies proportionally"
+        );
+      }
+    } else {
+      // Ineligible - entire amount at 19%
+      vat19 = price * 0.19;
+
+      if (totalArea > 190) {
+        notes.push(
+          "Property area exceeds 190 m² limit - reduced scheme inapplicable"
+        );
+      } else if (price > 475_000) {
+        notes.push(
+          "Property price exceeds €475,000 limit - reduced scheme inapplicable"
+        );
       }
     }
 
@@ -421,24 +437,26 @@ Property Details:
 - Property Type: ${isMainResidence ? "Primary Residence" : "Investment Property"}
 - Eligible for Reduced Rate: ${eligible ? "Yes" : "No"}
 
-${eligible ?
-  `Calculation Breakdown:
+${
+  eligible
+    ? `Calculation Breakdown:
 • Area Ratio: min(130, ${totalArea}) ÷ ${totalArea} = ${areaRatio.toFixed(6)}
-• Reduced Value Base: ${areaRatio.toFixed(6)} × €${Math.min(price, 350000).toLocaleString()} = €${reducedValueBase.toFixed(2)}
+• Reduced Value Base: ${areaRatio.toFixed(6)} × €${Math.min(price, 350_000).toLocaleString()} = €${reducedValueBase.toFixed(2)}
 • VAT at 5%: €${reducedValueBase.toFixed(2)} × 0.05 = €${vat5.toFixed(2)}
-• VAT at 19%: €${(price - reducedValueBase).toFixed(2)} × 0.19 = €${vat19.toFixed(2)}` :
-  `Calculation:
+• VAT at 19%: €${(price - reducedValueBase).toFixed(2)} × 0.19 = €${vat19.toFixed(2)}`
+    : `Calculation:
 • VAT Rate: 19% on entire purchase price
 • VAT Amount: €${price.toLocaleString()} × 0.19 = €${vat19.toFixed(2)}`
 }
 
 📊 Total VAT: €${finalVAT.toFixed(2)}
 
-${eligible ?
-  `Note: Reduced 5% VAT applies to first 130 m² only, capped at €350,000 value. ` +
-  `Property must be ≤190 m² and ≤€475,000 to qualify.` :
-  `Note: Property does not meet criteria for reduced VAT rate. ` +
-  `Requirements: ≤190 m² total area and ≤€475,000 purchase price.`
+${
+  eligible
+    ? "Note: Reduced 5% VAT applies to first 130 m² only, capped at €350,000 value. " +
+      "Property must be ≤190 m² and ≤€475,000 to qualify."
+    : "Note: Property does not meet criteria for reduced VAT rate. " +
+      "Requirements: ≤190 m² total area and ≤€475,000 purchase price."
 }
 
 Official calculator: https://www.mof.gov.cy/mof/tax/taxdep.nsf/vathousecalc_gr/vathousecalc_gr?openform`;

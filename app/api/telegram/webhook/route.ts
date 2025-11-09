@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 /**
  * Health check endpoint
  */
-export async function GET() {
+export function GET() {
   return NextResponse.json({
     status: "ok",
     service: "SOFIA Telegram Bot",

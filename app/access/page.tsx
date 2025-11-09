@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const ACCESS_CODE = "the8thchakra";
+const ACCESS_COOKIE_NAME = "qualia-access";
+const ACCESS_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24;
 
 export default function AccessPage() {
   const [code, setCode] = useState("");
@@ -21,9 +23,32 @@ export default function AccessPage() {
     setIsLoading(true);
 
     if (code === ACCESS_CODE) {
-      // Set a cookie to indicate access granted
-      document.cookie =
-        "qualia-access=granted; path=/; max-age=86400; SameSite=Lax";
+      const expires = Date.now() + ACCESS_COOKIE_MAX_AGE_SECONDS * 1000;
+      const browserWindow = window as typeof window & {
+        cookieStore?: {
+          set?: (options: {
+            name: string;
+            value: string;
+            expires?: number | Date;
+            path?: string;
+            sameSite?: "strict" | "lax" | "none";
+          }) => Promise<void>;
+        };
+      };
+
+      if (browserWindow.cookieStore?.set) {
+        await browserWindow.cookieStore.set({
+          name: ACCESS_COOKIE_NAME,
+          value: "granted",
+          expires,
+          path: "/",
+          sameSite: "lax",
+        });
+      } else {
+        /* biome-ignore lint/suspicious/noDocumentCookie: CookieStore API fallback */
+        document.cookie = `${ACCESS_COOKIE_NAME}=granted; path=/; max-age=${ACCESS_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
+      }
+
       toast.success("Access granted! Welcome to Qualia AI Agents Suite™");
       router.push("/");
     } else {
@@ -34,16 +59,38 @@ export default function AccessPage() {
     setIsLoading(false);
   };
 
-  // Check if access is already granted via cookie
-  if (typeof window !== "undefined") {
-    const hasAccess = document.cookie
-      .split("; ")
-      .some((row) => row.startsWith("qualia-access=granted"));
-    if (hasAccess) {
-      router.push("/");
-      return null;
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
     }
-  }
+
+    const browserWindow = window as typeof window & {
+      cookieStore?: {
+        get?: (
+          name: string
+        ) => Promise<{ name: string; value: string } | undefined>;
+      };
+    };
+
+    const checkAccess = async () => {
+      const cookieFromStore = browserWindow.cookieStore?.get
+        ? await browserWindow.cookieStore.get(ACCESS_COOKIE_NAME)
+        : undefined;
+
+      const hasAccessFromStore = cookieFromStore?.value === "granted";
+      const hasAccessFromDocument = document.cookie
+        .split("; ")
+        .some((row) => row.startsWith(`${ACCESS_COOKIE_NAME}=granted`));
+
+      if (hasAccessFromStore || hasAccessFromDocument) {
+        router.push("/");
+      }
+    };
+
+    checkAccess().catch(() => {
+      /* ignore access cookie read errors */
+    });
+  }, [router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">

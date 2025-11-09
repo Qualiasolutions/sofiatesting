@@ -64,6 +64,13 @@
       "when": 1761899005539,
       "tag": "0008_sticky_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1762645090825,
+      "tag": "0009_typical_living_lightning",
+      "breakpoints": true
     }
   ]
 }

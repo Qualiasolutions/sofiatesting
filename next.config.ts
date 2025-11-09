@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
       {
         hostname: "images.squarespace-cdn.com",
       },
+      {
+        hostname: "i.ibb.co",
+      },
     ],
   },
   // Skip static generation of API routes during build

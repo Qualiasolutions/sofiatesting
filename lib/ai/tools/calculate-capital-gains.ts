@@ -39,22 +39,30 @@ export const calculateCapitalGainsTool = tool({
       .number()
       .nonnegative()
       .default(0)
-      .describe("Cost of property improvements in Euros (e.g., 50,000) - optional"),
+      .describe(
+        "Cost of property improvements in Euros (e.g., 50,000) - optional"
+      ),
     transfer_fees: z
       .number()
       .nonnegative()
       .default(0)
-      .describe("Transfer fees paid when purchasing in Euros (e.g., 5,000) - optional"),
+      .describe(
+        "Transfer fees paid when purchasing in Euros (e.g., 5,000) - optional"
+      ),
     interest_on_loan: z
       .number()
       .nonnegative()
       .default(0)
-      .describe("Total interest paid on mortgage in Euros (e.g., 15,000) - optional"),
+      .describe(
+        "Total interest paid on mortgage in Euros (e.g., 15,000) - optional"
+      ),
     legal_fees: z
       .number()
       .nonnegative()
       .default(0)
-      .describe("Legal fees for purchase/sale in Euros (e.g., 3,000) - optional"),
+      .describe(
+        "Legal fees for purchase/sale in Euros (e.g., 3,000) - optional"
+      ),
     estate_agent_fees: z
       .number()
       .nonnegative()
@@ -72,7 +80,7 @@ export const calculateCapitalGainsTool = tool({
         "Type of allowance: main_residence (€85,430), farm_land (€25,629), any_other_sale (€17,086), or none"
       ),
   }),
-  execute: async ({
+  execute: ({
     sale_price,
     purchase_price,
     purchase_year,

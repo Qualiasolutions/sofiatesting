@@ -52,7 +52,7 @@ export const listListingsTool = tool({
       const formatted = listings
         .map((listing, index: number) => {
           const emoji = STATUS_EMOJIS[listing.status] || "❓";
-          const price = parseFloat(listing.price);
+          const price = Number.parseFloat(listing.price);
           const createdDate = new Date(listing.createdAt).toLocaleDateString();
 
           let statusLine = `Status: ${listing.status}`;

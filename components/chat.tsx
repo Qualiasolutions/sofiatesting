@@ -30,7 +30,6 @@ import { useDataStream } from "./data-stream-provider";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 import { getChatHistoryPaginationKey } from "./sidebar-history";
-import { TemplateSidebar } from "./template-sidebar";
 import { toast } from "./toast";
 import type { VisibilityType } from "./visibility-selector";
 
@@ -199,9 +198,6 @@ export function Chat({
             )}
           </div>
         </div>
-
-        {/* Template Sidebar */}
-        <TemplateSidebar />
       </div>
 
       <Artifact

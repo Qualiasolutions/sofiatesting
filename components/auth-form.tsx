@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export function AuthForm({
   action,
   children,
@@ -24,9 +26,8 @@ export function AuthForm({
     {}
   );
 
-  const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+  const validateEmail = (candidateEmail: string) => {
+    return EMAIL_REGEX.test(candidateEmail);
   };
 
   const validateForm = () => {

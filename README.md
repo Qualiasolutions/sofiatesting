@@ -1,70 +1,55 @@
-<a href="https://chat.vercel.ai/">
-  <img alt="Next.js 14 and App Router-ready AI chatbot." src="app/(chat)/opengraph-image.png">
-  <h1 align="center">Chat SDK</h1>
-</a>
+# SOFIA – Zyprus Property Group AI Assistant
 
-<p align="center">
-    Chat SDK is a free, open-source template built with Next.js and the AI SDK that helps you quickly build powerful chatbot applications.
-</p>
+SOFIA is a production-grade Next.js 15 application that helps Zyprus agents draft real estate documents, manage property listings, and operate an AI-assisted support desk. It builds on Vercel’s AI SDK with custom tooling, PostgreSQL persistence, and a Telegram bot integration.
 
-<p align="center">
-  <a href="https://chat-sdk.dev"><strong>Read Docs</strong></a> ·
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#model-providers"><strong>Model Providers</strong></a> ·
-  <a href="#deploy-your-own"><strong>Deploy Your Own</strong></a> ·
-  <a href="#running-locally"><strong>Running locally</strong></a>
-</p>
-<br/>
+## Highlights
+- **Chat Workspace** – secure, access-code gated UI with guest and registered sessions.
+- **Template Engine** – 38 instruction templates sourced from the legacy SOPHIA corpus with smart loading support.
+- **Property Listing Flow** – create, review, and upload listings to the Zyprus API, with retries and audit logging.
+- **Telegram Bot** – webhook-powered agent experience for external conversations.
+- **Observability** – OpenTelemetry instrumentation hooks ready for Vercel traces.
 
-## Features
+## Requirements
+- Node.js 20+
+- pnpm 9.x
+- PostgreSQL (Neon/Vercel Postgres recommended)
+- Redis (Upstash) for rate limiting and sessions
+- Credentials for the Vercel AI Gateway (or direct model keys)
+- Zyprus API OAuth client (for listing uploads)
 
-- [Next.js](https://nextjs.org) App Router
-  - Advanced routing for seamless navigation and performance
-  - React Server Components (RSCs) and Server Actions for server-side rendering and increased performance
-- [AI SDK](https://ai-sdk.dev/docs/introduction)
-  - Unified API for generating text, structured objects, and tool calls with LLMs
-  - Hooks for building dynamic chat and generative user interfaces
-  - Supports xAI (default), OpenAI, Fireworks, and other model providers
-- [shadcn/ui](https://ui.shadcn.com)
-  - Styling with [Tailwind CSS](https://tailwindcss.com)
-  - Component primitives from [Radix UI](https://radix-ui.com) for accessibility and flexibility
-- Data Persistence
-  - [Neon Serverless Postgres](https://vercel.com/marketplace/neon) for saving chat history and user data
-  - [Vercel Blob](https://vercel.com/storage/blob) for efficient file storage
-- [Auth.js](https://authjs.dev)
-  - Simple and secure authentication
-
-## Model Providers
-
-This template uses the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) to access multiple AI models through a unified interface. The default configuration includes [xAI](https://x.ai) models (`grok-2-vision-1212`, `grok-3-mini`) routed through the gateway.
-
-### AI Gateway Authentication
-
-**For Vercel deployments**: Authentication is handled automatically via OIDC tokens.
-
-**For non-Vercel deployments**: You need to provide an AI Gateway API key by setting the `AI_GATEWAY_API_KEY` environment variable in your `.env.local` file.
-
-With the [AI SDK](https://ai-sdk.dev/docs/introduction), you can also switch to direct LLM providers like [OpenAI](https://openai.com), [Anthropic](https://anthropic.com), [Cohere](https://cohere.com/), and [many more](https://ai-sdk.dev/providers/ai-sdk-providers) with just a few lines of code.
-
-## Deploy Your Own
-
-You can deploy your own version of the Next.js AI Chatbot to Vercel with one click:
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/templates/next.js/nextjs-ai-chatbot)
-
-## Running locally
-
-You will need to use the environment variables [defined in `.env.example`](.env.example) to run Next.js AI Chatbot. It's recommended you use [Vercel Environment Variables](https://vercel.com/docs/projects/environment-variables) for this, but a `.env` file is all that is necessary.
-
-> Note: You should not commit your `.env` file or it will expose secrets that will allow others to control access to your various AI and authentication provider accounts.
-
-1. Install Vercel CLI: `npm i -g vercel`
-2. Link local instance with Vercel and GitHub accounts (creates `.vercel` directory): `vercel link`
-3. Download your environment variables: `vercel env pull`
-
+## Getting Started
 ```bash
 pnpm install
+cp .env.example .env.local   # populate required secrets
+pnpm db:migrate
 pnpm dev
 ```
 
-Your app template should now be running on [localhost:3000](http://localhost:3000).
+Visit `http://localhost:3000`, enter the access code, then authenticate (or let SOFIA auto-provision a guest).
+
+## Key Scripts
+- `pnpm lint` / `pnpm format` – run Ultracite linting and formatting using the pinned workspace version.
+- `pnpm db:*` – manage Drizzle migrations against `lib/db/schema.ts`.
+- `pnpm test` – execute Playwright E2E suites (requires a running dev server and `PLAYWRIGHT=True`).
+
+## Documentation
+All Markdown documentation now lives under `docs/`:
+- `guides/` – deployment, AI gateway, API key, and Telegram setup walk-throughs.
+- `knowledge/` – domain context plus the new property-listing implementation guide.
+- `templates/` – consolidated SOPHIA instruction registry and historical exports.
+- `updates/` – change logs and Claude configuration notes.
+
+Start with `docs/README.md` to locate the material you need.
+
+## Deployment Notes
+- `next.config.ts` targets Vercel but can be adapted for other platforms.
+- The middleware enforces an access cookie (`qualia-access`) before any page render; seed it via `/access` or in tests.
+- For production, set `POSTGRES_URL`, `ZYPRUS_CLIENT_ID`, `ZYPRUS_CLIENT_SECRET`, model provider tokens, and `AUTH_SECRET`.
+
+## Contributing
+1. Create feature branches off `main`.
+2. Keep AI template changes isolated and update the registry in `lib/ai/instructions/template-loader.ts`.
+3. Document noteworthy changes in `docs/updates/`.
+4. Open a PR with screenshots or trace links when touching UI or Playwright flows.
+
+SOFIA remains under the MIT license (see `LICENSE`).

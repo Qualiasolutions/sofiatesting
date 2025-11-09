@@ -25,16 +25,16 @@ import {
   chat,
   type DBMessage,
   document,
+  type InferInsertModel,
   listingUploadAttempt,
   message,
   propertyListing,
-  stream,
   type Suggestion,
+  stream,
   suggestion,
   type User,
   user,
   vote,
-  type InferInsertModel,
 } from "./schema";
 import { generateHashedPassword } from "./utils";
 
@@ -601,10 +601,7 @@ export async function createPropertyListing(
   data: InferInsertModel<typeof propertyListing>
 ) {
   try {
-    const [listing] = await db
-      .insert(propertyListing)
-      .values(data)
-      .returning();
+    const [listing] = await db.insert(propertyListing).values(data).returning();
     return listing;
   } catch (_error) {
     throw new ChatSDKError(
@@ -619,7 +616,9 @@ export async function getListingById({ id }: { id: string }) {
     const [listing] = await db
       .select()
       .from(propertyListing)
-      .where(and(eq(propertyListing.id, id), isNull(propertyListing.deletedAt)));
+      .where(
+        and(eq(propertyListing.id, id), isNull(propertyListing.deletedAt))
+      );
 
     return listing;
   } catch (_error) {
@@ -641,7 +640,12 @@ export async function getListingsByUserId({
     return await db
       .select()
       .from(propertyListing)
-      .where(and(eq(propertyListing.userId, userId), isNull(propertyListing.deletedAt)))
+      .where(
+        and(
+          eq(propertyListing.userId, userId),
+          isNull(propertyListing.deletedAt)
+        )
+      )
       .orderBy(desc(propertyListing.createdAt))
       .limit(limit);
   } catch (_error) {

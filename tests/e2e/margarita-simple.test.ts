@@ -3,28 +3,31 @@ import { expect, test } from "@playwright/test";
 test.describe("SOFIA Direct API Test", () => {
   test("Test field extraction via direct API call", async ({ request }) => {
     // Test the chat API directly to see if SOFIA extracts fields correctly
-    const chatId = "test-chat-" + Date.now();
+    const chatId = `test-chat-${Date.now()}`;
 
-    const response = await request.post("https://sofiatesting-1q5604xdk-qualiasolutionscy.vercel.app/api/chat", {
-      data: {
-        id: chatId,
-        message: {
-          id: "msg-" + Date.now(),
-          role: "user",
-          parts: [
-            {
-              type: "text",
-              text: "i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova",
-            },
-          ],
+    const response = await request.post(
+      "https://sofiatesting-1q5604xdk-qualiasolutionscy.vercel.app/api/chat",
+      {
+        data: {
+          id: chatId,
+          message: {
+            id: `msg-${Date.now()}`,
+            role: "user",
+            parts: [
+              {
+                type: "text",
+                text: "i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova",
+              },
+            ],
+          },
+          selectedChatModel: "chat-model-gpt4o-mini",
+          selectedVisibilityType: "private",
         },
-        selectedChatModel: "chat-model-gpt4o-mini",
-        selectedVisibilityType: "private",
-      },
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log("API Response Status:", response.status());
     console.log("API Response Headers:", response.headers());
@@ -55,30 +58,35 @@ test.describe("SOFIA Direct API Test", () => {
     }
   });
 
-  test("Test complete registration when all fields provided", async ({ request }) => {
+  test("Test complete registration when all fields provided", async ({
+    request,
+  }) => {
     // Test with all fields including developer contact name
-    const chatId = "test-chat-complete-" + Date.now();
+    const chatId = `test-chat-complete-${Date.now()}`;
 
-    const response = await request.post("https://sofiatesting-1q5604xdk-qualiasolutionscy.vercel.app/api/chat", {
-      data: {
-        id: chatId,
-        message: {
-          id: "msg-" + Date.now(),
-          role: "user",
-          parts: [
-            {
-              type: "text",
-              text: "i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova contact person is Fotis",
-            },
-          ],
+    const response = await request.post(
+      "https://sofiatesting-1q5604xdk-qualiasolutionscy.vercel.app/api/chat",
+      {
+        data: {
+          id: chatId,
+          message: {
+            id: `msg-${Date.now()}`,
+            role: "user",
+            parts: [
+              {
+                type: "text",
+                text: "i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova contact person is Fotis",
+              },
+            ],
+          },
+          selectedChatModel: "chat-model-gpt4o-mini",
+          selectedVisibilityType: "private",
         },
-        selectedChatModel: "chat-model-gpt4o-mini",
-        selectedVisibilityType: "private",
-      },
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log("Complete API Response Status:", response.status());
 

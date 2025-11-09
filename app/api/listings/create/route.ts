@@ -1,8 +1,8 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
 import { createPropertyListing } from "@/lib/db/queries";
 import { generateUUID } from "@/lib/utils";
-import { NextResponse } from "next/server";
-import { z } from "zod";
 
 const createListingSchema = z.object({
   name: z.string().min(1).max(200),
@@ -13,11 +13,20 @@ const createListingSchema = z.object({
     postalCode: z.string().optional(),
     addressCountry: z.string().default("CY"),
   }),
-  price: z.string().or(z.number()).transform((val) => String(val)),
+  price: z
+    .string()
+    .or(z.number())
+    .transform((val) => String(val)),
   currency: z.string().default("EUR"),
   numberOfRooms: z.number().min(0).max(50),
-  numberOfBathroomsTotal: z.string().or(z.number()).transform((val) => String(val)),
-  floorSize: z.string().or(z.number()).transform((val) => String(val)),
+  numberOfBathroomsTotal: z
+    .string()
+    .or(z.number())
+    .transform((val) => String(val)),
+  floorSize: z
+    .string()
+    .or(z.number())
+    .transform((val) => String(val)),
   propertyType: z.string().optional(),
   amenityFeature: z.array(z.string()).optional(),
   image: z.array(z.string()).optional(),

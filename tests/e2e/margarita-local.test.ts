@@ -20,7 +20,9 @@ test.describe("SOFIA Local Development Test", () => {
   }) => {
     // Send the exact user query that was failing
     const input = page.locator('[data-testid="multimodal-input"] textarea');
-    await input.fill("i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova");
+    await input.fill(
+      "i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova"
+    );
 
     // Click the send button
     const sendButton = page.locator(
@@ -56,11 +58,13 @@ test.describe("SOFIA Local Development Test", () => {
 
     // Take screenshot for visual verification
     await page.screenshot({
-      path: 'test-results/margarita-local-response.png',
-      fullPage: false
+      path: "test-results/margarita-local-response.png",
+      fullPage: false,
     });
 
-    console.log("✅ TEST PASSED: SOFIA correctly extracted fields and only asked for developer contact name");
+    console.log(
+      "✅ TEST PASSED: SOFIA correctly extracted fields and only asked for developer contact name"
+    );
   });
 
   test("SOFIA should generate complete document when developer contact name is provided", async ({
@@ -68,7 +72,9 @@ test.describe("SOFIA Local Development Test", () => {
   }) => {
     // Send the complete request with developer contact name
     const input = page.locator('[data-testid="multimodal-input"] textarea');
-    await input.fill("i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova contact person is Fotis");
+    await input.fill(
+      "i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova contact person is Fotis"
+    );
 
     // Click the send button
     const sendButton = page.locator(
@@ -90,16 +96,20 @@ test.describe("SOFIA Local Development Test", () => {
     // Should generate the complete developer registration document
     expect(responseText).toContain("Dear Fotis,");
     expect(responseText).toContain("Registration Details: Margarita dimova");
-    expect(responseText).toContain("Viewing Arranged for: October 21, 2025 at 3:00 PM");
+    expect(responseText).toContain(
+      "Viewing Arranged for: October 21, 2025 at 3:00 PM"
+    );
     expect(responseText).toContain("**8%+VAT**");
     expect(responseText).toContain("CSC Zyprus Property Group LTD");
 
     // Take screenshot for visual verification
     await page.screenshot({
-      path: 'test-results/margarita-local-complete.png',
-      fullPage: false
+      path: "test-results/margarita-local-complete.png",
+      fullPage: false,
     });
 
-    console.log("✅ TEST PASSED: SOFIA generated complete document with all extracted fields");
+    console.log(
+      "✅ TEST PASSED: SOFIA generated complete document with all extracted fields"
+    );
   });
 });

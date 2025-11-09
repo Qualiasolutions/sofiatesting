@@ -2,6 +2,7 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { memo, useState } from "react";
 import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
@@ -18,7 +19,6 @@ import {
   ToolInput,
   ToolOutput,
 } from "./elements/tool";
-import { SparklesIcon } from "./icons";
 import { MessageActions } from "./message-actions";
 import { MessageEditor } from "./message-editor";
 import { MessageReasoning } from "./message-reasoning";
@@ -68,10 +68,12 @@ const PurePreviewMessage = ({
       >
         {message.role === "assistant" && (
           <div className="-mt-1 flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-border">
-            <img
+            <Image
               alt="SOFIA"
               className="h-full w-full object-cover"
+              height={32}
               src="https://i.ibb.co/FLVW0txQ/Chat-GPT-Image-Oct-24-2025-05-39-15-AM.png"
+              width={32}
             />
           </div>
         )}
@@ -328,10 +330,12 @@ export const ThinkingMessage = () => {
     >
       <div className="flex items-start justify-start gap-3">
         <div className="-mt-1 flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-border">
-          <img
+          <Image
             alt="SOFIA"
             className="h-full w-full object-cover"
+            height={32}
             src="https://i.ibb.co/FLVW0txQ/Chat-GPT-Image-Oct-24-2025-05-39-15-AM.png"
+            width={32}
           />
         </div>
 

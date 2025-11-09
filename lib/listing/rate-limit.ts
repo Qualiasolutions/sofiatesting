@@ -1,9 +1,22 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
+const redisUrl = process.env.REDIS_URL;
+
+if (!redisUrl) {
+  throw new Error("REDIS_URL environment variable is not configured");
+}
+
+const parsedRedisUrl = new URL(redisUrl);
+const redisToken = parsedRedisUrl.password;
+
+if (!redisToken) {
+  throw new Error("REDIS_URL must include a password component for Upstash");
+}
+
 const redis = new Redis({
-  url: process.env.REDIS_URL!,
-  token: process.env.REDIS_URL!.split("@")[0].split("//")[1],
+  url: redisUrl,
+  token: redisToken,
 });
 
 // 10 uploads per hour per user

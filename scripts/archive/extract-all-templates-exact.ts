@@ -5,11 +5,13 @@
  * Preserves EXACT formatting - not even 1mm difference!
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { join } from "path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
-const SOURCE_FILE =
-  "/home/qualiasolutions/Desktop/SOPHIA_AI_ASSISTANT_INSTRUCTIONS_UPDATED.md";
+const SOURCE_FILE = join(
+  process.cwd(),
+  "docs/knowledge/sophia-ai-assistant-instructions.md"
+);
 const TEMPLATES_DIR = join(process.cwd(), "lib/ai/instructions/templates");
 const BASE_FILE = join(process.cwd(), "lib/ai/instructions/base.md");
 
@@ -18,7 +20,7 @@ if (!existsSync(TEMPLATES_DIR)) {
   mkdirSync(TEMPLATES_DIR, { recursive: true });
 }
 
-function extractSection(
+function _extractSection(
   content: string,
   startLine: number,
   endLine: number

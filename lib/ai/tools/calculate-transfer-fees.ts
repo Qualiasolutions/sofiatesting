@@ -27,7 +27,7 @@ export const calculateTransferFeesTool = tool({
         "Whether the property is being purchased in joint names (splits calculation per person)"
       ),
   }),
-  execute: async ({ property_value, joint_names }) => {
+  execute: ({ property_value, joint_names }) => {
     try {
       // Calculate for each person if joint names
       const valuePerPerson = joint_names ? property_value / 2 : property_value;
@@ -46,7 +46,7 @@ export const calculateTransferFeesTool = tool({
       }
 
       // Multiply by number of persons
-      fees = fees * numberOfPersons;
+      fees *= numberOfPersons;
 
       // Apply 50% exemption for resale properties
       const exemptionApplied = fees * 0.5;

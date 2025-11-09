@@ -8,11 +8,6 @@ import {
   streamText,
 } from "ai";
 import { unstable_cache as cache } from "next/cache";
-import { after } from "next/server";
-import {
-  createResumableStreamContext,
-  type ResumableStreamContext,
-} from "resumable-stream";
 import type { ModelCatalog } from "tokenlens/core";
 import { fetchModels } from "tokenlens/fetch";
 import { getUsage } from "tokenlens/helpers";
@@ -22,14 +17,16 @@ import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
-import {
-  calculateCapitalGainsTool,
-  calculateTransferFeesTool,
-  calculateVATTool,
-  createListingTool,
-  listListingsTool,
-  uploadListingTool,
-} from "@/lib/ai/tools";
+import { calculateCapitalGainsTool } from "@/lib/ai/tools/calculate-capital-gains";
+import { calculateTransferFeesTool } from "@/lib/ai/tools/calculate-transfer-fees";
+import { calculateVATTool } from "@/lib/ai/tools/calculate-vat";
+import { createListingTool } from "@/lib/ai/tools/create-listing";
+import { createDocument } from "@/lib/ai/tools/create-document";
+import { getZyprusDataTool } from "@/lib/ai/tools/get-zyprus-data";
+import { listListingsTool } from "@/lib/ai/tools/list-listings";
+import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
+import { updateDocument } from "@/lib/ai/tools/update-document";
+import { uploadListingTool } from "@/lib/ai/tools/upload-listing";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
   createStreamId,
@@ -175,7 +172,11 @@ export async function POST(request: Request) {
             "createListing",
             "listListings",
             "uploadListing",
-          ], // SOFIA can use calculator and property listing tools
+            "getZyprusData",
+            "createDocument",
+            "updateDocument",
+            "requestSuggestions",
+          ], // SOFIA can use calculator, property listing, taxonomy, and document tools
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             calculateTransferFees: calculateTransferFeesTool,
@@ -184,7 +185,11 @@ export async function POST(request: Request) {
             createListing: createListingTool,
             listListings: listListingsTool,
             uploadListing: uploadListingTool,
-          }, // Cyprus real estate tools: calculators and property listings
+            getZyprusData: getZyprusDataTool,
+            createDocument: createDocument({ session, dataStream }),
+            updateDocument: updateDocument({ session, dataStream }),
+            requestSuggestions: requestSuggestions({ session, dataStream }),
+          }, // Cyprus real estate tools plus document creation
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
             functionId: "stream-text",
@@ -301,7 +306,8 @@ export async function POST(request: Request) {
       return new Response(
         JSON.stringify({
           error: "AI Gateway configuration required",
-          message: "The AI Gateway is not properly configured. Please add an AI_GATEWAY_API_KEY environment variable or set up billing on your Vercel account.",
+          message:
+            "The AI Gateway is not properly configured. Please add an AI_GATEWAY_API_KEY environment variable or set up billing on your Vercel account.",
           details: error.message,
         }),
         {

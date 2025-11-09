@@ -1,12 +1,16 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
 import {
   getListingById,
+  logListingUploadAttempt,
   updateListingStatus,
-  logListingUploadAttempt
 } from "@/lib/db/queries";
-import { uploadToZyprusAPI, ZyprusAPIError, isPermanentError } from "@/lib/zyprus/client";
-import { NextResponse } from "next/server";
-import { z } from "zod";
+import {
+  isPermanentError,
+  uploadToZyprusAPI,
+  ZyprusAPIError,
+} from "@/lib/zyprus/client";
 
 const uploadListingSchema = z.object({
   listingId: z.string().uuid(),
@@ -32,10 +36,7 @@ export async function POST(req: Request) {
     const listing = await getListingById({ id: listingId });
 
     if (!listing) {
-      return NextResponse.json(
-        { error: "Listing not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Listing not found" }, { status: 404 });
     }
 
     // Check ownership
@@ -63,8 +64,17 @@ export async function POST(req: Request) {
     });
 
     try {
-      // Upload to Zyprus
-      const { listingId: zyprusId, listingUrl } = await uploadToZyprusAPI(listing);
+      // Upload to Zyprus - convert nulls to undefined for optional fields
+      const { listingId: zyprusId, listingUrl } =
+        await uploadToZyprusAPI({
+          ...listing,
+          locationId: listing.locationId ?? undefined,
+          propertyTypeId: listing.propertyTypeId ?? undefined,
+          indoorFeatureIds: listing.indoorFeatureIds ?? undefined,
+          outdoorFeatureIds: listing.outdoorFeatureIds ?? undefined,
+          priceModifierId: listing.priceModifierId ?? undefined,
+          titleDeedId: listing.titleDeedId ?? undefined,
+        } as any);
 
       // Update status to uploaded
       await updateListingStatus({
@@ -90,8 +100,10 @@ export async function POST(req: Request) {
         message: "Property uploaded successfully",
       });
     } catch (uploadError) {
-      const errorMessage = uploadError instanceof Error ? uploadError.message : "Unknown error";
-      const errorCode = uploadError instanceof ZyprusAPIError ? uploadError.code : "UNKNOWN";
+      const errorMessage =
+        uploadError instanceof Error ? uploadError.message : "Unknown error";
+      const errorCode =
+        uploadError instanceof ZyprusAPIError ? uploadError.code : "UNKNOWN";
 
       // Log failed attempt
       await logListingUploadAttempt({
@@ -104,9 +116,10 @@ export async function POST(req: Request) {
       });
 
       // Update status based on error type
-      const newStatus = uploadError instanceof ZyprusAPIError && isPermanentError(uploadError)
-        ? "failed"
-        : "draft";
+      const newStatus =
+        uploadError instanceof ZyprusAPIError && isPermanentError(uploadError)
+          ? "failed"
+          : "draft";
 
       await updateListingStatus({
         id: listingId,
@@ -128,7 +141,7 @@ export async function POST(req: Request) {
         message: error.message,
         code: error.code,
         statusCode: error.statusCode,
-        fullError: error
+        fullError: error,
       });
       const statusCode = error.statusCode || 500;
       return NextResponse.json(
@@ -136,7 +149,7 @@ export async function POST(req: Request) {
           error: error.message,
           code: error.code,
           details: error.message,
-          statusCode: statusCode
+          statusCode,
         },
         { status: statusCode }
       );

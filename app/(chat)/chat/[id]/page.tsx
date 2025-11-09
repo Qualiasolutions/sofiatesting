@@ -56,7 +56,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   if (chatModelFromCookie) {
     // Check if it's an old model name and map it
-    selectedModel = modelMapping[chatModelFromCookie.value] || chatModelFromCookie.value;
+    selectedModel =
+      modelMapping[chatModelFromCookie.value] || chatModelFromCookie.value;
 
     // If the model was mapped, update the cookie with the new value
     if (modelMapping[chatModelFromCookie.value]) {

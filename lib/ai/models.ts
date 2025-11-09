@@ -1,4 +1,4 @@
-export const DEFAULT_CHAT_MODEL: string = "chat-model-gemini";
+export const DEFAULT_CHAT_MODEL: string = "chat-model-gpt4o-mini";
 
 export type ChatModel = {
   id: string;
@@ -8,9 +8,9 @@ export type ChatModel = {
 
 export const chatModels: ChatModel[] = [
   {
-    id: "chat-model-gemini",
-    name: "Gemini 1.5 Flash",
-    description: "Google's latest stable model - Fast and affordable",
+    id: "chat-model-gpt4o-mini",
+    name: "GPT-4o Mini",
+    description: "Fast and affordable - $0.15/M in, $0.60/M out",
   },
   {
     id: "chat-model-sonnet",
@@ -26,10 +26,5 @@ export const chatModels: ChatModel[] = [
     id: "chat-model-gpt4o",
     name: "GPT-4o",
     description: "OpenAI's flagship multimodal model - $2.50/M in, $10/M out",
-  },
-  {
-    id: "chat-model-gpt4o-mini",
-    name: "GPT-4o Mini",
-    description: "Fast and affordable - $0.15/M in, $0.60/M out",
   },
 ];

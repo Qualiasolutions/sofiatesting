@@ -22,10 +22,10 @@ import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SelectItem } from "@/components/ui/select";
 import { chatModels } from "@/lib/ai/models";
 import { myProvider } from "@/lib/ai/providers";
+import { getRandomTemplatePrompt } from "@/lib/random-data-generator";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
 import { cn } from "@/lib/utils";
-import { getRandomTemplatePrompt } from "@/lib/random-data-generator";
 import { Context } from "./elements/context";
 import {
   PromptInput,
@@ -40,9 +40,9 @@ import {
   ArrowUpIcon,
   ChevronDownIcon,
   CpuIcon,
+  DiceIcon,
   PaperclipIcon,
   StopIcon,
-  DiceIcon,
 } from "./icons";
 import { PreviewAttachment } from "./preview-attachment";
 import { SuggestedActions } from "./suggested-actions";
@@ -322,10 +322,7 @@ function PureMultimodalInput({
               selectedModelId={selectedModelId}
               status={status}
             />
-            <RandomDataButton
-              setInput={setInput}
-              status={status}
-            />
+            <RandomDataButton setInput={setInput} status={status} />
             <ModelSelectorCompact
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}
@@ -492,8 +489,13 @@ function PureRandomDataButton({
   status: UseChatHelpers<ChatMessage>["status"];
 }) {
   const handleRandomData = useCallback(() => {
-    const templateTypes: Array<"registration" | "marketing" | "viewing"> = ["registration", "marketing", "viewing"];
-    const randomType = templateTypes[Math.floor(Math.random() * templateTypes.length)];
+    const templateTypes: Array<"registration" | "marketing" | "viewing"> = [
+      "registration",
+      "marketing",
+      "viewing",
+    ];
+    const randomType =
+      templateTypes[Math.floor(Math.random() * templateTypes.length)];
     const randomPrompt = getRandomTemplatePrompt(randomType);
     setInput(randomPrompt);
   }, [setInput]);

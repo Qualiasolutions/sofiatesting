@@ -1,6 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { Geo } from "@vercel/functions";
-import { readFileSync } from "fs";
-import { join } from "path";
 import type { ArtifactKind } from "@/components/artifact";
 
 export const artifactsPrompt = `
@@ -42,7 +42,10 @@ Do not update document right after creating it. Wait for user feedback or reques
  */
 
 function loadSophiaInstructions(): string {
-  const basePath = join(process.cwd(), "SOPHIA_AI_ASSISTANT_INSTRUCTIONS_UPDATED.md");
+  const basePath = join(
+    process.cwd(),
+    "docs/knowledge/sophia-ai-assistant-instructions.md"
+  );
   let content = readFileSync(basePath, "utf8");
 
   // Replace date placeholders

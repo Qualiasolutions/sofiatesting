@@ -29,9 +29,7 @@ export const calculateVATTool = tool({
     buildable_area: z
       .number()
       .positive()
-      .describe(
-        "Total internal area in square meters (e.g., 150)"
-      ),
+      .describe("Total internal area in square meters (e.g., 150)"),
     is_main_residence: z
       .boolean()
       .default(true)
@@ -39,7 +37,7 @@ export const calculateVATTool = tool({
         "Is this for main residence? Ask: 'Is this for your main residence?' (Yes/No)"
       ),
   }),
-  execute: async ({ price, buildable_area, is_main_residence = true }) => {
+  execute: ({ price, buildable_area, is_main_residence = true }) => {
     try {
       // Calculate VAT using the updated service with deterministic rules
       const result = CalculatorService.calculateVAT({

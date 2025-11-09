@@ -37,7 +37,7 @@ export const uploadListingTool = tool({
       }
 
       // Get listing - either specified or most recent
-      let listing;
+      let listing: Awaited<ReturnType<typeof getListingById>> | undefined;
       if (listingId) {
         listing = await getListingById({ id: listingId });
         if (listing && listing.userId !== session.user.id) {
@@ -47,14 +47,18 @@ export const uploadListingTool = tool({
           };
         }
       } else {
-        const listings = await getListingsByUserId({ userId: session.user.id, limit: 1 });
+        const listings = await getListingsByUserId({
+          userId: session.user.id,
+          limit: 1,
+        });
         listing = listings[0];
       }
 
       if (!listing) {
         return {
           success: false,
-          error: "No listing found. Create a listing first by saying 'create a listing'.",
+          error:
+            "No listing found. Create a listing first by saying 'create a listing'.",
         };
       }
 
@@ -73,9 +77,17 @@ export const uploadListingTool = tool({
       // Update to uploading status
       await updateListingStatus({ id: listing.id, status: "uploading" });
 
-      // Upload to zyprus.com
+      // Upload to zyprus.com - convert nulls to undefined for optional fields
       try {
-        const result = await uploadToZyprusAPI(listing);
+        const result = await uploadToZyprusAPI({
+          ...listing,
+          locationId: listing.locationId ?? undefined,
+          propertyTypeId: listing.propertyTypeId ?? undefined,
+          indoorFeatureIds: listing.indoorFeatureIds ?? undefined,
+          outdoorFeatureIds: listing.outdoorFeatureIds ?? undefined,
+          priceModifierId: listing.priceModifierId ?? undefined,
+          titleDeedId: listing.titleDeedId ?? undefined,
+        } as any);
         const durationMs = Date.now() - startTime;
 
         // Success - update status
@@ -107,8 +119,10 @@ Your property is now live on zyprus.com!`,
         };
       } catch (uploadError) {
         const durationMs = Date.now() - startTime;
-        const errorMessage = uploadError instanceof Error ? uploadError.message : "Unknown error";
-        const errorCode = uploadError instanceof ZyprusAPIError ? uploadError.code : "UNKNOWN";
+        const errorMessage =
+          uploadError instanceof Error ? uploadError.message : "Unknown error";
+        const errorCode =
+          uploadError instanceof ZyprusAPIError ? uploadError.code : "UNKNOWN";
 
         // Log failed attempt
         await logListingUploadAttempt({
@@ -121,9 +135,10 @@ Your property is now live on zyprus.com!`,
         });
 
         // Update status to failed or draft based on error type
-        const newStatus = uploadError instanceof ZyprusAPIError && isPermanentError(uploadError)
-          ? "failed"
-          : "draft";
+        const newStatus =
+          uploadError instanceof ZyprusAPIError && isPermanentError(uploadError)
+            ? "failed"
+            : "draft";
 
         await updateListingStatus({ id: listing.id, status: newStatus });
 

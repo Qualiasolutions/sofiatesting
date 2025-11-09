@@ -4,7 +4,7 @@
 
 Your SOPHIA instructions have been successfully split into **38 separate template files** while maintaining **EXACTLY THE SAME BEHAVIOR** - not even 1mm difference!
 
-**Note:** The file header claims "42 templates" but actually contains 38 templates. We extracted ALL templates that exist in your Desktop SOPHIA file.
+**Note:** The file header claims "42 templates" but actually contains 38 templates. We extracted ALL templates that exist in the consolidated source at `../knowledge/sophia-ai-assistant-instructions.md`.
 
 ## 📁 New Structure
 
@@ -138,7 +138,7 @@ const prompt = buildSophiaPrompt({
 ## 📂 Template Files
 
 All templates extracted from:
-`/home/qualiasolutions/Desktop/SOPHIA_AI_ASSISTANT_INSTRUCTIONS_UPDATED.md`
+`../knowledge/sophia-ai-assistant-instructions.md`
 
 Each template file contains:
 - **Exact** formatting from original

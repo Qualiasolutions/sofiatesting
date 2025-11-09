@@ -32,7 +32,8 @@ export default async function Page() {
 
   if (modelIdFromCookie) {
     // Check if it's an old model name and map it
-    selectedModel = modelMapping[modelIdFromCookie.value] || modelIdFromCookie.value;
+    selectedModel =
+      modelMapping[modelIdFromCookie.value] || modelIdFromCookie.value;
 
     // If the model was mapped, update the cookie with the new value
     if (modelMapping[modelIdFromCookie.value]) {

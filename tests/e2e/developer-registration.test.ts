@@ -20,7 +20,9 @@ test.describe("SOFIA Developer Registration Tests", () => {
   }) => {
     // Send the exact user query that was failing
     const input = page.locator('[data-testid="multimodal-input"] textarea');
-    await input.fill("i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova");
+    await input.fill(
+      "i want a registartion developer with viewing tomorrow at 3pm the client is Margarita dimova"
+    );
 
     // Click the send button
     const sendButton = page.locator(
@@ -62,7 +64,9 @@ test.describe("SOFIA Developer Registration Tests", () => {
   }) => {
     // Send a complete developer registration request
     const input = page.locator('[data-testid="multimodal-input"] textarea');
-    await input.fill("developer registration with viewing tomorrow at 2pm client is John Smith contact person is Fotis");
+    await input.fill(
+      "developer registration with viewing tomorrow at 2pm client is John Smith contact person is Fotis"
+    );
 
     // Click the send button
     const sendButton = page.locator(
@@ -83,7 +87,9 @@ test.describe("SOFIA Developer Registration Tests", () => {
     // Should contain the complete developer registration document
     expect(responseText).toContain("Dear Fotis,");
     expect(responseText).toContain("Registration Details: John Smith");
-    expect(responseText).toContain("Viewing Arranged for: October 21, 2025 at 2:00 PM");
+    expect(responseText).toContain(
+      "Viewing Arranged for: October 21, 2025 at 2:00 PM"
+    );
     expect(responseText).toContain("**8%+VAT**");
     expect(responseText).toContain(" CSC Zyprus Property Group LTD");
   });
@@ -95,18 +101,19 @@ test.describe("SOFIA Developer Registration Tests", () => {
       {
         input: "developer registration tomorrow client Maria Papadopoulos",
         expectedToContain: ["developer", "contact", "name"],
-        expectedNotToContain: ["maria", "viewing", "time"]
+        expectedNotToContain: ["maria", "viewing", "time"],
       },
       {
         input: "dev reg with viewing today 4pm client Andreas Georgiou",
         expectedToContain: ["developer", "contact", "name"],
-        expectedNotToContain: ["andreas", "today", "4pm"]
+        expectedNotToContain: ["andreas", "today", "4pm"],
       },
       {
-        input: "registration developer with viewing client is Elena Petrou at 5pm",
+        input:
+          "registration developer with viewing client is Elena Petrou at 5pm",
         expectedToContain: ["developer", "contact", "name"],
-        expectedNotToContain: ["elena", "5pm"]
-      }
+        expectedNotToContain: ["elena", "5pm"],
+      },
     ];
 
     for (const testCase of testCases) {
@@ -124,7 +131,9 @@ test.describe("SOFIA Developer Registration Tests", () => {
       );
       await sendButton.click();
 
-      await page.waitForSelector('[data-role="assistant"]', { timeout: 15_000 });
+      await page.waitForSelector('[data-role="assistant"]', {
+        timeout: 15_000,
+      });
 
       const response = page
         .locator('[data-role="assistant"] .sophia-response')
@@ -148,7 +157,9 @@ test.describe("SOFIA Developer Registration Tests", () => {
   }) => {
     // Send developer registration without viewing request
     const input = page.locator('[data-testid="multimodal-input"] textarea');
-    await input.fill("developer registration no viewing client is Andreas Antoniou");
+    await input.fill(
+      "developer registration no viewing client is Andreas Antoniou"
+    );
 
     // Click the send button
     const sendButton = page.locator(
@@ -178,17 +189,19 @@ test.describe("SOFIA Developer Registration Tests", () => {
   }) => {
     const timeTestCases = [
       {
-        input: "developer registration with viewing tomorrow at 3pm client is Margarita Dimova",
-        expectedTime: "3:00 PM"
+        input:
+          "developer registration with viewing tomorrow at 3pm client is Margarita Dimova",
+        expectedTime: "3:00 PM",
       },
       {
         input: "dev reg viewing today at 2pm client John Smith",
-        expectedTime: "2:00 PM"
+        expectedTime: "2:00 PM",
       },
       {
-        input: "developer registration with viewing tomorrow at 4:30 client Maria Papadopoulos",
-        expectedTime: "4:30 PM"
-      }
+        input:
+          "developer registration with viewing tomorrow at 4:30 client Maria Papadopoulos",
+        expectedTime: "4:30 PM",
+      },
     ];
 
     for (const testCase of timeTestCases) {
@@ -206,7 +219,9 @@ test.describe("SOFIA Developer Registration Tests", () => {
       );
       await sendButton.click();
 
-      await page.waitForSelector('[data-role="assistant"]', { timeout: 15_000 });
+      await page.waitForSelector('[data-role="assistant"]', {
+        timeout: 15_000,
+      });
 
       const response = page
         .locator('[data-role="assistant"] .sophia-response')

@@ -1,5 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+const SOPHIA_RESPONSE_CLASS_REGEX = /sophia-response/;
+const SOPHIA_LINE_HEIGHT_REGEX = /1\.6/;
+const SOPHIA_FONT_SIZE_REGEX = /14px/;
+
 test.describe("SOFIA Enhanced Formatting Tests", () => {
   test.use({
     baseURL: "https://sofiatesting-69ohbse6x-qualiasolutionscy.vercel.app",
@@ -164,11 +168,17 @@ test.describe("SOFIA Enhanced Formatting Tests", () => {
     const responseContainer = page
       .locator('[data-role="assistant"] .sophia-response')
       .last();
-    await expect(responseContainer).toHaveClass(/sophia-response/);
+    await expect(responseContainer).toHaveClass(SOPHIA_RESPONSE_CLASS_REGEX);
 
     // Check if container has base styling
-    await expect(responseContainer).toHaveCSS("line-height", /1\.6/); // leading-relaxed
-    await expect(responseContainer).toHaveCSS("font-size", /14px/); // text-sm
+    await expect(responseContainer).toHaveCSS(
+      "line-height",
+      SOPHIA_LINE_HEIGHT_REGEX
+    ); // leading-relaxed
+    await expect(responseContainer).toHaveCSS(
+      "font-size",
+      SOPHIA_FONT_SIZE_REGEX
+    ); // text-sm
   });
 
   test("SOFIA should handle line breaks and paragraphs correctly", async ({
@@ -197,7 +207,10 @@ test.describe("SOFIA Enhanced Formatting Tests", () => {
       // Verify paragraphs have proper spacing
       const firstParagraph = paragraphs.first();
       await expect(firstParagraph).toHaveCSS("margin-bottom", "16px"); // mb-4 = 16px
-      await expect(firstParagraph).toHaveCSS("line-height", /1\.6/); // leading-relaxed
+      await expect(firstParagraph).toHaveCSS(
+        "line-height",
+        SOPHIA_LINE_HEIGHT_REGEX
+      ); // leading-relaxed
     }
 
     // Check for line break elements

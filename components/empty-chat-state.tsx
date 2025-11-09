@@ -2,15 +2,11 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { HomeIcon, MessageIcon, SparklesIcon } from "./icons";
+import { MessageIcon, SparklesIcon } from "./icons";
 import { Button } from "./ui/button";
 import { EmptyState } from "./ui/empty";
 
-interface EmptyChatStateProps {
-  user?: any;
-}
-
-export function EmptyChatState({ user }: EmptyChatStateProps) {
+export function EmptyChatState() {
   return (
     <motion.div
       animate={{ opacity: 1, y: 0 }}

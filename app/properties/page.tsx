@@ -1,9 +1,8 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -11,6 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -18,10 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
-interface PropertyListing {
+type PropertyListing = {
   id?: string;
   name: string;
   description: string;
@@ -36,7 +36,7 @@ interface PropertyListing {
     addressLocality: string;
     postalCode: string;
   };
-}
+};
 
 export default function PropertiesPage() {
   const [listings, setListings] = useState<PropertyListing[]>([]);
@@ -91,7 +91,7 @@ export default function PropertiesPage() {
         throw new Error(error.error || "Failed to create listing");
       }
 
-      const data = await response.json();
+      await response.json();
       toast.success("Property listing created successfully!");
 
       // Reset form
@@ -115,7 +115,9 @@ export default function PropertiesPage() {
       await fetchListings();
     } catch (error) {
       console.error("Error creating listing:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to create listing");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create listing"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -138,24 +140,26 @@ export default function PropertiesPage() {
         throw new Error(error.error || "Failed to upload listing");
       }
 
-      const data = await response.json();
+      const result = await response.json();
       toast.success("Property uploaded to Zyprus successfully!");
 
-      if (data.listingUrl) {
-        window.open(data.listingUrl, "_blank");
+      if (typeof window !== "undefined" && result.listingUrl) {
+        window.open(result.listingUrl, "_blank");
       }
 
       // Refresh listings
       await fetchListings();
     } catch (error) {
       console.error("Error uploading listing:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to upload listing");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to upload listing"
+      );
     } finally {
       setIsUploading(false);
     }
   };
 
-  const fetchListings = async () => {
+  const fetchListings = useCallback(async () => {
     try {
       const response = await fetch("/api/listings/list");
       if (!response.ok) {
@@ -169,18 +173,18 @@ export default function PropertiesPage() {
         toast.error("Failed to fetch listings");
       }
     }
-  };
+  }, []);
 
   // Fetch listings on component mount
   useEffect(() => {
     fetchListings();
-  }, []);
+  }, [fetchListings]);
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8">Property Management</h1>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="mb-8 font-bold text-3xl">Property Management</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         {/* Property Form */}
         <Card>
           <CardHeader>
@@ -190,17 +194,17 @@ export default function PropertiesPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div>
                 <Label htmlFor="name">Property Title</Label>
                 <Input
                   id="name"
-                  value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
                   placeholder="Modern 2BR Apartment in Limassol"
                   required
+                  value={formData.name}
                 />
               </div>
 
@@ -208,13 +212,13 @@ export default function PropertiesPage() {
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
-                  value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
                   placeholder="Describe the property features, location, and amenities..."
-                  rows={4}
                   required
+                  rows={4}
+                  value={formData.description}
                 />
               </div>
 
@@ -223,23 +227,23 @@ export default function PropertiesPage() {
                   <Label htmlFor="price">Price</Label>
                   <Input
                     id="price"
-                    type="number"
-                    value={formData.price}
                     onChange={(e) =>
                       setFormData({ ...formData, price: e.target.value })
                     }
                     placeholder="250000"
                     required
+                    type="number"
+                    value={formData.price}
                   />
                 </div>
 
                 <div>
                   <Label htmlFor="propertyType">Property Type</Label>
                   <Select
-                    value={formData.propertyType}
                     onValueChange={(value) =>
                       setFormData({ ...formData, propertyType: value })
                     }
+                    value={formData.propertyType}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -260,16 +264,16 @@ export default function PropertiesPage() {
                   <Label htmlFor="bedrooms">Bedrooms</Label>
                   <Input
                     id="bedrooms"
-                    type="number"
-                    value={formData.numberOfRooms}
+                    min="0"
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        numberOfRooms: parseInt(e.target.value) || 0,
+                        numberOfRooms: Number.parseInt(e.target.value, 10) || 0,
                       })
                     }
-                    min="0"
                     required
+                    type="number"
+                    value={formData.numberOfRooms}
                   />
                 </div>
 
@@ -277,9 +281,6 @@ export default function PropertiesPage() {
                   <Label htmlFor="bathrooms">Bathrooms</Label>
                   <Input
                     id="bathrooms"
-                    type="number"
-                    step="0.5"
-                    value={formData.numberOfBathroomsTotal}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
@@ -288,6 +289,9 @@ export default function PropertiesPage() {
                     }
                     placeholder="2"
                     required
+                    step="0.5"
+                    type="number"
+                    value={formData.numberOfBathroomsTotal}
                   />
                 </div>
 
@@ -295,13 +299,13 @@ export default function PropertiesPage() {
                   <Label htmlFor="size">Size (m²)</Label>
                   <Input
                     id="size"
-                    type="number"
-                    value={formData.floorSize}
                     onChange={(e) =>
                       setFormData({ ...formData, floorSize: e.target.value })
                     }
                     placeholder="120"
                     required
+                    type="number"
+                    value={formData.floorSize}
                   />
                 </div>
               </div>
@@ -309,8 +313,6 @@ export default function PropertiesPage() {
               <div className="space-y-2">
                 <Label>Address</Label>
                 <Input
-                  placeholder="Street Address"
-                  value={formData.address.streetAddress}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -320,11 +322,11 @@ export default function PropertiesPage() {
                       },
                     })
                   }
+                  placeholder="Street Address"
+                  value={formData.address.streetAddress}
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <Input
-                    placeholder="City/Locality"
-                    value={formData.address.addressLocality}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
@@ -334,11 +336,11 @@ export default function PropertiesPage() {
                         },
                       })
                     }
+                    placeholder="City/Locality"
                     required
+                    value={formData.address.addressLocality}
                   />
                   <Input
-                    placeholder="Postal Code"
-                    value={formData.address.postalCode}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
@@ -348,11 +350,13 @@ export default function PropertiesPage() {
                         },
                       })
                     }
+                    placeholder="Postal Code"
+                    value={formData.address.postalCode}
                   />
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button className="w-full" disabled={isLoading} type="submit">
                 {isLoading ? "Creating..." : "Create Listing"}
               </Button>
             </form>
@@ -369,7 +373,7 @@ export default function PropertiesPage() {
           </CardHeader>
           <CardContent>
             {listings.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
+              <p className="py-8 text-center text-muted-foreground">
                 No listings yet. Create your first property listing!
               </p>
             ) : (
@@ -377,27 +381,27 @@ export default function PropertiesPage() {
                 {listings.map((listing: any) => (
                   <Card key={listing.id}>
                     <CardContent className="pt-4">
-                      <div className="flex justify-between items-start">
+                      <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h3 className="font-semibold">{listing.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {listing.propertyType} • {listing.numberOfRooms} BR •{" "}
-                            {listing.floorSize}m²
+                          <p className="text-muted-foreground text-sm">
+                            {listing.propertyType} • {listing.numberOfRooms} BR
+                            • {listing.floorSize}m²
                           </p>
-                          <p className="text-sm font-medium mt-1">
+                          <p className="mt-1 font-medium text-sm">
                             €{listing.price}
                           </p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-muted-foreground text-sm">
                             {listing.address?.addressLocality}
                           </p>
-                          <div className="flex items-center gap-2 mt-2">
+                          <div className="mt-2 flex items-center gap-2">
                             <span
-                              className={`text-xs px-2 py-1 rounded-full ${
+                              className={`rounded-full px-2 py-1 text-xs ${
                                 listing.status === "uploaded"
                                   ? "bg-green-100 text-green-700"
                                   : listing.status === "failed"
-                                  ? "bg-red-100 text-red-700"
-                                  : "bg-gray-100 text-gray-700"
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-gray-100 text-gray-700"
                               }`}
                             >
                               {listing.status}
@@ -407,20 +411,20 @@ export default function PropertiesPage() {
                         <div className="ml-4">
                           {listing.status === "draft" && (
                             <Button
-                              size="sm"
-                              onClick={() => handleUpload(listing.id)}
                               disabled={isUploading}
+                              onClick={() => handleUpload(listing.id)}
+                              size="sm"
                             >
                               {isUploading ? "Uploading..." : "Upload"}
                             </Button>
                           )}
                           {listing.zyprusListingUrl && (
                             <Button
-                              size="sm"
-                              variant="outline"
                               onClick={() =>
                                 window.open(listing.zyprusListingUrl, "_blank")
                               }
+                              size="sm"
+                              variant="outline"
                             >
                               View on Zyprus
                             </Button>

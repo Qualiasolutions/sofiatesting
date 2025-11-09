@@ -1,14 +1,12 @@
 {
-    "servers": {
-        "postman": {
-            "type": "stdio",
-            "command": "npx",
-            "args": [
-                "@postman/postman-mcp-server@latest"
-            ],
-            "env": {
-                "POSTMAN_API_KEY": "PMAK-6904fc7359d53a00010abcfe-d4c8802943506fd4231648b59c7932e89b"
-            }
-        }
+  "servers": {
+    "postman": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@postman/postman-mcp-server@latest"],
+      "env": {
+        "POSTMAN_API_KEY": "REPLACE_WITH_POSTMAN_API_KEY"
+      }
     }
+  }
 }

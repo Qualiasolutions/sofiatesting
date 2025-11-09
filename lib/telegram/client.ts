@@ -6,14 +6,12 @@ import type { TelegramWebhookInfo } from "./types";
  * Handles all communication with Telegram Bot API
  */
 export class TelegramClient {
-  private readonly botToken: string;
   private readonly apiUrl: string;
 
   constructor(botToken: string) {
     if (!botToken) {
       throw new Error("TELEGRAM_BOT_TOKEN is required");
     }
-    this.botToken = botToken;
     this.apiUrl = `https://api.telegram.org/bot${botToken}`;
   }
 

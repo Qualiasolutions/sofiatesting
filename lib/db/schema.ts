@@ -192,12 +192,16 @@ export const propertyListing = pgTable(
     numberOfRooms: integer("numberOfRooms").notNull(), // bedrooms
     numberOfBathroomsTotal: numeric("numberOfBathroomsTotal").notNull(),
     floorSize: numeric("floorSize").notNull(), // in m²
-    propertyType: varchar("propertyType", { length: 50 }), // villa, apartment, etc.
-    amenityFeature: jsonb("amenityFeature"), // array of features
+    propertyType: varchar("propertyType", { length: 50 }), // villa, apartment, etc. [DEPRECATED - use taxonomy fields below]
+    propertyTypeId: uuid("propertyTypeId"), // UUID from zyprus.com taxonomy_term--property_type
+    locationId: uuid("locationId"), // UUID from zyprus.com node--location
+    indoorFeatureIds: uuid("indoorFeatureIds").array(), // UUIDs from zyprus.com taxonomy_term--indoor_property_features
+    outdoorFeatureIds: uuid("outdoorFeatureIds").array(), // UUIDs from zyprus.com taxonomy_term--outdoor_property_features
+    priceModifierId: uuid("priceModifierId"), // UUID from zyprus.com taxonomy_term--price_modifier
+    titleDeedId: uuid("titleDeedId"), // UUID from zyprus.com taxonomy_term--title_deed
+    amenityFeature: jsonb("amenityFeature"), // array of features [DEPRECATED - use featureIds above]
     image: jsonb("image"), // array of image URLs
-    status: varchar("status", { length: 20 })
-      .notNull()
-      .default("draft"), // draft, queued, uploading, uploaded, failed, published
+    status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, queued, uploading, uploaded, failed, published
     zyprusListingId: text("zyprusListingId"), // ID from zyprus.com
     zyprusListingUrl: text("zyprusListingUrl"), // public URL
     createdAt: timestamp("createdAt").notNull().defaultNow(),
@@ -212,6 +216,8 @@ export const propertyListing = pgTable(
     createdAtIdx: index("PropertyListing_createdAt_idx").on(table.createdAt),
     deletedAtIdx: index("PropertyListing_deletedAt_idx").on(table.deletedAt),
     chatIdIdx: index("PropertyListing_chatId_idx").on(table.chatId),
+    locationIdx: index("PropertyListing_locationId_idx").on(table.locationId),
+    propertyTypeIdx: index("PropertyListing_propertyTypeId_idx").on(table.propertyTypeId),
   })
 );
 
@@ -234,9 +240,7 @@ export const listingUploadAttempt = pgTable(
     durationMs: integer("durationMs"),
   },
   (table) => ({
-    listingIdx: index("ListingUploadAttempt_listingId_idx").on(
-      table.listingId
-    ),
+    listingIdx: index("ListingUploadAttempt_listingId_idx").on(table.listingId),
     attemptedAtIdx: index("ListingUploadAttempt_attemptedAt_idx").on(
       table.attemptedAt
     ),

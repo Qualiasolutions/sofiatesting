@@ -153,7 +153,7 @@ export const regularPrompt = buildSophiaPrompt({
 ## 📝 What Changed
 
 ### Before
-- ✅ Single file: `SOPHIA_AI_ASSISTANT_INSTRUCTIONS_UPDATED.md` (1,925 lines)
+- ✅ Single file: `../knowledge/sophia-ai-assistant-instructions.md` (1,925 lines)
 - ✅ Loaded entire file every request (~20k tokens)
 
 ### After
@@ -302,8 +302,8 @@ grep "mode:" lib/ai/prompts.ts
 
 ## 📚 Documentation
 
-- **Full Guide:** `TEMPLATE_SYSTEM_README.md`
-- **This File:** `DEPLOYMENT_READY.md`
+- **Full Guide:** `../templates/overview.md`
+- **This File:** `deployment-ready.md`
 - **Test Script:** `scripts/test-system.ts`
 - **Extraction Script:** `scripts/extract-all-42-templates.ts`
 

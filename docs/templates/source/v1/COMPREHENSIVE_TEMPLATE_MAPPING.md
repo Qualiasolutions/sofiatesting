@@ -178,7 +178,7 @@ Templates **39-43** are exclusively for info@zyprus.com use only:
 
 ## 📞 SUPPORT & MAINTENANCE
 
-**File Locations:** `/home/qualiasolutions/Desktop/templates_03_38_instructions/`
+**File Locations:** `docs/templates/source/v1/`
 
 **Main Index:** `Registration Templates list.txt`
 

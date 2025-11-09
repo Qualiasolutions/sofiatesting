@@ -1,6 +1,6 @@
+import { NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 import { getListingsByUserId } from "@/lib/db/queries";
-import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   try {
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     }
 
     const url = new URL(req.url);
-    const limit = parseInt(url.searchParams.get("limit") || "10");
+    const limit = Number.parseInt(url.searchParams.get("limit") || "10", 10);
 
     const listings = await getListingsByUserId({
       userId: session.user.id,
@@ -23,7 +23,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       success: true,
-      listings: listings.map(listing => ({
+      listings: listings.map((listing) => ({
         id: listing.id,
         name: listing.name,
         description: listing.description,

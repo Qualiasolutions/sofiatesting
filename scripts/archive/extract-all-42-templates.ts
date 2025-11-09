@@ -10,11 +10,13 @@
  * I will extract EVERY single one letter-by-letter
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { join } from "path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
-const SOURCE_FILE =
-  "/home/qualiasolutions/Desktop/SOPHIA_AI_ASSISTANT_INSTRUCTIONS_UPDATED.md";
+const SOURCE_FILE = join(
+  process.cwd(),
+  "docs/knowledge/sophia-ai-assistant-instructions.md"
+);
 const TEMPLATES_DIR = join(process.cwd(), "lib/ai/instructions/templates");
 const BASE_FILE = join(process.cwd(), "lib/ai/instructions/base.md");
 
@@ -40,7 +42,9 @@ for (let i = 0; i < lines.length; i++) {
 }
 
 console.log(`Found ${templateLines.length} numbered "Template XX:" entries:\n`);
-templateLines.forEach((t) => console.log(`  Line ${t.line}: ${t.text}`));
+for (const templateLine of templateLines) {
+  console.log(`  Line ${templateLine.line}: ${templateLine.text}`);
+}
 
 console.log(
   `\n⚠️  Expected 26 client communication templates, found only ${templateLines.length}`
