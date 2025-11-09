@@ -18,7 +18,7 @@
     "test": "PLAYWRIGHT=True pnpm exec playwright test"
   },
   "dependencies": {
-    "@ai-sdk/gateway": "^1.0.15",
+    "@ai-sdk/anthropic": "^2.0.42",
     "@ai-sdk/google": "^2.0.29",
     "@ai-sdk/openai": "^2.0.56",
     "@ai-sdk/provider": "2.0.0",

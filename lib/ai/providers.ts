@@ -1,10 +1,7 @@
-import { gateway } from "@ai-sdk/gateway";
+import { anthropic } from "@ai-sdk/anthropic";
 import { google } from "@ai-sdk/google";
-import {
-  customProvider,
-  extractReasoningMiddleware,
-  wrapLanguageModel,
-} from "ai";
+import { openai } from "@ai-sdk/openai";
+import { customProvider, extractReasoningMiddleware, wrapLanguageModel } from "ai";
 import { isTestEnvironment } from "../constants";
 
 export const myProvider = isTestEnvironment
@@ -24,18 +21,18 @@ export const myProvider = isTestEnvironment
     })()
   : customProvider({
       languageModels: {
-        // Gemini models (via Google AI SDK)
+        // Gemini models (via Google AI SDK) - fallback option
         "chat-model-gemini": google("gemini-1.5-flash-latest"),
-        "chat-model": google("gemini-1.5-flash-latest"), // Default model (Gemini Flash)
-        "title-model": google("gemini-1.5-flash-latest"), // Title generation
-        "artifact-model": google("gemini-1.5-flash-latest"), // Artifact generation
-        // AI Gateway models (require AI_GATEWAY_API_KEY)
+        // AI Gateway models (OpenAI and Anthropic automatically use AI Gateway on Vercel)
+        "chat-model": openai("gpt-4o-mini"), // Default model (fast & cheap)
+        "title-model": openai("gpt-4o-mini"), // Title generation
+        "artifact-model": openai("gpt-4o-mini"), // Artifact generation
         "chat-model-sonnet": wrapLanguageModel({
-          model: gateway("anthropic/claude-sonnet-4.5"),
+          model: anthropic("claude-sonnet-4.5"),
           middleware: extractReasoningMiddleware({ tagName: "thinking" }),
         }),
-        "chat-model-haiku": gateway("anthropic/claude-3-5-haiku-20241022"),
-        "chat-model-gpt4o": gateway("openai/gpt-4o"),
-        "chat-model-gpt4o-mini": gateway("openai/gpt-4o-mini"),
+        "chat-model-haiku": anthropic("claude-3-5-haiku-20241022"),
+        "chat-model-gpt4o": openai("gpt-4o"),
+        "chat-model-gpt4o-mini": openai("gpt-4o-mini"),
       },
     });

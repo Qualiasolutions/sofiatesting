@@ -174,11 +174,26 @@ Remember: You're chatting on Telegram, so keep it natural and conversational whi
       replyToMessageId: message.message_id,
     });
   } catch (error) {
-    console.error("Error handling Telegram message:", error);
-    await sendTelegramMessage(
+    console.error("Error handling Telegram message:", {
       chatId,
-      "Sorry, I encountered an error processing your message. Please try again later."
-    );
+      fromUser: message.from,
+      messageText: message.text?.substring(0, 100),
+      error: error,
+      errorMessage: error instanceof Error ? error.message : "Unknown error",
+      errorStack: error instanceof Error ? error.stack : undefined,
+    });
+
+    try {
+      await sendTelegramMessage(
+        chatId,
+        "Sorry, I encountered an error processing your message. Please try again later."
+      );
+    } catch (sendError) {
+      console.error("Failed to send error message to Telegram:", {
+        chatId,
+        sendError: sendError instanceof Error ? sendError.message : "Unknown error",
+      });
+    }
   }
 }
 

@@ -103,7 +103,8 @@ export async function saveChat({
       title,
       visibility,
     });
-  } catch (_error) {
+  } catch (error) {
+    console.error("Database error in saveChat:", error);
     throw new ChatSDKError("bad_request:database", "Failed to save chat");
   }
 }
@@ -242,7 +243,8 @@ export async function getChatById({ id }: { id: string }) {
     }
 
     return selectedChat;
-  } catch (_error) {
+  } catch (error) {
+    console.error("Database error in getChatById:", error);
     throw new ChatSDKError("bad_request:database", "Failed to get chat by id");
   }
 }
@@ -250,7 +252,8 @@ export async function getChatById({ id }: { id: string }) {
 export async function saveMessages({ messages }: { messages: DBMessage[] }) {
   try {
     return await db.insert(message).values(messages);
-  } catch (_error) {
+  } catch (error) {
+    console.error("Database error in saveMessages:", error);
     throw new ChatSDKError("bad_request:database", "Failed to save messages");
   }
 }

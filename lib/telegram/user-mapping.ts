@@ -40,7 +40,13 @@ export async function getTelegramUser(
 
     return newUser;
   } catch (error) {
-    console.error("Error getting Telegram user:", error);
+    console.error("Error getting Telegram user:", {
+      telegramUserId: telegramUser.id,
+      telegramUsername: telegramUser.username,
+      error: error,
+      errorMessage: error instanceof Error ? error.message : "Unknown error",
+      errorStack: error instanceof Error ? error.stack : undefined,
+    });
     throw new Error("Failed to get or create user for Telegram");
   }
 }
