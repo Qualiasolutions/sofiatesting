@@ -349,7 +349,7 @@ export function formatForWhatsApp(text: string): string {
 /**
  * Split long message into WhatsApp-compatible chunks
  */
-export function splitForWhatsApp(text: string, maxLength: number = 1600): string[] {
+export function splitForWhatsApp(text: string, maxLength = 1600): string[] {
   const chunks: string[] = [];
   let currentChunk = "";
 

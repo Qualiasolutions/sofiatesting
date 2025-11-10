@@ -50,7 +50,7 @@ export const getZyprusDataTool = tool({
 
       // Fetch requested data
       switch (resourceType) {
-        case "locations":
+        case "locations": {
           const locations = await getAllLocations();
           return {
             success: true,
@@ -63,8 +63,9 @@ export const getZyprusDataTool = tool({
             },
             message: `Found ${locations.length} locations on zyprus.com`,
           };
+        }
 
-        case "property_types":
+        case "property_types": {
           const propertyTypes = await getAllPropertyTypes();
           return {
             success: true,
@@ -77,8 +78,9 @@ export const getZyprusDataTool = tool({
             },
             message: `Found ${propertyTypes.length} property types on zyprus.com`,
           };
+        }
 
-        case "indoor_features":
+        case "indoor_features": {
           const indoorFeatures = await getAllIndoorFeatures();
           return {
             success: true,
@@ -91,8 +93,9 @@ export const getZyprusDataTool = tool({
             },
             message: `Found ${indoorFeatures.length} indoor features on zyprus.com`,
           };
+        }
 
-        case "outdoor_features":
+        case "outdoor_features": {
           const outdoorFeatures = await getAllOutdoorFeatures();
           return {
             success: true,
@@ -105,8 +108,9 @@ export const getZyprusDataTool = tool({
             },
             message: `Found ${outdoorFeatures.length} outdoor features on zyprus.com`,
           };
+        }
 
-        case "price_modifiers":
+        case "price_modifiers": {
           const priceModifiers = await getAllPriceModifiers();
           return {
             success: true,
@@ -119,8 +123,9 @@ export const getZyprusDataTool = tool({
             },
             message: `Found ${priceModifiers.length} price modifiers on zyprus.com`,
           };
+        }
 
-        case "title_deeds":
+        case "title_deeds": {
           const titleDeeds = await getAllTitleDeeds();
           return {
             success: true,
@@ -133,17 +138,24 @@ export const getZyprusDataTool = tool({
             },
             message: `Found ${titleDeeds.length} title deed types on zyprus.com`,
           };
+        }
 
-        case "all":
-          const [allLocations, allPropertyTypes, allIndoorFeatures, allOutdoorFeatures, allPriceModifiers, allTitleDeeds] =
-            await Promise.all([
-              getAllLocations(),
-              getAllPropertyTypes(),
-              getAllIndoorFeatures(),
-              getAllOutdoorFeatures(),
-              getAllPriceModifiers(),
-              getAllTitleDeeds(),
-            ]);
+        case "all": {
+          const [
+            allLocations,
+            allPropertyTypes,
+            allIndoorFeatures,
+            allOutdoorFeatures,
+            allPriceModifiers,
+            allTitleDeeds,
+          ] = await Promise.all([
+            getAllLocations(),
+            getAllPropertyTypes(),
+            getAllIndoorFeatures(),
+            getAllOutdoorFeatures(),
+            getAllPriceModifiers(),
+            getAllTitleDeeds(),
+          ]);
 
           return {
             success: true,
@@ -175,6 +187,7 @@ export const getZyprusDataTool = tool({
             },
             message: `Fetched complete taxonomy from zyprus.com: ${allLocations.length} locations, ${allPropertyTypes.length} property types, ${allIndoorFeatures.length} indoor features, ${allOutdoorFeatures.length} outdoor features, ${allPriceModifiers.length} price modifiers, ${allTitleDeeds.length} title deeds`,
           };
+        }
 
         default:
           return {

@@ -178,7 +178,7 @@ Remember: You're chatting on Telegram, so keep it natural and conversational whi
       chatId,
       fromUser: message.from,
       messageText: message.text?.substring(0, 100),
-      error: error,
+      error,
       errorMessage: error instanceof Error ? error.message : "Unknown error",
       errorStack: error instanceof Error ? error.stack : undefined,
     });
@@ -191,7 +191,8 @@ Remember: You're chatting on Telegram, so keep it natural and conversational whi
     } catch (sendError) {
       console.error("Failed to send error message to Telegram:", {
         chatId,
-        sendError: sendError instanceof Error ? sendError.message : "Unknown error",
+        sendError:
+          sendError instanceof Error ? sendError.message : "Unknown error",
       });
     }
   }

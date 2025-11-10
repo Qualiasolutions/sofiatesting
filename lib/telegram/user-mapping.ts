@@ -62,20 +62,36 @@ export function getTelegramChatId(telegramUserId: number): string {
   const namespace = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"; // DNS namespace UUID
   const name = `telegram_user_${telegramUserId}`;
 
-  // Create deterministic UUID v5
+  // Create deterministic UUID v5 using SHA-1
   const hash = crypto.createHash("sha1");
-  hash.update(namespace.replace(/-/g, ""));
+
+  // Convert namespace UUID to bytes (remove dashes)
+  const namespaceBytes = Buffer.from(namespace.replace(/-/g, ""), "hex");
+  hash.update(namespaceBytes);
   hash.update(name);
+
   const digest = hash.digest();
 
-  // Format as UUID v5
+  // Format as UUID v5 (RFC 4122)
+  // 8-4-4-4-12 hex character format
   const uuid = [
-    digest.subarray(0, 4).toString("hex"),
-    digest.subarray(4, 6).toString("hex"),
-    digest.subarray(6, 8).toString("hex"),
-    digest.subarray(8, 10).toString("hex"),
-    digest.subarray(10, 16).toString("hex"),
+    digest.subarray(0, 4).toString("hex"),    // 8 hex chars (time_low)
+    digest.subarray(4, 6).toString("hex"),    // 4 hex chars (time_mid)
+    digest.subarray(6, 8).toString("hex"),    // 4 hex chars (time_hi_and_version)
+    digest.subarray(8, 10).toString("hex"),   // 4 hex chars (clock_seq_hi_and_reserved + clock_seq_low)
+    digest.subarray(10, 16).toString("hex"),  // 12 hex chars (node)
   ].join("-");
 
-  return uuid;
+  // Set version (5) and variant bits as per RFC 4122
+  const parts = uuid.split("-");
+
+  // Set version to 5 (0101) in time_hi_and_version (bits 12-15)
+  const timeHiAndVersion = parseInt(parts[2], 16);
+  parts[2] = ((timeHiAndVersion & 0x0fff) | 0x5000).toString(16).padStart(4, "0");
+
+  // Set variant to 10 in clock_seq_hi_and_reserved (bits 6-7)
+  const clockSeq = parseInt(parts[3], 16);
+  parts[3] = ((clockSeq & 0x3fff) | 0x8000).toString(16).padStart(4, "0");
+
+  return parts.join("-");
 }

@@ -5,11 +5,38 @@ import { getTelegramClient } from "@/lib/telegram/client";
  * Telegram Bot Setup Endpoint
  * Use this to set up the webhook and check bot status
  *
+ * Requires ADMIN_API_KEY header for authentication
+ *
  * GET /api/telegram/setup - Get bot info and webhook status
  * POST /api/telegram/setup - Set up webhook
+ * DELETE /api/telegram/setup - Delete webhook
  */
 
-export async function GET() {
+/**
+ * Validates admin API key from request headers
+ */
+function validateAdminAuth(request: Request): boolean {
+  const adminKey = request.headers.get("x-admin-api-key");
+  const expectedKey = process.env.ADMIN_API_KEY;
+
+  if (!expectedKey) {
+    console.error(
+      "ADMIN_API_KEY not configured - setup endpoint is disabled"
+    );
+    return false;
+  }
+
+  return adminKey === expectedKey;
+}
+
+export async function GET(request: Request) {
+  // Require admin authentication
+  if (!validateAdminAuth(request)) {
+    return NextResponse.json(
+      { error: "Unauthorized - Admin API key required" },
+      { status: 401 }
+    );
+  }
   try {
     const client = getTelegramClient();
 
@@ -37,6 +64,14 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  // Require admin authentication
+  if (!validateAdminAuth(request)) {
+    return NextResponse.json(
+      { error: "Unauthorized - Admin API key required" },
+      { status: 401 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { webhookUrl } = body;
@@ -50,8 +85,9 @@ export async function POST(request: Request) {
 
     const client = getTelegramClient();
 
-    // Set webhook
-    const success = await client.setWebhook(webhookUrl);
+    // Set webhook with secret token for security
+    const secretToken = process.env.TELEGRAM_WEBHOOK_SECRET;
+    const success = await client.setWebhook(webhookUrl, secretToken);
 
     if (success) {
       const webhookInfo = await client.getWebhookInfo();
@@ -75,7 +111,15 @@ export async function POST(request: Request) {
   }
 }
 
-export async function DELETE() {
+export async function DELETE(request: Request) {
+  // Require admin authentication
+  if (!validateAdminAuth(request)) {
+    return NextResponse.json(
+      { error: "Unauthorized - Admin API key required" },
+      { status: 401 }
+    );
+  }
+
   try {
     const client = getTelegramClient();
 

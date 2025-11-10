@@ -1,6 +1,16 @@
 # SOFIA – Zyprus Property Group AI Assistant
 
-SOFIA is a production-grade Next.js 15 application that helps Zyprus agents draft real estate documents, manage property listings, and operate an AI-assisted support desk. It builds on Vercel’s AI SDK with custom tooling, PostgreSQL persistence, and a Telegram bot integration.
+SOFIA is a production-grade Next.js 15 application that helps Zyprus agents draft real estate documents, manage property listings, and operate an AI-assisted support desk. It builds on Vercel's AI SDK with custom tooling, PostgreSQL persistence, and a Telegram bot integration.
+
+## 🚀 Active Development
+
+**Optimization work in progress!** See `IMPLEMENTATION_PLAN.md` for:
+- 10 prioritized performance & cost optimizations
+- Current implementation status
+- Testing & deployment checklists
+- Performance metrics tracking
+
+All contributors and AI agents should reference `IMPLEMENTATION_PLAN.md` before starting work.
 
 ## Highlights
 - **Chat Workspace** – secure, access-code gated UI with guest and registered sessions.

@@ -42,3 +42,14 @@ yarn-error.log*
 /playwright-report/
 /blob-report/
 /playwright/*
+
+# pnpm
+.pnpm-store/
+
+# IDE
+.vscode/
+.cursor/
+.claude/
+
+# Logs
+*.log

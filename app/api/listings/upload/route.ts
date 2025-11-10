@@ -65,16 +65,15 @@ export async function POST(req: Request) {
 
     try {
       // Upload to Zyprus - convert nulls to undefined for optional fields
-      const { listingId: zyprusId, listingUrl } =
-        await uploadToZyprusAPI({
-          ...listing,
-          locationId: listing.locationId ?? undefined,
-          propertyTypeId: listing.propertyTypeId ?? undefined,
-          indoorFeatureIds: listing.indoorFeatureIds ?? undefined,
-          outdoorFeatureIds: listing.outdoorFeatureIds ?? undefined,
-          priceModifierId: listing.priceModifierId ?? undefined,
-          titleDeedId: listing.titleDeedId ?? undefined,
-        } as any);
+      const { listingId: zyprusId, listingUrl } = await uploadToZyprusAPI({
+        ...listing,
+        locationId: listing.locationId ?? undefined,
+        propertyTypeId: listing.propertyTypeId ?? undefined,
+        indoorFeatureIds: listing.indoorFeatureIds ?? undefined,
+        outdoorFeatureIds: listing.outdoorFeatureIds ?? undefined,
+        priceModifierId: listing.priceModifierId ?? undefined,
+        titleDeedId: listing.titleDeedId ?? undefined,
+      } as any);
 
       // Update status to uploaded
       await updateListingStatus({

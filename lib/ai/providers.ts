@@ -1,3 +1,4 @@
+import { google } from "@ai-sdk/google";
 import { gateway } from "@ai-sdk/gateway";
 import {
   customProvider,
@@ -23,10 +24,12 @@ export const myProvider = isTestEnvironment
     })()
   : customProvider({
       languageModels: {
-        // AI Gateway models (OpenAI and Anthropic via Vercel AI Gateway)
-        "chat-model": gateway("openai/gpt-4o-mini"), // Default model - fast, reliable, cost-effective
-        "title-model": gateway("openai/gpt-4o-mini"), // Title generation
-        "artifact-model": gateway("openai/gpt-4o-mini"), // Artifact generation
+        // Primary models: Gemini 1.5 Flash (fast, cost-effective)
+        "chat-model": google("gemini-1.5-flash-latest"), // Default model - 50% cheaper than GPT-4o-mini
+        "title-model": google("gemini-1.5-flash-latest"), // Title generation
+        "artifact-model": google("gemini-1.5-flash-latest"), // Artifact generation
+
+        // Premium models via AI Gateway (optional, requires AI_GATEWAY_API_KEY)
         "chat-model-gpt4o-mini": gateway("openai/gpt-4o-mini"),
         "chat-model-gpt4o": gateway("openai/gpt-4o"),
         "chat-model-sonnet": wrapLanguageModel({

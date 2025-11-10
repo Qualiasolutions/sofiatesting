@@ -78,7 +78,8 @@ export const uploadListingTool = tool({
       if (!listing.locationId) {
         return {
           success: false,
-          error: "❌ Missing required field: locationId. Please use the getZyprusData tool to fetch available locations and update the listing with a valid location ID.",
+          error:
+            "❌ Missing required field: locationId. Please use the getZyprusData tool to fetch available locations and update the listing with a valid location ID.",
         };
       }
 

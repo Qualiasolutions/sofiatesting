@@ -24,18 +24,28 @@ export const user = pgTable("User", {
 
 export type User = InferSelectModel<typeof user>;
 
-export const chat = pgTable("Chat", {
-  id: uuid("id").primaryKey().notNull().defaultRandom(),
-  createdAt: timestamp("createdAt").notNull(),
-  title: text("title").notNull(),
-  userId: uuid("userId")
-    .notNull()
-    .references(() => user.id),
-  visibility: varchar("visibility", { enum: ["public", "private"] })
-    .notNull()
-    .default("private"),
-  lastContext: jsonb("lastContext").$type<AppUsage | null>(),
-});
+export const chat = pgTable(
+  "Chat",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    createdAt: timestamp("createdAt").notNull(),
+    title: text("title").notNull(),
+    userId: uuid("userId")
+      .notNull()
+      .references(() => user.id),
+    visibility: varchar("visibility", { enum: ["public", "private"] })
+      .notNull()
+      .default("private"),
+    lastContext: jsonb("lastContext").$type<AppUsage | null>(),
+  },
+  (table) => ({
+    // Composite index for user chat list queries (userId + createdAt DESC)
+    userIdCreatedAtIdx: index("Chat_userId_createdAt_idx").on(
+      table.userId,
+      table.createdAt.desc()
+    ),
+  })
+);
 
 export type Chat = InferSelectModel<typeof chat>;
 
@@ -53,16 +63,26 @@ export const messageDeprecated = pgTable("Message", {
 
 export type MessageDeprecated = InferSelectModel<typeof messageDeprecated>;
 
-export const message = pgTable("Message_v2", {
-  id: uuid("id").primaryKey().notNull().defaultRandom(),
-  chatId: uuid("chatId")
-    .notNull()
-    .references(() => chat.id),
-  role: varchar("role").notNull(),
-  parts: json("parts").notNull(),
-  attachments: json("attachments").notNull(),
-  createdAt: timestamp("createdAt").notNull(),
-});
+export const message = pgTable(
+  "Message_v2",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    chatId: uuid("chatId")
+      .notNull()
+      .references(() => chat.id),
+    role: varchar("role").notNull(),
+    parts: json("parts").notNull(),
+    attachments: json("attachments").notNull(),
+    createdAt: timestamp("createdAt").notNull(),
+  },
+  (table) => ({
+    // Composite index for message history queries (chatId + createdAt ASC)
+    chatIdCreatedAtIdx: index("Message_v2_chatId_createdAt_idx").on(
+      table.chatId,
+      table.createdAt.asc()
+    ),
+  })
+);
 
 export type DBMessage = InferSelectModel<typeof message>;
 
@@ -217,7 +237,18 @@ export const propertyListing = pgTable(
     deletedAtIdx: index("PropertyListing_deletedAt_idx").on(table.deletedAt),
     chatIdIdx: index("PropertyListing_chatId_idx").on(table.chatId),
     locationIdx: index("PropertyListing_locationId_idx").on(table.locationId),
-    propertyTypeIdx: index("PropertyListing_propertyTypeId_idx").on(table.propertyTypeId),
+    propertyTypeIdx: index("PropertyListing_propertyTypeId_idx").on(
+      table.propertyTypeId
+    ),
+    // Composite index for user listings queries (userId + status)
+    userIdStatusIdx: index("PropertyListing_userId_status_idx").on(
+      table.userId,
+      table.status
+    ),
+    // Index for draft cleanup cron job
+    draftExpiresAtIdx: index("PropertyListing_draftExpiresAt_idx").on(
+      table.draftExpiresAt
+    ),
   })
 );
 

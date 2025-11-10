@@ -85,19 +85,31 @@ export class TelegramClient {
 
   /**
    * Set webhook URL for receiving updates
+   * @param webhookUrl - The HTTPS URL to send updates to
+   * @param secretToken - Optional secret token for webhook security (recommended)
    */
-  async setWebhook(webhookUrl: string): Promise<boolean> {
+  async setWebhook(
+    webhookUrl: string,
+    secretToken?: string
+  ): Promise<boolean> {
     try {
+      const body: any = {
+        url: webhookUrl,
+        allowed_updates: ["message", "edited_message"],
+        drop_pending_updates: false,
+      };
+
+      // Add secret token if provided (recommended for security)
+      if (secretToken) {
+        body.secret_token = secretToken;
+      }
+
       const response = await fetch(`${this.apiUrl}/setWebhook`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          url: webhookUrl,
-          allowed_updates: ["message", "edited_message"],
-          drop_pending_updates: false,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();

@@ -34,12 +34,16 @@ export const createListingTool = tool({
     locationId: z
       .string()
       .uuid()
-      .describe("Location UUID from zyprus.com (required). Use getZyprusData tool to fetch available locations first."),
+      .describe(
+        "Location UUID from zyprus.com (required). Use getZyprusData tool to fetch available locations first."
+      ),
     propertyTypeId: z
       .string()
       .uuid()
       .optional()
-      .describe("Property type UUID from zyprus.com. Use getZyprusData tool to fetch available property types."),
+      .describe(
+        "Property type UUID from zyprus.com. Use getZyprusData tool to fetch available property types."
+      ),
     price: z
       .number()
       .positive()
@@ -67,21 +71,29 @@ export const createListingTool = tool({
     indoorFeatureIds: z
       .array(z.string().uuid())
       .optional()
-      .describe("Indoor feature UUIDs from zyprus.com. Use getZyprusData tool to fetch available indoor features."),
+      .describe(
+        "Indoor feature UUIDs from zyprus.com. Use getZyprusData tool to fetch available indoor features."
+      ),
     outdoorFeatureIds: z
       .array(z.string().uuid())
       .optional()
-      .describe("Outdoor feature UUIDs from zyprus.com. Use getZyprusData tool to fetch available outdoor features."),
+      .describe(
+        "Outdoor feature UUIDs from zyprus.com. Use getZyprusData tool to fetch available outdoor features."
+      ),
     priceModifierId: z
       .string()
       .uuid()
       .optional()
-      .describe("Price modifier UUID from zyprus.com (e.g., 'Guide Price'). Use getZyprusData tool to fetch options."),
+      .describe(
+        "Price modifier UUID from zyprus.com (e.g., 'Guide Price'). Use getZyprusData tool to fetch options."
+      ),
     titleDeedId: z
       .string()
       .uuid()
       .optional()
-      .describe("Title deed UUID from zyprus.com. Use getZyprusData tool to fetch available title deed types."),
+      .describe(
+        "Title deed UUID from zyprus.com. Use getZyprusData tool to fetch available title deed types."
+      ),
     features: z
       .array(z.string())
       .optional()
@@ -121,7 +133,8 @@ export const createListingTool = tool({
       if (!locationId) {
         return {
           success: false,
-          error: "Location ID is required. Use the getZyprusData tool to fetch available locations first.",
+          error:
+            "Location ID is required. Use the getZyprusData tool to fetch available locations first.",
         };
       }
 

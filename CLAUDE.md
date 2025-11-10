@@ -2,6 +2,26 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🚨 CRITICAL: Before Starting Any Work
+
+**ALL AGENTS MUST:**
+1. **READ** `IMPLEMENTATION_PLAN.md` in the root directory
+2. **CHECK** current task status and priority
+3. **UPDATE** checkboxes as you work
+4. **TEST** after completing each item
+5. **DEPLOY** and verify in production
+
+The `IMPLEMENTATION_PLAN.md` is the single source of truth for all optimization work. It tracks:
+- 10 prioritized optimization tasks
+- Testing protocols for each task
+- Deployment checklists
+- Performance metrics before/after
+- Completion status and notes
+
+**Never start optimization work without consulting IMPLEMENTATION_PLAN.md first.**
+
+---
+
 ## Project Overview
 
 SOFIA is a production-grade Next.js 15 application serving as the Zyprus Property Group AI Assistant. It handles real estate document drafting, property listing management, and operates an AI-assisted support desk with Telegram bot integration. Built on Vercel's AI SDK with PostgreSQL persistence and custom real estate tooling.

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/(auth)/auth";
 
 const WEBHOOK_SECRET = process.env.WHATSAPP_WEBHOOK_SECRET;
@@ -88,7 +88,10 @@ async function sendWhatsAppMessage(to: string, message: string) {
       );
 
       if (!response.ok) {
-        console.error("Failed to send WhatsApp message:", await response.text());
+        console.error(
+          "Failed to send WhatsApp message:",
+          await response.text()
+        );
       }
     } catch (error) {
       console.error("Error sending WhatsApp message:", error);
@@ -105,7 +108,7 @@ async function processWhatsAppMessage(from: string, message: string) {
     const command = message.trim().toLowerCase();
 
     // Get or create user session
-    let session = await auth();
+    const session = await auth();
     if (!session?.user) {
       // Create guest user for WhatsApp
       const guestEmail = `whatsapp-${from.replace(/[^a-zA-Z0-9]/g, "")}`;
@@ -134,7 +137,7 @@ Type your request in plain English and I'll help you!`,
 
     if (command.includes("locations") || command.includes("where")) {
       return {
-        response: `📍 To see available locations, please use the web interface or type "help" for available commands.`
+        response: `📍 To see available locations, please use the web interface or type "help" for available commands.`,
       };
     }
 
@@ -144,7 +147,7 @@ Type your request in plain English and I'll help you!`,
 
 "Create a 3-bedroom apartment in Limassol for €300,000"
 
-I'll guide you through the process!`
+I'll guide you through the process!`,
       };
     }
 
@@ -154,13 +157,13 @@ I'll guide you through the process!`
 
 I can help you create and upload property listings to zyprus.com.
 
-Type "help" to see available commands or just tell me what you'd like to do!`
+Type "help" to see available commands or just tell me what you'd like to do!`,
     };
-
   } catch (error) {
     console.error("Error processing WhatsApp message:", error);
     return {
-      response: "Sorry, I encountered an error. Please try again or contact support."
+      response:
+        "Sorry, I encountered an error. Please try again or contact support.",
     };
   }
 }
@@ -174,11 +177,11 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get("x-hub-signature-256");
 
     // Verify webhook signature in production
-    if (process.env.NODE_ENV === "production" && !verifySignature(body, signature)) {
-      return NextResponse.json(
-        { error: "Invalid signature" },
-        { status: 401 }
-      );
+    if (
+      process.env.NODE_ENV === "production" &&
+      !verifySignature(body, signature)
+    ) {
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     const data = JSON.parse(body);

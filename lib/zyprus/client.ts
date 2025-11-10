@@ -6,7 +6,13 @@ export class ZyprusAPIError extends Error {
   details?: string;
   errors?: any[];
 
-  constructor(message: string, code: string, statusCode?: number, details?: string, errors?: any[]) {
+  constructor(
+    message: string,
+    code: string,
+    statusCode?: number,
+    details?: string,
+    errors?: any[]
+  ) {
     super(message);
     this.name = "ZyprusAPIError";
     this.code = code;

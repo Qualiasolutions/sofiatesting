@@ -8,8 +8,20 @@ export const maxDuration = 60;
  * Telegram Bot Webhook Handler
  * This endpoint receives updates from Telegram Bot API
  * Set webhook URL: https://your-domain.com/api/telegram/webhook
+ *
+ * Security: Validates X-Telegram-Bot-Api-Secret-Token header
+ * Set webhook with secret_token parameter to enable validation
  */
 export async function POST(request: Request) {
+  // Validate secret token (if configured)
+  const secretToken = request.headers.get("x-telegram-bot-api-secret-token");
+  const expectedSecret = process.env.TELEGRAM_WEBHOOK_SECRET;
+
+  if (expectedSecret && secretToken !== expectedSecret) {
+    console.warn("Telegram webhook rejected - invalid secret token");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = (await request.json()) as TelegramUpdate;
 
