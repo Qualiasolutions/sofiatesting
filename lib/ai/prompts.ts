@@ -100,20 +100,12 @@ About the origin of user's request:
 - country: ${requestHints.country}
 `;
 
-export const systemPrompt = ({
-  selectedChatModel,
-  requestHints,
-}: {
-  selectedChatModel: string;
-  requestHints: RequestHints;
-}) => {
-  const requestPrompt = getRequestPromptFromHints(requestHints);
-
-  // Use cached sophia instructions (cached for 24h)
+/**
+ * Get the base system prompt with critical field extraction reminders
+ * This part is CACHEABLE for Anthropic prompt caching
+ */
+export const getBaseSystemPrompt = () => {
   const sophiaInstructions = regularPrompt;
-  const requestHintsContent = requestPrompt;
-
-  const chatModelInstructions = `Using model: ${selectedChatModel}`;
 
   const criticalFieldExtractionReminder = `
 🚨🚨🚨 CRITICAL FIELD EXTRACTION - IMMEDIATE ACTION REQUIRED 🚨🚨🚨
@@ -143,13 +135,28 @@ CRITICAL RULES:
 ✅ Extract ALL information from user message BEFORE responding
 ✅ Generate immediately when all required fields are present`;
 
-  const systemPromptContent = `${sophiaInstructions}
+  return `${sophiaInstructions}
 
-${requestHintsContent}
+${criticalFieldExtractionReminder}`;
+};
+
+/**
+ * Get the dynamic system prompt parts (changes per request)
+ * This part is NOT cacheable
+ */
+export const getDynamicSystemPrompt = ({
+  selectedChatModel,
+  requestHints,
+}: {
+  selectedChatModel: string;
+  requestHints: RequestHints;
+}) => {
+  const requestPrompt = getRequestPromptFromHints(requestHints);
+  const chatModelInstructions = `Using model: ${selectedChatModel}`;
+
+  return `${requestPrompt}
 
 ${chatModelInstructions}
-
-${criticalFieldExtractionReminder}
 
 Current date: ${new Date().toLocaleDateString("en-US", {
     year: "numeric",
@@ -161,11 +168,27 @@ Current time: ${new Date().toLocaleTimeString("en-US", {
     minute: "2-digit",
     timeZone: "Asia/Nicosia",
   })} (Cyprus time)`;
+};
 
-  // NEVER include artifactsPrompt - SOFIA generates documents directly in chat
-  // Note: The heavy lifting (file read) is already cached via loadSophiaInstructions (24h cache)
-  // String concatenation here is fast (<1ms), so no additional caching needed
-  return systemPromptContent;
+/**
+ * Legacy single-string system prompt (for non-Anthropic models)
+ */
+export const systemPrompt = ({
+  selectedChatModel,
+  requestHints,
+}: {
+  selectedChatModel: string;
+  requestHints: RequestHints;
+}) => {
+  const basePrompt = getBaseSystemPrompt();
+  const dynamicPrompt = getDynamicSystemPrompt({
+    selectedChatModel,
+    requestHints,
+  });
+
+  return `${basePrompt}
+
+${dynamicPrompt}`;
 };
 
 export const codePrompt = `

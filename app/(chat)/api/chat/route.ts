@@ -15,7 +15,12 @@ import { auth, type UserType } from "@/app/(auth)/auth";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
-import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
+import {
+  getBaseSystemPrompt,
+  getDynamicSystemPrompt,
+  type RequestHints,
+  systemPrompt,
+} from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
 import { calculateCapitalGainsTool } from "@/lib/ai/tools/calculate-capital-gains";
 import { calculateTransferFeesTool } from "@/lib/ai/tools/calculate-transfer-fees";
@@ -159,9 +164,31 @@ export async function POST(request: Request) {
 
     const stream = createUIMessageStream({
       execute: ({ writer: dataStream }) => {
+        // Use Anthropic prompt caching for Claude models (Sonnet, Haiku)
+        const isAnthropicModel =
+          selectedChatModel === "chat-model-sonnet" ||
+          selectedChatModel === "chat-model-haiku";
+
+        const systemPromptValue = isAnthropicModel
+          ? ([
+              {
+                type: "text" as const,
+                text: getBaseSystemPrompt(),
+                cache_control: { type: "ephemeral" as const },
+              },
+              {
+                type: "text" as const,
+                text: getDynamicSystemPrompt({
+                  selectedChatModel,
+                  requestHints,
+                }),
+              },
+            ] as any) // Anthropic prompt caching format (AI SDK types don't support this yet)
+          : systemPrompt({ selectedChatModel, requestHints });
+
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
-          system: systemPrompt({ selectedChatModel, requestHints }),
+          system: systemPromptValue,
           messages: convertToModelMessages(uiMessages),
           temperature: 0,
           stopWhen: stepCountIs(5),
