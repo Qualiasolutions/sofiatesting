@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { handleTelegramMessage } from "@/lib/telegram/message-handler";
 import type { TelegramUpdate } from "@/lib/telegram/types";
 
+// Extended duration to allow AI responses to complete (Telegram timeout is 60s)
 export const maxDuration = 60;
 
 /**
@@ -11,6 +12,11 @@ export const maxDuration = 60;
  *
  * Security: Validates X-Telegram-Bot-Api-Secret-Token header
  * Set webhook with secret_token parameter to enable validation
+ *
+ * ASYNC PROCESSING:
+ * - Returns 200 OK immediately to prevent Telegram timeout
+ * - Processes message asynchronously in background
+ * - Serverless function stays alive until processing completes (up to maxDuration)
  */
 export async function POST(request: Request) {
   // Validate secret token (if configured)
@@ -29,12 +35,25 @@ export async function POST(request: Request) {
       update_id: body.update_id,
       has_message: !!body.message,
       has_edited_message: !!body.edited_message,
+      chat_id: body.message?.chat.id,
+      from_user: body.message?.from?.username,
     });
 
-    // Handle new message
+    // Handle new message - ASYNC (no await)
     if (body.message) {
-      await handleTelegramMessage(body.message);
-      return NextResponse.json({ ok: true });
+      // Process message asynchronously - don't await
+      // The serverless function will stay alive until completion
+      handleTelegramMessage(body.message).catch((error) => {
+        console.error("Error in async Telegram message handler:", {
+          update_id: body.update_id,
+          chat_id: body.message?.chat.id,
+          error: error instanceof Error ? error.message : "Unknown error",
+          stack: error instanceof Error ? error.stack : undefined,
+        });
+      });
+
+      // Return immediately to prevent Telegram timeout
+      return NextResponse.json({ ok: true }, { status: 200 });
     }
 
     // Handle edited message
