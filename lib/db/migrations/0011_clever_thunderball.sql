@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "PropertyListing_userId_createdAt_idx" ON "PropertyListing" USING btree ("userId","createdAt" DESC NULLS LAST);

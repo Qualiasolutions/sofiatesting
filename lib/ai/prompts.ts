@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { unstable_cache } from "next/cache";
 import type { Geo } from "@vercel/functions";
 import type { ArtifactKind } from "@/components/artifact";
 
@@ -41,7 +42,7 @@ Do not update document right after creating it. Wait for user feedback or reques
  * This maintains the original behavior with all 42 templates in a single document
  */
 
-function loadSophiaInstructions(): string {
+async function loadSophiaInstructionsUncached(): Promise<string> {
   const basePath = join(
     process.cwd(),
     "docs/knowledge/sophia-ai-assistant-instructions.md"
@@ -73,7 +74,16 @@ function loadSophiaInstructions(): string {
   return content;
 }
 
-export const regularPrompt = loadSophiaInstructions();
+// Cache base instructions for 24 hours (file content rarely changes)
+const loadSophiaInstructions = unstable_cache(
+  loadSophiaInstructionsUncached,
+  ["sophia-base-prompt"],
+  {
+    revalidate: 86400, // 24 hours in seconds
+  }
+);
+
+export const regularPrompt = await loadSophiaInstructions();
 
 export type RequestHints = {
   latitude: Geo["latitude"];
@@ -99,6 +109,7 @@ export const systemPrompt = ({
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
 
+  // Use cached sophia instructions (cached for 24h)
   const sophiaInstructions = regularPrompt;
   const requestHintsContent = requestPrompt;
 
@@ -152,6 +163,8 @@ Current time: ${new Date().toLocaleTimeString("en-US", {
   })} (Cyprus time)`;
 
   // NEVER include artifactsPrompt - SOFIA generates documents directly in chat
+  // Note: The heavy lifting (file read) is already cached via loadSophiaInstructions (24h cache)
+  // String concatenation here is fast (<1ms), so no additional caching needed
   return systemPromptContent;
 };
 

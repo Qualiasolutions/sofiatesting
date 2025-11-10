@@ -139,12 +139,17 @@ Remember: You're chatting on Telegram, so keep it natural and conversational whi
     });
 
     // Collect response text
+    const TYPING_INTERVAL_MS = 3000; // 3 seconds
+    let lastTypingIndicator = Date.now();
+
     for await (const textPart of result.textStream) {
       fullResponse += textPart;
 
-      // Send typing indicator periodically
-      if (fullResponse.length % 500 === 0) {
+      // Send typing indicator periodically (time-based, not character-based)
+      const now = Date.now();
+      if (now - lastTypingIndicator >= TYPING_INTERVAL_MS) {
         await telegramClient.sendChatAction({ chatId });
+        lastTypingIndicator = now;
       }
     }
 

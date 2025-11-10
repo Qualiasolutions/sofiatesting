@@ -245,6 +245,11 @@ export const propertyListing = pgTable(
       table.userId,
       table.status
     ),
+    // Composite index for user listings sorted by creation date (userId + createdAt DESC)
+    userIdCreatedAtIdx: index("PropertyListing_userId_createdAt_idx").on(
+      table.userId,
+      table.createdAt.desc()
+    ),
     // Index for draft cleanup cron job
     draftExpiresAtIdx: index("PropertyListing_draftExpiresAt_idx").on(
       table.draftExpiresAt

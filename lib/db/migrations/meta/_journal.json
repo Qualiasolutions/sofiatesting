@@ -78,6 +78,13 @@
       "when": 1762745649557,
       "tag": "0010_cynical_romulus",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1762793524564,
+      "tag": "0011_clever_thunderball",
+      "breakpoints": true
     }
   ]
 }
