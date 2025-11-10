@@ -67,7 +67,13 @@ function PureArtifactActions({
 
                 try {
                   await Promise.resolve(action.onClick(actionContext));
-                } catch (_error) {
+                } catch (error) {
+                  console.error("Artifact action error:", {
+                    actionDescription: action.description,
+                    artifactKind: artifact.kind,
+                    error: error instanceof Error ? error.message : "Unknown error",
+                    stack: error instanceof Error ? error.stack : undefined,
+                  });
                   toast.error("Failed to execute action");
                 } finally {
                   setIsLoading(false);

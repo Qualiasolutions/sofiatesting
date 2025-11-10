@@ -69,7 +69,7 @@ export const message = pgTable(
     id: uuid("id").primaryKey().notNull().defaultRandom(),
     chatId: uuid("chatId")
       .notNull()
-      .references(() => chat.id),
+      .references(() => chat.id, { onDelete: "cascade" }),
     role: varchar("role").notNull(),
     parts: json("parts").notNull(),
     attachments: json("attachments").notNull(),
@@ -113,10 +113,10 @@ export const vote = pgTable(
   {
     chatId: uuid("chatId")
       .notNull()
-      .references(() => chat.id),
+      .references(() => chat.id, { onDelete: "cascade" }),
     messageId: uuid("messageId")
       .notNull()
-      .references(() => message.id),
+      .references(() => message.id, { onDelete: "cascade" }),
     isUpvoted: boolean("isUpvoted").notNull(),
   },
   (table) => {
@@ -189,7 +189,7 @@ export const stream = pgTable(
     chatRef: foreignKey({
       columns: [table.chatId],
       foreignColumns: [chat.id],
-    }),
+    }).onDelete("cascade"),
   })
 );
 
