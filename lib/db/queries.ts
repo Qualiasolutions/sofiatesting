@@ -173,52 +173,49 @@ export async function getChatsByUserId({
   try {
     const extendedLimit = limit + 1;
 
-    const query = (whereCondition?: SQL<any>) =>
-      db
-        .select()
-        .from(chat)
-        .where(
-          whereCondition
-            ? and(whereCondition, eq(chat.userId, id))
-            : eq(chat.userId, id)
-        )
-        .orderBy(desc(chat.createdAt))
-        .limit(extendedLimit);
+    // Build WHERE conditions (combine all into single where() call)
+    const conditions: SQL<any>[] = [eq(chat.userId, id)];
 
-    let filteredChats: Chat[] = [];
-
+    // Use subquery for cursor-based pagination (single query instead of two)
     if (startingAfter) {
-      const [selectedChat] = await db
-        .select()
-        .from(chat)
-        .where(eq(chat.id, startingAfter))
-        .limit(1);
-
-      if (!selectedChat) {
-        throw new ChatSDKError(
-          "not_found:database",
-          `Chat with id ${startingAfter} not found`
-        );
-      }
-
-      filteredChats = await query(gt(chat.createdAt, selectedChat.createdAt));
+      conditions.push(
+        gt(
+          chat.createdAt,
+          db
+            .select({ createdAt: chat.createdAt })
+            .from(chat)
+            .where(eq(chat.id, startingAfter))
+            .limit(1) as any
+        )
+      );
     } else if (endingBefore) {
-      const [selectedChat] = await db
-        .select()
-        .from(chat)
-        .where(eq(chat.id, endingBefore))
-        .limit(1);
+      conditions.push(
+        lt(
+          chat.createdAt,
+          db
+            .select({ createdAt: chat.createdAt })
+            .from(chat)
+            .where(eq(chat.id, endingBefore))
+            .limit(1) as any
+        )
+      );
+    }
 
-      if (!selectedChat) {
-        throw new ChatSDKError(
-          "not_found:database",
-          `Chat with id ${endingBefore} not found`
-        );
-      }
+    // Execute single optimized query with combined conditions
+    const filteredChats = await db
+      .select()
+      .from(chat)
+      .where(and(...conditions))
+      .orderBy(desc(chat.createdAt))
+      .limit(extendedLimit);
 
-      filteredChats = await query(lt(chat.createdAt, selectedChat.createdAt));
-    } else {
-      filteredChats = await query();
+    // If cursor was provided but no results, the cursor ID doesn't exist
+    if ((startingAfter || endingBefore) && filteredChats.length === 0) {
+      const cursorId = (startingAfter || endingBefore) as string;
+      throw new ChatSDKError(
+        "not_found:database",
+        `Chat with id ${cursorId} not found`
+      );
     }
 
     const hasMore = filteredChats.length > limit;
@@ -227,7 +224,11 @@ export async function getChatsByUserId({
       chats: hasMore ? filteredChats.slice(0, limit) : filteredChats,
       hasMore,
     };
-  } catch (_error) {
+  } catch (error) {
+    if (error instanceof ChatSDKError) {
+      throw error;
+    }
+    console.error("Database error in getChatsByUserId:", error);
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to get chats by user id"

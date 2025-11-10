@@ -65,6 +65,13 @@ export default defineConfig({
         ...devices["Desktop Chrome"],
       },
     },
+    {
+      name: "integration",
+      testMatch: /integration\/.*.test.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+      },
+    },
 
     // {
     //   name: 'firefox',
