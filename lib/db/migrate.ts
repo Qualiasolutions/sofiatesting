@@ -12,6 +12,9 @@ const runMigrate = async () => {
     throw new Error("POSTGRES_URL is not defined");
   }
 
+  // Note: Migrations use direct postgres-js connection (not Vercel pooler)
+  // This is intentional - migration scripts need dedicated connections
+  // The pooler is only used in serverless functions (lib/db/queries.ts)
   const connection = postgres(process.env.POSTGRES_URL, { max: 1 });
   const db = drizzle(connection);
 
