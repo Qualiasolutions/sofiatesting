@@ -7,6 +7,26 @@ import {
 } from "ai";
 import { isTestEnvironment } from "../constants";
 
+// Check if AI Gateway is properly configured
+// This runs at module initialization time, which happens server-side during build/runtime
+const isGatewayConfigured = (() => {
+  // In test environment, gateway is not needed
+  if (isTestEnvironment) return false;
+
+  // Check for AI_GATEWAY_API_KEY environment variable
+  const hasGatewayKey = !!process.env.AI_GATEWAY_API_KEY;
+
+  // Only log warning during server-side initialization
+  // typeof window check ensures this only logs on server
+  if (!hasGatewayKey && typeof window === "undefined") {
+    console.warn(
+      "[SOFIA] AI Gateway not configured. Premium models (Claude, GPT-4o) will fall back to Gemini 1.5 Flash."
+    );
+  }
+
+  return hasGatewayKey;
+})();
+
 export const myProvider = isTestEnvironment
   ? (() => {
       const { chatModel, claudeModel, mistralSmallModel } =
@@ -15,27 +35,37 @@ export const myProvider = isTestEnvironment
         languageModels: {
           "chat-model": claudeModel,
           "chat-model-sonnet": claudeModel,
+          "chat-model-haiku": claudeModel,
           "chat-model-gpt4o": chatModel,
-          "chat-model-gpt4o-mini": mistralSmallModel,
           "title-model": mistralSmallModel,
           "artifact-model": claudeModel,
         },
       });
     })()
-  : customProvider({
-      languageModels: {
-        // Primary models: Gemini 1.5 Flash (fast, cost-effective)
-        "chat-model": google("gemini-1.5-flash-latest"), // Default model - 50% cheaper than GPT-4o-mini
-        "title-model": google("gemini-1.5-flash-latest"), // Title generation
-        "artifact-model": google("gemini-1.5-flash-latest"), // Artifact generation
+  : (() => {
+      // Use latest Gemini 2.0 Flash as default model
+      const geminiFlash = google("gemini-2.0-flash-exp");
 
-        // Premium models via AI Gateway (optional, requires AI_GATEWAY_API_KEY)
-        "chat-model-gpt4o-mini": gateway("openai/gpt-4o-mini"),
-        "chat-model-gpt4o": gateway("openai/gpt-4o"),
-        "chat-model-sonnet": wrapLanguageModel({
-          model: gateway("anthropic/claude-sonnet-4.5"),
-          middleware: extractReasoningMiddleware({ tagName: "thinking" }),
-        }),
-        "chat-model-haiku": gateway("anthropic/claude-3-5-haiku-20241022"),
-      },
-    });
+      return customProvider({
+        languageModels: {
+          // Primary models: Gemini 2.0 Flash (fast, cost-effective, multimodal)
+          "chat-model": geminiFlash, // Default model - latest Gemini 2.0 Flash
+          "title-model": geminiFlash, // Title generation
+          "artifact-model": geminiFlash, // Artifact generation
+
+          // Premium models via AI Gateway (with fallback to Gemini if not configured)
+          "chat-model-gpt4o": isGatewayConfigured
+            ? gateway("openai/gpt-4o")
+            : geminiFlash,
+          "chat-model-sonnet": isGatewayConfigured
+            ? wrapLanguageModel({
+                model: gateway("anthropic/claude-3-5-sonnet-latest"),
+                middleware: extractReasoningMiddleware({ tagName: "thinking" }),
+              })
+            : geminiFlash,
+          "chat-model-haiku": isGatewayConfigured
+            ? gateway("anthropic/claude-3-5-haiku-latest")
+            : geminiFlash,
+        },
+      });
+    })();
