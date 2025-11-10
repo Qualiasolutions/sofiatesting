@@ -134,6 +134,9 @@ importers:
       next-themes:
         specifier: ^0.3.0
         version: 0.3.0(react-dom@19.0.0-rc-45804af1-20241021(react@19.0.0-rc-45804af1-20241021))(react@19.0.0-rc-45804af1-20241021)
+      opossum:
+        specifier: ^9.0.0
+        version: 9.0.0
       orderedmap:
         specifier: ^2.1.1
         version: 2.1.1
@@ -228,6 +231,9 @@ importers:
       '@types/node':
         specifier: ^22.8.6
         version: 22.13.10
+      '@types/opossum':
+        specifier: ^8.1.9
+        version: 8.1.9
       '@types/papaparse':
         specifier: ^5.3.15
         version: 5.3.15
@@ -2175,6 +2181,9 @@ packages:
   '@types/omelette@0.4.5':
     resolution: {integrity: sha512-zUCJpVRwfMcZfkxSCGp73mgd3/xesvPz5tQJIORlfP/zkYEyp9KUfF7IP3RRjyZR3DwxkPs96/IFf70GmYZYHQ==}
 
+  '@types/opossum@8.1.9':
+    resolution: {integrity: sha512-Jm/tYxuJFefiwRYs+/EOsUP3ktk0c8siMgAHPLnA4PXF4wKghzcjqf88dY+Xii5jId5Txw4JV0FMKTpjbd7KJA==}
+
   '@types/papaparse@5.3.15':
     resolution: {integrity: sha512-JHe6vF6x/8Z85nCX4yFdDslN11d+1pr12E526X8WAfhadOeaOTx5AuIkvDKIBopfvlzpzkdMx4YyvSKCM9oqtw==}
 
@@ -3419,6 +3428,10 @@ packages:
 
   oniguruma-to-es@4.3.3:
     resolution: {integrity: sha512-rPiZhzC3wXwE59YQMRDodUwwT9FZ9nNBwQQfsd1wfdtlKEyCdRV0avrTcSZ5xlIvGRVPd/cx6ZN45ECmS39xvg==}
+
+  opossum@9.0.0:
+    resolution: {integrity: sha512-K76U0QkxOfUZamneQuzz+AP0fyfTJcCplZ2oZL93nxeupuJbN4s6uFNbmVCt4eWqqGqRnnowdFuBicJ1fLMVxw==}
+    engines: {node: ^24 || ^22 || ^20}
 
   orderedmap@2.1.1:
     resolution: {integrity: sha512-TvAWxi0nDe1j/rtMcWcIj94+Ffe6n7zhow33h40SKxmsmozs6dz/e+EajymfoFcHd7sxNn8yHM8839uixMOV6g==}
@@ -5894,6 +5907,10 @@ snapshots:
 
   '@types/omelette@0.4.5': {}
 
+  '@types/opossum@8.1.9':
+    dependencies:
+      '@types/node': 22.13.10
+
   '@types/papaparse@5.3.15':
     dependencies:
       '@types/node': 22.13.10
@@ -7376,6 +7393,8 @@ snapshots:
       oniguruma-parser: 0.12.1
       regex: 6.0.1
       regex-recursion: 6.0.2
+
+  opossum@9.0.0: {}
 
   orderedmap@2.1.1: {}
 

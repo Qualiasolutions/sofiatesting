@@ -1,4 +1,5 @@
 import type { PropertyListing } from "@/lib/db/schema";
+import { createCircuitBreaker } from "@/lib/circuit-breakers";
 
 export class ZyprusAPIError extends Error {
   code: string;
@@ -46,15 +47,10 @@ let cachedToken: OAuthToken | null = null;
 let tokenExpiresAt = 0;
 
 /**
- * Get OAuth token for API authentication
+ * Internal OAuth token fetch (wrapped by circuit breaker)
  */
-async function getAccessToken(): Promise<string> {
+async function fetchAccessTokenInternal(): Promise<string> {
   const now = Date.now();
-
-  // Return cached token if still valid (with 5 minute buffer)
-  if (cachedToken && tokenExpiresAt > now + 300_000) {
-    return cachedToken.access_token;
-  }
 
   const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
   const clientId = process.env.ZYPRUS_CLIENT_ID;
@@ -105,6 +101,29 @@ async function getAccessToken(): Promise<string> {
       "OAUTH_ERROR"
     );
   }
+}
+
+// Circuit breaker for OAuth token fetch
+const oauthBreaker = createCircuitBreaker(fetchAccessTokenInternal, {
+  name: "ZyprusOAuth",
+  timeout: 10000, // 10 second timeout
+  errorThresholdPercentage: 60, // Allow more failures before opening (OAuth is critical)
+  resetTimeout: 60000, // Wait 1 minute before trying again
+});
+
+/**
+ * Get OAuth token for API authentication (with circuit breaker and caching)
+ */
+async function getAccessToken(): Promise<string> {
+  const now = Date.now();
+
+  // Return cached token if still valid (with 5 minute buffer)
+  if (cachedToken && tokenExpiresAt > now + 300_000) {
+    return cachedToken.access_token;
+  }
+
+  // Fetch new token through circuit breaker
+  return await oauthBreaker.fire();
 }
 
 /**
@@ -193,9 +212,9 @@ export async function getZyprusTaxonomyTerms(
 }
 
 /**
- * Upload property listing to Zyprus API using JSON:API format
+ * Internal property upload function (wrapped by circuit breaker)
  */
-export async function uploadToZyprusAPI(
+async function uploadToZyprusAPIInternal(
   listing: PropertyListing & {
     locationId?: string;
     indoorFeatureIds?: string[];
@@ -552,6 +571,37 @@ export async function getZyprusListings(): Promise<any[]> {
   }
 }
 
+// Circuit breaker for property upload
+const uploadBreaker = createCircuitBreaker(uploadToZyprusAPIInternal, {
+  name: "ZyprusUpload",
+  timeout: 45000, // 45 second timeout (allows for image uploads)
+  errorThresholdPercentage: 50, // 50% failure rate trips circuit
+  resetTimeout: 30000, // Wait 30 seconds before trying again
+  volumeThreshold: 3, // Need at least 3 failed requests to trip
+});
+
+/**
+ * Upload property listing to Zyprus API (with circuit breaker)
+ */
+export async function uploadToZyprusAPI(
+  listing: PropertyListing & {
+    locationId?: string;
+    indoorFeatureIds?: string[];
+    outdoorFeatureIds?: string[];
+    listingTypeId?: string;
+    propertyTypeId?: string;
+    priceModifierId?: string;
+    titleDeedId?: string;
+    yearBuilt?: number;
+    referenceId?: string;
+  }
+): Promise<{
+  listingId: string;
+  listingUrl: string;
+}> {
+  return await uploadBreaker.fire(listing);
+}
+
 /**
  * Check if error is permanent (should not retry)
  */
@@ -566,3 +616,11 @@ export function isPermanentError(error: ZyprusAPIError): boolean {
   ];
   return permanentCodes.includes(error.code);
 }
+
+/**
+ * Export circuit breakers for monitoring/admin
+ */
+export const zyprusCircuitBreakers = {
+  oauth: oauthBreaker,
+  upload: uploadBreaker,
+};
