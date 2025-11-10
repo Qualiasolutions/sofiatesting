@@ -74,6 +74,14 @@ export const uploadListingTool = tool({
         };
       }
 
+      // Validate required fields before upload
+      if (!listing.locationId) {
+        return {
+          success: false,
+          error: "❌ Missing required field: locationId. Please use the getZyprusData tool to fetch available locations and update the listing with a valid location ID.",
+        };
+      }
+
       // Update to uploading status
       await updateListingStatus({ id: listing.id, status: "uploading" });
 

@@ -3,12 +3,16 @@ import type { PropertyListing } from "@/lib/db/schema";
 export class ZyprusAPIError extends Error {
   code: string;
   statusCode?: number;
+  details?: string;
+  errors?: any[];
 
-  constructor(message: string, code: string, statusCode?: number) {
+  constructor(message: string, code: string, statusCode?: number, details?: string, errors?: any[]) {
     super(message);
     this.name = "ZyprusAPIError";
     this.code = code;
     this.statusCode = statusCode;
+    this.details = details;
+    this.errors = errors;
   }
 }
 
@@ -188,8 +192,8 @@ export async function getZyprusTaxonomyTerms(
 export async function uploadToZyprusAPI(
   listing: PropertyListing & {
     locationId?: string;
-    indoorFeatures?: string[];
-    outdoorFeatures?: string[];
+    indoorFeatureIds?: string[];
+    outdoorFeatureIds?: string[];
     listingTypeId?: string;
     propertyTypeId?: string;
     priceModifierId?: string;
@@ -345,18 +349,18 @@ export async function uploadToZyprusAPI(
     };
   }
 
-  if (listing.indoorFeatures?.length) {
+  if (listing.indoorFeatureIds?.length) {
     relationships.field_indoor_property_features = {
-      data: listing.indoorFeatures.map((id) => ({
+      data: listing.indoorFeatureIds.map((id) => ({
         type: "taxonomy_term--indoor_property_views",
         id,
       })),
     };
   }
 
-  if (listing.outdoorFeatures?.length) {
+  if (listing.outdoorFeatureIds?.length) {
     relationships.field_outdoor_property_features = {
-      data: listing.outdoorFeatures.map((id) => ({
+      data: listing.outdoorFeatureIds.map((id) => ({
         type: "taxonomy_term--outdoor_property_features",
         id,
       })),
@@ -467,15 +471,13 @@ export async function uploadToZyprusAPI(
         errorDetails = JSON.stringify(errorData.errors);
       }
 
-      const error = new ZyprusAPIError(
+      throw new ZyprusAPIError(
         errorMessage,
         errorData.errors?.[0]?.code || "API_ERROR",
-        response.status
+        response.status,
+        errorDetails,
+        errorData.errors
       );
-      // Add extra details to the error object
-      (error as any).details = errorDetails;
-      (error as any).errors = errorData.errors;
-      throw error;
     }
 
     const responseData: JsonApiDocument = await response.json();
