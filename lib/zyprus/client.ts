@@ -233,25 +233,27 @@ async function uploadToZyprusAPIInternal(
   const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
   const token = await getAccessToken();
 
-  // Upload images to field_gallery_ endpoint if present
+  // Upload images to field_gallery_ endpoint if present (PARALLEL UPLOADS)
   const imageIds: string[] = [];
   if (listing.image && Array.isArray(listing.image)) {
-    console.log(`Starting upload of ${listing.image.length} images to Zyprus`);
-    try {
-      for (let i = 0; i < listing.image.length; i++) {
-        const imageUrl = (listing.image as string[])[i];
-        console.log(
-          `Uploading image ${i + 1}/${listing.image.length}: ${imageUrl}`
-        );
+    const imageUrls = listing.image as string[];
+    const totalImages = imageUrls.length;
+
+    console.log(
+      `Starting PARALLEL upload of ${totalImages} images to Zyprus`
+    );
+
+    // Create upload promise for each image
+    const uploadPromises = imageUrls.map(async (imageUrl, i) => {
+      console.log(`Uploading image ${i + 1}/${totalImages}: ${imageUrl}`);
 
         try {
           // Fetch image from URL (supports both external URLs and Vercel Blob URLs)
           const imageResponse = await fetch(imageUrl);
           if (!imageResponse.ok) {
-            console.error(
-              `Failed to fetch image ${imageUrl}: ${imageResponse.status}`
+            throw new Error(
+              `Failed to fetch image: ${imageResponse.status} ${imageResponse.statusText}`
             );
-            continue;
           }
 
           const imageBlob = await imageResponse.blob();
@@ -277,28 +279,48 @@ async function uploadToZyprusAPIInternal(
             }
           );
 
-          if (uploadResponse.ok) {
-            const data = await uploadResponse.json();
-            imageIds.push(data.data.id);
-            console.log(
-              `Successfully uploaded image ${i + 1}: ${data.data.id}`
-            );
-          } else {
+          if (!uploadResponse.ok) {
             const errorText = await uploadResponse.text();
-            console.error(
-              `Failed to upload image ${i + 1}: ${uploadResponse.status} - ${errorText}`
+            throw new Error(
+              `Upload failed: ${uploadResponse.status} - ${errorText}`
             );
           }
+
+          const data = await uploadResponse.json();
+          console.log(
+            `Successfully uploaded image ${i + 1}: ${data.data.id}`
+          );
+          return { index: i, id: data.data.id, url: imageUrl };
         } catch (imgError) {
-          console.error(`Error processing image ${i + 1}:`, imgError);
+          console.error(
+            `Error processing image ${i + 1} (${imageUrl}):`,
+            imgError
+          );
+          throw imgError; // Re-throw to mark as rejected in Promise.allSettled
         }
       }
-      console.log(
-        `Image upload complete: ${imageIds.length}/${listing.image.length} successful`
-      );
-    } catch (error) {
-      console.error("Image upload error:", error);
-    }
+    );
+
+    // Execute all uploads in parallel and collect results
+    const results = await Promise.allSettled(uploadPromises);
+
+    // Extract successful image IDs (preserve original order)
+    results.forEach((result, i) => {
+      if (result.status === "fulfilled") {
+        imageIds.push(result.value.id);
+      } else {
+        console.error(
+          `Image ${i + 1} upload failed:`,
+          result.reason instanceof Error
+            ? result.reason.message
+            : "Unknown error"
+        );
+      }
+    });
+
+    console.log(
+      `Parallel image upload complete: ${imageIds.length}/${totalImages} successful (${((imageIds.length / totalImages) * 100).toFixed(1)}%)`
+    );
   }
 
   // Build JSON:API payload for Drupal with correct field names
