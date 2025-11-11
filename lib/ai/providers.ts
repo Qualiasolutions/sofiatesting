@@ -46,29 +46,34 @@ export const myProvider = isTestEnvironment
       // Use Gemini 2.0 Flash - ultra cheap ($0.10/M input, $0.40/M output) and fast
       const geminiFlash = google("gemini-2.0-flash");
 
+      // Use AI Gateway models as primary when available
+      const defaultModel = isGatewayConfigured
+        ? gateway("anthropic/claude-haiku-4.5")  // Use Haiku 4.5 as default (cheap & smart)
+        : geminiFlash; // Fallback to Gemini if Gateway not available
+
       return customProvider({
         languageModels: {
-          // Primary models: Gemini 2.0 Flash (ultra cheap, fast, reliable)
-          "chat-model": geminiFlash, // Default model - Gemini 2.0 Flash
-          "title-model": geminiFlash, // Title generation
-          "artifact-model": geminiFlash, // Artifact generation
+          // Primary models: Use AI Gateway when available, fallback to Gemini
+          "chat-model": defaultModel, // Default to Claude Haiku 4.5 when Gateway is available
+          "title-model": defaultModel, // Title generation
+          "artifact-model": defaultModel, // Artifact generation
 
-          // Premium models via AI Gateway (with fallback to Gemini if not configured)
+          // Premium models via AI Gateway (with fallback to default)
           // GPT-4o Mini - Cheap OpenAI option ($0.15/M input, $0.60/M output)
           "chat-model-gpt4o": isGatewayConfigured
             ? gateway("openai/gpt-4o-mini")
-            : geminiFlash,
+            : defaultModel,
           // Claude Sonnet 4.5 - Best quality ($3.00/M input, $15.00/M output)
           "chat-model-sonnet": isGatewayConfigured
             ? wrapLanguageModel({
                 model: gateway("anthropic/claude-sonnet-4.5"),
                 middleware: extractReasoningMiddleware({ tagName: "thinking" }),
               })
-            : geminiFlash,
+            : defaultModel,
           // Claude Haiku 4.5 - Fast & smart ($1.00/M input, $5.00/M output)
           "chat-model-haiku": isGatewayConfigured
             ? gateway("anthropic/claude-haiku-4.5")
-            : geminiFlash,
+            : defaultModel,
         },
       });
     })();
