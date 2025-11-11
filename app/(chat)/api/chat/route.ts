@@ -164,27 +164,9 @@ export async function POST(request: Request) {
 
     const stream = createUIMessageStream({
       execute: ({ writer: dataStream }) => {
-        // Use Anthropic prompt caching for Claude models (Sonnet, Haiku)
-        const isAnthropicModel =
-          selectedChatModel === "chat-model-sonnet" ||
-          selectedChatModel === "chat-model-haiku";
-
-        const systemPromptValue = isAnthropicModel
-          ? ([
-              {
-                type: "text" as const,
-                text: getBaseSystemPrompt(),
-                cache_control: { type: "ephemeral" as const },
-              },
-              {
-                type: "text" as const,
-                text: getDynamicSystemPrompt({
-                  selectedChatModel,
-                  requestHints,
-                }),
-              },
-            ] as any) // Anthropic prompt caching format (AI SDK types don't support this yet)
-          : systemPrompt({ selectedChatModel, requestHints });
+        // AI Gateway models don't support Anthropic's native prompt caching format
+        // Always use string format for system prompts
+        const systemPromptValue = systemPrompt({ selectedChatModel, requestHints });
 
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),

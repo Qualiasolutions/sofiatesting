@@ -64,11 +64,9 @@ export const myProvider = isTestEnvironment
             ? gateway("openai/gpt-4o-mini")
             : defaultModel,
           // Claude Sonnet 4.5 - Best quality ($3.00/M input, $15.00/M output)
+          // No extractReasoningMiddleware for AI Gateway models
           "chat-model-sonnet": isGatewayConfigured
-            ? wrapLanguageModel({
-                model: gateway("anthropic/claude-sonnet-4.5"),
-                middleware: extractReasoningMiddleware({ tagName: "thinking" }),
-              })
+            ? gateway("anthropic/claude-sonnet-4.5")
             : defaultModel,
           // Claude Haiku 4.5 - Fast & smart ($1.00/M input, $5.00/M output)
           "chat-model-haiku": isGatewayConfigured
