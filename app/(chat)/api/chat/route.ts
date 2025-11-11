@@ -329,13 +329,18 @@ export async function POST(request: Request) {
         error.message?.includes("403") ||
         error.message?.includes("503"))
     ) {
-      console.error("AI Gateway configuration error:", error.message);
+      console.error("AI Gateway error:", {
+        message: error.message,
+        stack: error.stack,
+        vercelId,
+      });
+
+      // Return user-friendly error that doesn't expose sensitive details
       return new Response(
         JSON.stringify({
-          error: "AI Gateway configuration required",
+          error: "service_unavailable",
           message:
-            "The AI Gateway is not properly configured. Please add an AI_GATEWAY_API_KEY environment variable or set up billing on your Vercel account.",
-          details: error.message,
+            "SOFIA is temporarily using the default model. Premium models (Claude, GPT-4) are currently unavailable but the service remains fully functional with Gemini 1.5 Flash.",
         }),
         {
           status: 503,

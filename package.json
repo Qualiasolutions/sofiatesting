@@ -17,7 +17,8 @@
     "db:up": "pnpm exec drizzle-kit up",
     "test": "PLAYWRIGHT=True pnpm exec playwright test",
     "test:unit": "pnpm exec tsx --test tests/unit/**/*.test.ts",
-    "test:unit:parallel-uploads": "pnpm exec tsx --test tests/unit/parallel-image-uploads.test.ts"
+    "test:unit:parallel-uploads": "pnpm exec tsx --test tests/unit/parallel-image-uploads.test.ts",
+    "test:ai-models": "pnpm exec tsx scripts/test-ai-models.ts"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^2.0.7",
