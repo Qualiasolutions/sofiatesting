@@ -1,4 +1,3 @@
-import { google } from "@ai-sdk/google";
 import { gateway } from "@ai-sdk/gateway";
 import {
   customProvider,
@@ -7,8 +6,8 @@ import {
 } from "ai";
 import { isTestEnvironment } from "../constants";
 
-// Check if AI Gateway is properly configured
-// This runs at module initialization time, which happens server-side during build/runtime
+// AI Gateway is REQUIRED - no fallback
+// This ensures SOFIA always uses premium models
 const isGatewayConfigured = (() => {
   // In test environment, gateway is not needed
   if (isTestEnvironment) return false;
@@ -16,11 +15,13 @@ const isGatewayConfigured = (() => {
   // Check for AI_GATEWAY_API_KEY environment variable
   const hasGatewayKey = !!process.env.AI_GATEWAY_API_KEY;
 
-  // Only log warning during server-side initialization
-  // typeof window check ensures this only logs on server
+  // Enforce AI Gateway requirement
   if (!hasGatewayKey && typeof window === "undefined") {
-    console.warn(
-      "[SOFIA] AI Gateway not configured. Premium models (Claude, GPT-4o) will fall back to Gemini 1.5 Flash."
+    console.error(
+      "[SOFIA] CRITICAL: AI Gateway API key is required. Please configure AI_GATEWAY_API_KEY."
+    );
+    throw new Error(
+      "AI Gateway configuration is required. Please set AI_GATEWAY_API_KEY environment variable."
     );
   }
 
@@ -43,35 +44,26 @@ export const myProvider = isTestEnvironment
       });
     })()
   : (() => {
-      // Use Gemini 2.0 Flash - ultra cheap ($0.10/M input, $0.40/M output) and fast
-      const geminiFlash = google("gemini-2.0-flash");
-
-      // Use AI Gateway models as primary when available
-      const defaultModel = isGatewayConfigured
-        ? gateway("anthropic/claude-haiku-4.5")  // Use Haiku 4.5 as default (cheap & smart)
-        : geminiFlash; // Fallback to Gemini if Gateway not available
+      // AI Gateway only - no Gemini fallback
+      // Default to Claude Haiku 4.5 - fast, smart, and affordable
+      const defaultModel = gateway("anthropic/claude-haiku-4.5");
 
       return customProvider({
         languageModels: {
-          // Primary models: Use AI Gateway when available, fallback to Gemini
-          "chat-model": defaultModel, // Default to Claude Haiku 4.5 when Gateway is available
-          "title-model": defaultModel, // Title generation
-          "artifact-model": defaultModel, // Artifact generation
+          // Primary model: Claude Haiku 4.5 ($1.00/M input, $5.00/M output)
+          "chat-model": defaultModel,
+          "title-model": defaultModel,
+          "artifact-model": defaultModel,
 
-          // Premium models via AI Gateway (with fallback to default)
-          // GPT-4o Mini - Cheap OpenAI option ($0.15/M input, $0.60/M output)
-          "chat-model-gpt4o": isGatewayConfigured
-            ? gateway("openai/gpt-4o-mini")
-            : defaultModel,
+          // Alternative models via AI Gateway
+          // GPT-4o Mini - Ultra cheap OpenAI option ($0.15/M input, $0.60/M output)
+          "chat-model-gpt4o": gateway("openai/gpt-4o-mini"),
+
           // Claude Sonnet 4.5 - Best quality ($3.00/M input, $15.00/M output)
-          // No extractReasoningMiddleware for AI Gateway models
-          "chat-model-sonnet": isGatewayConfigured
-            ? gateway("anthropic/claude-sonnet-4.5")
-            : defaultModel,
+          "chat-model-sonnet": gateway("anthropic/claude-sonnet-4.5"),
+
           // Claude Haiku 4.5 - Fast & smart ($1.00/M input, $5.00/M output)
-          "chat-model-haiku": isGatewayConfigured
-            ? gateway("anthropic/claude-haiku-4.5")
-            : defaultModel,
+          "chat-model-haiku": gateway("anthropic/claude-haiku-4.5"),
         },
       });
     })();
