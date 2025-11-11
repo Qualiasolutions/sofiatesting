@@ -43,28 +43,31 @@ export const myProvider = isTestEnvironment
       });
     })()
   : (() => {
-      // Use stable Gemini 1.5 Flash (production-ready model)
-      const geminiFlash = google("gemini-1.5-flash-latest");
+      // Use Gemini 2.0 Flash - ultra cheap ($0.10/M input, $0.40/M output) and fast
+      const geminiFlash = google("gemini-2.0-flash");
 
       return customProvider({
         languageModels: {
-          // Primary models: Gemini 1.5 Flash (stable, reliable, production-ready)
-          "chat-model": geminiFlash, // Default model - Gemini 1.5 Flash (stable)
+          // Primary models: Gemini 2.0 Flash (ultra cheap, fast, reliable)
+          "chat-model": geminiFlash, // Default model - Gemini 2.0 Flash
           "title-model": geminiFlash, // Title generation
           "artifact-model": geminiFlash, // Artifact generation
 
           // Premium models via AI Gateway (with fallback to Gemini if not configured)
+          // GPT-4o Mini - Cheap OpenAI option ($0.15/M input, $0.60/M output)
           "chat-model-gpt4o": isGatewayConfigured
-            ? gateway("openai/gpt-4o")
+            ? gateway("openai/gpt-4o-mini")
             : geminiFlash,
+          // Claude Sonnet 4.5 - Best quality ($3.00/M input, $15.00/M output)
           "chat-model-sonnet": isGatewayConfigured
             ? wrapLanguageModel({
-                model: gateway("anthropic/claude-sonnet-4-5-20250929"),
+                model: gateway("anthropic/claude-sonnet-4.5"),
                 middleware: extractReasoningMiddleware({ tagName: "thinking" }),
               })
             : geminiFlash,
+          // Claude Haiku 4.5 - Fast & smart ($1.00/M input, $5.00/M output)
           "chat-model-haiku": isGatewayConfigured
-            ? gateway("anthropic/claude-haiku-4-5-20251001")
+            ? gateway("anthropic/claude-haiku-4.5")
             : geminiFlash,
         },
       });
