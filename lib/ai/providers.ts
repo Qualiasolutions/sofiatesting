@@ -43,13 +43,13 @@ export const myProvider = isTestEnvironment
       });
     })()
   : (() => {
-      // Use stable Gemini 2.5 Flash (latest production-ready model)
-      const geminiFlash = google("gemini-2.5-flash");
+      // Use stable Gemini 1.5 Flash (production-ready model)
+      const geminiFlash = google("gemini-1.5-flash-latest");
 
       return customProvider({
         languageModels: {
-          // Primary models: Gemini 2.5 Flash (fast, cost-effective, latest stable)
-          "chat-model": geminiFlash, // Default model - Gemini 2.5 Flash (stable)
+          // Primary models: Gemini 1.5 Flash (stable, reliable, production-ready)
+          "chat-model": geminiFlash, // Default model - Gemini 1.5 Flash (stable)
           "title-model": geminiFlash, // Title generation
           "artifact-model": geminiFlash, // Artifact generation
 

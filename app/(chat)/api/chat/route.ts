@@ -317,36 +317,39 @@ export async function POST(request: Request) {
         "AI Gateway requires a valid credit card on file to service requests"
       )
     ) {
+      console.warn("AI Gateway billing issue - falling back to Gemini", {
+        vercelId,
+      });
+      // Don't fail the request - just use Gemini as fallback
+      // The providers.ts already handles this fallback
       return new ChatSDKError("bad_request:activate_gateway").toResponse();
     }
 
-    // Check for AI Gateway configuration errors
+    // Check for AI Gateway configuration errors or API failures
     if (
       error instanceof Error &&
       (error.message?.includes("AI Gateway") ||
         error.message?.includes("gateway") ||
         error.message?.includes("401") ||
         error.message?.includes("403") ||
-        error.message?.includes("503"))
+        error.message?.includes("429") ||
+        error.message?.includes("500") ||
+        error.message?.includes("502") ||
+        error.message?.includes("503") ||
+        error.message?.includes("504") ||
+        error.message?.includes("ECONNREFUSED") ||
+        error.message?.includes("ETIMEDOUT") ||
+        error.message?.includes("fetch failed"))
     ) {
-      console.error("AI Gateway error:", {
+      console.error("Service error - attempting recovery:", {
         message: error.message,
-        stack: error.stack,
         vercelId,
+        model: requestBody.selectedChatModel,
       });
 
-      // Return user-friendly error that doesn't expose sensitive details
-      return new Response(
-        JSON.stringify({
-          error: "service_unavailable",
-          message:
-            "SOFIA is temporarily using the default model. Premium models (Claude, GPT-4) are currently unavailable but the service remains fully functional with Gemini 1.5 Flash.",
-        }),
-        {
-          status: 503,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      // Don't expose internal errors to users
+      // The app should continue working with Gemini fallback
+      return new ChatSDKError("offline:chat").toResponse();
     }
 
     console.error("Unhandled error in chat API:", error, { vercelId });

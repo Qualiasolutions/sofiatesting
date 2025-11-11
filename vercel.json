@@ -1,0 +1,35 @@
+{
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "env": {
+    "AI_GATEWAY_API_KEY": {
+      "description": "Vercel AI Gateway API key for premium models (Claude 4.5, GPT-4o)",
+      "required": false
+    },
+    "GEMINI_API_KEY": {
+      "description": "Google Gemini API key for default model (Gemini 1.5 Flash)",
+      "required": true
+    },
+    "AUTH_SECRET": {
+      "description": "NextAuth secret for session encryption",
+      "required": true
+    }
+  },
+  "functions": {
+    "app/(chat)/api/chat/route.ts": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "app/api/telegram/webhook/route.ts": {
+      "maxDuration": 30,
+      "memory": 512
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/cleanup",
+      "schedule": "0 2 * * *"
+    }
+  ]
+}
