@@ -15,15 +15,15 @@ export const chatModels: ChatModel[] = [
   },
   {
     id: "chat-model-sonnet",
-    name: "Claude 3.5 Sonnet",
+    name: "Claude Sonnet 4.5",
     description:
-      "Anthropic's most intelligent model with extended thinking - $3/M in, $15/M out (requires AI Gateway)",
+      "Anthropic's newest and most intelligent model with extended thinking - $3/M in, $15/M out (requires AI Gateway)",
   },
   {
     id: "chat-model-haiku",
-    name: "Claude 3.5 Haiku",
+    name: "Claude Haiku 4.5",
     description:
-      "Anthropic's fastest premium model - $0.80/M in, $4/M out (requires AI Gateway)",
+      "Anthropic's newest fast model with improved capabilities - $0.80/M in, $4/M out (requires AI Gateway)",
   },
   {
     id: "chat-model-gpt4o",
