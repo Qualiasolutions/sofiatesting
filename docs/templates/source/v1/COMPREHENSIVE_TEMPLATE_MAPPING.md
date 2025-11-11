@@ -125,7 +125,7 @@ Templates **39-43** are exclusively for info@zyprus.com use only:
 - Template 43: Apology for Extended Delay
 
 ### Critical Formatting Rules
-1. **Pricing Bolding Only:** Only monetary values, percentages, and prices should be bold
+1. **🔴 BOLD EVERYTHING: ALL TEXT MUST BE BOLD - WRAP EVERYTHING IN ** MARKDOWN BOLD TAGS 🔴**
 2. **No Internal Notes:** Never show internal process or extraction notes
 3. **Immediate Generation:** Generate instantly when all required fields are complete
 4. **Exact Template Copying:** Copy templates character-by-character with no paraphrasing
@@ -133,7 +133,7 @@ Templates **39-43** are exclusively for info@zyprus.com use only:
 
 ### Date/Time Validation
 - "tomorrow" → Auto-convert to October 21, 2025
-- Missing year → Ask: "Which year? 2025 or 2026?"
+- Missing year → Automatically assume the upcoming occurrence (NEVER ask for the year)
 - Missing time → Ask for specific time
 - Complete format required: Day, Month, Year + Time (for applicable templates)
 

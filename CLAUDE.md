@@ -2,350 +2,236 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 🚨 CRITICAL: Before Starting Any Work
+## Critical: Implementation Tracking
 
-**ALL AGENTS MUST:**
-1. **READ** `IMPLEMENTATION_PLAN.md` in the root directory
-2. **CHECK** current task status and priority
-3. **UPDATE** checkboxes as you work
-4. **TEST** after completing each item
-5. **DEPLOY** and verify in production
-
-The `IMPLEMENTATION_PLAN.md` is the single source of truth for all optimization work. It tracks:
-- 10 prioritized optimization tasks
-- Testing protocols for each task
+**ALWAYS** check `IMPLEMENTATION_PLAN.md` before starting ANY work. This file tracks:
+- All optimization tasks and their status
+- Testing protocols
 - Deployment checklists
-- Performance metrics before/after
-- Completion status and notes
-
-**Never start optimization work without consulting IMPLEMENTATION_PLAN.md first.**
-
----
+- Recent changes (11 tasks completed as of 2025-01-10)
 
 ## Project Overview
 
-SOFIA is a production-grade Next.js 15 application serving as the Zyprus Property Group AI Assistant. It handles real estate document drafting, property listing management, and operates an AI-assisted support desk with Telegram bot integration. Built on Vercel's AI SDK with PostgreSQL persistence and custom real estate tooling.
+SOFIA is a production-grade Next.js 15 application serving as Zyprus Property Group's AI Assistant for Cyprus real estate operations.
 
-## Development Commands
-
-### Core Development
-```bash
-pnpm install              # Install dependencies
-pnpm dev                  # Start Next.js dev server with Turbo
-pnpm build                # Production build
-pnpm start                # Start production server
-```
-
-### Code Quality
-```bash
-pnpm lint                 # Run Ultracite linting (checks only)
-pnpm format               # Run Ultracite formatting (auto-fix)
-```
-
-### Database Operations
-```bash
-pnpm db:generate          # Generate Drizzle migrations from schema changes
-pnpm db:migrate           # Apply pending migrations to database
-pnpm db:studio            # Launch Drizzle Studio GUI
-pnpm db:push              # Push schema directly to database (no migrations)
-pnpm db:pull              # Pull schema from database
-pnpm db:check             # Check migration consistency
-pnpm db:up                # Upgrade Drizzle Kit
-```
-
-### Testing
-```bash
-pnpm test                 # Run Playwright E2E tests (requires PLAYWRIGHT=True env var)
-```
-
-**Important**: Before running tests, ensure:
-1. Development server is running (`pnpm dev`)
-2. Environment variable `PLAYWRIGHT=True` is set
-3. Database is migrated and accessible
-4. Access code cookie (`qualia-access`) is properly handled in test setup
+### Core Functionality
+- Cyprus real estate document generation (38 templates)
+- Property listing management with Zyprus API integration
+- AI chat interface with specialized real estate tools
+- Telegram bot integration for external support
+- VAT, transfer fee, and capital gains tax calculators
 
 ## Architecture
 
-### AI System Architecture
+### AI Model Configuration (lib/ai/providers.ts)
 
-The AI system uses a multi-model approach with Vercel AI SDK:
+**CRITICAL**: AI Gateway is MANDATORY - no fallback options exist.
 
-**Model Configuration** (`lib/ai/providers.ts`):
-- Primary model: Gemini 1.5 Flash (default chat, title generation, artifacts)
-- Premium models via AI Gateway: Claude Sonnet 4.5, Claude Haiku, GPT-4o
-- Test environment uses mock models from `lib/ai/models.mock.ts`
-
-**System Prompt Loading** (`lib/ai/prompts.ts`):
-- Core instructions loaded from `docs/knowledge/sophia-ai-assistant-instructions.md`
-- Dynamic date replacement for template placeholders
-- Critical field extraction logic for real estate forms embedded in system prompt
-- Geo-location hints (city, country, lat/lon) passed from request headers
-
-**Tool Registration** (`app/(chat)/api/chat/route.ts:164-180`):
-```typescript
-experimental_activeTools: [
-  "calculateTransferFees",
-  "calculateCapitalGains",
-  "calculateVAT",
-  "createListing",
-  "listListings",
-  "uploadListing"
-]
-```
-All tools are Cyprus real estate domain-specific. When adding new tools:
-1. Create tool definition in `lib/ai/tools/`
-2. Export from tool file
-3. Register in chat route's `tools` object and `experimental_activeTools` array
-
-**Tool Structure**:
-- `calculate-capital-gains.ts` - CGT calculations for property sales
-- `calculate-transfer-fees.ts` - Cyprus transfer fee calculator
-- `calculate-vat.ts` - VAT calculation for real estate
-- `create-listing.ts` - Creates property listing draft in database
-- `list-listings.ts` - Retrieves user's property listings
-- `upload-listing.ts` - Submits listing to Zyprus API via OAuth
-
-### Authentication Flow
-
-SOFIA uses a two-tier access system (`middleware.ts`, `app/(auth)/auth.ts`):
-
-**Tier 1 - Access Code Gate**:
-- All page routes require `qualia-access=granted` cookie
-- Cookie set via `/access` page (hardcoded access code check)
-- API routes bypass this check
-
-**Tier 2 - NextAuth Session**:
-- Guest users: Auto-provisioned via `/api/auth/guest`
-- Regular users: Email/password authentication with bcrypt
-- Rate limiting:
-  - Guests: Limited messages per day (see `lib/ai/entitlements.ts`)
-  - Regular: Higher quota
-- Session managed via JWT with custom `type` field (`guest` | `regular`)
-
-**User Type Detection**: `guestRegex` pattern in `lib/constants.ts` identifies guest sessions.
-
-### Database Schema
-
-**Core Tables** (`lib/db/schema.ts`):
-- `User` - Authentication and user profiles
-- `Chat` - Conversation sessions with visibility control
-- `Message_v2` - Chat messages with parts/attachments (v2 schema)
-- `Vote_v2` - Message feedback system
-- `Stream` - Resumable stream tracking
-
-**Property Listing Tables** (Schema.org RealEstateListing compliant):
-- `PropertyListing` - Core listing data with JSON fields for address, features, images
-- `ListingUploadAttempt` - Audit log for Zyprus API uploads with retry tracking
-
-**Key Fields**:
-- `PropertyListing.status`: `draft` → `queued` → `uploading` → `uploaded` | `failed`
-- `PropertyListing.lastContext`: Stores AI usage metrics (tokenlens)
-- Soft delete: `deletedAt` timestamp field
-- Draft expiration: `draftExpiresAt` for auto-cleanup
-
-**Migration Workflow**:
-1. Modify `lib/db/schema.ts`
-2. Run `pnpm db:generate` to create migration file
-3. Review migration in `lib/db/migrations/`
-4. Run `pnpm db:migrate` to apply (via `lib/db/migrate.ts`)
-
-### External API Integration
-
-**Zyprus Property API** (`lib/zyprus/client.ts`):
-- OAuth2 client credentials flow with token caching (5-minute buffer)
-- JSON:API format for all requests
-- Image upload: Fetches from URL → uploads to `/jsonapi/node/property/field_gallery_`
-- Property creation: POST to `/jsonapi/node/property` with relationships
-- Default fallbacks: Location ID and Property Type ID configured for missing data
-- Retry logic: `isPermanentError()` distinguishes retryable vs permanent failures
-
-**Critical Zyprus Fields**:
-- `field_ai_state`: Always set to `"draft"` to track AI-generated properties
-- `status`: Always `false` to prevent unexpected public display
-- Numeric fields: Parse with `parseInt`/`parseFloat` (no strings)
-- Relationships: Must reference existing taxonomy terms and nodes by UUID
-
-**Telegram Bot** (`lib/telegram/client.ts`):
-- Webhook-based message handling at `/api/telegram/webhook`
-- Long message splitting (4096 char limit) with paragraph-aware chunking
-- Typing indicators via `sendChatAction`
-- HTML parse mode for formatted messages
-
-### Route Organization
-
-**App Router Structure**:
-```
-app/
-├── (auth)/           # Login, register, auth configuration
-├── (chat)/           # Main chat UI and streaming API
-│   ├── page.tsx      # Chat home page
-│   ├── chat/[id]/    # Individual chat sessions
-│   └── api/chat/     # Main AI streaming endpoint (route.ts)
-├── access/           # Access code gate page
-├── properties/       # Property listing UI
-└── api/              # REST endpoints
-    ├── listings/     # CRUD for property listings
-    ├── templates/    # Template metadata endpoints
-    └── telegram/     # Telegram webhook handler
-```
-
-**API Route Conventions**:
-- All routes validate session (except webhook with secret token)
-- Use `ChatSDKError` for consistent error responses
-- Streaming endpoints use `JsonToSseTransformStream` for SSE
-- Rate limiting checked per user type in chat routes
-
-### Middleware Behavior
-
-The middleware (`middleware.ts`) runs on all routes except static assets:
-
-1. **Health Check**: `/ping` → returns 200 for Playwright
-2. **Access Code Check**: Validates `qualia-access` cookie (redirects to `/access` if missing)
-3. **Auth Bypass**: Allows `/api/auth/*` routes through
-4. **Guest Auto-Login**: Redirects unauthenticated users to `/api/auth/guest`
-5. **Registered User Redirect**: Prevents authenticated users from accessing `/login` or `/register`
-
-### Testing Architecture
-
-**Playwright Configuration** (`playwright.config.ts`):
-- Base URL: `http://localhost:3000`
-- Parallel execution: 8 workers locally, 2 on CI
-- Test timeout: 240 seconds (generous for AI response times)
-- All tests require access cookie setup
-
-**Test Structure** (`tests/e2e/`):
-```
-developer-registration.test.ts    # Template 07 end-to-end flow
-margarita-extraction.test.ts      # Field extraction from user input
-margarita-simple.test.ts          # Simplified extraction test
-sophia-formatting.test.ts         # Output format validation
-artifacts.test.ts                 # Document creation tests
-chat.test.ts                      # Basic chat functionality
-session.test.ts                   # Auth and session tests
-```
-
-**Common Test Patterns**:
-- Set `qualia-access=granted` cookie before navigation
-- Use `page.waitForSelector()` with generous timeouts for AI responses
-- Validate streaming responses incrementally
-- Check database state after tool executions
-
-## Environment Configuration
-
-**Required Variables** (see `.env.example`):
 ```bash
-AUTH_SECRET                     # NextAuth JWT signing key
-GEMINI_API_KEY                  # Primary model API key
-POSTGRES_URL                    # Database connection string
-REDIS_URL                       # Rate limiting and caching
-BLOB_READ_WRITE_TOKEN          # Vercel Blob for image storage
-TELEGRAM_BOT_TOKEN             # @BotFather token
-ZYPRUS_CLIENT_ID               # OAuth client ID
-ZYPRUS_CLIENT_SECRET           # OAuth client secret
-ZYPRUS_API_URL                 # Default: https://dev9.zyprus.com
-ZYPRUS_SITE_URL                # Default: https://dev9.zyprus.com
+AI_GATEWAY_API_KEY=required  # Application will not start without this
 ```
 
-**Optional Variables**:
+Available models via Vercel AI Gateway:
+- `chat-model` → Claude Haiku 4.5 (default, $1.00/M input, $5.00/M output)
+- `chat-model-sonnet` → Claude Sonnet 4.5 ($3.00/M input, $15.00/M output)
+- `chat-model-gpt4o` → GPT-4o Mini ($0.15/M input, $0.60/M output)
+
+### Database Architecture
+
+PostgreSQL with Drizzle ORM. Key tables:
+- `User` - Authentication and profiles
+- `Chat` - Conversation sessions
+- `Message_v2` - Chat messages with parts
+- `PropertyListing` - Real estate listings
+- `Vote_v2` - Message feedback
+
+Recent optimizations:
+- Composite indexes on (userId, createdAt) for faster queries
+- CASCADE deletes for automatic cleanup
+- Enhanced error logging in all catch blocks
+
+### Authentication & Rate Limiting
+
+1. **Access Gate**: `qualia-access=granted` cookie required
+2. **Session Types**: Guest (auto-created) vs Regular users
+3. **Rate Limits**: Different quotas per user type (lib/ai/entitlements.ts)
+4. **Redis**: Used for rate limiting via Upstash
+
+## Development Commands
+
 ```bash
-AI_GATEWAY_API_KEY             # For Claude/GPT-4 via Vercel AI Gateway
-GOOGLE_GENERATIVE_AI_API_KEY   # Alternative to GEMINI_API_KEY
+# Core development
+pnpm dev                    # Start dev server with Turbo
+pnpm build                  # Production build
+pnpm start                  # Start production server
+
+# Database management
+pnpm db:generate           # Generate Drizzle migrations
+pnpm db:migrate            # Apply migrations
+pnpm db:studio             # Launch Drizzle Studio GUI
+
+# Code quality
+pnpm lint                  # Run Ultracite checks
+pnpm format                # Auto-fix with Ultracite
+
+# Testing
+pnpm test                  # Playwright E2E (requires PLAYWRIGHT=True)
+pnpm test:unit             # Unit tests
+pnpm test:ai-models        # Test AI model connectivity
 ```
 
-## Code Patterns and Conventions
+## Key Implementation Patterns
 
 ### Adding New AI Tools
 
-1. Create tool definition file in `lib/ai/tools/`:
-```typescript
-import { z } from 'zod';
-import { tool } from 'ai';
+1. Create tool in `lib/ai/tools/`
+2. Export from tool file
+3. Register in `app/(chat)/api/chat/route.ts`:
+   ```typescript
+   const tools = {
+     yourTool: yourToolImplementation,
+     // ...
+   };
+   experimental_activeTools: ["yourTool"]
+   ```
 
-export const myNewTool = tool({
-  description: 'Clear description for AI model',
-  parameters: z.object({
-    param: z.string().describe('Parameter description')
-  }),
-  execute: async ({ param }) => {
-    // Implementation
-    return { result: 'value' };
-  }
-});
+### Streaming Chat Architecture
+
+Main endpoint: `app/(chat)/api/chat/route.ts`
+
+Features:
+- Server-Sent Events using `JsonToSseTransformStream`
+- Token tracking with tokenlens
+- Message persistence in PostgreSQL
+- Tool execution for real estate calculations
+- Anthropic prompt caching (when using Claude models)
+
+### Telegram Integration
+
+- Webhook: `/api/telegram/webhook`
+- Handler: `lib/telegram/message-handler.ts`
+- Optimized typing indicators (3-second intervals)
+- Automatic message splitting for long responses
+
+### Property Listing Flow
+
+1. Create via AI tool or API endpoint
+2. Status progression: `draft` → `queued` → `uploading` → `uploaded`
+3. Redis-cached Zyprus taxonomy (1-hour TTL)
+4. Retry logic with exponential backoff
+5. Upload attempts tracked in `ListingUploadAttempt` table
+
+## Recent Optimizations (from IMPLEMENTATION_PLAN.md)
+
+### Completed (Week 3)
+- ✅ Database indexes for 10-100x faster queries
+- ✅ Telegram typing indicators reduced by 90%
+- ✅ System prompt caching (50-100ms saved per request)
+- ✅ Redis cache for Zyprus taxonomy (95% fewer API calls)
+- ✅ Anthropic prompt caching ($2-5 saved per 1000 requests)
+- ✅ Optimized pagination queries (50% fewer database round-trips)
+- ✅ CASCADE deletes (75% fewer deletion queries)
+- ✅ Enhanced error logging across all database operations
+- ✅ Environment variable consolidation
+
+### Pending
+- Paid membership tier implementation (requires billing integration)
+
+## Project Structure
+
+```
+app/
+├── (auth)/              # Authentication pages
+├── (chat)/              # Main chat interface
+│   ├── api/chat/        # Streaming AI endpoint
+│   └── chat/[id]/       # Individual chat sessions
+├── api/
+│   ├── listings/        # Property CRUD
+│   ├── templates/       # Template metadata
+│   └── telegram/        # Telegram webhook
+└── properties/          # Property management UI
+
+lib/
+├── ai/
+│   ├── providers.ts     # AI Gateway configuration
+│   ├── prompts.ts       # System prompts (cached)
+│   └── tools/           # Cyprus real estate tools
+├── db/
+│   ├── schema.ts        # Drizzle schema with indexes
+│   └── queries.ts       # Database operations
+├── telegram/            # Bot integration
+└── zyprus/              # API client with Redis cache
 ```
 
-2. Register in chat route (`app/(chat)/api/chat/route.ts`):
-```typescript
-experimental_activeTools: [...existing, "myNewTool"],
-tools: { ...existing, myNewTool: myNewTool }
+## Environment Variables
+
+Required for operation:
+```bash
+# Critical - no fallback
+AI_GATEWAY_API_KEY=        # Vercel AI Gateway key
+
+# Database (auto-generated by Vercel)
+POSTGRES_URL=              # PostgreSQL connection
+REDIS_URL=                 # Redis/KV for caching
+
+# Authentication
+AUTH_SECRET=               # NextAuth JWT signing
+
+# Integrations
+TELEGRAM_BOT_TOKEN=        # Telegram bot
+ZYPRUS_CLIENT_ID=          # Zyprus OAuth
+ZYPRUS_CLIENT_SECRET=      # Zyprus OAuth
 ```
 
-3. Update system prompt if tool requires special instructions
+See `.env.example` for complete documentation with setup instructions.
 
-### Working with Property Listings
+## Testing Strategy
 
-**Creating Listings**:
-- Always set `status: "draft"` initially
-- Use `createListing` tool from chat or direct API call to `/api/listings/create`
-- Validate required fields: name, description, price, rooms, bathrooms, floorSize
+1. **Unit Tests**: `pnpm test:unit`
+2. **E2E Tests**: `PLAYWRIGHT=True pnpm test`
+3. **Model Tests**: `pnpm test:ai-models`
+4. **Build Verification**: `pnpm build`
 
-**Uploading to Zyprus**:
-- Call `uploadListing` tool with listing ID
-- Tool handles retry logic (3 attempts with exponential backoff)
-- Check `ListingUploadAttempt` table for detailed error logs
-- Permanent errors (auth, validation) won't retry automatically
-
-**Image Handling**:
-- Upload to Vercel Blob first via `/api/listings/upload`
-- Store URLs in `PropertyListing.image` JSON array
-- Zyprus client fetches and re-uploads to Drupal during submission
-
-### Error Handling
-
-**Structured Error System** (`lib/errors.ts`):
-- `ChatSDKError` class with predefined error codes
-- Consistent JSON response format
-- AI Gateway errors mapped to user-friendly messages
-
-**Common Error Codes**:
-- `unauthorized:chat` - No valid session
-- `forbidden:chat` - User doesn't own resource
-- `rate_limit:chat` - Message quota exceeded
-- `bad_request:api` - Invalid request body
-- `bad_request:activate_gateway` - AI Gateway billing issue
-
-## Documentation Structure
-
-All documentation lives under `docs/`:
-```
-docs/
-├── README.md                    # Documentation index
-├── guides/                      # Setup and deployment guides
-│   ├── ai-gateway-setup.md
-│   ├── telegram-bot-setup.md
-│   ├── zyprus-api-setup.md
-│   └── deployment-ready.md
-├── knowledge/                   # Domain knowledge and implementation
-│   ├── sophia-ai-assistant-instructions.md
-│   ├── cyprus-real-estate-knowledge-base.md
-│   └── property-listing-implementation.md
-├── templates/                   # Template system documentation
-│   └── overview.md
-└── updates/                     # Change logs
-    ├── claude-model-config.md
-    └── chat-api-fix.md
+Always verify after database migrations:
+```bash
+pnpm db:generate
+pnpm db:migrate
+pnpm build
 ```
 
-Start with `docs/README.md` to locate specific documentation.
+## Deployment
 
-## Common Pitfalls
+```bash
+# Vercel auto-deploys on push to main
+git push origin main
 
-1. **System Prompt Changes**: Main instructions file is at `docs/knowledge/sophia-ai-assistant-instructions.md`
-2. **Migration Apply**: Always run `pnpm db:migrate` after generating migrations, not `pnpm db:push` (push skips migration history)
-3. **Tool Registration**: Tools must be added to BOTH `tools` object AND `experimental_activeTools` array in chat route
-4. **Access Cookie**: Playwright tests fail without proper access cookie setup in beforeEach hook
-5. **Zyprus UUID Fields**: All relationships (location, property type, features) require exact UUIDs from Zyprus taxonomy
-6. **Guest vs Regular Users**: Check user type when implementing features - guests have stricter rate limits
-7. **Streaming Response Format**: Use `JsonToSseTransformStream` for SSE, not raw JSON responses
-8. **Image Upload Order**: Upload images to Blob BEFORE creating property listing to store URLs
-9. **Database Soft Deletes**: Check `deletedAt IS NULL` in queries to exclude soft-deleted records
-10. **Model Selection**: Default model is Gemini Flash; premium models require AI Gateway setup
+# Manual deployment
+npx vercel --prod
+
+# Migrations apply automatically on Vercel
+```
+
+Monitor after deployment:
+- Check Vercel logs: `vercel logs sofiatesting.vercel.app`
+- Verify AI Gateway costs in Vercel dashboard
+- Monitor Redis memory usage
+- Check error rates in production logs
+
+## Common Issues & Solutions
+
+| Issue | Solution |
+|-------|----------|
+| 503 Errors | Verify AI_GATEWAY_API_KEY is set |
+| Rate limit exceeded | Check user type and message count in database |
+| Database errors | Run `pnpm db:migrate` |
+| Tool not working | Verify registration in chat route |
+| Slow queries | Check indexes exist (migration 0011) |
+| High API costs | Monitor Anthropic prompt caching hit rate |
+
+## Important Notes
+
+1. **No Gemini/Google AI**: All Google dependencies removed
+2. **Soft deletes**: Always check `deletedAt IS NULL` in queries
+3. **Streaming format**: Use `JsonToSseTransformStream` for SSE
+4. **Tool execution**: Tools must be registered in both `tools` object and `experimental_activeTools` array
+5. **Prompt caching**: Only works with Claude models, not GPT-4o Mini

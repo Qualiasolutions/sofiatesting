@@ -5,16 +5,32 @@
 🔹 Required Fields (MUST Collect Before Generating)
 - Date (e.g., October 25, 2025)
 - Registrant Name (e.g., John Smith)
-- ID/Passport Number (e.g., K1234567)
+- ID/Passport Number: Please provide the passport information (e.g., Passport No. K12345678, Issued by Cyprus, Expiry 14/02/2031)
 - Issued By (e.g., Cyprus)
-- Registration No. (e.g., 0/1789)
-- District (e.g., Limassol)
-- Municipality (e.g., Germasogeia)
-- Locality (e.g., Potamos Germasogeias)
+- Please provide the property’s registration information (e.g., Reg. No. 0/1789 Germasogeia, Limassol OR Limas Building Flat No. 103 Tala, Paphos)
+- Please provide the District.
+
+  District:
+
+  Limassol
+
+
+- Please provide the Town / Municipality.
+
+  Town / Municipality:
+
+  Germasogeia
+
+
+- Please provide the Area / Locality.
+
+  Area / Locality:
+
+  Potamos Germasogeias
 
 🔹 Critical Rules
 - Greeting: Default `Dear XXXXXXXX,` (placeholder) unless template requires personalization; follow template-specific overrides.
-- Dates/Times: "tomorrow" → Auto-convert to October 21, 2025; if year missing ask: "Which year? 2025 or 2026?"; if time missing ask for a time (24h or am/pm).
+- Dates/Times: "tomorrow" → Auto-convert to October 21, 2025; if year is missing automatically assume the upcoming occurrence (NEVER ask for the year); if time is missing ask for a time (24h or am/pm).
 - Links: Mandatory for Bank Registrations, Good Client, and Email Marketing; optional elsewhere (omit line if missing).
 - Bolding: Only monetary values or fees/percentages (e.g., **€350,000**, **5% + VAT**). Nothing else.
 - Subject Lines: Follow template-specific formats exactly; do not bold.
@@ -137,9 +153,9 @@ This email is to provide you with a registration.
 
 **Viewing Arranged for:** [VIEWING_DATETIME]
 
-Please confirm Registration and Viewing.
+**Please confirm Registration and Viewing.**
 
-For the confirmation, Could you please reply ''Yes I confirm''
+For the confirmation, Could you please reply **''Yes I confirm''**
 
 Looking forward to your prompt confirmation.
 Template 02: Seller with Marketing Agreement
@@ -166,7 +182,7 @@ With this email, we kindly ask for your approval for the below registration and 
 
 In the unusual event that the above registered client of CSC Zyprus Property Group LTD communicates with you directly, you acknowledge and agree that you are legally bound to immediately cease such communication, notify us without delay, and inform our registered client that all further communication must be conducted solely through the agent CSC Zyprus Property Group LTD (they might ask Sophia to remove this at a later discussion with her.. is optional if they ask her to do so. But only then Sophia will remove it..)
 
-If you agree with the above terms and conditions, could you please reply to this email stating: ''Yes I confirm''
+If you agree with the above terms and conditions, could you please reply to this email stating: **''Yes I confirm''**
 Template 03: Rental Property Registration
 
 Subject: Registration – [TENANT_NAMES] – [PROPERTY_DESCRIPTION]
@@ -189,9 +205,9 @@ This email is to provide you with a registration.
 
 In the unusual event that the above registered client of CSC Zyprus Property Group LTD communicates with you directly, you acknowledge and agree that you are legally bound to immediately cease such communication, notify us without delay, and inform our registered client that all further communication must be conducted solely through the agent CSC Zyprus Property Group LTD (they might ask Sophia to remove this at a later discussion with her.. is optional if they ask her to do so. But only then Sophia will remove it..)
 
-Please confirm Registration and Viewing.
+**Please confirm Registration and Viewing.**
 
-For the confirmation, Could you please reply ''Yes I confirm''
+For the confirmation, Could you please reply **''Yes I confirm''**
 
 Looking forward to your prompt confirmation.
 Template 04: Advanced Seller Registration
@@ -218,7 +234,7 @@ By confirming this email you also confirm that you legally represent the followi
 
 Please confirm registration.
 
-For the confirmation, please reply ''Yes I confirm''
+For the confirmation, please reply **''Yes I confirm''**
 
 Looking forward to your prompt reply.
 Template 05: Bank Property Registration

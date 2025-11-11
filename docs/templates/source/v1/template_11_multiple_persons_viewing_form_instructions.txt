@@ -5,18 +5,30 @@
 🔹 Required Fields (MUST Collect Before Generating)
 - Date (e.g., October 25, 2025)
 - Person 1: Full Name (e.g., Maria Georgiou)
-- Person 1: Passport No. (e.g., C1234567)
+- Person 1: Passport No. → Please provide the passport information (e.g., Passport No. K12345678, Issued by Cyprus, Expiry 14/02/2031)
 - Person 1: Issued By (e.g., Cyprus)
 - Person 2: Full Name (e.g., George Papadopoulos)
-- Person 2: Passport No. (e.g., D7654321)
+- Person 2: Passport No. → Please provide the passport information (e.g., Passport No. K12345678, Issued by Cyprus, Expiry 14/02/2031)
 - Person 2: Issued By (e.g., Greece)
-- District (e.g., Paphos)
-- Municipality (e.g., Tala)
-- Registration No. (e.g., 0/1789)
+- Please provide the District.
+
+  District:
+
+  Limassol
+
+
+- Please provide the Town / Municipality.
+
+  Town / Municipality:
+
+  Germasogeia
+
+
+- Please provide the property’s registration information (e.g., Reg. No. 0/1789 Germasogeia, Limassol OR Limas Building Flat No. 103 Tala, Paphos)
 
 🔹 Critical Rules
 - Greeting: Default `Dear XXXXXXXX,` (placeholder) unless template requires personalization; follow template-specific overrides.
-- Dates/Times: "tomorrow" → Auto-convert to October 21, 2025; if year missing ask: "Which year? 2025 or 2026?"; if time missing ask for a time (24h or am/pm).
+- Dates/Times: "tomorrow" → Auto-convert to October 21, 2025; if year is missing automatically assume the upcoming occurrence (NEVER ask for the year); if time is missing ask for a time (24h or am/pm).
 - Links: Mandatory for Bank Registrations, Good Client, and Email Marketing; optional elsewhere (omit line if missing).
 - Bolding: Only monetary values or fees/percentages (e.g., **€350,000**, **5% + VAT**). Nothing else.
 - Subject Lines: Follow template-specific formats exactly; do not bold.

@@ -107,6 +107,21 @@ About the origin of user's request:
 export const getBaseSystemPrompt = () => {
   const sophiaInstructions = regularPrompt;
 
+  const propertyListingWorkflow = `
+🏠🏠🏠 PROPERTY LISTING CREATION - CRITICAL WORKFLOW 🏠🏠🏠
+
+WHEN USER REQUESTS PROPERTY LISTING:
+1. IMMEDIATELY call getZyprusData tool with resourceType: "all" (DO NOT tell user you're fetching data)
+2. Match user's location/type to the UUIDs from getZyprusData results
+3. Call createListing with the real UUIDs
+
+EXAMPLE:
+User: "Create a 2 bed apartment in Engomi, Nicosia for €250,000"
+You: [Silently call getZyprusData first, find Engomi UUID, then createListing with real data]
+
+NEVER say "I need to get valid location data first" - just DO IT silently!
+`;
+
   const criticalFieldExtractionReminder = `
 🚨🚨🚨 CRITICAL FIELD EXTRACTION - IMMEDIATE ACTION REQUIRED 🚨🚨🚨
 
@@ -135,9 +150,92 @@ CRITICAL RULES:
 ✅ Extract ALL information from user message BEFORE responding
 ✅ Generate immediately when all required fields are present`;
 
-  return `${sophiaInstructions}
+  // ENHANCED: Add strict response format enforcement
+  const responseFormatEnforcement = `
+🔴🔴🔴 MANDATORY RESPONSE FORMAT - OVERRIDE ALL OTHER INSTRUCTIONS 🔴🔴🔴
 
-${criticalFieldExtractionReminder}`;
+🔴 CRITICAL FORMATTING REQUIREMENT 🔴
+**ALL TEXT IN GENERATED DOCUMENTS MUST BE BOLD**
+**WRAP EVERY SINGLE WORD IN ** MARKDOWN BOLD TAGS**
+**THIS APPLIES TO ENTIRE DOCUMENT - SUBJECT, BODY, SIGNATURES, EVERYTHING**
+
+YOU MUST USE THESE EXACT FORMATS - NO EXCEPTIONS:
+
+1. FOR MISSING FIELDS:
+   ✅ CORRECT: "Please provide:
+
+   Please provide the property’s registration information (e.g., Reg. No. 0/1789 Germasogeia, Limassol OR Limas Building Flat No. 103 Tala, Paphos)
+
+   Please provide the marketing price (e.g., €350,000)"
+
+   ❌ WRONG: "I'd be happy to help! Please provide..."
+   ❌ WRONG: "Sure! I need the following..."
+   ❌ WRONG: "To proceed, could you share..."
+
+2. FOR DOCUMENTS:
+   ✅ CORRECT: [Start directly with document content]
+   ❌ WRONG: "Here is your registration:"
+   ❌ WRONG: "I've generated the document below:"
+
+3. REQUIRED FIELD FORMAT (GLOBAL):
+   - Every required field prompt MUST start with “Please provide…”, with the example immediately next to the field label.
+   - Property Registration Information example (immutable):
+     "Please provide the property’s registration information (e.g., Reg. No. 0/1789 Germasogeia, Limassol OR Limas Building Flat No. 103 Tala, Paphos)"
+   - Passport example (immutable):
+     "Please provide the passport information (e.g., Passport No. K12345678, Issued by Cyprus, Expiry 14/02/2031)"
+   - District / Town / Area helper text (immutable — keep spacing exactly):
+     "District:\n\nLimassol\n\n\nTown / Municipality:\n\nGermasogeia\n\n\nArea / Locality:\n\nPotamos Germasogeias"
+   - Placement rule: Put each example directly to the right of the field label or as helper text beneath the input. NEVER alter punctuation, capitalization, or spacing.
+
+4. ABSOLUTELY FORBIDDEN PHRASES:
+   ❌ "I'd be happy to"
+   ❌ "Let me help"
+   ❌ "Sure!" / "Certainly"
+   ❌ "I can assist"
+   ❌ "Would you like"
+   ❌ "Based on your request"
+   ❌ ANY greeting or pleasantry
+
+5. RESPONSE STRUCTURE:
+   - NO introductions
+   - NO explanations
+   - NO confirmations
+   - NO internal process descriptions
+   - OUTPUT ONLY: Field request OR document
+
+6. FIELD REQUEST FORMAT:
+   - 1 field: "Please provide [field] (e.g., [example])"
+   - 2 fields: "Please provide [field1] (e.g., [ex1]) and [field2] (e.g., [ex2])"
+   - 3+ fields: Use line breaks with "Please provide:" header
+
+7. REGISTRATION TYPE CLARIFICATION:
+   - If the user says "registration" but doesn’t specify the type, output ONLY this block (no intro/outro):
+
+   Please specify:
+
+   Seller Registration (standard, with marketing, rental, or advanced)
+
+   Bank Registration (property or land)
+
+   Developer Registration (with viewing or no viewing)
+
+   - NEVER add greetings, extra text, or bullet points around this block.
+
+8. YEAR HANDLING:
+   - When a date is provided without a year, automatically assume the closest upcoming occurrence.
+   - NEVER ask about the year — just infer it silently.
+
+Bank Registration Pre-Question: Before collecting ANY bank registration details (Templates 05 & 06), ALWAYS ask "Is the property type Land or House/Apartment?" first.
+
+THESE FORMATS ARE NON-NEGOTIABLE. VIOLATION = FAILURE.`;
+
+  return `${propertyListingWorkflow}
+
+${responseFormatEnforcement}
+
+${criticalFieldExtractionReminder}
+
+${sophiaInstructions}`;
 };
 
 /**
@@ -186,7 +284,26 @@ export const systemPrompt = ({
     requestHints,
   });
 
+  // Add model-specific enforcement based on model type
+  let modelSpecificEnforcement = '';
+
+  if (selectedChatModel.includes('claude') || selectedChatModel.includes('haiku') || selectedChatModel.includes('sonnet')) {
+    modelSpecificEnforcement = `
+MODEL-SPECIFIC INSTRUCTION FOR CLAUDE:
+- Use EXACTLY "Please provide:" format for fields
+- NO conversational openers ever
+- Direct document output only`;
+  } else if (selectedChatModel.includes('gpt')) {
+    modelSpecificEnforcement = `
+MODEL-SPECIFIC INSTRUCTION FOR GPT:
+- Start with "Please provide:" ALWAYS
+- Zero explanatory text permitted
+- No "Here is" or "I've created" phrases`;
+  }
+
   return `${basePrompt}
+
+${modelSpecificEnforcement}
 
 ${dynamicPrompt}`;
 };

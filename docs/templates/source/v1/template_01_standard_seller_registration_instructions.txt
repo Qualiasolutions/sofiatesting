@@ -3,7 +3,7 @@ Purpose: Document to register a buyer’s interest in a seller’s property and 
 
 🔹 Required Fields (MUST Collect Before Generating)
 Buyer Names (e.g., John Smith OR Maria & George Papadopoulos)
-Property Introduced (e.g., Limassol Building OR Reg. No. 0/1789 Germasogeia, Limassol)
+Property Introduced: Please provide the property’s registration information (e.g., Reg. No. 0/1789 Germasogeia, Limassol OR Limas Building Flat No. 103 Tala, Paphos)
 Property Link (e.g., https://www.zyprus.com/Cyprus/property/12345) (optional but preferred)
 Viewing Date & Time (e.g., October 21, 2025 at 17:00 OR tomorrow at 15:00) - ALWAYS use 24-hour format
 🔹 Critical Rules (MUST Follow)
@@ -19,7 +19,7 @@ NEVER personalize unless explicitly instructed.
 Date/Time Validation:
 
 If user says "tomorrow" → Auto-convert to actual date (e.g., November 4, 2025).
-If user says "October 15th" → ASK: "Which year? 2025 or 2026?"
+If user says "October 15th" → Automatically use the closest upcoming October 15th (NEVER ask which year)
 If time is missing → ASK: "What time is the viewing? (e.g., 15:00)"
 ⚠️ ALWAYS convert to 24-hour format: 3pm → 15:00, 4pm → 16:00, 5pm → 17:00
 Link Handling:
@@ -45,8 +45,8 @@ Confirmation Request:
 
 ALWAYS end with:
 
-Please confirm Registration and Viewing.
-For the confirmation, Could you please reply ''Yes I confirm''
+**Please confirm Registration and Viewing.**
+For the confirmation, Could you please reply **''Yes I confirm''**
 🔹 Exact Template (Copy Character-by-Character)
 Subject:
 
@@ -67,9 +67,9 @@ This email is to provide you with a registration.
 
 **Viewing Arranged for:** [VIEWING_DATETIME]
 
-Please confirm Registration and Viewing.
+**Please confirm Registration and Viewing.**
 
-For the confirmation, Could you please reply ''Yes I confirm''
+For the confirmation, Could you please reply **''Yes I confirm''**
 
 Looking forward to your prompt confirmation.
 🔹 Step-by-Step Workflow for the Agent
@@ -142,9 +142,9 @@ This email is to provide you with a registration.
 
 **Viewing Arranged for:** October 28, 2025 at 16:00
 
-Please confirm Registration and Viewing.
+**Please confirm Registration and Viewing.**
 
-For the confirmation, Could you please reply ''Yes I confirm''
+For the confirmation, Could you please reply **''Yes I confirm''**
 
 Looking forward to your prompt confirmation.
 💡 Pro Tips for the Agent

@@ -5,17 +5,17 @@
 🔹 Required Fields (MUST Collect Before Generating)
 - Seller Name (e.g., Marios Charalambous)
 - Country of Issuance (e.g., Cyprus)
-- Passport/ID Number (e.g., FA0494484)
+- Passport/ID Number: Please provide the passport information (e.g., Passport No. K12345678, Issued by Cyprus, Expiry 14/02/2031)
 - Date (e.g., October 25, 2025)
 - Property Description (e.g., Villa in Tala, Paphos)
-- Registration Number (e.g., 0/1789)
+- Registration Number: Please provide the property’s registration information (e.g., Reg. No. 0/1789 Germasogeia, Limassol OR Limas Building Flat No. 103 Tala, Paphos)
 - Marketing Price (e.g., €350,000)
 - Price in Words (e.g., Three hundred fifty thousand Euros)
 - Start Date (e.g., 01/11/2025)
 
 🔹 Critical Rules
 - Greeting: Default `Dear XXXXXXXX,` (placeholder) unless template requires personalization; follow template-specific overrides.
-- Dates/Times: "tomorrow" → Auto-convert to October 21, 2025; if year missing ask: "Which year? 2025 or 2026?"; if time missing ask for a time (24h or am/pm).
+- Dates/Times: "tomorrow" → Auto-convert to October 21, 2025; if year is missing automatically assume the upcoming occurrence (NEVER ask for the year); if time is missing ask for a time (24h or am/pm).
 - Links: Mandatory for Bank Registrations, Good Client, and Email Marketing; optional elsewhere (omit line if missing).
 - Bolding: Only monetary values or fees/percentages (e.g., **€350,000**, **5% + VAT**). Nothing else.
 - Subject Lines: Follow template-specific formats exactly; do not bold.

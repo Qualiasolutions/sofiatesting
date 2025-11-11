@@ -1,65 +1,268 @@
 # SOFIA – Zyprus Property Group AI Assistant
 
-SOFIA is a production-grade Next.js 15 application that helps Zyprus agents draft real estate documents, manage property listings, and operate an AI-assisted support desk. It builds on Vercel's AI SDK with custom tooling, PostgreSQL persistence, and a Telegram bot integration.
+SOFIA is a production-grade Next.js 15 application that serves as the AI-powered assistant for Zyprus Property Group. Built with Vercel's AI SDK and AI Gateway, it provides intelligent real estate document drafting, property listing management, and automated support through web and Telegram interfaces.
+
+## 🚨 Critical Architecture Update
+
+**SOFIA now exclusively uses Vercel AI Gateway for all AI models**. There are no fallback options - AI Gateway configuration is mandatory. This ensures consistent access to premium models (Claude 4.5 Haiku/Sonnet, GPT-4o Mini) with unified billing and observability.
 
 ## 🚀 Active Development
 
 **Optimization work in progress!** See `IMPLEMENTATION_PLAN.md` for:
-- 10 prioritized performance & cost optimizations
+- 12 prioritized performance & cost optimizations (11 completed)
 - Current implementation status
 - Testing & deployment checklists
 - Performance metrics tracking
 
-All contributors and AI agents should reference `IMPLEMENTATION_PLAN.md` before starting work.
+All contributors and AI agents MUST reference `IMPLEMENTATION_PLAN.md` before starting work.
 
-## Highlights
-- **Chat Workspace** – secure, access-code gated UI with guest and registered sessions.
-- **Template Engine** – 38 instruction templates sourced from the legacy SOPHIA corpus with smart loading support.
-- **Property Listing Flow** – create, review, and upload listings to the Zyprus API, with retries and audit logging.
-- **Telegram Bot** – webhook-powered agent experience for external conversations.
-- **Observability** – OpenTelemetry instrumentation hooks ready for Vercel traces.
+## Core Features
+
+- **AI-Powered Chat Interface** – Secure, access-code gated UI with guest and registered user sessions
+- **Multi-Model Support** – Claude 4.5 Haiku (default), Claude 4.5 Sonnet, GPT-4o Mini via AI Gateway
+- **Template Engine** – 38 Cyprus real estate templates with smart field extraction
+- **Property Listing Management** – Create, review, and upload listings to Zyprus API with retry logic
+- **Telegram Bot Integration** – Webhook-powered conversational interface for external support
+- **Document Generation** – AI-assisted drafting of contracts, agreements, and property descriptions
+- **Cyprus-Specific Tools** – Transfer fee, capital gains tax, and VAT calculators
+
+## Tech Stack
+
+- **Framework**: Next.js 15.3.0 with App Router
+- **AI Platform**: Vercel AI SDK 5.0 with AI Gateway
+- **Models**: Claude 4.5 Haiku/Sonnet, GPT-4o Mini
+- **Database**: PostgreSQL with Drizzle ORM
+- **Authentication**: NextAuth.js 5.0 Beta
+- **Rate Limiting**: Upstash Redis
+- **Styling**: Tailwind CSS 4.0
+- **Deployment**: Vercel with Edge Functions
 
 ## Requirements
+
 - Node.js 20+
 - pnpm 9.x
-- PostgreSQL (Neon/Vercel Postgres recommended)
-- Redis (Upstash) for rate limiting and sessions
-- Credentials for the Vercel AI Gateway (or direct model keys)
-- Zyprus API OAuth client (for listing uploads)
+- PostgreSQL (Vercel Postgres/Neon recommended)
+- Redis (Upstash for rate limiting)
+- **Vercel AI Gateway API Key** (REQUIRED - no fallback)
+- Zyprus API OAuth credentials (for property uploads)
+- Telegram Bot Token (optional, for bot integration)
 
-## Getting Started
+## Environment Setup
+
 ```bash
+# Required AI Configuration
+AI_GATEWAY_API_KEY=your_vercel_ai_gateway_key  # MANDATORY - no fallback
+
+# Database
+POSTGRES_URL=postgresql://...
+
+# Authentication
+AUTH_SECRET=your_nextauth_secret
+
+# Redis (Rate Limiting)
+REDIS_URL=redis://...
+UPSTASH_REDIS_REST_URL=https://...
+UPSTASH_REDIS_REST_TOKEN=...
+
+# Zyprus Integration
+ZYPRUS_CLIENT_ID=your_oauth_client_id
+ZYPRUS_CLIENT_SECRET=your_oauth_client_secret
+ZYPRUS_API_URL=https://dev9.zyprus.com
+ZYPRUS_SITE_URL=https://dev9.zyprus.com
+
+# Telegram Bot (Optional)
+TELEGRAM_BOT_TOKEN=your_bot_token
+TELEGRAM_SECRET_TOKEN=webhook_secret
+
+# Storage
+BLOB_READ_WRITE_TOKEN=vercel_blob_token
+```
+
+## Quick Start
+
+```bash
+# Install dependencies
 pnpm install
-cp .env.example .env.local   # populate required secrets
+
+# Set up environment
+cp .env.example .env.local
+# Edit .env.local with your credentials (AI_GATEWAY_API_KEY is mandatory!)
+
+# Initialize database
+pnpm db:generate
 pnpm db:migrate
+
+# Start development server
 pnpm dev
 ```
 
-Visit `http://localhost:3000`, enter the access code, then authenticate (or let SOFIA auto-provision a guest).
+Visit `http://localhost:3000` and enter the access code to begin.
 
-## Key Scripts
-- `pnpm lint` / `pnpm format` – run Ultracite linting and formatting using the pinned workspace version.
-- `pnpm db:*` – manage Drizzle migrations against `lib/db/schema.ts`.
-- `pnpm test` – execute Playwright E2E suites (requires a running dev server and `PLAYWRIGHT=True`).
+## Model Configuration
+
+SOFIA uses these models via AI Gateway (see `lib/ai/providers.ts`):
+
+| Model | ID | Use Case | Cost |
+|-------|----|----|------|
+| Claude 4.5 Haiku | `anthropic/claude-haiku-4.5` | Default chat, titles, artifacts | $1.00/M input, $5.00/M output |
+| Claude 4.5 Sonnet | `anthropic/claude-sonnet-4.5` | Premium quality responses | $3.00/M input, $15.00/M output |
+| GPT-4o Mini | `openai/gpt-4o-mini` | Ultra-budget option | $0.15/M input, $0.60/M output |
+
+Claude Haiku 4.5 is the default for optimal price/performance balance.
+
+## Development Commands
+
+### Core Development
+```bash
+pnpm dev          # Start Next.js dev server with Turbo
+pnpm build        # Production build
+pnpm start        # Start production server
+```
+
+### Code Quality
+```bash
+pnpm lint         # Run Ultracite linting (checks only)
+pnpm format       # Auto-fix with Ultracite
+```
+
+### Database Management
+```bash
+pnpm db:generate  # Generate Drizzle migrations
+pnpm db:migrate   # Apply migrations to database
+pnpm db:studio    # Launch Drizzle Studio GUI
+pnpm db:push      # Push schema directly (skip migrations)
+pnpm db:pull      # Pull schema from database
+```
+
+### Testing
+```bash
+pnpm test         # Run Playwright E2E tests
+pnpm test:unit    # Run unit tests
+pnpm test:ai-models # Test AI model connectivity
+```
+
+**Note**: E2E tests require `PLAYWRIGHT=True` environment variable and a running dev server.
+
+## Project Structure
+
+```
+app/
+├── (auth)/           # Authentication pages
+├── (chat)/           # Main chat interface
+│   ├── api/chat/     # Streaming AI endpoint
+│   └── chat/[id]/    # Individual chat sessions
+├── api/
+│   ├── listings/     # Property listing CRUD
+│   ├── templates/    # Template metadata
+│   └── telegram/     # Telegram webhook
+└── properties/       # Property management UI
+
+lib/
+├── ai/
+│   ├── providers.ts  # AI Gateway configuration
+│   ├── prompts.ts    # System prompts
+│   └── tools/        # Cyprus real estate tools
+├── db/
+│   ├── schema.ts     # Drizzle schema
+│   └── queries.ts    # Database operations
+└── zyprus/
+    └── client.ts     # Zyprus API integration
+
+docs/
+├── guides/           # Setup documentation
+├── knowledge/        # Domain knowledge
+├── templates/        # Template registry
+└── updates/          # Change logs
+```
 
 ## Documentation
-All Markdown documentation now lives under `docs/`:
-- `guides/` – deployment, AI gateway, API key, and Telegram setup walk-throughs.
-- `knowledge/` – domain context plus the new property-listing implementation guide.
-- `templates/` – consolidated SOPHIA instruction registry and historical exports.
-- `updates/` – change logs and Claude configuration notes.
 
-Start with `docs/README.md` to locate the material you need.
+Comprehensive documentation in `docs/`:
+- `docs/README.md` – Documentation index
+- `docs/guides/` – Setup guides for AI Gateway, deployment, Telegram
+- `docs/knowledge/` – Cyprus real estate domain knowledge
+- `docs/templates/` – Template system overview
+- `CLAUDE.md` – AI agent instructions (root directory)
+- `IMPLEMENTATION_PLAN.md` – Current optimization work
 
-## Deployment Notes
-- `next.config.ts` targets Vercel but can be adapted for other platforms.
-- The middleware enforces an access cookie (`qualia-access`) before any page render; seed it via `/access` or in tests.
-- For production, set `POSTGRES_URL`, `ZYPRUS_CLIENT_ID`, `ZYPRUS_CLIENT_SECRET`, model provider tokens, and `AUTH_SECRET`.
+## Deployment
+
+### Vercel Deployment
+
+```bash
+# Install Vercel CLI
+pnpm i -g vercel
+
+# Deploy to Vercel
+vercel --prod
+
+# Required environment variables in Vercel dashboard:
+# - AI_GATEWAY_API_KEY (mandatory)
+# - POSTGRES_URL
+# - AUTH_SECRET
+# - All other production credentials
+```
+
+### Configuration Files
+- `vercel.json` – Function configuration and cron jobs
+- `next.config.ts` – Next.js configuration
+- `middleware.ts` – Access control and auth routing
+
+## Architecture Highlights
+
+### AI Gateway Integration
+- **No Fallbacks**: AI Gateway is mandatory - app won't function without it
+- **Unified Access**: All models accessed through `@ai-sdk/gateway`
+- **Consistent Pricing**: Centralized billing through Vercel
+- **Enhanced Observability**: Built-in monitoring and analytics
+
+### Authentication Flow
+1. **Access Code Gate**: All pages require `qualia-access=granted` cookie
+2. **Guest Auto-Login**: Unauthenticated users get guest sessions
+3. **Rate Limiting**: Different quotas for guest vs registered users
+4. **Session Management**: JWT-based with NextAuth.js
+
+### Cyprus Real Estate Tools
+- Capital gains tax calculator
+- Property transfer fee calculator
+- VAT calculator for real estate
+- Property listing creation and management
+- Integration with Zyprus property platform
+
+## Troubleshooting
+
+### Common Issues
+
+**"AI Gateway requires a valid credit card"**
+- Add payment method to your Vercel account
+- AI Gateway requires active billing
+
+**"Invalid prompt: system must be a string"**
+- System prompts must be strings, not arrays
+- Check `lib/ai/prompts.ts` for proper format
+
+**Rate limiting errors**
+- Guest users have lower message quotas
+- Check `lib/ai/entitlements.ts` for limits
+- Upgrade to registered account for higher quotas
+
+**Property upload failures**
+- Verify Zyprus OAuth credentials
+- Check `ListingUploadAttempt` table for error details
+- Ensure all required fields are populated
 
 ## Contributing
-1. Create feature branches off `main`.
-2. Keep AI template changes isolated and update the registry in `lib/ai/instructions/template-loader.ts`.
-3. Document noteworthy changes in `docs/updates/`.
-4. Open a PR with screenshots or trace links when touching UI or Playwright flows.
 
-SOFIA remains under the MIT license (see `LICENSE`).
+1. Create feature branches from `main`
+2. Reference `IMPLEMENTATION_PLAN.md` for ongoing work
+3. Update documentation in `docs/` for significant changes
+4. Run tests before submitting PRs
+5. Include screenshots for UI changes
+
+## License
+
+MIT License - see `LICENSE` file
+
+---
+
+**Need Help?** Check `CLAUDE.md` for detailed development patterns and `docs/README.md` for comprehensive documentation.
