@@ -39,7 +39,7 @@ async function testModel(
         },
       ],
       temperature: 0, // STRICT: 0 temperature for deterministic responses
-      maxTokens: 100, // Small limit for quick tests
+      maxSteps: 1, // Single step for quick tests
     });
 
     const response = await result.text;
