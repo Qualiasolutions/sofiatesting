@@ -43,13 +43,13 @@ export const myProvider = isTestEnvironment
       });
     })()
   : (() => {
-      // Use latest Gemini 2.0 Flash as default model
-      const geminiFlash = google("gemini-2.0-flash-exp");
+      // Use stable Gemini 2.0 Flash as default model
+      const geminiFlash = google("gemini-2.0-flash-001");
 
       return customProvider({
         languageModels: {
           // Primary models: Gemini 2.0 Flash (fast, cost-effective, multimodal)
-          "chat-model": geminiFlash, // Default model - latest Gemini 2.0 Flash
+          "chat-model": geminiFlash, // Default model - Gemini 2.0 Flash stable
           "title-model": geminiFlash, // Title generation
           "artifact-model": geminiFlash, // Artifact generation
 
@@ -59,12 +59,12 @@ export const myProvider = isTestEnvironment
             : geminiFlash,
           "chat-model-sonnet": isGatewayConfigured
             ? wrapLanguageModel({
-                model: gateway("anthropic/claude-sonnet-4.5"),
+                model: gateway("anthropic/claude-sonnet-4-5-20250929"),
                 middleware: extractReasoningMiddleware({ tagName: "thinking" }),
               })
             : geminiFlash,
           "chat-model-haiku": isGatewayConfigured
-            ? gateway("anthropic/claude-haiku-4.5")
+            ? gateway("anthropic/claude-haiku-4-5-20251001")
             : geminiFlash,
         },
       });
