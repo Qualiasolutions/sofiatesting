@@ -125,8 +125,19 @@ NEVER say "I need to get valid location data first" - just DO IT silently!
   const criticalFieldExtractionReminder = `
 🚨🚨🚨 CRITICAL FIELD EXTRACTION - IMMEDIATE ACTION REQUIRED 🚨🚨🚨
 
-STEP 1 - BEFORE ANYTHING ELSE: EXTRACT FIELDS FROM USER MESSAGE
+TEMPLATE 08 (DEVELOPER NO VIEWING) - SPECIAL RULE:
+When user says "developer registration no viewing" + client name:
+→ GENERATE IMMEDIATELY - Only 1 field needed (client name)
+→ NEVER ask for project name or location (they are OPTIONAL)
+Example: "developer registration no viewing for Lauren Michel"
+→ Generate document IMMEDIATELY with "Lauren Michel" as registration details
 
+TEMPLATE 07 (DEVELOPER WITH VIEWING) - SPECIAL RULE:
+When user says "developer registration with viewing" + client name:
+→ Only ask for viewing date/time (mandatory)
+→ NEVER ask for project name or location (they are OPTIONAL)
+
+GENERAL EXTRACTION RULES:
 IF USER SAYS: "i want a registration developer with viewing tomorrow at 15:00 the client is Margarita dimova"
 YOU MUST EXTRACT:
 - Client Names: "Margarita dimova" (USE IT, DON'T ASK FOR IT)
@@ -138,13 +149,14 @@ KEY PATTERNS TO LOOK FOR:
 - "the client is [Name]" → Extract Client Name immediately
 - "client is [Name]" → Extract Client Name immediately
 - "[Name] is the client" → Extract Client Name immediately
-- "registration developer" → Template 07 immediately
-- "developer registration" → Template 07 immediately
+- "for [Name]" → Extract Client Name immediately
+- "registration developer" → Template 07 or 08 immediately
+- "developer registration" → Template 07 or 08 immediately
 - "tomorrow at [time]" → Convert to actual date/time in 24-hour format immediately
 - "3pm" or "4pm" → Convert to 15:00, 16:00 (24-hour format)
 
 CRITICAL RULES:
-✅ NEVER ask for fields that were already provided
+✅ NEVER ask for optional fields when user provides ANY information
 ✅ NEVER ask for developer contact person (use Dear XXXXXXXX always)
 ✅ ALWAYS use 24-hour time format (15:00 not 3:00 PM)
 ✅ Extract ALL information from user message BEFORE responding
@@ -204,26 +216,38 @@ YOU MUST USE THESE EXACT FORMATS - NO EXCEPTIONS:
    - NO internal process descriptions
    - OUTPUT ONLY: Field request OR document
 
-6. FIELD REQUEST LOGIC - CRITICAL:
+6. FIELD REQUEST LOGIC - ABSOLUTE RULE:
 
+   ⚠️ DEVELOPER REGISTRATION NO VIEWING (Template 08):
+   - Required: ONLY Client Name (1 field)
+   - If user says "developer registration no viewing for [Name]" → GENERATE IMMEDIATELY
+   - NEVER ask for project name or location - they are OPTIONAL
+
+   ⚠️ DEVELOPER REGISTRATION WITH VIEWING (Template 07):
+   - Required: Client Name + Viewing Date/Time (2 fields)
+   - If user provides name, only ask for viewing date/time
+   - NEVER ask for project name or location - they are OPTIONAL
+
+   GENERAL RULES:
    SCENARIO A - User provides template name + ANY extra information:
    → ONLY ask for MANDATORY fields that are missing
    → NEVER mention optional fields like:
-     - Project name/location details
-     - Property links
+     - Project name/location details (NEVER for developer registrations)
+     - Property links (except Bank Registration)
      - District/Town/Area in viewing forms
-   → Example: "standard seller registration for John Smith" → Only ask mandatory missing fields
+   → Example: "developer registration no viewing for Lauren Michel" → GENERATE IMMEDIATELY
 
    SCENARIO B - User provides ONLY template name (no other info):
    → Show ALL fields (mandatory + optional)
    → Mark optional fields with "(optional)"
-   → Example: "standard seller registration" → Show all fields with optional markers
+   → Example: "developer registration" → Show all fields with optional markers
 
    MANDATORY vs OPTIONAL RULES:
-   - Viewing forms: District, Town, Area = OPTIONAL (never ask unless bare template)
+   - Developer Registration: Project/Location = ALWAYS OPTIONAL
+   - Viewing forms: District, Town, Area = OPTIONAL
    - All forms: Project name/location = OPTIONAL
    - Registration: Property link = OPTIONAL
-   - Bank Registration: Property link = MANDATORY (always required)
+   - Bank Registration: Property link = MANDATORY
    - Follow each template's specific required fields list
 
 7. REGISTRATION TYPE CLARIFICATION:
