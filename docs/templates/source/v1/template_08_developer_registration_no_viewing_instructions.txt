@@ -10,7 +10,7 @@
 - Dates/Times: "tomorrow" → Auto-convert to October 21, 2025; if year is missing automatically assume the upcoming occurrence (NEVER ask for the year); if time is missing ask for a time (24h or am/pm).
 - Links: Mandatory for Bank Registrations, Good Client, and Email Marketing; optional elsewhere (omit line if missing).
 - Bolding:
-  1. All monetary values or fees/percentages (e.g., **€350,000**, **5% + VAT**, **30%**)
+  1. All monetary values or fees/percentages (e.g., **€350,000**, **5%+ VAT**, **30%**)
   2. All field labels before colons (e.g., **Fees:**, **Registration Details:**)
 - Subject Lines: Follow template-specific formats exactly; do not bold.
 - Use placeholder greeting `Dear XXXXXXXX,`

@@ -268,7 +268,7 @@ This is a global rule that overrides any visual formatting in the original templ
 What to BOLD:
 1. **Pricing Information:**
    - Any monetary value (e.g., **€500 + VAT**, **€350,000**)
-   - Any fee percentage (e.g., **5% + VAT**)
+   - Any fee percentage (e.g., **5%+ VAT**)
    - Any price range (e.g., **€320,000 - €340,000**)
 
 2. **Field Labels Before Colons (UNIVERSAL RULE):**
@@ -1373,7 +1373,7 @@ Property: [PROPERTY_DETAILS] (Registration No [REG_NUMBER] [LOCATION] OR propert
 
 Marketing Price: [MARKETING_PRICE]EUR
 
-Fees: 5% + VAT based on the final agreed sold price. If sold to a purchaser introduced to you by CSC Zyprus Property Group LTD.
+Fees: 5%+ VAT based on the final agreed sold price. If sold to a purchaser introduced to you by CSC Zyprus Property Group LTD.
 
 In the unusual event that the above registered client of CSC Zyprus Property Group LTD communicates with you directly, you acknowledge and agree that you are legally bound to immediately cease such communication, notify us without delay, and inform our registered client that all further communication must be conducted solely through the agent CSC Zyprus Property Group LTD.
 

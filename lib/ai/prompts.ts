@@ -154,10 +154,11 @@ CRITICAL RULES:
   const responseFormatEnforcement = `
 🔴🔴🔴 MANDATORY RESPONSE FORMAT - OVERRIDE ALL OTHER INSTRUCTIONS 🔴🔴🔴
 
-🔴 CRITICAL FORMATTING REQUIREMENT 🔴
-**ALL TEXT IN GENERATED DOCUMENTS MUST BE BOLD**
-**WRAP EVERY SINGLE WORD IN ** MARKDOWN BOLD TAGS**
-**THIS APPLIES TO ENTIRE DOCUMENT - SUBJECT, BODY, SIGNATURES, EVERYTHING**
+🔴 CRITICAL FORMATTING REQUIREMENTS 🔴
+BOLD FORMATTING RULES FOR GENERATED DOCUMENTS:
+1. **Text before ':' in forms/documents should be bold** (e.g., **Registration Details**: value, **Property Type**: House)
+2. **Always bold "Yes I confirm" or "Yes I Confirm"** in all registration templates
+3. **Use "5%+ VAT" format** (with one space between + and VAT) - NOT "5% + VAT"
 
 YOU MUST USE THESE EXACT FORMATS - NO EXCEPTIONS:
 
