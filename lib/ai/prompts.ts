@@ -130,7 +130,10 @@ When user says "developer registration no viewing" + client name:
 → GENERATE IMMEDIATELY - Only 1 field needed (client name)
 → NEVER ask for project name or location (they are OPTIONAL)
 Example: "developer registration no viewing for Lauren Michel"
-→ Generate document IMMEDIATELY with "Lauren Michel" as registration details
+→ Generate document IMMEDIATELY with formatting:
+   **Registration Details**: Lauren Michel
+   **Fees**: Standard agency fee on the Agreed/Accepted Sold price
+   (Note: Bold the labels, not the values)
 
 TEMPLATE 07 (DEVELOPER WITH VIEWING) - SPECIAL RULE:
 When user says "developer registration with viewing" + client name:
@@ -168,9 +171,14 @@ CRITICAL RULES:
 
 🔴 CRITICAL FORMATTING REQUIREMENTS 🔴
 BOLD FORMATTING RULES FOR GENERATED DOCUMENTS:
-1. **Text before ':' in forms/documents should be bold** (e.g., **Registration Details**: value, **Property Type**: House)
+1. **ALWAYS bold text BEFORE the colon ':' in ALL documents**
+   - ✅ CORRECT: **Registration Details**: Fawzi Goussous
+   - ✅ CORRECT: **Fees**: 5%+ VAT on the Agreed/Accepted Sold price
+   - ❌ WRONG: Registration Details: Fawzi Goussous
+   - ❌ WRONG: Fees: **5%+ VAT** (don't bold the value, only the label)
 2. **Always bold "Yes I confirm" or "Yes I Confirm"** in all registration templates
 3. **Use "5%+ VAT" format** (with one space between + and VAT) - NOT "5% + VAT"
+4. **DO NOT bold the values after the colon** - only the label before it
 
 YOU MUST USE THESE EXACT FORMATS - NO EXCEPTIONS:
 
