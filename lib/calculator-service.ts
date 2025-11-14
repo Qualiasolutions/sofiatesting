@@ -548,10 +548,9 @@ ${
 
 ${
   eligible
-    ? "Note: This calculation uses post-reform VAT rules (after May 1, 2023). " +
-      "Reduced 5% VAT applies to first 130 m² only, capped at €350,000 value. " +
+    ? "Note: Reduced 5% VAT applies to first 130 m² only, capped at €350,000 value. " +
       "Property must be ≤190 m² and ≤€475,000 to qualify."
-    : "Note: Property does not meet post-reform criteria for reduced VAT rate. " +
+    : "Note: Property does not meet criteria for reduced VAT rate. " +
       "Requirements: ≤190 m² total area and ≤€475,000 purchase price."
 }
 
