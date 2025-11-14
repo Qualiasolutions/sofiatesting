@@ -95,9 +95,30 @@ function isCacheStale(cache: TaxonomyCache): boolean {
 }
 
 /**
+ * Check if we're in build/static generation phase
+ */
+function isBuildTime(): boolean {
+  return (
+    process.env.NEXT_PHASE === "phase-production-build" ||
+    process.env.VERCEL_ENV === "production-build" ||
+    process.env.NODE_ENV === "production" && typeof window === "undefined" && !process.env.ZYPRUS_CLIENT_ID
+  );
+}
+
+/**
  * Refresh all taxonomy data from Zyprus API and store in Redis
  */
 async function refreshCache(): Promise<TaxonomyCache> {
+  // During build time, skip API calls and return empty cache
+  if (isBuildTime()) {
+    console.log(
+      "Build time detected - skipping taxonomy cache refresh (will populate at runtime)"
+    );
+    return {
+      lastUpdated: 0,
+    };
+  }
+
   try {
     const locations = await getZyprusLocations();
     const propertyTypes = await getZyprusTaxonomyTerms("property_type");
@@ -162,9 +183,34 @@ async function refreshCache(): Promise<TaxonomyCache> {
     return newCache;
   } catch (error) {
     console.error("Failed to refresh taxonomy cache from Zyprus API:", error);
-    // Return existing cache if refresh fails
-    const existingCache = await getCache();
-    return existingCache;
+
+    // During build time, return empty cache instead of retrying
+    if (isBuildTime()) {
+      console.log("Build time - returning empty cache after API failure");
+      return {
+        lastUpdated: 0,
+      };
+    }
+
+    // At runtime, try to return existing cache from Redis or fallback
+    try {
+      const serialized = await kv.get<SerializableTaxonomyCache>(CACHE_KEY);
+      if (serialized) {
+        return deserializeCache(serialized);
+      }
+    } catch (redisError) {
+      console.error("Failed to get existing cache from Redis:", redisError);
+    }
+
+    // Return fallback cache if available
+    if (fallbackCache.lastUpdated > 0) {
+      return fallbackCache;
+    }
+
+    // Last resort: empty cache
+    return {
+      lastUpdated: 0,
+    };
   }
 }
 
@@ -172,6 +218,14 @@ async function refreshCache(): Promise<TaxonomyCache> {
  * Get cached taxonomy data from Redis, refresh if stale
  */
 export async function getCache(): Promise<TaxonomyCache> {
+  // During build time, return empty cache immediately
+  if (isBuildTime()) {
+    console.log("Build time - returning empty taxonomy cache");
+    return {
+      lastUpdated: 0,
+    };
+  }
+
   try {
     // Try to get from Redis first
     const serialized = await kv.get<SerializableTaxonomyCache>(CACHE_KEY);
