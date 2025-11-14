@@ -5,6 +5,13 @@ import { myProvider } from "../ai/providers";
 import { calculateCapitalGainsTool } from "../ai/tools/calculate-capital-gains";
 import { calculateTransferFeesTool } from "../ai/tools/calculate-transfer-fees";
 import { calculateVATTool } from "../ai/tools/calculate-vat";
+import { createDocument } from "../ai/tools/create-document";
+import { createListingTool } from "../ai/tools/create-listing";
+import { getZyprusDataTool } from "../ai/tools/get-zyprus-data";
+import { listListingsTool } from "../ai/tools/list-listings";
+import { requestSuggestions } from "../ai/tools/request-suggestions";
+import { updateDocument } from "../ai/tools/update-document";
+import { uploadListingTool } from "../ai/tools/upload-listing";
 import { isProductionEnvironment } from "../constants";
 import {
   getChatById,
@@ -107,6 +114,19 @@ export async function handleTelegramMessage(
     let fullResponse = "";
     const assistantMessageId = generateUUID();
 
+    // Create a simple data stream for document tools (Telegram doesn't need real-time streaming)
+    const dataStream = {
+      writeData: () => {}, // No-op for Telegram
+    };
+
+    // Mock session for document tools (user already authenticated via dbUser)
+    const session = {
+      user: {
+        id: dbUser.id,
+        email: dbUser.email,
+      },
+    };
+
     const result = await streamText({
       model: myProvider.languageModel("chat-model"), // Use Gemini Flash for Telegram (reliable & fast)
       system: `${systemPrompt({
@@ -138,11 +158,25 @@ Remember: You're chatting on Telegram, so keep it natural and conversational whi
         "calculateTransferFees",
         "calculateCapitalGains",
         "calculateVAT",
+        "createListing",
+        "listListings",
+        "uploadListing",
+        "getZyprusData",
+        "createDocument",
+        "updateDocument",
+        "requestSuggestions",
       ],
       tools: {
         calculateTransferFees: calculateTransferFeesTool,
         calculateCapitalGains: calculateCapitalGainsTool,
         calculateVAT: calculateVATTool,
+        createListing: createListingTool,
+        listListings: listListingsTool,
+        uploadListing: uploadListingTool,
+        getZyprusData: getZyprusDataTool,
+        createDocument: createDocument({ session, dataStream }),
+        updateDocument: updateDocument({ session, dataStream }),
+        requestSuggestions: requestSuggestions({ session, dataStream }),
       },
       experimental_telemetry: {
         isEnabled: isProductionEnvironment,
