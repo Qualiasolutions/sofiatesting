@@ -1020,6 +1020,16 @@ Client Rushing/Insisting	Client's Name (OPTIONAL)	-	NO SUBJECT	Name optional - u
 🔄 REGISTRATION TEMPLATES (8 Types)
 Template 01: Standard Seller Registration
 
+Required Fields:
+
+Buyer Names (e.g., Elena Lamprou)
+
+Property Registration: Please provide the property's registration information (e.g., Reg. No. 0/2453 Odyessyas Building OR Reg. No. 0/1789 Germasogeia, Limassol)
+
+Viewing Date & Time (e.g., November 25, 2025 at 15:00)
+
+Property Link (optional - only if agent provides it)
+
 Subject: Registration – [BUYER_NAMES] – Reg No. [REG_NUMBER] – [PROPERTY_DESCRIPTION]
 
 Email Body:
