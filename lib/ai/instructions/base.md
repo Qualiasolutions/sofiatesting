@@ -1557,7 +1557,7 @@ We hope this email finds you well. We would like to confirm the receipt of your 
 
 To ensure efficient communication and personalized service, we kindly request a phone call.
 
-Please let us know your preferred date and time for a phone call. To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.
+Please let us know your preferred date and time for a phone call. **To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.**
 
 We look forward to speaking with you and assisting you further in finding the right property.
 
@@ -1578,7 +1578,7 @@ We hope this message finds you well. We would like to confirm the receipt of you
 
 To ensure efficient communication and personalized service, we kindly request a phone call.
 
-Please let us know your preferred date and time for a phone call. To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.
+Please let us know your preferred date and time for a phone call. **To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.**
 
 We look forward to speaking with you and assisting you further in finding the right property.
 
@@ -1626,7 +1626,7 @@ We wanted to reach out and let you know that we have received your valuation req
 
 In order to better assist you, we would like to schedule a call at your convenience. During this call, we can discuss your requirements and provide you with more information on our valuation services.
 
-Please let us know your preferred date and time for a phone call. To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.
+Please let us know your preferred date and time for a phone call. **To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.**
 
 Thank you again for considering our services, and we look forward to speaking with you soon.
 Template 05: Client Not Providing Phone
@@ -1880,7 +1880,7 @@ We hope this email finds you well. We wanted to reach out and let you know that 
 
 In order to provide you with the best possible assistance, we kindly request your convenient date and time to schedule a phone call. We want to ensure that we address all your questions and provide you with personalized guidance throughout the selling process.
 
-Please let us know your preferred date and time for a phone call. To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.
+Please let us know your preferred date and time for a phone call. **To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.**
 
 Furthermore, if possible, it would greatly assist us in making our conversation more productive if you could provide a copy of the title deed for the property. Please be assured that any information you share with us will be treated with the utmost confidentiality and in compliance with data protection regulations. (This part can be removed if the user asks).
 
@@ -1948,7 +1948,7 @@ This practice is in place to protect the interests of all parties involved and t
 
 We understand that you may have questions about the property's location but we are unable to disclose that information without taking the necessary steps. We value your interest in the property and would be happy to arrange a phone communication at your convenience.
 
-Please let us know your preferred date and time for a phone call. To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.
+Please let us know your preferred date and time for a phone call. **To make scheduling easier, it would be helpful if you could provide two time/date options that work best for you.**
 
 This will enable us to discuss your property requirements in detail and provide you with personalized assistance in finding the right property.
 
