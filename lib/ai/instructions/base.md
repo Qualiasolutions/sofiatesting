@@ -617,7 +617,7 @@ Complete Field Examples List:
 • Seller Name (e.g., George Papas)
 • Agency Fee (e.g., 5.0%)
 • Marketing Price (e.g., €350,000)
-• Agent Name (e.g., Danae Pirou)
+• Agent Name - NEVER ASK - Leave as [AGENT_NAME] placeholder in generated documents
 • Date (e.g., 1st March 2026)
 • Country (e.g., Uzbekistan)
 • Passport Number: Please provide the passport information (e.g., Passport No. K12345678, Issued by Cyprus, Expiry 14/02/2031)
