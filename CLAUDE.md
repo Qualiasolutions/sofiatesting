@@ -84,27 +84,55 @@ pnpm test:ai-models        # Test AI model connectivity
 
 ### Adding New AI Tools
 
-1. Create tool in `lib/ai/tools/`
-2. Export from tool file
+**CRITICAL**: Tools require DUAL registration to function properly.
+
+1. Create tool in `lib/ai/tools/` (e.g., `calculate-vat.ts`)
+2. Export tool definition with `description`, `parameters`, and `execute` function
 3. Register in `app/(chat)/api/chat/route.ts`:
    ```typescript
+   // Step 1: Import the tool
+   import { calculateVAT } from "@/lib/ai/tools/calculate-vat";
+
+   // Step 2: Add to tools object
    const tools = {
-     yourTool: yourToolImplementation,
-     // ...
+     calculateVAT: calculateVAT,
+     // ...other tools
    };
-   experimental_activeTools: ["yourTool"]
+
+   // Step 3: Add to experimental_activeTools array (MUST MATCH KEY NAME)
+   experimental_activeTools: ["calculateVAT"]
    ```
+
+**Common Mistake**: Forgetting to add tool name to `experimental_activeTools` array. The tool will be imported but won't be available to the AI model.
 
 ### Streaming Chat Architecture
 
 Main endpoint: `app/(chat)/api/chat/route.ts`
 
-Features:
-- Server-Sent Events using `JsonToSseTransformStream`
-- Token tracking with tokenlens
-- Message persistence in PostgreSQL
-- Tool execution for real estate calculations
-- Anthropic prompt caching (when using Claude models)
+**Response Format**: Server-Sent Events (SSE) using custom `JsonToSseTransformStream`
+
+The chat endpoint streams responses in real-time:
+1. Client sends POST with messages array and model selection
+2. Server validates rate limits and authentication
+3. Calls `streamText()` from Vercel AI SDK with selected model
+4. Transforms JSON stream to SSE format for browser consumption
+5. Persists final message and tool results to PostgreSQL
+6. Tracks token usage with tokenlens library
+
+**Key Features**:
+- **Model Selection**: User can choose between Haiku (default), Sonnet, or GPT-4o Mini
+- **Tool Execution**: AI can call Cyprus real estate calculation tools
+- **Prompt Caching**: Anthropic models cache system prompt (5-minute TTL)
+- **Token Tracking**: Input/output tokens counted for billing
+- **Error Handling**: Catches streaming errors and returns proper error responses
+
+**Response Event Types**:
+- `0:` - Text delta (streaming content)
+- `2:` - Tool call
+- `3:` - Tool result
+- `d:` - Done (final message metadata)
+
+Client-side: `app/(chat)/chat/[id]/page.tsx` uses `useChat()` hook to handle SSE stream parsing.
 
 ### Telegram Integration
 
@@ -120,6 +148,24 @@ Features:
 3. Redis-cached Zyprus taxonomy (1-hour TTL)
 4. Retry logic with exponential backoff
 5. Upload attempts tracked in `ListingUploadAttempt` table
+
+### Template System
+
+SOFIA includes 38 Cyprus real estate document templates:
+- **Location**: Templates stored as metadata in database
+- **Smart Extraction**: AI extracts required fields from conversation context
+- **Document Types**: Contracts, agreements, listings, legal documents
+- **API**: `/api/templates` provides template metadata
+- **Rendering**: Templates use variables with `{{fieldName}}` syntax
+
+Available tools in `lib/ai/tools/`:
+- `calculate-transfer-fees.ts` - Property transfer fees
+- `calculate-capital-gains.ts` - Capital gains tax
+- `calculate-vat.ts` - VAT calculations
+- `create-listing.ts` - Property listing creation
+- `list-listings.ts` - Query property listings
+- `create-document.ts` - Template-based document generation
+- `update-document.ts` - Document modifications
 
 ## Recent Optimizations (from IMPLEMENTATION_PLAN.md)
 
@@ -219,19 +265,49 @@ Monitor after deployment:
 
 ## Common Issues & Solutions
 
+### Production Issues
+
 | Issue | Solution |
 |-------|----------|
-| 503 Errors | Verify AI_GATEWAY_API_KEY is set |
+| 503 Errors | Verify AI_GATEWAY_API_KEY is set in Vercel |
 | Rate limit exceeded | Check user type and message count in database |
 | Database errors | Run `pnpm db:migrate` |
-| Tool not working | Verify registration in chat route |
+| Tool not working | Verify dual registration (tools object + experimental_activeTools) |
 | Slow queries | Check indexes exist (migration 0011) |
 | High API costs | Monitor Anthropic prompt caching hit rate |
 
+### Development Issues
+
+| Issue | Solution |
+|-------|----------|
+| Build fails with Tailwind errors | Run `pnpm install` to ensure @tailwindcss/postcss is installed |
+| "Cannot find module" errors | Check imports use correct path aliases (@/lib, @/app) |
+| Drizzle type errors | Run `pnpm db:generate` after schema changes |
+| Hot reload not working | Restart dev server with `pnpm dev` |
+| Tests failing | Ensure PLAYWRIGHT=True env var for E2E tests |
+| Database connection fails | Check POSTGRES_URL in .env.local |
+| AI models not responding | Verify AI_GATEWAY_API_KEY and check Vercel AI Gateway dashboard |
+
 ## Important Notes
 
-1. **No Gemini/Google AI**: All Google dependencies removed
+1. **No Gemini/Google AI**: All Google dependencies removed - AI Gateway only
 2. **Soft deletes**: Always check `deletedAt IS NULL` in queries
-3. **Streaming format**: Use `JsonToSseTransformStream` for SSE
+3. **Streaming format**: Use `JsonToSseTransformStream` for SSE responses
 4. **Tool execution**: Tools must be registered in both `tools` object and `experimental_activeTools` array
-5. **Prompt caching**: Only works with Claude models, not GPT-4o Mini
+5. **Prompt caching**: Only works with Claude models (Haiku/Sonnet), not GPT-4o Mini
+6. **Git status**: Check `git status` before making changes - there are uncommitted admin components
+7. **Database schema changes**: Always run `pnpm db:generate` → `pnpm db:migrate` → `pnpm build` in sequence
+8. **Testing after migrations**: Run full test suite after schema changes to verify integrity
+
+## Working with Uncommitted Changes
+
+Current uncommitted files (as of last check):
+- `app/(admin)/` - Admin interface components (new)
+- `components/admin/` - Admin UI components (new)
+- `components/ui/table.tsx` - Table component (new)
+- `app/(chat)/api/chat/route.ts` - Modified chat endpoint
+- `lib/ai/prompts.ts` - Modified prompts
+- `lib/db/schema.ts` - Database schema changes
+- Migration files (0013)
+
+**Before making changes**: Run `git status` to see current uncommitted work. Coordinate with existing changes to avoid conflicts.

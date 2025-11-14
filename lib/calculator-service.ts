@@ -290,13 +290,22 @@ Note: This is an estimate. Consult a tax professional for accurate assessment.`;
  * - https://www.mof.gov.cy/mof/tax/taxdep.nsf/vathousecalc_gr/vathousecalc_gr?openform
  * - VAT Circular 11/2023, Post-reform rules (≤190 m², €350k/€475k thresholds)
  *
- * Authoritative Rules (Must Enforce):
+ * VAT REFORM DATE: May 1, 2023
+ * - Before May 1, 2023: 5% VAT on entire amount for eligible properties
+ * - After May 1, 2023: 5% VAT only on first 130m² capped at €350k, rest at 19%
+ *
+ * Post-Reform Rules (After May 1, 2023):
  * 1. Reduced 5% VAT applies only to first 130 m² of qualifying primary residence
  * 2. Property total area must be ≤ 190 m² to be eligible for reduced scheme
  * 3. Reduced rate capped at €350,000 of value
  * 4. Total transaction value must be ≤ €475,000
  * 5. If price > €475,000 → no 5% applies (entire taxable amount at 19%)
  * 6. If price ≤ €475,000 but > €350,000, only eligible portion at 5%, remainder at 19%
+ *
+ * Pre-Reform Rules (Before May 1, 2023):
+ * 1. 5% VAT applies to entire amount for eligible primary residence
+ * 2. Property must be ≤ 200 m² (different threshold)
+ * 3. Different eligibility criteria (simpler)
  */
 export function calculateVAT(
   inputs: Record<string, any>
@@ -307,6 +316,22 @@ export function calculateVAT(
     const totalArea = Number.parseFloat(inputs.buildable_area);
     const price = Number.parseFloat(inputs.price);
     const isMainResidence = inputs.is_main_residence !== false; // default true
+    const submissionDate = inputs.submission_date;
+
+    // Parse submission date if provided (DD/MM/YYYY format)
+    const VAT_REFORM_DATE = new Date("2023-05-01");
+    let isPreReform = false;
+
+    if (submissionDate && typeof submissionDate === "string") {
+      const dateParts = submissionDate.split("/");
+      if (dateParts.length === 3) {
+        const [day, month, year] = dateParts;
+        const parsedDate = new Date(`${year}-${month}-${day}`);
+        if (!Number.isNaN(parsedDate.getTime())) {
+          isPreReform = parsedDate < VAT_REFORM_DATE;
+        }
+      }
+    }
 
     // Input validation
     if (
@@ -372,6 +397,74 @@ Note: Only primary residences may qualify for reduced 5% VAT rates under Cyprus 
       };
     }
 
+    // PRE-REFORM CALCULATION (Before May 1, 2023)
+    if (isPreReform) {
+      // Pre-reform rules: 5% VAT on entire amount for eligible properties
+      // Eligibility: primary residence, ≤ 200m² (different from post-reform)
+      const eligible = totalArea <= 200;
+      const vat5 = eligible ? price * 0.05 : 0;
+      const vat19 = eligible ? 0 : price * 0.19;
+      const finalVAT = vat5 + vat19;
+
+      const formattedOutput = `💵 VAT Calculation - Cyprus Primary Residence (Pre-Reform)
+
+Property Details:
+- Total Area: ${totalArea}m²
+- Price: €${price.toLocaleString()}
+- Submission Date: ${submissionDate || "Not provided"}
+- VAT Regime: Before May 1, 2023 (Pre-Reform)
+- Eligible for Reduced Rate: ${eligible ? "Yes" : "No"}
+
+${
+  eligible
+    ? `Calculation (Pre-Reform Rules):
+• VAT Rate: 5% on entire purchase price
+• VAT Amount: €${price.toLocaleString()} × 0.05 = €${vat5.toFixed(2)}`
+    : `Calculation:
+• Property exceeds 200 m² limit (pre-reform threshold)
+• VAT Rate: 19% on entire purchase price
+• VAT Amount: €${price.toLocaleString()} × 0.19 = €${vat19.toFixed(2)}`
+}
+
+📊 Total VAT: €${finalVAT.toFixed(2)}
+
+Note: This calculation uses pre-reform VAT rules (before May 1, 2023).
+Under old rules, 5% VAT applied to entire amount for eligible primary residences ≤200 m².
+
+Official calculator: https://www.mof.gov.cy/mof/tax/taxdep.nsf/vathousecalc_gr/vathousecalc_gr?openform`;
+
+      return {
+        success: true,
+        calculator_name: "vat_calculator",
+        inputs,
+        result: {
+          summary: `€${finalVAT.toFixed(2)}`,
+          details: {
+            eligible,
+            vat_regime: "pre-reform",
+            submission_date: submissionDate,
+            inputs: { price, total_area: totalArea },
+            computed: {
+              area_ratio: 1,
+              reduced_value_base: eligible ? price : 0,
+              vat_5: vat5,
+              vat_19: vat19,
+            },
+            final_vat: finalVAT,
+            notes: [
+              "Pre-reform rules apply (before May 1, 2023)",
+              eligible
+                ? "5% VAT on entire amount - property meets pre-reform criteria (≤200 m²)"
+                : "19% VAT - property exceeds 200 m² limit",
+            ],
+          },
+          formatted_output: formattedOutput,
+        },
+        execution_time_ms: Date.now() - startTime,
+      };
+    }
+
+    // POST-REFORM CALCULATION (After May 1, 2023)
     // Eligibility checks for primary residence
     const eligible = totalArea <= 190 && price <= 475_000;
 
@@ -429,11 +522,13 @@ Note: Only primary residences may qualify for reduced 5% VAT rates under Cyprus 
 
     const finalVAT = vat5 + vat19;
 
-    const formattedOutput = `💵 VAT Calculation - Cyprus Primary Residence
+    const formattedOutput = `💵 VAT Calculation - Cyprus Primary Residence (Post-Reform)
 
 Property Details:
 - Total Area: ${totalArea}m²
 - Price: €${price.toLocaleString()}
+- Submission Date: ${submissionDate || "Not provided (assumed post-May 1, 2023)"}
+- VAT Regime: After May 1, 2023 (Post-Reform)
 - Property Type: ${isMainResidence ? "Primary Residence" : "Investment Property"}
 - Eligible for Reduced Rate: ${eligible ? "Yes" : "No"}
 
@@ -453,9 +548,10 @@ ${
 
 ${
   eligible
-    ? "Note: Reduced 5% VAT applies to first 130 m² only, capped at €350,000 value. " +
+    ? "Note: This calculation uses post-reform VAT rules (after May 1, 2023). " +
+      "Reduced 5% VAT applies to first 130 m² only, capped at €350,000 value. " +
       "Property must be ≤190 m² and ≤€475,000 to qualify."
-    : "Note: Property does not meet criteria for reduced VAT rate. " +
+    : "Note: Property does not meet post-reform criteria for reduced VAT rate. " +
       "Requirements: ≤190 m² total area and ≤€475,000 purchase price."
 }
 
@@ -469,6 +565,8 @@ Official calculator: https://www.mof.gov.cy/mof/tax/taxdep.nsf/vathousecalc_gr/v
         summary: `€${finalVAT.toFixed(2)}`,
         details: {
           eligible,
+          vat_regime: "post-reform",
+          submission_date: submissionDate,
           inputs: { price, total_area: totalArea },
           computed: {
             area_ratio: areaRatio,
