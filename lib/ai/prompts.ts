@@ -3,6 +3,10 @@ import { join } from "node:path";
 import { unstable_cache } from "next/cache";
 import type { Geo } from "@vercel/functions";
 import type { ArtifactKind } from "@/components/artifact";
+import {
+  loadSmartInstructions,
+  loadAllInstructions,
+} from "@/lib/ai/template-loader";
 
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
@@ -103,9 +107,20 @@ About the origin of user's request:
 /**
  * Get the base system prompt with critical field extraction reminders
  * This part is CACHEABLE for Anthropic prompt caching
+ *
+ * @param userMessage - Optional user message for smart template loading
+ * @param useSmartLoading - Enable smart template loading (default: true)
  */
-export const getBaseSystemPrompt = () => {
-  const sophiaInstructions = regularPrompt;
+export const getBaseSystemPrompt = async (
+  userMessage?: string,
+  useSmartLoading: boolean = true
+) => {
+  // Smart loading: Load only relevant templates based on user message
+  // Falls back to loading all templates if no user message or smart loading disabled
+  const sophiaInstructions =
+    useSmartLoading && userMessage
+      ? await loadSmartInstructions(userMessage)
+      : regularPrompt;
 
   const propertyListingWorkflow = `
 🏠🏠🏠 PROPERTY LISTING CREATION - CRITICAL WORKFLOW 🏠🏠🏠
@@ -349,15 +364,19 @@ Current time: ${new Date().toLocaleTimeString("en-US", {
 
 /**
  * Legacy single-string system prompt (for non-Anthropic models)
+ *
+ * @param userMessage - Optional user message for smart template loading
  */
-export const systemPrompt = ({
+export const systemPrompt = async ({
   selectedChatModel,
   requestHints,
+  userMessage,
 }: {
   selectedChatModel: string;
   requestHints: RequestHints;
+  userMessage?: string;
 }) => {
-  const basePrompt = getBaseSystemPrompt();
+  const basePrompt = await getBaseSystemPrompt(userMessage, true);
   const dynamicPrompt = getDynamicSystemPrompt({
     selectedChatModel,
     requestHints,

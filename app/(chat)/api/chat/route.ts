@@ -163,10 +163,21 @@ export async function POST(request: Request) {
     let finalMergedUsage: AppUsage | undefined;
 
     const stream = createUIMessageStream({
-      execute: ({ writer: dataStream }) => {
+      execute: async ({ writer: dataStream }) => {
+        // Extract user message text for smart template loading
+        const userMessageText = message.parts
+          .filter((part) => part.type === "text")
+          .map((part) => part.text)
+          .join(" ");
+
         // AI Gateway models don't support Anthropic's native prompt caching format
         // Always use string format for system prompts
-        const systemPromptValue = systemPrompt({ selectedChatModel, requestHints });
+        // Smart template loading: Only load relevant templates based on user message
+        const systemPromptValue = await systemPrompt({
+          selectedChatModel,
+          requestHints,
+          userMessage: userMessageText,
+        });
 
         const result = streamText({
           model: myProvider.languageModel(selectedChatModel),
