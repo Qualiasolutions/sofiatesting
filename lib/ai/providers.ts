@@ -1,4 +1,5 @@
 import { gateway } from "@ai-sdk/gateway";
+import { google } from "@ai-sdk/google";
 import {
   customProvider,
   extractReasoningMiddleware,
@@ -6,8 +7,7 @@ import {
 } from "ai";
 import { isTestEnvironment } from "../constants";
 
-// AI Gateway is REQUIRED - no fallback
-// This ensures SOFIA always uses premium models
+// AI Gateway configuration
 const isGatewayConfigured = (() => {
   // In test environment, gateway is not needed
   if (isTestEnvironment) return false;
@@ -36,6 +36,22 @@ const isGatewayConfigured = (() => {
   return hasGatewayKey;
 })();
 
+// Gemini API configuration
+const isGeminiConfigured = (() => {
+  // In test environment, not needed
+  if (isTestEnvironment) return false;
+
+  // Skip validation during build
+  const isBuildTime = process.env.NEXT_PHASE === "phase-production-build";
+  if (isBuildTime) {
+    console.log("[SOFIA] Build time detected - skipping Gemini API validation");
+    return false;
+  }
+
+  // Check for GOOGLE_GENERATIVE_AI_API_KEY
+  return !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+})();
+
 export const myProvider = isTestEnvironment
   ? (() => {
       const { chatModel, claudeModel, mistralSmallModel } =
@@ -52,7 +68,7 @@ export const myProvider = isTestEnvironment
       });
     })()
   : (() => {
-      // AI Gateway only - no Gemini fallback
+      // Hybrid approach: AI Gateway (Claude, GPT) + Direct Gemini
       // Default to Claude Haiku 4.5 - fast, smart, and affordable
       const defaultModel = gateway("anthropic/claude-haiku-4.5");
 
@@ -63,15 +79,21 @@ export const myProvider = isTestEnvironment
           "title-model": defaultModel,
           "artifact-model": defaultModel,
 
-          // Alternative models via AI Gateway
+          // Claude models via AI Gateway
+          // Claude Sonnet 4.5 - Best quality ($3.00/M input, $15.00/M output)
+          "chat-model-sonnet": gateway("anthropic/claude-sonnet-4.5"),
+          // Claude Haiku 4.5 - Fast & smart ($1.00/M input, $5.00/M output)
+          "chat-model-haiku": gateway("anthropic/claude-haiku-4.5"),
+
+          // OpenAI models via AI Gateway
           // GPT-4o Mini - Ultra cheap OpenAI option ($0.15/M input, $0.60/M output)
           "chat-model-gpt4o": gateway("openai/gpt-4o-mini"),
 
-          // Claude Sonnet 4.5 - Best quality ($3.00/M input, $15.00/M output)
-          "chat-model-sonnet": gateway("anthropic/claude-sonnet-4.5"),
-
-          // Claude Haiku 4.5 - Fast & smart ($1.00/M input, $5.00/M output)
-          "chat-model-haiku": gateway("anthropic/claude-haiku-4.5"),
+          // Google Gemini models (Direct API integration)
+          // Gemini 2.0 Flash - Experimental fast model
+          "chat-model-gemini-flash": google("gemini-2.0-flash-exp"),
+          // Gemini 1.5 Pro - Powerful reasoning
+          "chat-model-gemini-pro": google("gemini-1.5-pro-002"),
         },
       });
     })();
