@@ -92,8 +92,8 @@ export const myProvider = isTestEnvironment
           // Google Gemini models (Direct API integration)
           // Gemini 2.0 Flash - Experimental fast model
           "chat-model-gemini-flash": google("gemini-2.0-flash-exp"),
-          // Gemini 1.5 Pro - Powerful reasoning
-          "chat-model-gemini-pro": google("gemini-1.5-pro-002"),
+          // Gemini 2.5 Pro - Latest powerful reasoning model
+          "chat-model-gemini-pro": google("gemini-2.5-pro-exp"),
         },
       });
     })();
