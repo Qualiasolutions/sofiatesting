@@ -12,10 +12,18 @@ const isGatewayConfigured = (() => {
   // In test environment, gateway is not needed
   if (isTestEnvironment) return false;
 
+  // Skip validation during Next.js build process
+  // AI_GATEWAY_API_KEY will be available at runtime from Vercel env vars
+  const isBuildTime = process.env.NEXT_PHASE === "phase-production-build";
+  if (isBuildTime) {
+    console.log("[SOFIA] Build time detected - skipping AI Gateway validation");
+    return false; // Will be configured at runtime
+  }
+
   // Check for AI_GATEWAY_API_KEY environment variable
   const hasGatewayKey = !!process.env.AI_GATEWAY_API_KEY;
 
-  // Enforce AI Gateway requirement
+  // Enforce AI Gateway requirement (only at runtime)
   if (!hasGatewayKey && typeof window === "undefined") {
     console.error(
       "[SOFIA] CRITICAL: AI Gateway API key is required. Please configure AI_GATEWAY_API_KEY."
