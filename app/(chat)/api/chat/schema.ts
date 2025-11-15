@@ -27,6 +27,8 @@ export const postRequestBodySchema = z.object({
     "chat-model-haiku",
     "chat-model-gpt4o",
     "chat-model-gpt4o-mini",
+    "chat-model-gemini-flash",
+    "chat-model-gemini-pro",
   ]),
   selectedVisibilityType: z.enum(["public", "private"]),
 });
