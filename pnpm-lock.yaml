@@ -11,6 +11,9 @@ importers:
       '@ai-sdk/gateway':
         specifier: ^2.0.7
         version: 2.0.7(zod@3.25.76)
+      '@ai-sdk/google':
+        specifier: ^2.0.32
+        version: 2.0.32(zod@3.25.76)
       '@ai-sdk/provider':
         specifier: 2.0.0
         version: 2.0.0
@@ -282,8 +285,20 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/google@2.0.32':
+    resolution: {integrity: sha512-tQh15Eo+qcW2Yx1fqIT/iBf9sUAsEzx8oriyxMQAGLYMlZBG6EGs1ftNWQIwWqmAjz8q9FH0WjKs18E5522JjA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/provider-utils@3.0.16':
     resolution: {integrity: sha512-lsWQY9aDXHitw7C1QRYIbVGmgwyT98TF3MfM8alNIXKpdJdi+W782Rzd9f1RyOfgRmZ08gJ2EYNDhWNK7RqpEA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/provider-utils@3.0.17':
+    resolution: {integrity: sha512-TR3Gs4I3Tym4Ll+EPdzRdvo/rc8Js6c4nVhFLuvGLX/Y4V9ZcQMa/HTiYsHEgmYrf1zVi6Q145UEZUfleOwOjw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -4216,7 +4231,20 @@ snapshots:
       '@vercel/oidc': 3.0.3
       zod: 3.25.76
 
+  '@ai-sdk/google@2.0.32(zod@3.25.76)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider-utils': 3.0.17(zod@3.25.76)
+      zod: 3.25.76
+
   '@ai-sdk/provider-utils@3.0.16(zod@3.25.76)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.0
+      '@standard-schema/spec': 1.0.0
+      eventsource-parser: 3.0.6
+      zod: 3.25.76
+
+  '@ai-sdk/provider-utils@3.0.17(zod@3.25.76)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@standard-schema/spec': 1.0.0
