@@ -33,7 +33,7 @@ export const chatModels: ChatModel[] = [
   },
   {
     id: "chat-model-gemini-pro",
-    name: "Gemini 1.5 Pro",
+    name: "Gemini 2.5 Pro",
     description:
       "Google's powerful reasoning model - Extended context and multimodal (Direct API)",
   },
