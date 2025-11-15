@@ -1,4 +1,4 @@
-export const DEFAULT_CHAT_MODEL: string = "chat-model"; // Gemini 1.5 Flash (default)
+export const DEFAULT_CHAT_MODEL: string = "chat-model"; // Gemini 2.0 Flash (default)
 
 export type ChatModel = {
   id: string;
@@ -9,26 +9,26 @@ export type ChatModel = {
 export const chatModels: ChatModel[] = [
   {
     id: "chat-model",
-    name: "Gemini 1.5 Flash",
+    name: "Gemini 2.0 Flash",
     description:
-      "Google's proven multimodal model - Fast, cost-effective, and reliable (Default)",
+      "Google's latest and fastest multimodal model - FREE, no API Gateway needed (Default)",
   },
   {
-    id: "chat-model-sonnet",
-    name: "Claude Sonnet 4.5",
+    id: "chat-model-gemini-pro",
+    name: "Gemini Pro 2.5",
     description:
-      "Anthropic's newest and most intelligent model with extended thinking - $3/M in, $15/M out (requires AI Gateway)",
+      "Google's most capable model with advanced reasoning - FREE, no API Gateway needed",
   },
   {
     id: "chat-model-haiku",
     name: "Claude Haiku 4.5",
     description:
-      "Anthropic's newest fast model with improved capabilities - $0.80/M in, $4/M out (requires AI Gateway)",
+      "Anthropic's fast model with improved capabilities - $1/M in, $5/M out (requires AI Gateway)",
   },
   {
-    id: "chat-model-gpt4o",
-    name: "GPT-4o",
+    id: "chat-model-sonnet",
+    name: "Claude Sonnet 4.5",
     description:
-      "OpenAI's flagship multimodal model - $2.50/M in, $10/M out (requires AI Gateway)",
+      "Anthropic's most intelligent model with extended thinking - $3/M in, $15/M out (requires AI Gateway)",
   },
 ];
