@@ -13,6 +13,7 @@ import { fetchModels } from "tokenlens/fetch";
 import { getUsage } from "tokenlens/helpers";
 import { auth, type UserType } from "@/app/(auth)/auth";
 import type { VisibilityType } from "@/components/visibility-selector";
+import { pruneConversationHistory } from "@/lib/ai/conversation-pruning";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
 import {
@@ -133,7 +134,11 @@ export async function POST(request: Request) {
     }
 
     const messagesFromDb = await getMessagesByChatId({ id });
-    const uiMessages = [...convertToUIMessages(messagesFromDb), message];
+    const allMessages = [...convertToUIMessages(messagesFromDb), message];
+
+    // Prune conversation history to prevent unbounded token growth
+    // Keeps first message + last N messages for optimal cost/quality balance
+    const uiMessages = pruneConversationHistory(allMessages);
 
     const { longitude, latitude, city, country } = geolocation(request);
 
