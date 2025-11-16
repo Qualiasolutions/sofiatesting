@@ -264,9 +264,8 @@ async function uploadToZyprusAPIInternal(
           const ext = contentType.split("/")[1] || "jpg";
           const filename = `property-image-${i + 1}.${ext}`;
 
-          const formData = new FormData();
-          formData.append("file", imageBlob, filename);
-
+          // IMPORTANT: Zyprus expects raw binary upload with Content-Disposition header
+          // NOT multipart/form-data (as per Postman collection spec)
           const uploadResponse = await fetch(
             `${apiUrl}/jsonapi/node/property/field_gallery_`,
             {
@@ -274,8 +273,10 @@ async function uploadToZyprusAPIInternal(
               headers: {
                 Authorization: `Bearer ${token}`,
                 "User-Agent": "SophiaAI/1.0",
+                "Content-Type": "application/octet-stream",
+                "Content-Disposition": `file; filename="${filename}"`,
               },
-              body: formData,
+              body: imageBlob,
             }
           );
 

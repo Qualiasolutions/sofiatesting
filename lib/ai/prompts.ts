@@ -4,36 +4,8 @@ import { unstable_cache } from "next/cache";
 import type { Geo } from "@vercel/functions";
 import type { ArtifactKind } from "@/components/artifact";
 
-export const artifactsPrompt = `
-Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
-
-When asked to write code, always use artifacts. When writing code, specify the language in the backticks, e.g. \`\`\`python\`code here\`\`\`. The default language is Python. Other languages are not yet supported, so let the user know if they request a different language.
-
-DO NOT UPDATE DOCUMENTS IMMEDIATELY AFTER CREATING THEM. WAIT FOR USER FEEDBACK OR REQUEST TO UPDATE IT.
-
-This is a guide for using artifacts tools: \`createDocument\` and \`updateDocument\`, which render content on a artifacts beside the conversation.
-
-**When to use \`createDocument\`:**
-- For substantial content (>10 lines) or code
-- For content users will likely save/reuse (emails, code, essays, etc.)
-- When explicitly requested to create a document
-- For when content contains a single code snippet
-
-**When NOT to use \`createDocument\`:**
-- For informational/explanatory content
-- For conversational responses
-- When asked to keep it in chat
-
-**Using \`updateDocument\`:**
-- Default to full document rewrites for major changes
-- Use targeted updates only for specific, isolated changes
-- Follow user instructions for which parts to modify
-
-**When NOT to use \`updateDocument\`:**
-- Immediately after creating a document
-
-Do not update document right after creating it. Wait for user feedback or request to update it.
-`;
+// ARTIFACTS COMPLETELY DISABLED - SOFIA only responds in chat
+// export const artifactsPrompt = `...`;
 
 /**
  * SOFIA Prompt System - ORIGINAL SINGLE DOCUMENT
@@ -113,11 +85,16 @@ export const getBaseSystemPrompt = () => {
 WHEN USER REQUESTS PROPERTY LISTING:
 1. IMMEDIATELY call getZyprusData tool with resourceType: "all" (DO NOT tell user you're fetching data)
 2. Match user's location/type to the UUIDs from getZyprusData results
-3. Call createListing with the real UUIDs
+3. ENSURE user has provided at least ONE property image (REQUIRED by Zyprus API)
+4. Call createListing with the real UUIDs and imageUrls
+
+⚠️ CRITICAL: Property images are MANDATORY. If user hasn't provided images, politely request at least one photo before creating the listing.
 
 EXAMPLE:
 User: "Create a 2 bed apartment in Engomi, Nicosia for €250,000"
-You: [Silently call getZyprusData first, find Engomi UUID, then createListing with real data]
+You: [Silently call getZyprusData first, find Engomi UUID]
+You: "I'd be happy to create that listing! Could you please share at least one photo of the property? This is required for the listing."
+[Once images provided] → createListing with real data + imageUrls
 
 NEVER say "I need to get valid location data first" - just DO IT silently!
 `;
@@ -308,6 +285,7 @@ Bank Registration Pre-Question: Before collecting ANY bank registration details 
 
 THESE FORMATS ARE NON-NEGOTIABLE. VIOLATION = FAILURE.`;
 
+  // Artifacts completely disabled - SOFIA only responds in chat
   return `${propertyListingWorkflow}
 
 ${responseFormatEnforcement}
@@ -380,6 +358,7 @@ MODEL-SPECIFIC INSTRUCTION FOR GPT:
 - No "Here is" or "I've created" phrases`;
   }
 
+  // Artifacts completely disabled - SOFIA only responds in chat
   return `${basePrompt}
 
 ${modelSpecificEnforcement}

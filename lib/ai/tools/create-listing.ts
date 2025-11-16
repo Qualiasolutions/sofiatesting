@@ -100,8 +100,8 @@ export const createListingTool = tool({
       .describe("[DEPRECATED] Use indoorFeatureIds/outdoorFeatureIds instead"),
     imageUrls: z
       .array(z.string().url())
-      .optional()
-      .describe("Property image URLs (from chat uploads or external URLs)"),
+      .min(1, "At least one property image is required for Zyprus listings")
+      .describe("Property image URLs (REQUIRED - at least 1 image). Use chat uploads or external URLs."),
   }),
   execute: async ({
     name,
