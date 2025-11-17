@@ -1,5 +1,5 @@
 /**
- * Test script to verify all AI models work correctly with AI Gateway
+ * Test script to verify all Gemini models work correctly
  * Tests temperature=0 enforcement and instruction following
  */
 
@@ -13,12 +13,11 @@ import { myProvider } from "@/lib/ai/providers";
 import { streamText } from "ai";
 
 const MODELS_TO_TEST = [
-  "chat-model", // Gemini 1.5 Flash (default)
-  "chat-model-sonnet", // Claude Sonnet 4.5 via AI Gateway
-  "chat-model-haiku", // Claude Haiku 4.5 via AI Gateway
-  "chat-model-gpt4o", // GPT-4o via AI Gateway
-  "title-model", // Gemini 1.5 Flash
-  "artifact-model", // Gemini 1.5 Flash
+  "chat-model", // Gemini 2.5 Flash (default)
+  "chat-model-pro", // Gemini 2.5 Pro
+  "chat-model-flash-lite", // Gemini 2.5 Flash-Lite
+  "title-model", // Gemini 2.5 Flash
+  "artifact-model", // Gemini 2.5 Flash
 ] as const;
 
 const STRICT_INSTRUCTION_TEST =
@@ -80,11 +79,11 @@ async function testModel(
 }
 
 async function main() {
-  console.log("🚀 Starting AI Model Tests");
+  console.log("🚀 Starting Gemini Model Tests");
   console.log("=" .repeat(60));
   console.log("\n📋 Testing Configuration:");
   console.log(`   - Temperature: 0 (strict instruction following)`);
-  console.log(`   - AI Gateway: ${process.env.AI_GATEWAY_API_KEY ? "✅ Configured" : "❌ Not configured"}`);
+  console.log(`   - Gemini API: ${process.env.GOOGLE_GENERATIVE_AI_API_KEY ? "✅ Configured" : "❌ Not configured"}`);
   console.log(`   - Models to test: ${MODELS_TO_TEST.length}`);
   console.log("\n" + "=".repeat(60));
 
@@ -121,11 +120,11 @@ async function main() {
   console.log("=" .repeat(60));
 
   if (failCount > 0) {
-    console.log("\n⚠️  Some models failed. Check AI Gateway configuration.");
-    console.log("   Ensure AI_GATEWAY_API_KEY is set correctly.");
+    console.log("\n⚠️  Some models failed. Check Gemini API configuration.");
+    console.log("   Ensure GOOGLE_GENERATIVE_AI_API_KEY is set correctly.");
     process.exit(1);
   } else {
-    console.log("\n🎉 All models working correctly with temperature=0!");
+    console.log("\n🎉 All Gemini models working correctly with temperature=0!");
     process.exit(0);
   }
 }

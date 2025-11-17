@@ -3,6 +3,9 @@ import { AgentExecutionTable } from "@/components/admin/agents/execution-table";
 import { AgentMetrics } from "@/components/admin/agents/metrics";
 import { LoadingCard } from "@/components/admin/dashboard/loading-card";
 
+// Force dynamic rendering to avoid build-time database connections
+export const dynamic = "force-dynamic";
+
 export default function AgentLogsPage() {
   return (
     <div className="space-y-6">

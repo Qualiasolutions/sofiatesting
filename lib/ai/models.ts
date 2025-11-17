@@ -1,4 +1,4 @@
-export const DEFAULT_CHAT_MODEL: string = "chat-model"; // Claude Haiku 4.5 (default)
+export const DEFAULT_CHAT_MODEL: string = "chat-model"; // Gemini 2.5 Flash (default)
 
 export type ChatModel = {
   id: string;
@@ -9,32 +9,20 @@ export type ChatModel = {
 export const chatModels: ChatModel[] = [
   {
     id: "chat-model",
-    name: "Claude Haiku 4.5",
+    name: "Gemini 2.5 Flash",
     description:
-      "Anthropic's fast and smart model - $1/M in, $5/M out (Default - AI Gateway)",
+      "Google's best price-performance model with thinking - Fast, intelligent, cost-effective (Default)",
   },
   {
-    id: "chat-model-sonnet",
-    name: "Claude Sonnet 4.5",
-    description:
-      "Anthropic's most intelligent model with extended thinking - $3/M in, $15/M out (AI Gateway)",
-  },
-  {
-    id: "chat-model-gpt4o",
-    name: "GPT-4o Mini",
-    description:
-      "OpenAI's ultra-cheap model - $0.15/M in, $0.60/M out (AI Gateway)",
-  },
-  {
-    id: "chat-model-gemini-flash",
-    name: "Gemini 2.0 Flash",
-    description:
-      "Google's experimental fast model - Multimodal and cost-effective (Direct API)",
-  },
-  {
-    id: "chat-model-gemini-pro",
+    id: "chat-model-pro",
     name: "Gemini 2.5 Pro",
     description:
-      "Google's powerful reasoning model - Extended context and multimodal (Direct API)",
+      "Google's most powerful reasoning model - Extended context, advanced thinking, best for complex tasks",
+  },
+  {
+    id: "chat-model-flash-lite",
+    name: "Gemini 2.5 Flash-Lite",
+    description:
+      "Google's ultra-fast and cost-efficient model - Optimized for high throughput and simple tasks",
   },
 ];

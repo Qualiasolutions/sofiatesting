@@ -17,8 +17,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Skip static generation of API routes during build
-  output: undefined, // Use default for now
+  // Skip static generation of admin routes during build
+  trailingSlash: false,
+  // Exclude admin routes from static generation
+  generateEtags: false,
 };
 
 export default nextConfig;
