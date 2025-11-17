@@ -26,6 +26,7 @@ import { myProvider } from "@/lib/ai/providers";
 import { calculateCapitalGainsTool } from "@/lib/ai/tools/calculate-capital-gains";
 import { calculateTransferFeesTool } from "@/lib/ai/tools/calculate-transfer-fees";
 import { calculateVATTool } from "@/lib/ai/tools/calculate-vat";
+import { getGeneralKnowledge } from "@/lib/ai/tools/get-general-knowledge";
 // import { createDocument } from "@/lib/ai/tools/create-document"; // DISABLED - No artifacts needed
 import { createListingTool } from "@/lib/ai/tools/create-listing";
 import { getZyprusDataTool } from "@/lib/ai/tools/get-zyprus-data";
@@ -219,10 +220,11 @@ export async function POST(request: Request) {
             "listListings",
             "uploadListing",
             "getZyprusData",
+            "getGeneralKnowledge",
             // "createDocument", // DISABLED - No artifacts needed
             // "updateDocument", // DISABLED - No artifacts needed
             "requestSuggestions",
-          ], // SOFIA can use calculator, property listing, and taxonomy tools only
+          ], // SOFIA can use calculator, property listing, taxonomy, and general knowledge tools only
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             calculateTransferFees: calculateTransferFeesTool,
@@ -232,10 +234,11 @@ export async function POST(request: Request) {
             listListings: listListingsTool,
             uploadListing: uploadListingTool,
             getZyprusData: getZyprusDataTool,
+            getGeneralKnowledge: getGeneralKnowledge,
             // createDocument: createDocument({ session, dataStream }), // DISABLED - No artifacts needed
             // updateDocument: updateDocument({ session, dataStream }), // DISABLED - No artifacts needed
             requestSuggestions: requestSuggestions({ session, dataStream }),
-          }, // Cyprus real estate tools only - no document creation
+          }, // Cyprus real estate tools and general knowledge only - no document creation
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
             functionId: "stream-text",

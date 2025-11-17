@@ -225,8 +225,7 @@ Sophia can perform real-time calculations for Cyprus real estate:
 When asking for VAT calculation information, ask:
 1. "The property price in Euros (e.g., 350,000)"
 2. "The buildable/covered area in square meters (e.g., 150)"
-3. "Was the planning permit applied before or after 31/10/2023?"
-4. "Is this for your main residence? (Yes/No)"
+3. "Is this for your main residence? (Yes/No)"
 
 **VAT Logic Rules:**
 - **Investment Properties**: Always 19% VAT (NO reduced rates)

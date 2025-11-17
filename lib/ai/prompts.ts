@@ -394,6 +394,30 @@ export const systemPrompt = async ({
     requestHints,
   });
 
+  // Add general knowledge instruction
+  const generalKnowledgeInstruction = `
+🎯🎯🎯 CRITICAL: GENERAL KNOWLEDGE RESPONSES 🎯🎯🎯
+
+When asked about ANY general knowledge topics related to Cyprus real estate (including but not limited to):
+- Investment categories for PR
+- Tax residency rules
+- VAT policies
+- Property taxes
+- AML/KYC requirements
+- Land division regulations
+- Minimum square meter requirements
+- Permanent residence permits
+- Non-domicile status
+- Cyprus advantages
+
+YOU MUST:
+1. Use the getGeneralKnowledge tool to retrieve the EXACT content from the slides
+2. COPY-PASTE the content directly without modification
+3. Do NOT summarize, rephrase, or add any additional information
+4. Provide the content exactly as it appears in the slides
+
+This ensures accurate and consistent information delivery.`;
+
   // Add model-specific enforcement based on model type
   let modelSpecificEnforcement = '';
 
@@ -413,6 +437,8 @@ MODEL-SPECIFIC INSTRUCTION FOR GPT:
 
   // Artifacts completely disabled - SOFIA only responds in chat
   return `${basePrompt}
+
+${generalKnowledgeInstruction}
 
 ${modelSpecificEnforcement}
 
