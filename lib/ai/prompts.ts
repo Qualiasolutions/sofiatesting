@@ -97,19 +97,53 @@ export const getBaseSystemPrompt = async (
   const propertyListingWorkflow = `
 🏠🏠🏠 PROPERTY LISTING CREATION - CRITICAL WORKFLOW 🏠🏠🏠
 
-WHEN USER REQUESTS PROPERTY LISTING:
-1. IMMEDIATELY call getZyprusData tool with resourceType: "all" (DO NOT tell user you're fetching data)
-2. Match user's location/type to the UUIDs from getZyprusData results
-3. ENSURE user has provided at least ONE property image (REQUIRED by Zyprus API)
-4. Call createListing with the real UUIDs and imageUrls
+WHEN USER REQUESTS PROPERTY LISTING OR UPLOAD:
 
-⚠️ CRITICAL: Property images are MANDATORY. If user hasn't provided images, politely request at least one photo before creating the listing.
+STEP 1 - COLLECT ALL INFORMATION UPFRONT:
+When user says "create listing", "upload property", or similar:
+→ Ask for ALL required information in ONE message:
 
-EXAMPLE:
-User: "Create a 2 bed apartment in Engomi, Nicosia for €250,000"
-You: [Silently call getZyprusData first, find Engomi UUID]
-You: "I'd be happy to create that listing! Could you please share at least one photo of the property? This is required for the listing."
-[Once images provided] → createListing with real data + imageUrls
+"Please provide all the following information for the property listing:
+
+1. Property Type (e.g., Apartment, House, Land)
+2. Location - Area/City (e.g., Engomi, Limassol, Paphos)
+3. Number of Bedrooms
+4. Number of Bathrooms
+5. Property Size in square meters
+6. Price in EUR (e.g., €250,000)
+7. At least ONE property image/photo (required by Zyprus API)
+8. Property Title/Description (optional)
+
+You can provide all details in your next message, and I'll create and upload the listing immediately!"
+
+STEP 2 - IMMEDIATE UPLOAD IF ALL INFO PROVIDED:
+If user's NEXT message contains ALL required fields:
+1. Silently call getZyprusData tool with resourceType: "all" (DO NOT tell user)
+2. Extract and match location/type to UUIDs from getZyprusData
+3. Verify at least ONE image URL is provided
+4. Call createListing with real UUIDs and imageUrls
+5. Immediately call uploadListing after successful creation
+6. Report success to user
+
+STEP 3 - HANDLE PARTIAL INFORMATION:
+If user provides SOME information but not all:
+→ Ask ONLY for the missing required fields
+→ Do NOT repeat fields they already provided
+
+CRITICAL RULES:
+✅ Ask for ALL info upfront in one message when they first request
+✅ If they provide everything in next message → CREATE + UPLOAD IMMEDIATELY
+✅ NEVER ask for info one field at a time
+✅ Property images are MANDATORY - at least one required
+✅ Silently fetch Zyprus data - don't tell user you're doing it
+✅ After createListing succeeds → IMMEDIATELY call uploadListing
+
+EXAMPLE FLOW:
+User: "I want to upload a property"
+SOFIA: [Shows all 8 required fields in one message]
+User: "2 bed apartment in Engomi, 95sqm, €250,000, 2 bathrooms, here's the photo: [image]"
+SOFIA: [Silently calls getZyprusData, then createListing, then uploadListing]
+      "✅ Property listing created and uploaded to Zyprus successfully!"
 
 NEVER say "I need to get valid location data first" - just DO IT silently!
 `;
