@@ -26,12 +26,12 @@ import { myProvider } from "@/lib/ai/providers";
 import { calculateCapitalGainsTool } from "@/lib/ai/tools/calculate-capital-gains";
 import { calculateTransferFeesTool } from "@/lib/ai/tools/calculate-transfer-fees";
 import { calculateVATTool } from "@/lib/ai/tools/calculate-vat";
-import { createDocument } from "@/lib/ai/tools/create-document";
+// import { createDocument } from "@/lib/ai/tools/create-document"; // DISABLED - No artifacts needed
 import { createListingTool } from "@/lib/ai/tools/create-listing";
 import { getZyprusDataTool } from "@/lib/ai/tools/get-zyprus-data";
 import { listListingsTool } from "@/lib/ai/tools/list-listings";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
-import { updateDocument } from "@/lib/ai/tools/update-document";
+// import { updateDocument } from "@/lib/ai/tools/update-document"; // DISABLED - No artifacts needed
 import { uploadListingTool } from "@/lib/ai/tools/upload-listing";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
@@ -198,10 +198,10 @@ export async function POST(request: Request) {
             "listListings",
             "uploadListing",
             "getZyprusData",
-            "createDocument",
-            "updateDocument",
+            // "createDocument", // DISABLED - No artifacts needed
+            // "updateDocument", // DISABLED - No artifacts needed
             "requestSuggestions",
-          ], // SOFIA can use calculator, property listing, taxonomy, and document tools
+          ], // SOFIA can use calculator, property listing, and taxonomy tools only
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             calculateTransferFees: calculateTransferFeesTool,
@@ -211,10 +211,10 @@ export async function POST(request: Request) {
             listListings: listListingsTool,
             uploadListing: uploadListingTool,
             getZyprusData: getZyprusDataTool,
-            createDocument: createDocument({ session, dataStream }),
-            updateDocument: updateDocument({ session, dataStream }),
+            // createDocument: createDocument({ session, dataStream }), // DISABLED - No artifacts needed
+            // updateDocument: updateDocument({ session, dataStream }), // DISABLED - No artifacts needed
             requestSuggestions: requestSuggestions({ session, dataStream }),
-          }, // Cyprus real estate tools plus document creation
+          }, // Cyprus real estate tools only - no document creation
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
             functionId: "stream-text",

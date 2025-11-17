@@ -1,0 +1,110 @@
+import { db } from "@/lib/db/client";
+import {
+  message,
+  propertyListing,
+  documentGenerationLog,
+  user,
+} from "@/lib/db/schema";
+import { sql, eq, and, gte, isNull } from "drizzle-orm";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MessageSquare, FileText, Home, Users } from "lucide-react";
+
+interface DashboardOverviewProps {
+  userId: string;
+}
+
+export async function DashboardOverview({ userId }: DashboardOverviewProps) {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  // Get metrics in parallel
+  const [
+    totalMessages,
+    totalDocuments,
+    totalListings,
+    totalUsers,
+    messagesLast30Days,
+    documentsLast30Days,
+  ] = await Promise.all([
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(message)
+      .then((r) => r[0]?.count || 0),
+
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(documentGenerationLog)
+      .then((r) => r[0]?.count || 0),
+
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(propertyListing)
+      .where(isNull(propertyListing.deletedAt))
+      .then((r) => r[0]?.count || 0),
+
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(user)
+      .then((r) => r[0]?.count || 0),
+
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(message)
+      .where(gte(message.createdAt, thirtyDaysAgo))
+      .then((r) => r[0]?.count || 0),
+
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(documentGenerationLog)
+      .where(gte(documentGenerationLog.timestamp, thirtyDaysAgo))
+      .then((r) => r[0]?.count || 0),
+  ]);
+
+  const metrics = [
+    {
+      title: "Total Messages",
+      value: totalMessages.toLocaleString(),
+      description: `${messagesLast30Days.toLocaleString()} in last 30 days`,
+      icon: MessageSquare,
+    },
+    {
+      title: "Documents Generated",
+      value: totalDocuments.toLocaleString(),
+      description: `${documentsLast30Days.toLocaleString()} in last 30 days`,
+      icon: FileText,
+    },
+    {
+      title: "Property Listings",
+      value: totalListings.toLocaleString(),
+      description: "Active listings",
+      icon: Home,
+    },
+    {
+      title: "Total Users",
+      value: totalUsers.toLocaleString(),
+      description: "Registered users",
+      icon: Users,
+    },
+  ];
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {metrics.map((metric) => (
+        <Card key={metric.title}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              {metric.title}
+            </CardTitle>
+            <metric.icon className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metric.value}</div>
+            <p className="text-xs text-muted-foreground">
+              {metric.description}
+            </p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
