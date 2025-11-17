@@ -80,6 +80,27 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Check if system is enabled (admin can disable SOFIA globally)
+    try {
+      const { kv } = await import("@vercel/kv");
+      const systemEnabled = (await kv.get("sofia:system:enabled")) ?? true;
+
+      if (!systemEnabled) {
+        return new Response(
+          JSON.stringify({
+            error: "System is currently disabled by administrator. Please try again later."
+          }),
+          {
+            status: 503,
+            headers: { "Content-Type": "application/json" }
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error checking system status:", error);
+      // Continue if Redis check fails (fail open)
+    }
+
     const {
       id,
       message,

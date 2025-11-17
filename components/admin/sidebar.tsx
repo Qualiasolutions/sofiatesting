@@ -53,6 +53,12 @@ const navigationItems = [
     requiredPermission: "view_agent_logs",
   },
   {
+    name: "WhatsApp",
+    href: "/admin/whatsapp",
+    icon: MessageSquare,
+    requiredPermission: "view_agent_logs",
+  },
+  {
     name: "Telegram",
     href: "/admin/telegram",
     icon: MessageSquare,
