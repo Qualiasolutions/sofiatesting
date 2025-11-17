@@ -4,7 +4,7 @@ import {
   adminUserRole,
   agentExecutionLog,
   adminAuditLog,
-  whatsAppConversation,
+  whatsappConversation,
   user,
 } from "@/lib/db/schema";
 import { eq, desc, sql, and, gte } from "drizzle-orm";
@@ -126,24 +126,24 @@ export async function GET(request: Request) {
       // Get WhatsApp conversations
       const conversations = await db
         .select({
-          id: whatsAppConversation.id,
-          phoneNumber: whatsAppConversation.phoneNumber,
-          userId: whatsAppConversation.userId,
+          id: whatsappConversation.id,
+          phoneNumber: whatsappConversation.phoneNumber,
+          userId: whatsappConversation.userId,
           userEmail: user.email,
-          status: whatsAppConversation.status,
-          metadata: whatsAppConversation.metadata,
-          createdAt: whatsAppConversation.createdAt,
-          lastMessageAt: whatsAppConversation.lastMessageAt,
+          status: whatsappConversation.status,
+          metadata: whatsappConversation.metadata,
+          createdAt: whatsappConversation.createdAt,
+          lastMessageAt: whatsappConversation.lastMessageAt,
         })
-        .from(whatsAppConversation)
-        .leftJoin(user, eq(whatsAppConversation.userId, user.id))
-        .orderBy(desc(whatsAppConversation.lastMessageAt))
+        .from(whatsappConversation)
+        .leftJoin(user, eq(whatsappConversation.userId, user.id))
+        .orderBy(desc(whatsappConversation.lastMessageAt))
         .limit(limit)
         .offset(offset);
 
       const [{ count: total }] = await db
         .select({ count: sql<number>`count(*)::int` })
-        .from(whatsAppConversation);
+        .from(whatsappConversation);
 
       return NextResponse.json({
         conversations,
