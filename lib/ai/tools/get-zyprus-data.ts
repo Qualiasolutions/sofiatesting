@@ -44,7 +44,7 @@ export const getZyprusDataTool = tool({
       }
 
       // Initialize cache if empty
-      if (!hasCacheData()) {
+      if (!(await hasCacheData())) {
         await forceRefreshCache();
       }
 
