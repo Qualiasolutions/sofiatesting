@@ -42,6 +42,7 @@ export default function PropertiesPage() {
   const [listings, setListings] = useState<PropertyListing[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadImmediately, setUploadImmediately] = useState(true);
 
   const [formData, setFormData] = useState<PropertyListing>({
     name: "",
@@ -91,8 +92,47 @@ export default function PropertiesPage() {
         throw new Error(error.error || "Failed to create listing");
       }
 
-      await response.json();
+      const result = await response.json();
+      const listingId = result.listing?.id;
+
       toast.success("Property listing created successfully!");
+
+      // If uploadImmediately is checked, upload to Zyprus right away
+      if (uploadImmediately && listingId) {
+        try {
+          setIsUploading(true);
+          const uploadResponse = await fetch("/api/listings/upload", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ listingId }),
+          });
+
+          if (!uploadResponse.ok) {
+            const uploadError = await uploadResponse.json();
+            throw new Error(
+              uploadError.error || "Failed to upload listing to Zyprus"
+            );
+          }
+
+          const uploadResult = await uploadResponse.json();
+          toast.success("✅ Property uploaded to Zyprus successfully!");
+
+          if (typeof window !== "undefined" && uploadResult.listingUrl) {
+            window.open(uploadResult.listingUrl, "_blank");
+          }
+        } catch (uploadError) {
+          console.error("Error uploading listing:", uploadError);
+          toast.error(
+            uploadError instanceof Error
+              ? uploadError.message
+              : "Failed to upload to Zyprus"
+          );
+        } finally {
+          setIsUploading(false);
+        }
+      }
 
       // Reset form
       setFormData({
@@ -356,8 +396,31 @@ export default function PropertiesPage() {
                 </div>
               </div>
 
-              <Button className="w-full" disabled={isLoading} type="submit">
-                {isLoading ? "Creating..." : "Create Listing"}
+              <div className="flex items-center space-x-2">
+                <input
+                  checked={uploadImmediately}
+                  className="h-4 w-4 rounded border-gray-300"
+                  id="uploadImmediately"
+                  onChange={(e) => setUploadImmediately(e.target.checked)}
+                  type="checkbox"
+                />
+                <Label className="text-sm" htmlFor="uploadImmediately">
+                  Upload to Zyprus immediately after creation
+                </Label>
+              </div>
+
+              <Button
+                className="w-full"
+                disabled={isLoading || isUploading}
+                type="submit"
+              >
+                {isLoading
+                  ? "Creating..."
+                  : isUploading
+                    ? "Uploading to Zyprus..."
+                    : uploadImmediately
+                      ? "Create & Upload to Zyprus"
+                      : "Create Listing"}
               </Button>
             </form>
           </CardContent>
