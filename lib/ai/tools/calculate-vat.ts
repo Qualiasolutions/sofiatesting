@@ -20,7 +20,7 @@ import { CalculatorService } from "@/lib/calculator-service";
  */
 export const calculateVATTool = tool({
   description:
-    "Calculate VAT for new houses/apartments in Cyprus using official Tax Department rules. ALWAYS USE THIS TOOL for VAT calculations - do NOT calculate manually. CRITICAL: Always ask for the date of submission of town planning permission application - VAT rates changed on May 1, 2023. Ask for: property price, total area, submission date (DD/MM/YYYY), and whether it's a main residence. Before May 2023: 5% on entire amount. After May 2023: 5% on first 130m² capped at €350k, rest at 19%.",
+    "Calculate VAT for new houses/apartments in Cyprus using official Tax Department rules. ALWAYS USE THIS TOOL for VAT calculations - do NOT calculate manually. Ask for: property price, total area, and whether it's a main residence. Default assumes current date (post-reform rules). Before May 2023: 5% on entire amount. After May 2023: 5% on first 130m² capped at €350k, rest at 19%.",
   inputSchema: z.object({
     price: z
       .number()
@@ -30,13 +30,7 @@ export const calculateVATTool = tool({
       .number()
       .positive()
       .describe("Total internal area in square meters (e.g., 150)"),
-    submission_date: z
-      .string()
-      .optional()
-      .describe(
-        "Date of submission of town planning permission application (DD/MM/YYYY format, e.g., 25/01/2022). If not provided, assumes current date (post-reform rates)."
-      ),
-    is_main_residence: z
+      is_main_residence: z
       .boolean()
       .default(true)
       .describe(
@@ -54,7 +48,6 @@ export const calculateVATTool = tool({
       const result = CalculatorService.calculateVAT({
         price,
         buildable_area,
-        submission_date,
         is_main_residence,
       });
 
