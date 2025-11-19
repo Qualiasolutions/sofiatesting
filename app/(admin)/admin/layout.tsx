@@ -28,14 +28,7 @@ export default async function AdminLayout({
   const userRole = adminRole.length > 0 ? adminRole[0].role : "admin";
   const permissions = adminRole.length > 0
     ? (adminRole[0].permissions as Record<string, boolean> | null)
-    : {
-        agents: { view: true, create: true, edit: true, delete: true },
-        health: { view: true },
-        integrations: { view: true, edit: true },
-        settings: { view: true, edit: true },
-        users: { view: true, create: true, edit: true, delete: true },
-        whatsapp: { view: true, edit: true },
-      };
+    : null; // Grant full access by default (null permissions = no restrictions)
 
   return (
     <div className="flex h-screen bg-background">
