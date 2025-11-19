@@ -22,7 +22,7 @@ export class TelegramClient {
     chatId,
     text,
     replyToMessageId,
-    parseMode = "HTML",
+    parseMode,
   }: {
     chatId: number | string;
     text: string;
@@ -30,29 +30,47 @@ export class TelegramClient {
     parseMode?: "Markdown" | "HTML" | "MarkdownV2";
   }): Promise<any> {
     try {
+      const body: any = {
+        chat_id: chatId,
+        text,
+      };
+
+      // Only include parse_mode if specified (allows plain text mode)
+      if (parseMode) {
+        body.parse_mode = parseMode;
+      }
+
+      if (replyToMessageId) {
+        body.reply_to_message_id = replyToMessageId;
+      }
+
       const response = await fetch(`${this.apiUrl}/sendMessage`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text,
-          parse_mode: parseMode,
-          reply_to_message_id: replyToMessageId,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await response.json();
 
       if (!data.ok) {
-        console.error("Telegram API error:", data);
+        console.error("Telegram API error:", {
+          description: data.description,
+          errorCode: data.error_code,
+          chatId,
+          textLength: text.length,
+        });
         throw new Error(data.description || "Failed to send message");
       }
 
       return data.result;
     } catch (error) {
-      console.error("Error sending Telegram message:", error);
+      console.error("Error sending Telegram message:", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        chatId,
+        textLength: text.length,
+      });
       throw error;
     }
   }
@@ -176,14 +194,16 @@ export class TelegramClient {
     text,
     maxLength = 4096,
     replyToMessageId,
+    parseMode,
   }: {
     chatId: number | string;
     text: string;
     maxLength?: number;
     replyToMessageId?: number;
+    parseMode?: "Markdown" | "HTML" | "MarkdownV2";
   }): Promise<void> {
     if (text.length <= maxLength) {
-      await this.sendMessage({ chatId, text, replyToMessageId });
+      await this.sendMessage({ chatId, text, replyToMessageId, parseMode });
       return;
     }
 
@@ -199,6 +219,7 @@ export class TelegramClient {
             chatId,
             text: currentChunk.trim(),
             replyToMessageId,
+            parseMode,
           });
           currentChunk = "";
         }
@@ -213,6 +234,7 @@ export class TelegramClient {
                   chatId,
                   text: currentChunk.trim(),
                   replyToMessageId,
+                  parseMode,
                 });
               }
               currentChunk = sentence;
@@ -234,6 +256,7 @@ export class TelegramClient {
         chatId,
         text: currentChunk.trim(),
         replyToMessageId,
+        parseMode,
       });
     }
   }

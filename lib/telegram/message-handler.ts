@@ -103,21 +103,27 @@ export async function handleTelegramMessage(
     // Prepare messages for AI
     const allMessages = [...previousMessages, userMessage];
 
-    // Generate AI response
+    // Generate AI response with retry mechanism
     let fullResponse = "";
     const assistantMessageId = generateUUID();
+    let result;
+    let retryCount = 0;
+    const MAX_RETRIES = 2;
+    const STREAM_TIMEOUT_MS = 45000; // 45 seconds
 
-    const result = await streamText({
-      model: myProvider.languageModel("chat-model"), // Use Gemini Flash for Telegram (reliable & fast)
-      system: `${systemPrompt({
-        selectedChatModel: "chat-model",
-        requestHints: {
-          latitude: undefined,
-          longitude: undefined,
-          city: undefined,
-          country: "Cyprus", // Default to Cyprus for SOFIA
-        },
-      })}
+    while (retryCount <= MAX_RETRIES) {
+      try {
+        result = await streamText({
+          model: myProvider.languageModel("chat-model"), // Use Gemini 2.5 Flash for Telegram (reliable & fast)
+          system: `${systemPrompt({
+            selectedChatModel: "chat-model",
+            requestHints: {
+              latitude: undefined,
+              longitude: undefined,
+              city: undefined,
+              country: "Cyprus", // Default to Cyprus for SOFIA
+            },
+          })}
 
 TELEGRAM CHAT PERSONALITY:
 You are SOFIA - the Zyprus Property Group AI Assistant, but with a friendly, conversational tone suitable for Telegram messaging.
@@ -130,31 +136,67 @@ GUIDELINES:
 - Be helpful and proactive in offering assistance
 - Maintain your expertise as a Cyprus real estate professional
 - Feel free to ask clarifying questions if needed
-- Use formatting like <b>bold</b> for emphasis on important information
+- Use simple text formatting (no HTML) for maximum compatibility
 
 Remember: You're chatting on Telegram, so keep it natural and conversational while maintaining professionalism.`,
-      messages: convertToModelMessages(allMessages),
-      experimental_activeTools: [
-        "calculateTransferFees",
-        "calculateCapitalGains",
-        "calculateVAT",
-      ],
-      tools: {
-        calculateTransferFees: calculateTransferFeesTool,
-        calculateCapitalGains: calculateCapitalGainsTool,
-        calculateVAT: calculateVATTool,
-      },
-      experimental_telemetry: {
-        isEnabled: isProductionEnvironment,
-        functionId: "telegram-stream-text",
-      },
-    });
+          messages: convertToModelMessages(allMessages),
+          experimental_activeTools: [
+            "calculateTransferFees",
+            "calculateCapitalGains",
+            "calculateVAT",
+          ],
+          tools: {
+            calculateTransferFees: calculateTransferFeesTool,
+            calculateCapitalGains: calculateCapitalGainsTool,
+            calculateVAT: calculateVATTool,
+          },
+          experimental_telemetry: {
+            isEnabled: isProductionEnvironment,
+            functionId: "telegram-stream-text",
+          },
+        });
+        break; // Success - exit retry loop
+      } catch (streamError) {
+        retryCount++;
+        console.error(`AI stream attempt ${retryCount} failed:`, {
+          chatId,
+          attempt: retryCount,
+          error: streamError instanceof Error ? streamError.message : "Unknown",
+          stack: streamError instanceof Error ? streamError.stack : undefined,
+        });
 
-    // Collect response text
+        if (retryCount > MAX_RETRIES) {
+          throw new Error(
+            `AI service unavailable after ${MAX_RETRIES} retries: ${streamError instanceof Error ? streamError.message : "Unknown error"}`
+          );
+        }
+
+        // Wait before retry (exponential backoff: 1s, 2s)
+        await new Promise((resolve) => setTimeout(resolve, 1000 * retryCount));
+      }
+    }
+
+    // Collect response text with timeout protection
     const TYPING_INTERVAL_MS = 3000; // 3 seconds
     let lastTypingIndicator = Date.now();
+    const streamStartTime = Date.now();
+
+    // TypeScript: result is guaranteed to be defined here (retry loop ensures it)
+    if (!result) {
+      throw new Error("AI model failed to initialize");
+    }
 
     for await (const textPart of result.textStream) {
+      // Check for timeout
+      if (Date.now() - streamStartTime > STREAM_TIMEOUT_MS) {
+        console.error("AI stream timeout exceeded", {
+          chatId,
+          duration: Date.now() - streamStartTime,
+          partialResponse: fullResponse.substring(0, 200),
+        });
+        throw new Error("Response generation timeout");
+      }
+
       fullResponse += textPart;
 
       // Send typing indicator periodically (time-based, not character-based)
@@ -181,17 +223,20 @@ Remember: You're chatting on Telegram, so keep it natural and conversational whi
       ],
     });
 
-    // Convert markdown bold (**text**) to Telegram markdown (*text*)
+    // Format response for Telegram (plain text mode)
     const telegramFormattedResponse = formatForTelegram(fullResponse);
 
-    // Send response to Telegram
+    // Send response to Telegram with plain text mode
     await telegramClient.sendLongMessage({
       chatId,
       text: telegramFormattedResponse,
       replyToMessageId: message.message_id,
+      parseMode: undefined, // Use plain text mode to avoid HTML parsing errors
     });
   } catch (error) {
+    const errorId = Date.now();
     console.error("Error handling Telegram message:", {
+      errorId,
       chatId,
       fromUser: message.from,
       messageText: message.text?.substring(0, 100),
@@ -201,51 +246,60 @@ Remember: You're chatting on Telegram, so keep it natural and conversational whi
     });
 
     try {
-      await sendTelegramMessage(
+      // Send user-friendly error message with error ID for support
+      await telegramClient.sendMessage({
         chatId,
-        "Sorry, I encountered an error processing your message. Please try again later."
-      );
+        text:
+          "⚠️ I encountered an error processing your message.\n\n" +
+          "Please try:\n" +
+          "• Rephrasing your question\n" +
+          "• Using /help for commands\n" +
+          "• Contacting support if this persists\n\n" +
+          `Error ID: ${errorId}`,
+        replyToMessageId: message.message_id,
+        parseMode: undefined, // Plain text mode
+      });
     } catch (sendError) {
       console.error("Failed to send error message to Telegram:", {
+        errorId,
         chatId,
         sendError:
           sendError instanceof Error ? sendError.message : "Unknown error",
+        originalError: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }
 }
 
 /**
- * Format text for Telegram HTML
- * Converts markdown to HTML for better Telegram compatibility
+ * Format text for Telegram
+ * Converts markdown to plain text for maximum compatibility
+ * Avoids HTML parsing errors by using plain text mode
  */
 function formatForTelegram(text: string): string {
   let formatted = text;
 
-  // Convert **bold** to <b>bold</b>
-  formatted = formatted.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  // Remove markdown formatting for plain text mode
+  // Bold: **text** -> text (keep content only)
+  formatted = formatted.replace(/\*\*(.+?)\*\*/g, "$1");
 
-  // Convert *italic* to <i>italic</i>
-  formatted = formatted.replace(/\*(.+?)\*/g, "<i>$1</i>");
+  // Italic: *text* -> text (keep content only)
+  formatted = formatted.replace(/\*(.+?)\*/g, "$1");
 
-  // Convert code blocks to preformatted text
+  // Code blocks: ```code``` -> code (keep content only)
   formatted = formatted.replace(/```[\s\S]*?```/g, (match) => {
     const code = match.replace(/```/g, "").trim();
-    return `<code>${code}</code>`;
+    return code;
   });
 
-  // Convert inline code
-  formatted = formatted.replace(/`([^`]+)`/g, "<code>$1</code>");
+  // Inline code: `code` -> code (keep content only)
+  formatted = formatted.replace(/`([^`]+)`/g, "$1");
 
-  // Clean up multiple newlines
+  // Clean up multiple newlines (keep max 2 consecutive newlines)
   formatted = formatted.replace(/\n{3,}/g, "\n\n");
 
-  // Ensure proper spacing for lists
-  formatted = formatted.replace(/(\d+\.)/g, "\n$1");
-  formatted = formatted.replace(/([•\-*])/g, "\n$1");
-
-  // Convert newlines to HTML line breaks for better formatting
-  formatted = formatted.replace(/\n/g, "<br>");
+  // Keep newlines as-is - Telegram preserves them in plain text mode
+  // No need to convert to <br> tags
 
   return formatted.trim();
 }
