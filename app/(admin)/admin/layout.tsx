@@ -17,19 +17,25 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
-  // Check if user has admin role
+  // Check if user has admin role, otherwise grant default admin access
   const adminRole = await db
     .select()
     .from(adminUserRole)
     .where(eq(adminUserRole.userId, session.user.id))
     .limit(1);
 
-  if (!adminRole || adminRole.length === 0) {
-    redirect("/");
-  }
-
-  const userRole = adminRole[0].role;
-  const permissions = adminRole[0].permissions as Record<string, boolean> | null;
+  // Grant all logged-in users admin access with default permissions
+  const userRole = adminRole.length > 0 ? adminRole[0].role : "admin";
+  const permissions = adminRole.length > 0
+    ? (adminRole[0].permissions as Record<string, boolean> | null)
+    : {
+        agents: { view: true, create: true, edit: true, delete: true },
+        health: { view: true },
+        integrations: { view: true, edit: true },
+        settings: { view: true, edit: true },
+        users: { view: true, create: true, edit: true, delete: true },
+        whatsapp: { view: true, edit: true },
+      };
 
   return (
     <div className="flex h-screen bg-background">
