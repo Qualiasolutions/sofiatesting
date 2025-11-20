@@ -7,6 +7,14 @@
       "env": {
         "POSTMAN_API_KEY": "REPLACE_WITH_POSTMAN_API_KEY"
       }
+    },
+    "supabase": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@supabase/mcp-server@latest"],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_adc60f52636da3692a5cc8ef5c18d493240e9b1e"
+      }
     }
   }
 }

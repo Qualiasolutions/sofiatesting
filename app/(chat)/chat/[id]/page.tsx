@@ -42,14 +42,18 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
   const chatModelFromCookie = cookieStore.get("chat-model");
 
-  // Map old model names to new ones
+  // Map old model names to current Gemini models
   const modelMapping: Record<string, string> = {
-    "chat-model-small": "chat-model-gpt4o-mini",
-    "chat-model-medium": "chat-model-gpt4o",
-    "chat-model-large": "chat-model-sonnet",
-    "chat-model-code": "chat-model-gpt4o",
-    "chat-model-reasoning": "chat-model-sonnet",
-    "chat-model-flagship": "chat-model-sonnet",
+    "chat-model-small": "chat-model-flash-lite",
+    "chat-model-medium": "chat-model",
+    "chat-model-large": "chat-model-pro",
+    "chat-model-code": "chat-model",
+    "chat-model-reasoning": "chat-model-pro",
+    "chat-model-flagship": "chat-model-pro",
+    // Legacy Claude/GPT model names
+    "chat-model-gpt4o-mini": "chat-model-flash-lite",
+    "chat-model-gpt4o": "chat-model",
+    "chat-model-sonnet": "chat-model-pro",
   };
 
   let selectedModel = DEFAULT_CHAT_MODEL;
