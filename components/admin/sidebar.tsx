@@ -14,6 +14,7 @@ import {
   FileText,
   Users,
   Shield,
+  UserCog,
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -51,6 +52,12 @@ const navigationItems = [
     href: "/admin/agents",
     icon: Bot,
     requiredPermission: "view_agent_logs",
+  },
+  {
+    name: "Agents Registry",
+    href: "/admin/agents-registry",
+    icon: UserCog,
+    requiredPermission: "manage_users",
   },
   {
     name: "WhatsApp",
