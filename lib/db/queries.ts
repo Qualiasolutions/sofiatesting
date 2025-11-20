@@ -234,7 +234,7 @@ export async function getChatsByUserId({
     console.error("Database error in getChatsByUserId:", error);
     throw new ChatSDKError(
       "bad_request:database",
-      "Failed to get chats by user id"
+      `Failed to get chats: ${error instanceof Error ? error.message : String(error)}`
     );
   }
 }
