@@ -1,5 +1,6 @@
 import type { InferSelectModel } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   foreignKey,
   index,
@@ -519,5 +520,100 @@ export const userActivitySummary = pgTable(
 );
 
 export type UserActivitySummary = InferSelectModel<typeof userActivitySummary>;
+
+// ===================================================================
+// ZYPRUS AGENT REGISTRY TABLES
+// ===================================================================
+
+// Zyprus employee registry (real estate agents working with SOFIA)
+export const zyprusAgent = pgTable(
+  "ZyprusAgent",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("userId").references(() => user.id), // Optional - set after agent registers
+    fullName: text("fullName").notNull(),
+    email: varchar("email", { length: 255 }).notNull().unique(),
+    phoneNumber: varchar("phoneNumber", { length: 20 }), // Cyprus mobile: +357 XX XXX XXX
+    region: varchar("region", { length: 50 }).notNull(), // Limassol, Paphos, Larnaca, Famagusta, Nicosia, All
+    role: varchar("role", { length: 50 }).notNull(), // CEO, Manager Limassol, Manager Paphos, Normal Agent, Listing Admin
+    isActive: boolean("isActive").notNull().default(true),
+    telegramUserId: bigint("telegramUserId", { mode: "number" }), // For Telegram identification
+    whatsappPhoneNumber: varchar("whatsappPhoneNumber", { length: 20 }), // For WhatsApp identification
+    lastActiveAt: timestamp("lastActiveAt"),
+    registeredAt: timestamp("registeredAt"), // When they completed registration
+    inviteSentAt: timestamp("inviteSentAt"), // When invite email was sent
+    inviteToken: varchar("inviteToken", { length: 64 }), // Invite verification token
+    notes: text("notes"), // Admin notes
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+  },
+  (table) => ({
+    emailIdx: index("ZyprusAgent_email_idx").on(table.email),
+    phoneNumberIdx: index("ZyprusAgent_phoneNumber_idx").on(table.phoneNumber),
+    regionIdx: index("ZyprusAgent_region_idx").on(table.region),
+    roleIdx: index("ZyprusAgent_role_idx").on(table.role),
+    isActiveIdx: index("ZyprusAgent_isActive_idx").on(table.isActive),
+    telegramIdx: index("ZyprusAgent_telegramUserId_idx").on(
+      table.telegramUserId
+    ),
+    whatsappIdx: index("ZyprusAgent_whatsappPhoneNumber_idx").on(
+      table.whatsappPhoneNumber
+    ),
+    userIdIdx: index("ZyprusAgent_userId_idx").on(table.userId),
+    inviteTokenIdx: index("ZyprusAgent_inviteToken_idx").on(table.inviteToken),
+    // Composite index for regional queries (region + isActive)
+    regionActiveIdx: index("ZyprusAgent_region_isActive_idx").on(
+      table.region,
+      table.isActive
+    ),
+  })
+);
+
+export type ZyprusAgent = InferSelectModel<typeof zyprusAgent>;
+
+// Agent chat session tracking (multi-platform)
+export const agentChatSession = pgTable(
+  "AgentChatSession",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    agentId: uuid("agentId")
+      .notNull()
+      .references(() => zyprusAgent.id, { onDelete: "cascade" }),
+    chatId: uuid("chatId").references(() => chat.id, { onDelete: "cascade" }),
+    platform: varchar("platform", { length: 20 }).notNull(), // 'web', 'telegram', 'whatsapp'
+    platformUserId: text("platformUserId"), // Telegram user ID, WhatsApp phone, or web session ID
+    startedAt: timestamp("startedAt").notNull().defaultNow(),
+    endedAt: timestamp("endedAt"),
+    messageCount: integer("messageCount").default(0),
+    documentCount: integer("documentCount").default(0),
+    calculatorCount: integer("calculatorCount").default(0),
+    listingCount: integer("listingCount").default(0),
+    totalTokensUsed: integer("totalTokensUsed").default(0),
+    totalCostUsd: numeric("totalCostUsd", { precision: 10, scale: 6 }).default(
+      "0"
+    ),
+    metadata: jsonb("metadata"), // session-specific data
+  },
+  (table) => ({
+    agentIdIdx: index("AgentChatSession_agentId_idx").on(table.agentId),
+    chatIdIdx: index("AgentChatSession_chatId_idx").on(table.chatId),
+    platformIdx: index("AgentChatSession_platform_idx").on(table.platform),
+    startedAtIdx: index("AgentChatSession_startedAt_idx").on(
+      table.startedAt.desc()
+    ),
+    // Composite index for agent activity queries (agentId + startedAt DESC)
+    agentIdStartedAtIdx: index("AgentChatSession_agentId_startedAt_idx").on(
+      table.agentId,
+      table.startedAt.desc()
+    ),
+    // Composite index for platform analytics (platform + startedAt DESC)
+    platformStartedAtIdx: index("AgentChatSession_platform_startedAt_idx").on(
+      table.platform,
+      table.startedAt.desc()
+    ),
+  })
+);
+
+export type AgentChatSession = InferSelectModel<typeof agentChatSession>;
 
 export type { InferInsertModel } from "drizzle-orm";
