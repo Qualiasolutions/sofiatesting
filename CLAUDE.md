@@ -32,9 +32,9 @@ AI_GATEWAY_API_KEY=required  # Application will not start without this
 ```
 
 Available models via Vercel AI Gateway:
-- `chat-model` → Claude Haiku 4.5 (default, $1.00/M input, $5.00/M output)
-- `chat-model-sonnet` → Claude Sonnet 4.5 ($3.00/M input, $15.00/M output)
-- `chat-model-gpt4o` → GPT-4o Mini ($0.15/M input, $0.60/M output)
+- `chat-model` → Gemini 2.5 Flash (default, $0.075/M input, $0.30/M output) - Best price-performance with thinking
+- `chat-model-pro` → Gemini 2.5 Pro ($1.25/M input, $5.00/M output) - Most powerful reasoning model
+- `chat-model-flash-lite` → Gemini 2.5 Flash-Lite ($0.0375/M input, $0.15/M output) - Ultra-fast and cheapest
 
 ### Database Architecture
 
