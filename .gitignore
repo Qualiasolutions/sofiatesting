@@ -36,6 +36,10 @@ yarn-error.log*
 .env
 .vercel
 .env*.local
+.env.production.*
+.env.vercel.*
+.env*.tmp
+.env*.BACKUP*
 
 # Playwright
 /test-results/
@@ -56,3 +60,5 @@ yarn-error.log*
 
 # TypeScript
 *.tsbuildinfo
+app/api.admin.disabled/
+app/(admin.disabled)/
