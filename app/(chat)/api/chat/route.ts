@@ -76,8 +76,10 @@ export async function POST(request: Request) {
   try {
     const json = await request.json();
     requestBody = postRequestBodySchema.parse(json);
-  } catch (_) {
-    return new ChatSDKError("bad_request:api").toResponse();
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Invalid request body";
+    console.error("Validation error in POST /api/chat:", error);
+    return new ChatSDKError("bad_request:api", errorMessage).toResponse();
   }
 
   try {
