@@ -14,8 +14,8 @@ const isGeminiConfigured = (() => {
     return false;
   }
 
-  // Polyfill for Vercel's GEMINI_API_KEY if GOOGLE_GENERATIVE_AI_API_KEY is missing
-  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY && process.env.GEMINI_API_KEY) {
+  // Prioritize Vercel's GEMINI_API_KEY if present (overrides GOOGLE_GENERATIVE_AI_API_KEY)
+  if (process.env.GEMINI_API_KEY) {
     process.env.GOOGLE_GENERATIVE_AI_API_KEY = process.env.GEMINI_API_KEY;
   }
 

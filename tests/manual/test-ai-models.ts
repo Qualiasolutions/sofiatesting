@@ -44,9 +44,12 @@ async function testModel(
     const response = await result.text;
     console.log(`   Response: ${response}`);
 
+    // Clean up response (remove markdown code blocks if present)
+    const cleanResponse = response.replace(/```json\n?|```/g, "").trim();
+
     // Verify response follows strict instructions
     try {
-      const parsed = JSON.parse(response.trim());
+      const parsed = JSON.parse(cleanResponse);
       if (parsed.status === "ok" && parsed.temperature === 0) {
         console.log(`   ✅ PASS: ${modelId} follows strict instructions`);
         return { success: true, response };
