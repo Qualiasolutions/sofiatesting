@@ -1,0 +1,188 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db/client";
+import { zyprusAgent } from "@/lib/db/schema";
+import * as XLSX from "xlsx";
+import { randomBytes } from "crypto";
+
+interface AgentRow {
+  "Fulla Name": string;
+  "Mobile Phone": string | number;
+  "Email use to communicate": string;
+  Region: string;
+  Role: string;
+}
+
+function normalizePhoneNumber(phone: string | number): string {
+  if (typeof phone === "number") {
+    const phoneStr = phone.toString();
+    if (phoneStr.startsWith("357")) {
+      return `+${phoneStr}`;
+    }
+    return `+357${phoneStr}`;
+  }
+
+  let cleaned = phone.trim();
+  if (!cleaned.startsWith("+")) {
+    if (cleaned.startsWith("357")) {
+      cleaned = `+${cleaned}`;
+    } else {
+      cleaned = `+357${cleaned.replace(/\s+/g, "")}`;
+    }
+  }
+
+  return cleaned;
+}
+
+function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+/**
+ * POST /api/admin/agents/import
+ * Bulk import agents from Excel file
+ *
+ * Body: FormData with 'file' field containing Excel file
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get("file") as File;
+
+    if (!file) {
+      return NextResponse.json(
+        { error: "No file provided" },
+        { status: 400 }
+      );
+    }
+
+    // Validate file type
+    if (
+      !file.name.endsWith(".xlsx") &&
+      !file.name.endsWith(".xls") &&
+      !file.name.endsWith(".csv")
+    ) {
+      return NextResponse.json(
+        {
+          error: "Invalid file type. Please upload an Excel (.xlsx, .xls) or CSV file",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Read file buffer
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: "array" });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const rawData = XLSX.utils.sheet_to_json<AgentRow>(worksheet);
+
+    if (rawData.length === 0) {
+      return NextResponse.json(
+        { error: "Excel file is empty" },
+        { status: 400 }
+      );
+    }
+
+    // Transform and validate data
+    const agents = rawData
+      .filter((row) => row["Fulla Name"] && row["Email use to communicate"])
+      .map((row) => ({
+        fullName: row["Fulla Name"].trim(),
+        email: normalizeEmail(row["Email use to communicate"]),
+        phoneNumber: row["Mobile Phone"]
+          ? normalizePhoneNumber(row["Mobile Phone"])
+          : null,
+        region: row.Region.trim(),
+        role: row.Role.trim(),
+        isActive: true,
+        inviteToken: randomBytes(32).toString("hex"),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
+
+    if (agents.length === 0) {
+      return NextResponse.json(
+        { error: "No valid agent data found in file" },
+        { status: 400 }
+      );
+    }
+
+    // Check for duplicate emails in the batch
+    const emailSet = new Set<string>();
+    const duplicatesInBatch: string[] = [];
+    for (const agent of agents) {
+      if (emailSet.has(agent.email)) {
+        duplicatesInBatch.push(agent.email);
+      } else {
+        emailSet.add(agent.email);
+      }
+    }
+
+    if (duplicatesInBatch.length > 0) {
+      return NextResponse.json(
+        {
+          error: "Duplicate emails found in file",
+          duplicates: duplicatesInBatch,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Insert agents (batch insert)
+    const inserted = await db
+      .insert(zyprusAgent)
+      .values(agents)
+      .returning({ id: zyprusAgent.id, email: zyprusAgent.email })
+      .catch((error) => {
+        // Handle unique constraint violations
+        if (error.message?.includes("unique constraint")) {
+          throw new Error(
+            "One or more agents already exist with the provided emails"
+          );
+        }
+        throw error;
+      });
+
+    // Regional breakdown
+    const regionCounts = agents.reduce(
+      (acc, agent) => {
+        acc[agent.region] = (acc[agent.region] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    // Role breakdown
+    const roleCounts = agents.reduce(
+      (acc, agent) => {
+        acc[agent.role] = (acc[agent.role] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    return NextResponse.json(
+      {
+        message: `Successfully imported ${inserted.length} agents`,
+        imported: inserted.length,
+        breakdown: {
+          byRegion: regionCounts,
+          byRole: roleCounts,
+        },
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error(
+      "[API /api/admin/agents/import POST] Error importing agents:",
+      error
+    );
+    return NextResponse.json(
+      {
+        error: "Failed to import agents",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
+  }
+}
