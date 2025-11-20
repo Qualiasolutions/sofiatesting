@@ -40,7 +40,6 @@ export const calculateVATTool = tool({
   execute: ({
     price,
     buildable_area,
-    submission_date,
     is_main_residence = true,
   }) => {
     try {

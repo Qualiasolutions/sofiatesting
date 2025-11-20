@@ -13,8 +13,6 @@ import {
   lt,
   type SQL,
 } from "drizzle-orm";
-import { sql } from "@vercel/postgres";
-import { drizzle } from "drizzle-orm/vercel-postgres";
 import type { ArtifactKind } from "@/components/artifact";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { ChatSDKError } from "../errors";
@@ -37,14 +35,11 @@ import {
   vote,
 } from "./schema";
 import { generateHashedPassword } from "./utils";
+import { db } from "./client";
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth
 // https://authjs.dev/reference/adapter/drizzle
-
-// Use Vercel Postgres connection pooler for serverless compatibility
-// This prevents connection exhaustion under load (200+ concurrent users)
-const db = drizzle(sql);
 
 export async function getUser(email: string): Promise<User[]> {
   try {

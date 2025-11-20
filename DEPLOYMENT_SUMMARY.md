@@ -102,7 +102,7 @@ fetch(url, {
 
 ### Test 1: OAuth & Taxonomy Fetch ✅ PASS
 
-**Command**: `npx tsx scripts/test-zyprus-api.ts`
+**Command**: `npx tsx tests/manual/test-zyprus-api.ts`
 
 **Results**:
 ```
@@ -118,7 +118,7 @@ fetch(url, {
 
 ### Test 2: End-to-End Property Upload ✅ PASS
 
-**Command**: `npx tsx scripts/test-upload-with-images.ts`
+**Command**: `npx tsx tests/manual/test-upload-with-images.ts`
 
 **Results**:
 ```

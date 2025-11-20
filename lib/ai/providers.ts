@@ -7,23 +7,28 @@ const isGeminiConfigured = (() => {
   // In test environment, not needed
   if (isTestEnvironment) return false;
 
-  // Skip validation during build
+  // Build time detected - skipping Gemini API validation
   const isBuildTime = process.env.NEXT_PHASE === "phase-production-build";
   if (isBuildTime) {
     console.log("[SOFIA] Build time detected - skipping Gemini API validation");
     return false;
   }
 
-  // Check for GOOGLE_GENERATIVE_AI_API_KEY (required for Gemini API)
-  const hasGeminiKey = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  // Polyfill for Vercel's GEMINI_API_KEY if GOOGLE_GENERATIVE_AI_API_KEY is missing
+  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY && process.env.GEMINI_API_KEY) {
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY = process.env.GEMINI_API_KEY;
+  }
+
+  // Check for GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY (required for Gemini API)
+  const hasGeminiKey = !!(process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GEMINI_API_KEY);
 
   // Enforce Gemini API requirement (only at runtime and not during testing)
   if (!hasGeminiKey && typeof window === "undefined" && !process.env.NODE_ENV?.includes("test")) {
     console.error(
-      "[SOFIA] CRITICAL: Gemini API key is required. Please configure GOOGLE_GENERATIVE_AI_API_KEY."
+      "[SOFIA] CRITICAL: Gemini API key is required. Please configure GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY."
     );
     throw new Error(
-      "Gemini API configuration is required. Please set GOOGLE_GENERATIVE_AI_API_KEY environment variable."
+      "Gemini API configuration is required. Please set GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY environment variable."
     );
   }
 

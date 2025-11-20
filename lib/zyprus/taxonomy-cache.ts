@@ -1,4 +1,3 @@
-import { kv } from "@vercel/kv";
 import { getZyprusLocations, getZyprusTaxonomyTerms } from "./client";
 
 export interface TaxonomyCache {
@@ -11,80 +10,12 @@ export interface TaxonomyCache {
   lastUpdated: number;
 }
 
-// Serializable version for Redis storage (Maps converted to objects)
-interface SerializableTaxonomyCache {
-  locations?: Record<string, string>;
-  propertyTypes?: Record<string, string>;
-  indoorFeatures?: Record<string, string>;
-  outdoorFeatures?: Record<string, string>;
-  priceModifiers?: Record<string, string>;
-  titleDeeds?: Record<string, string>;
-  lastUpdated: number;
-}
-
-const CACHE_KEY = "zyprus:taxonomy:v1";
 const CACHE_TTL_SECONDS = 3600; // 1 hour in seconds
 
-// In-memory fallback cache (used if Redis fails)
-let fallbackCache: TaxonomyCache = {
+// In-memory cache
+let globalCache: TaxonomyCache = {
   lastUpdated: 0,
 };
-
-/**
- * Convert Maps to plain objects for Redis storage
- */
-function serializeCache(cache: TaxonomyCache): SerializableTaxonomyCache {
-  return {
-    locations: cache.locations
-      ? Object.fromEntries(cache.locations)
-      : undefined,
-    propertyTypes: cache.propertyTypes
-      ? Object.fromEntries(cache.propertyTypes)
-      : undefined,
-    indoorFeatures: cache.indoorFeatures
-      ? Object.fromEntries(cache.indoorFeatures)
-      : undefined,
-    outdoorFeatures: cache.outdoorFeatures
-      ? Object.fromEntries(cache.outdoorFeatures)
-      : undefined,
-    priceModifiers: cache.priceModifiers
-      ? Object.fromEntries(cache.priceModifiers)
-      : undefined,
-    titleDeeds: cache.titleDeeds
-      ? Object.fromEntries(cache.titleDeeds)
-      : undefined,
-    lastUpdated: cache.lastUpdated,
-  };
-}
-
-/**
- * Convert plain objects back to Maps after Redis retrieval
- */
-function deserializeCache(
-  serialized: SerializableTaxonomyCache
-): TaxonomyCache {
-  return {
-    locations: serialized.locations
-      ? new Map(Object.entries(serialized.locations))
-      : undefined,
-    propertyTypes: serialized.propertyTypes
-      ? new Map(Object.entries(serialized.propertyTypes))
-      : undefined,
-    indoorFeatures: serialized.indoorFeatures
-      ? new Map(Object.entries(serialized.indoorFeatures))
-      : undefined,
-    outdoorFeatures: serialized.outdoorFeatures
-      ? new Map(Object.entries(serialized.outdoorFeatures))
-      : undefined,
-    priceModifiers: serialized.priceModifiers
-      ? new Map(Object.entries(serialized.priceModifiers))
-      : undefined,
-    titleDeeds: serialized.titleDeeds
-      ? new Map(Object.entries(serialized.titleDeeds))
-      : undefined,
-    lastUpdated: serialized.lastUpdated,
-  };
-}
 
 /**
  * Check if cache is stale (older than TTL)
@@ -101,12 +32,14 @@ function isBuildTime(): boolean {
   return (
     process.env.NEXT_PHASE === "phase-production-build" ||
     process.env.VERCEL_ENV === "production-build" ||
-    process.env.NODE_ENV === "production" && typeof window === "undefined" && !process.env.ZYPRUS_CLIENT_ID
+    (process.env.NODE_ENV === "production" &&
+      typeof window === "undefined" &&
+      !process.env.ZYPRUS_CLIENT_ID)
   );
 }
 
 /**
- * Refresh all taxonomy data from Zyprus API and store in Redis
+ * Refresh all taxonomy data from Zyprus API and store in memory
  */
 async function refreshCache(): Promise<TaxonomyCache> {
   // During build time, skip API calls and return empty cache
@@ -171,14 +104,8 @@ async function refreshCache(): Promise<TaxonomyCache> {
       lastUpdated: Date.now(),
     };
 
-    // Store in Redis with TTL
-    try {
-      const serialized = serializeCache(newCache);
-      await kv.set(CACHE_KEY, serialized, { ex: CACHE_TTL_SECONDS });
-    } catch (redisError) {
-      console.error("Failed to store cache in Redis, using fallback:", redisError);
-      fallbackCache = newCache;
-    }
+    // Update global cache
+    globalCache = newCache;
 
     return newCache;
   } catch (error) {
@@ -192,19 +119,9 @@ async function refreshCache(): Promise<TaxonomyCache> {
       };
     }
 
-    // At runtime, try to return existing cache from Redis or fallback
-    try {
-      const serialized = await kv.get<SerializableTaxonomyCache>(CACHE_KEY);
-      if (serialized) {
-        return deserializeCache(serialized);
-      }
-    } catch (redisError) {
-      console.error("Failed to get existing cache from Redis:", redisError);
-    }
-
-    // Return fallback cache if available
-    if (fallbackCache.lastUpdated > 0) {
-      return fallbackCache;
+    // Return existing cache if available
+    if (globalCache.lastUpdated > 0) {
+      return globalCache;
     }
 
     // Last resort: empty cache
@@ -215,7 +132,7 @@ async function refreshCache(): Promise<TaxonomyCache> {
 }
 
 /**
- * Get cached taxonomy data from Redis, refresh if stale
+ * Get cached taxonomy data, refresh if stale
  */
 export async function getCache(): Promise<TaxonomyCache> {
   // During build time, return empty cache immediately
@@ -226,36 +143,20 @@ export async function getCache(): Promise<TaxonomyCache> {
     };
   }
 
-  try {
-    // Try to get from Redis first
-    const serialized = await kv.get<SerializableTaxonomyCache>(CACHE_KEY);
-
-    if (serialized) {
-      const cache = deserializeCache(serialized);
-
-      // Check if stale
-      if (isCacheStale(cache)) {
-        // Refresh in background, return stale data immediately
-        refreshCache().catch((err) =>
-          console.error("Background cache refresh failed:", err)
-        );
-      }
-
-      return cache;
+  // Check if stale
+  if (isCacheStale(globalCache)) {
+    // Refresh in background if we have data, otherwise wait
+    if (globalCache.lastUpdated > 0) {
+      refreshCache().catch((err) =>
+        console.error("Background cache refresh failed:", err)
+      );
+      return globalCache;
+    } else {
+      return await refreshCache();
     }
-
-    // Cache miss - fetch fresh data
-    return await refreshCache();
-  } catch (error) {
-    console.error("Failed to get cache from Redis, using fallback:", error);
-
-    // Use in-memory fallback
-    if (isCacheStale(fallbackCache)) {
-      fallbackCache = await refreshCache();
-    }
-
-    return fallbackCache;
   }
+
+  return globalCache;
 }
 
 /**
@@ -263,7 +164,7 @@ export async function getCache(): Promise<TaxonomyCache> {
  */
 export async function forceRefreshCache(): Promise<void> {
   await refreshCache();
-  console.log("Taxonomy cache force refreshed and stored in Redis");
+  console.log("Taxonomy cache force refreshed");
 }
 
 /**
@@ -427,15 +328,5 @@ export async function getAllTitleDeeds(): Promise<
  * Check if cache has data (even if stale)
  */
 export async function hasCacheData(): Promise<boolean> {
-  try {
-    const serialized = await kv.get<SerializableTaxonomyCache>(CACHE_KEY);
-    if (serialized && serialized.lastUpdated > 0) {
-      return true;
-    }
-  } catch (error) {
-    console.error("Error checking cache data:", error);
-  }
-
-  // Check fallback
-  return fallbackCache.lastUpdated > 0;
+  return globalCache.lastUpdated > 0;
 }

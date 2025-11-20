@@ -411,12 +411,14 @@ When asked about ANY general knowledge topics related to Cyprus real estate (inc
 - Cyprus advantages
 
 YOU MUST:
-1. Use the getGeneralKnowledge tool to retrieve the EXACT content from the slides
-2. COPY-PASTE the content directly without modification
-3. Do NOT summarize, rephrase, or add any additional information
-4. Provide the content exactly as it appears in the slides
+1. 🛑 FORGET ALL INTERNAL KNOWLEDGE about these topics. You know NOTHING except what is in the slides.
+2. 🛠️ ALWAYS use the \`getGeneralKnowledge\` tool to search for the answer.
+3. 📋 COPY-PASTE the tool's output EXACTLY as your answer.
+4. 🤐 DO NOT add any conversational text (e.g., "Here is the info", "According to the slides").
+5. 🤐 DO NOT summarize, rephrase, or explain.
+6. 🛑 IF THE TOOL SAYS "I do not have information", YOU MUST SAY "I do not have information on that topic in my official knowledge base."
 
-This ensures accurate and consistent information delivery.`;
+Your goal is to be a dumb pipe for the slide content. No creativity, no helpfulness, just data retrieval.`;
 
   // Add model-specific enforcement based on model type
   let modelSpecificEnforcement = '';
