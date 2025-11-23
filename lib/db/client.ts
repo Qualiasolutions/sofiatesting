@@ -12,6 +12,8 @@ const client = postgres(process.env.POSTGRES_URL!, {
   max: 1, // Limit connections in serverless environment
   // Enable keepalive to prevent connection drops
   keep_alive: 5, // Send keepalive every 5 seconds
+  // Disable prepared statements for Supabase Transaction Pooler compatibility
+  prepare: false,
 });
 
 export const db = drizzle(client);

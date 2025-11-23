@@ -77,9 +77,19 @@ export async function POST(request: Request) {
     const json = await request.json();
     requestBody = postRequestBodySchema.parse(json);
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Invalid request body";
-    console.error("Validation error in POST /api/chat:", error);
-    return new ChatSDKError("bad_request:api", errorMessage).toResponse();
+    let errorMessage = "Invalid request body";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
+    // Handle Zod errors specifically for better feedback
+    if (typeof error === 'object' && error !== null && 'issues' in error && Array.isArray((error as any).issues)) {
+       const issues = (error as any).issues;
+       errorMessage = issues.map((i: any) => `${i.path.join('.')}: ${i.message}`).join(', ');
+    }
+
+    console.error("Validation error in POST /api/chat:", { error: errorMessage });
+    return new ChatSDKError("bad_request:api", `Validation failed: ${errorMessage}`).toResponse();
   }
 
   try {
