@@ -25,16 +25,18 @@ SOFIA is a production-grade Next.js 15 application serving as Zyprus Property Gr
 
 ### AI Model Configuration (lib/ai/providers.ts)
 
-**CRITICAL**: AI Gateway is MANDATORY - no fallback options exist.
+**CRITICAL**: Google Gemini API is MANDATORY - no fallback options exist.
 
 ```bash
-AI_GATEWAY_API_KEY=required  # Application will not start without this
+GOOGLE_GENERATIVE_AI_API_KEY=required  # Or GEMINI_API_KEY
+# Application will not start without this at runtime (skipped during build)
 ```
 
-Available models via Vercel AI Gateway:
-- `chat-model` → Gemini 2.5 Flash (default, $0.075/M input, $0.30/M output) - Best price-performance with thinking
-- `chat-model-pro` → Gemini 2.5 Pro ($1.25/M input, $5.00/M output) - Most powerful reasoning model
-- `chat-model-flash-lite` → Gemini 2.5 Flash-Lite ($0.0375/M input, $0.15/M output) - Ultra-fast and cheapest
+Available models via Google Gemini API:
+- `chat-model` → Gemini 2.0 Flash (default) - Best price-performance with thinking
+- `chat-model-pro` → Gemini 1.5 Pro - Most powerful reasoning model
+- `chat-model-flash-lite` → Gemini 2.0 Flash-Lite - Ultra-fast and cheapest
+- `chat-model-flash` → Gemini 2.0 Flash (alias)
 
 ### Database Architecture
 
@@ -107,19 +109,25 @@ pnpm test:ai-models        # Test AI model connectivity
 3. Register in `app/(chat)/api/chat/route.ts`:
    ```typescript
    // Step 1: Import the tool
-   import { calculateVAT } from "@/lib/ai/tools/calculate-vat";
+   import { calculateVATTool } from "@/lib/ai/tools/calculate-vat";
 
-   // Step 2: Add to tools object
-   const tools = {
-     calculateVAT: calculateVAT,
+   // Step 2: Add to experimental_activeTools array
+   experimental_activeTools: [
+     "calculateVAT",  // MUST match the key in tools object below
+     // ...other tool names
+   ],
+
+   // Step 3: Add to tools object (MUST MATCH NAME IN activeTools)
+   tools: {
+     calculateVAT: calculateVATTool,  // Key must match string in activeTools
      // ...other tools
-   };
-
-   // Step 3: Add to experimental_activeTools array (MUST MATCH KEY NAME)
-   experimental_activeTools: ["calculateVAT"]
+   }
    ```
 
-**Common Mistake**: Forgetting to add tool name to `experimental_activeTools` array. The tool will be imported but won't be available to the AI model.
+**Common Mistakes**:
+- Forgetting to add tool name to `experimental_activeTools` array
+- Mismatching keys between `experimental_activeTools` and `tools` object
+- Using wrong casing (keys are case-sensitive)
 
 ### Streaming Chat Architecture
 
@@ -136,10 +144,10 @@ The chat endpoint streams responses in real-time:
 6. Tracks token usage with tokenlens library
 
 **Key Features**:
-- **Model Selection**: User can choose between Haiku (default), Sonnet, or GPT-4o Mini
+- **Model Selection**: User can choose between different Gemini models (Flash, Pro, Flash-Lite)
 - **Tool Execution**: AI can call Cyprus real estate calculation tools
-- **Prompt Caching**: Anthropic models cache system prompt (5-minute TTL)
-- **Token Tracking**: Input/output tokens counted for billing
+- **System Prompt Caching**: Base prompt cached for 24 hours via `unstable_cache`
+- **Token Tracking**: Input/output tokens counted via tokenlens library
 - **Error Handling**: Catches streaming errors and returns proper error responses
 
 **Response Event Types**:
@@ -237,9 +245,9 @@ lib/
 
 Required for operation:
 ```bash
-# Critical - no fallback
-AI_GATEWAY_API_KEY=        # Vercel AI Gateway key
-GEMINI_API_KEY=            # Google Gemini API (for AI Gateway)
+# Critical - no fallback (only one required)
+GOOGLE_GENERATIVE_AI_API_KEY=  # Google Gemini API (preferred)
+GEMINI_API_KEY=                 # Alternative env var name (Vercel convention)
 
 # Database - MUST use Session Pooler for Vercel (IPv4)
 POSTGRES_URL="postgresql://postgres.ebgsbtqtkdgaafqejjye:[PASSWORD]@aws-1-eu-west-3.pooler.supabase.com:5432/postgres"
@@ -292,8 +300,8 @@ npx vercel --prod
 
 Monitor after deployment:
 - Check Vercel logs: `vercel logs sofiatesting.vercel.app`
-- Verify AI Gateway costs in Vercel dashboard
-- Monitor Redis memory usage
+- Monitor Google AI API quota at https://aistudio.google.com
+- Monitor Redis memory usage in Vercel KV dashboard
 - Check error rates in production logs
 
 ## Common Issues & Solutions
@@ -302,7 +310,7 @@ Monitor after deployment:
 
 | Issue | Solution |
 |-------|----------|
-| 503 Errors | Verify AI_GATEWAY_API_KEY is set in Vercel |
+| 503 Errors | Verify GEMINI_API_KEY or GOOGLE_GENERATIVE_AI_API_KEY is set in Vercel |
 | 500 Error: "Tenant or user not found" | Database password incorrect - update POSTGRES_URL in Vercel with correct password |
 | "getaddrinfo ENOTFOUND db.ebgsbtqtkdgaafqejjye.supabase.co" | Using wrong connection format - switch to Session Pooler (aws-1-eu-west-3.pooler.supabase.com) |
 | Database connection fails on Vercel | Vercel is IPv4-only - use Session Pooler, NOT direct connection |
@@ -323,30 +331,29 @@ Monitor after deployment:
 | Hot reload not working | Restart dev server with `pnpm dev` |
 | Tests failing | Ensure PLAYWRIGHT=True env var for E2E tests |
 | Database connection fails | Check POSTGRES_URL in .env.local |
-| AI models not responding | Verify AI_GATEWAY_API_KEY and check Vercel AI Gateway dashboard |
+| AI models not responding | Verify GOOGLE_GENERATIVE_AI_API_KEY is set and check Google AI Studio for quota limits |
 
 ## Important Notes
 
-1. **No Gemini/Google AI**: All Google dependencies removed - AI Gateway only
+1. **Gemini API Only**: Uses Google Gemini API directly (not Vercel AI Gateway)
 2. **Soft deletes**: Always check `deletedAt IS NULL` in queries
 3. **Streaming format**: Use `JsonToSseTransformStream` for SSE responses
-4. **Tool execution**: Tools must be registered in both `tools` object and `experimental_activeTools` array
-5. **Prompt caching**: Only works with Claude models (Haiku/Sonnet), not GPT-4o Mini
+4. **Tool execution**: Tools must be registered in both `tools` object and passed to `streamText()`
+5. **Prompt caching**: Base system prompt cached via Next.js `unstable_cache` (24h TTL)
 6. **Git status**: Check `git status` before making changes - there are uncommitted admin components
 7. **Database schema changes**: Always run `pnpm db:generate` → `pnpm db:migrate` → `pnpm build` in sequence
 8. **Testing after migrations**: Run full test suite after schema changes to verify integrity
 9. **Vercel IPv4 Requirement**: ALWAYS use Session Pooler connection format for production - direct connection will fail with DNS errors
 10. **Supabase MCP Integration**: Can use `mcp__supabase__*` tools to manage database, projects, and deployments programmatically
 
-## Working with Uncommitted Changes
+## Git Workflow
 
-Current uncommitted files (as of last check):
-- `app/(admin)/` - Admin interface components (new)
-- `components/admin/` - Admin UI components (new)
-- `components/ui/table.tsx` - Table component (new)
-- `app/(chat)/api/chat/route.ts` - Modified chat endpoint
-- `lib/ai/prompts.ts` - Modified prompts
-- `lib/db/schema.ts` - Database schema changes
-- Migration files (0013)
+**ALWAYS** run `git status` before making changes to avoid conflicts.
 
-**Before making changes**: Run `git status` to see current uncommitted work. Coordinate with existing changes to avoid conflicts.
+Current uncommitted files:
+- `lib/telegram/message-handler.ts` - Modified (typing indicator optimization)
+- `"GENERAL KNOWLEDGE.html"` - Untracked file
+- `scripts/check-telegram-webhook.ts` - Untracked script
+- `scripts/check-webhook.mjs` - Untracked script
+
+Use `git diff <file>` to review changes before committing.

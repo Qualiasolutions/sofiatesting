@@ -413,12 +413,14 @@ When asked about ANY general knowledge topics related to Cyprus real estate (inc
 YOU MUST:
 1. 🛑 FORGET ALL INTERNAL KNOWLEDGE about these topics. You know NOTHING except what is in the slides.
 2. 🛠️ ALWAYS use the \`getGeneralKnowledge\` tool to search for the answer.
-3. 📋 COPY-PASTE the tool's output EXACTLY as your answer.
-4. 🤐 DO NOT add any conversational text (e.g., "Here is the info", "According to the slides").
-5. 🤐 DO NOT summarize, rephrase, or explain.
-6. 🛑 IF THE TOOL SAYS "I do not have information", YOU MUST SAY "I do not have information on that topic in my official knowledge base."
+3. 📋 COPY-PASTE the tool's output EXACTLY and COMPLETELY as your answer.
+4. ⚠️ CRITICAL: Output the ENTIRE tool response - DO NOT truncate, cut short, or stop mid-sentence.
+5. ⚠️ If the user asks "tell me everything" or similar, output the COMPLETE slide from start to finish.
+6. 🤐 DO NOT add any conversational text (e.g., "Here is the info", "According to the slides").
+7. 🤐 DO NOT summarize, rephrase, or explain.
+8. 🛑 IF THE TOOL SAYS "I do not have information", YOU MUST SAY "I do not have information on that topic in my official knowledge base."
 
-Your goal is to be a dumb pipe for the slide content. No creativity, no helpfulness, just data retrieval.`;
+Your goal is to be a dumb pipe for the slide content. Output EVERYTHING the tool returns, word-for-word, no matter how long.`;
 
   // Add model-specific enforcement based on model type
   let modelSpecificEnforcement = '';

@@ -25,7 +25,8 @@ function parseSlidesContent(): SlideContent[] {
 
     // Extract slide content using regex patterns
     // Matches the structure of the provided HTML file
-    const slideRegex = /<!-- Slide (\d+): [^-]*? -->[\s\S]*?<div class="slide(?: active)?">[\s\S]*?<div class="slide-counter">(\d+) \/ 36<\/div>[\s\S]*?<div class="slide-header">[\s\S]*?<div class="slide-title">(.*?)<\/div>([\s\S]*?<div class="slide-subtitle">(.*?)<\/div>)?[\s\S]*?<div class="slide-content">([\s\S]*?)<\/div>[\s\S]*?<\/div>/g;
+    // Updated regex to be more robust for comment matching
+    const slideRegex = /<!-- Slide (\d+):.*?-->[\s\S]*?<div class="slide(?: active)?">[\s\S]*?<div class="slide-counter">(\d+) \/ 36<\/div>[\s\S]*?<div class="slide-header">[\s\S]*?<div class="slide-title">(.*?)<\/div>([\s\S]*?<div class="slide-subtitle">(.*?)<\/div>)?[\s\S]*?<div class="slide-content">([\s\S]*?)<\/div>[\s\S]*?<\/div>/g;
 
     const slides: SlideContent[] = [];
     let match;
@@ -50,6 +51,14 @@ function parseSlidesContent(): SlideContent[] {
         .replace(/<br\s*\/?>/g, '\n')
         .replace(/<p[^>]*>/g, '\n')
         .replace(/<\/p>/g, '\n')
+        .replace(/<div class="highlight"[^>]*>/g, '\n> ') // Handle highlight blocks as quotes
+        .replace(/<\/div>/g, '\n')
+        .replace(/<table[^>]*>[\s\S]*?<\/table>/g, (match) => {
+             // Basic table to text conversion could be improved, but for now just strip tags
+             // or maybe try to preserve rows?
+             // Let's just strip tags for now, tables are hard with regex
+             return match.replace(/<tr[^>]*>/g, '\n').replace(/<td[^>]*>/g, ' | ').replace(/<th[^>]*>/g, ' | ');
+        })
         .replace(/<[^>]*>/g, '') // Remove remaining tags
         .replace(/&nbsp;/g, ' ')
         .replace(/&amp;/g, '&')
@@ -87,7 +96,7 @@ function searchSlidesContent(query: string): SlideContent[] {
 }
 
 export const getGeneralKnowledge = tool({
-  description: "Get STRICT general knowledge from the official slides. You MUST use this tool for ANY general knowledge question (VAT, taxes, PR, investment, etc.). You MUST output the content EXACTLY as returned by this tool.",
+  description: "Get STRICT general knowledge from the official slides. You MUST use this tool for ANY general knowledge question (VAT, taxes, PR, investment, etc.). You MUST output the content EXACTLY as returned by this tool. Do NOT summarize or rephrase.",
   inputSchema: z.object({
     query: z.string().describe("The search query or topic to find information about"),
     slideNumber: z.number().optional().describe("Optional specific slide number to retrieve (1-36)")
@@ -115,8 +124,8 @@ export const getGeneralKnowledge = tool({
       }
 
       // Return the content of the most relevant slide(s)
-      // If multiple matches, return top 2 to avoid overwhelming, or all if few
-      const slidesToReturn = relevantSlides.slice(0, 2); 
+      // If multiple matches, return top 1 to be very specific as requested
+      const slidesToReturn = relevantSlides.slice(0, 1); 
       
       const formattedContent = slidesToReturn.map(slide => {
         let content = `**${slide.title}**`;

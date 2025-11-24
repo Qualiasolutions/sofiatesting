@@ -24,11 +24,8 @@ const isGeminiConfigured = (() => {
 
   // Enforce Gemini API requirement (only at runtime and not during testing)
   if (!hasGeminiKey && typeof window === "undefined" && !process.env.NODE_ENV?.includes("test")) {
-    console.error(
-      "[SOFIA] CRITICAL: Gemini API key is required. Please configure GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY."
-    );
-    throw new Error(
-      "Gemini API configuration is required. Please set GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY environment variable."
+    console.warn(
+      "[SOFIA] WARNING: Gemini API key is missing. Chat functionality will not work."
     );
   }
 
@@ -48,6 +45,28 @@ export const myProvider = isTestEnvironment
       });
     })()
   : (() => {
+      if (!isGeminiConfigured) {
+        // Fallback for missing keys - prevents crash on startup
+        const errorModel = {
+            specificationVersion: 'v1',
+            provider: 'google',
+            modelId: 'error-model',
+            doGenerate: async () => { throw new Error("Gemini API key is not configured."); },
+            doStream: async () => { throw new Error("Gemini API key is not configured."); },
+        } as any;
+
+        return customProvider({
+            languageModels: {
+                "chat-model": errorModel,
+                "title-model": errorModel,
+                "artifact-model": errorModel,
+                "chat-model-pro": errorModel,
+                "chat-model-flash-lite": errorModel,
+                "chat-model-flash": errorModel,
+            }
+        });
+      }
+
       // Pure Gemini API approach - Latest stable models only
       // Default to Gemini 2.5 Flash - best price-performance ratio
       const defaultModel = google("gemini-2.5-flash");

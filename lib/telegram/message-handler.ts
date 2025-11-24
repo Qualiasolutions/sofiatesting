@@ -115,7 +115,7 @@ export async function handleTelegramMessage(
       try {
         result = await streamText({
           model: myProvider.languageModel("chat-model"), // Use Gemini 2.5 Flash for Telegram (reliable & fast)
-          system: `${systemPrompt({
+          system: await systemPrompt({
             selectedChatModel: "chat-model",
             requestHints: {
               latitude: undefined,
@@ -123,22 +123,8 @@ export async function handleTelegramMessage(
               city: undefined,
               country: "Cyprus", // Default to Cyprus for SOFIA
             },
-          })}
-
-TELEGRAM CHAT PERSONALITY:
-You are SOFIA - the Zyprus Property Group AI Assistant, but with a friendly, conversational tone suitable for Telegram messaging.
-
-GUIDELINES:
-- Be warm, friendly, and approachable in your responses
-- Use emojis occasionally when appropriate (🏠💼📊💰)
-- Keep paragraphs relatively short for better mobile readability
-- If someone greets you, greet them back warmly
-- Be helpful and proactive in offering assistance
-- Maintain your expertise as a Cyprus real estate professional
-- Feel free to ask clarifying questions if needed
-- Use simple text formatting (no HTML) for maximum compatibility
-
-Remember: You're chatting on Telegram, so keep it natural and conversational while maintaining professionalism.`,
+            userMessage: message.text,
+          }),
           messages: convertToModelMessages(allMessages),
           experimental_activeTools: [
             "calculateTransferFees",
@@ -319,64 +305,61 @@ async function sendTelegramMessage(
  * Handle /templates command - List all available templates
  */
 async function handleTemplatesCommand(chatId: number): Promise<void> {
-  const templatesList = `<b>📋 SOFIA Template Library - 43 Available Templates</b>
+  const templatesList = `📋 SOFIA Template Library - 43 Available Templates
 
-<b>🏢 REGISTRATION TEMPLATES (1-8)</b>
-<b>1.</b> Standard Seller Registration
-<b>2.</b> Seller with Marketing Agreement
-<b>3.</b> Rental Property Registration
-<b>4.</b> Advanced Seller Registration
-<b>5.</b> Bank Property Registration
-<b>6.</b> Bank Land Registration
-<b>7.</b> Developer Registration (with viewing)
-<b>8.</b> Developer Registration (no viewing)
+🏢 REGISTRATION TEMPLATES (1-8)
+1. Standard Seller Registration
+2. Seller with Marketing Agreement
+3. Rental Property Registration
+4. Advanced Seller Registration
+5. Bank Property Registration
+6. Bank Land Registration
+7. Developer Registration (with viewing)
+8. Developer Registration (no viewing)
 
-<b>👁️ VIEWING & RESERVATIONS (9-13)</b>
-<b>9.</b> Standard Viewing Form
-<b>10.</b> Advanced Viewing Form
-<b>11.</b> Multiple Persons Viewing Form
-<b>12.</b> Property Reservation Form
-<b>13.</b> Property Reservation Agreement
+👁️ VIEWING & RESERVATIONS (9-13)
+9. Standard Viewing Form
+10. Advanced Viewing Form
+11. Multiple Persons Viewing Form
+12. Property Reservation Form
+13. Property Reservation Agreement
 
-<b>📢 MARKETING AGREEMENTS (14-16)</b>
-<b>14.</b> Email Marketing Agreement
-<b>15.</b> Non-Exclusive Marketing Agreement
-<b>16.</b> Exclusive Marketing Agreement
+📢 MARKETING AGREEMENTS (14-16)
+14. Email Marketing Agreement
+15. Non-Exclusive Marketing Agreement
+16. Exclusive Marketing Agreement
 
-<b>📧 CLIENT COMMUNICATIONS (17-33)</b>
-<b>17.</b> Good Client Request - Email
-<b>18.</b> Good Client Request - WhatsApp
-<b>19.</b> Valuation Quote
-<b>20.</b> Valuation Request Received
-<b>21.</b> Client Not Providing Phone
-<b>22.</b> Follow-up Multiple Properties
-<b>23.</b> Follow-up Single Property
-<b>24.</b> Buyer Viewing Confirmation
-<b>25.</b> No Options - Low Budget
-<b>26.</b> Multiple Areas Issue
-<b>27.</b> Time Wasters Polite Decline
-<b>28.</b> Still Looking Follow-up
-<b>29.</b> No Agent Cooperation
-<b>30.</b> AML/KYC Record Keeping
-<b>31.</b> Selling Request Received
-<b>32.</b> Recommended Pricing Advice
-<b>33.</b> Overpriced Property Decline
+📧 CLIENT COMMUNICATIONS (17-33)
+17. Good Client Request - Email
+18. Good Client Request - WhatsApp
+19. Valuation Quote
+20. Valuation Request Received
+21. Client Not Providing Phone
+22. Follow-up Multiple Properties
+23. Follow-up Single Property
+24. Buyer Viewing Confirmation
+25. No Options - Low Budget
+26. Multiple Areas Issue
+27. Time Wasters Polite Decline
+28. Still Looking Follow-up
+29. No Agent Cooperation
+30. AML/KYC Record Keeping
+31. Selling Request Received
+32. Recommended Pricing Advice
+33. Overpriced Property Decline
 
-<b>📨 EXTENDED COMMUNICATIONS (39-43)</b>
-<b>39.</b> Property Location Info Request
-<b>40.</b> Different Regions Request
-<b>41.</b> Client Follow-up (No Reply)
-<b>42.</b> Plain Request to info@zyprus
-<b>43.</b> Apology for Extended Delay
+📨 EXTENDED COMMUNICATIONS (39-43)
+39. Property Location Info Request
+40. Different Regions Request
+41. Client Follow-up (No Reply)
+42. Plain Request to info@zyprus
+43. Apology for Extended Delay
 
-<b>💡 How to use:</b>
-Simply tell me what you need! For example:
-• "I need a seller registration"
-• "Create template 7 for Maria"
-• "Developer registration with viewing tomorrow at 15:00"
-• "Bank property registration"
-
-I'll ask for any missing information and generate the document instantly! 🚀`;
+Usage:
+• "seller registration"
+• "template 7 for Maria"
+• "developer registration with viewing tomorrow at 15:00"
+• "bank property registration"`;
 
   await sendTelegramMessage(chatId, templatesList);
 }
@@ -385,36 +368,25 @@ I'll ask for any missing information and generate the document instantly! 🚀`;
  * Handle /help command - Show available commands and usage
  */
 async function handleHelpCommand(chatId: number): Promise<void> {
-  const helpText = `<b>🤖 SOFIA - Zyprus Property Group AI Assistant</b>
+  const helpText = `🤖 SOFIA - Zyprus Property Group AI Assistant
 
-<b>Available Commands:</b>
+Available Commands:
 /templates - View all 43 available templates
 /help - Show this help message
 /start - Welcome message
 
-<b>What I can do:</b>
-🏠 Generate property registration documents
-📋 Create viewing forms and agreements
-💰 Calculate transfer fees, VAT, and capital gains
-📧 Draft professional client communications
-🏢 Handle developer & bank registrations
+Capabilities:
+🏠 Property registration documents
+📋 Viewing forms and agreements
+💰 Transfer fees, VAT, and capital gains calculations
+📧 Client communications
+🏢 Developer & bank registrations
 
-<b>How to use me:</b>
-Simply type what you need in plain language!
-
-<b>Examples:</b>
+Examples:
 • "Calculate VAT on €350,000"
 • "Transfer fees for a property worth €500,000"
-• "Create a seller registration for John Smith"
-• "Developer registration with viewing tomorrow at 15:00"
-
-<b>Tips:</b>
-• I understand natural language - just chat normally!
-• For documents, I'll ask for any missing information
-• All generated documents are now in <b>bold text</b> format
-• I work 24/7 to assist you! 🌟
-
-Need help? Just ask! I'm here to make your real estate work easier. 💼`;
+• "seller registration for John Smith"
+• "developer registration with viewing tomorrow at 15:00"`;
 
   await sendTelegramMessage(chatId, helpText);
 }
