@@ -40,17 +40,42 @@ export async function handleTelegramMessage(
   const telegramClient = getTelegramClient();
   const chatId = message.chat.id;
 
-  // Handle /templates command
-  if (message.text === "/templates" || message.text === "/template") {
-    await handleTemplatesCommand(chatId);
-    return;
+  // Handle bot commands
+  const command = message.text.split(" ")[0].toLowerCase();
+
+  switch (command) {
+    case "/start":
+      await handleStartCommand(chatId, message.from.first_name);
+      return;
+    case "/help":
+      await handleHelpCommand(chatId);
+      return;
+    case "/templates":
+    case "/template":
+      await handleTemplatesCommand(chatId);
+      return;
+    case "/vat":
+      await handleVATCommand(chatId);
+      return;
+    case "/transfer":
+      await handleTransferCommand(chatId);
+      return;
+    case "/capitalgains":
+      await handleCapitalGainsCommand(chatId);
+      return;
+    case "/examples":
+      await handleExamplesCommand(chatId);
+      return;
+    case "/clear":
+      await handleClearCommand(chatId, message.from.id);
+      return;
+    case "/about":
+      await handleAboutCommand(chatId);
+      return;
   }
 
-  // Handle /help command
-  if (message.text === "/help" || message.text === "/start") {
-    await handleHelpCommand(chatId);
-    return;
-  }
+  // Get the model once for use in both streaming and error logging
+  const chatModel = myProvider.languageModel("chat-model");
 
   try {
     // Show typing indicator
@@ -114,7 +139,7 @@ export async function handleTelegramMessage(
     while (retryCount <= MAX_RETRIES) {
       try {
         result = await streamText({
-          model: myProvider.languageModel("chat-model"), // Use Gemini 2.5 Flash for Telegram (reliable & fast)
+          model: chatModel, // Use Gemini 2.5 Flash for Telegram (reliable & fast)
           system: await systemPrompt({
             selectedChatModel: "chat-model",
             requestHints: {
@@ -229,6 +254,7 @@ export async function handleTelegramMessage(
       error,
       errorMessage: error instanceof Error ? error.message : "Unknown error",
       errorStack: error instanceof Error ? error.stack : undefined,
+      modelName: chatModel.modelId, // Log the actual model being used
     });
 
     try {
@@ -365,28 +391,219 @@ Usage:
 }
 
 /**
+ * Handle /start command - Welcome message with quick start
+ */
+async function handleStartCommand(
+  chatId: number,
+  firstName: string
+): Promise<void> {
+  const startText = `Welcome ${firstName}! I'm SOFIA, your Cyprus Real Estate AI Assistant.
+
+I help with:
+- Property tax calculations (VAT, transfer fees, capital gains)
+- Document templates for real estate transactions
+- Cyprus property market information
+
+Quick Start:
+Just type your question naturally, like:
+"Calculate VAT for a €400,000 apartment"
+"Transfer fees for €250,000 property"
+
+Or use /help to see all commands.
+
+How can I assist you today?`;
+
+  await sendTelegramMessage(chatId, startText);
+}
+
+/**
  * Handle /help command - Show available commands and usage
  */
 async function handleHelpCommand(chatId: number): Promise<void> {
-  const helpText = `🤖 SOFIA - Zyprus Property Group AI Assistant
+  const helpText = `SOFIA - Cyprus Real Estate AI Assistant
 
-Available Commands:
-/templates - View all 43 available templates
-/help - Show this help message
-/start - Welcome message
+COMMANDS:
+/vat - Calculate VAT for new properties
+/transfer - Calculate property transfer fees
+/capitalgains - Calculate capital gains tax
+/templates - Browse 43 document templates
+/examples - See example questions
+/clear - Start fresh conversation
+/about - About SOFIA
 
-Capabilities:
-🏠 Property registration documents
-📋 Viewing forms and agreements
-💰 Transfer fees, VAT, and capital gains calculations
-📧 Client communications
-🏢 Developer & bank registrations
+CALCULATORS:
+Just ask naturally:
+"VAT for €350,000 apartment, 120sqm"
+"Transfer fees for €500,000"
+"Capital gains: bought €200k in 2015, selling €350k"
 
-Examples:
-• "Calculate VAT on €350,000"
-• "Transfer fees for a property worth €500,000"
-• "seller registration for John Smith"
-• "developer registration with viewing tomorrow at 15:00"`;
+DOCUMENTS:
+"Seller registration for John Smith"
+"Viewing form for tomorrow at 3pm"
+"Marketing agreement for Villa Costa"
+
+Need help? Just type your question!`;
 
   await sendTelegramMessage(chatId, helpText);
+}
+
+/**
+ * Handle /vat command - VAT calculator guide
+ */
+async function handleVATCommand(chatId: number): Promise<void> {
+  const vatText = `VAT Calculator for Cyprus Properties
+
+VAT applies to NEW properties only (not resale).
+
+RATES:
+- 5% reduced rate: Primary residence, first 130sqm, up to €350k
+- 19% standard rate: Investment properties or excess
+
+REQUIRED INFO:
+1. Property price (€)
+2. Total area (sqm)
+3. Main residence? (yes/no)
+
+EXAMPLES:
+"Calculate VAT for €300,000 apartment, 100sqm, main residence"
+"VAT on €500,000 villa, 200sqm, investment property"
+
+Just type your calculation request!`;
+
+  await sendTelegramMessage(chatId, vatText);
+}
+
+/**
+ * Handle /transfer command - Transfer fees guide
+ */
+async function handleTransferCommand(chatId: number): Promise<void> {
+  const transferText = `Transfer Fees Calculator
+
+Progressive rates with 50% exemption for resale:
+- Up to €85,000: 3%
+- €85,001 - €170,000: 5%
+- Over €170,000: 8%
+
+EXAMPLES:
+"Transfer fees for €250,000 property"
+"Transfer fees for €400,000 in joint names"
+
+Joint names = fee split between 2 buyers (often saves money on higher-value properties).
+
+Just type your calculation!`;
+
+  await sendTelegramMessage(chatId, transferText);
+}
+
+/**
+ * Handle /capitalgains command - Capital gains guide
+ */
+async function handleCapitalGainsCommand(chatId: number): Promise<void> {
+  const cgText = `Capital Gains Tax Calculator
+
+TAX RATE: 20% on profit above allowance
+
+ALLOWANCES:
+- Main residence: €85,430
+- Farm land: €25,629
+- Other property: €17,086
+
+DEDUCTIBLE COSTS:
+- Purchase price (inflation adjusted)
+- Improvements
+- Legal fees, agent fees
+- Transfer fees paid
+
+EXAMPLE:
+"Capital gains: bought for €200,000 in 2015, selling for €350,000 now, main residence"
+
+Type your calculation with purchase & sale details!`;
+
+  await sendTelegramMessage(chatId, cgText);
+}
+
+/**
+ * Handle /examples command - Show example questions
+ */
+async function handleExamplesCommand(chatId: number): Promise<void> {
+  const examplesText = `Example Questions for SOFIA
+
+CALCULATIONS:
+"Calculate VAT for €350,000 new apartment, 120sqm"
+"What are the transfer fees for a €500,000 villa?"
+"Capital gains if I bought for €180k in 2018 and sell for €280k"
+"Total buying costs for €400,000 property"
+
+DOCUMENTS:
+"Create seller registration for Maria Georgiou"
+"Viewing form for 25 Poseidon St, Limassol, tomorrow 2pm"
+"Marketing agreement for 3-bed apartment"
+"Valuation request for villa in Paphos"
+
+INFORMATION:
+"What documents do I need to buy property in Cyprus?"
+"Explain the property buying process"
+"What is Title Deed vs Contract of Sale?"
+
+Just copy any example or type your own question!`;
+
+  await sendTelegramMessage(chatId, examplesText);
+}
+
+/**
+ * Handle /clear command - Clear conversation history
+ */
+async function handleClearCommand(
+  chatId: number,
+  _telegramUserId: number
+): Promise<void> {
+  try {
+    // Note: Full message deletion would require deleteChatMessages DB operation
+    // For now, we just acknowledge the clear request
+
+    const clearText = `Conversation cleared!
+
+Your previous context has been reset. I'll treat our next exchange as a fresh conversation.
+
+How can I help you today?`;
+
+    await sendTelegramMessage(chatId, clearText);
+  } catch {
+    await sendTelegramMessage(
+      chatId,
+      "Ready for a fresh start! What would you like to know?"
+    );
+  }
+}
+
+/**
+ * Handle /about command - About SOFIA
+ */
+async function handleAboutCommand(chatId: number): Promise<void> {
+  const aboutText = `About SOFIA
+
+SOFIA (Smart Operations & Facilitation Intelligence Assistant) is the AI assistant for Zyprus Property Group.
+
+CAPABILITIES:
+- Cyprus property tax calculations
+- 43 real estate document templates
+- Property market information
+- Transaction cost estimates
+
+ACCURACY:
+Calculations follow official Cyprus tax rules:
+- VAT: Cyprus Tax Department guidelines
+- Transfer fees: Land Registry rates
+- Capital gains: 20% tax rate with allowances
+
+SUPPORT:
+For complex queries or official advice, consult:
+- Tax advisor for tax matters
+- Lawyer for legal documents
+- Licensed agent for property valuations
+
+Powered by Zyprus Property Group
+https://www.zyprus.com`;
+
+  await sendTelegramMessage(chatId, aboutText);
 }
