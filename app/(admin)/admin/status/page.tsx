@@ -1,4 +1,8 @@
 import { Suspense } from "react";
+
+// Prevent static generation - this page needs real-time data
+export const dynamic = "force-dynamic";
+
 import { db } from "@/lib/db/client";
 import { systemHealthLog } from "@/lib/db/schema";
 import { desc, sql } from "drizzle-orm";
