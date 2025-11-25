@@ -13,6 +13,8 @@ import { getWhatsAppClient } from "./client";
 import type { WaSenderMessageData } from "./types";
 import { shouldSendAsDocument, getDocumentType } from "./document-detector";
 import { generateDocx } from "./docx-generator";
+import { db } from "@/lib/db/client";
+import { agentExecutionLog } from "@/lib/db/schema";
 
 /**
  * Handle incoming WhatsApp message and generate AI response
@@ -46,6 +48,19 @@ export async function handleWhatsAppMessage(
       role: "user",
       parts: [{ type: "text", text: userMessage }],
     };
+
+    // Log incoming message
+    await db.insert(agentExecutionLog).values({
+      agentType: "whatsapp",
+      action: "message_received",
+      modelUsed: "user",
+      success: true,
+      metadata: {
+        from: phoneNumber,
+        message: userMessage,
+        isGroup: messageData.isGroup,
+      },
+    });
 
     // Generate AI response
     let fullResponse = "";

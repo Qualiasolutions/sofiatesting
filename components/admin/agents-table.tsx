@@ -91,8 +91,7 @@ export function AgentsTable({
   const [agentToEdit, setAgentToEdit] = useState<Agent | null>(null);
 
   const handleRowClick = (agent: Agent) => {
-    setSelectedAgent(agent);
-    setSheetOpen(true);
+    router.push(`/admin/agents-registry/${agent.id}`);
   };
 
   const handleEditClick = (agent: Agent) => {

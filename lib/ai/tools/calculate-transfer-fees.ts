@@ -14,7 +14,7 @@ import { z } from "zod";
  */
 export const calculateTransferFeesTool = tool({
   description:
-    "Calculate property transfer fees in Cyprus. Use this when users ask about transfer fees, buying costs, or property transaction fees. Applies progressive rates: 3% up to €85k, 5% for €85k-€170k, 8% above €170k. Includes 50% exemption for resale properties.",
+    "Calculate property transfer fees in Cyprus. Use this when users ask about transfer fees, buying costs, or property transaction fees. Applies progressive rates: 3% up to €85k, 5% for €85k-€170k, 8% above €170k. Includes 50% exemption for resale properties. IMPORTANT: Ask for BOTH property price AND joint names IN ONE QUESTION: 'What is the property price and will you be buying in joint names?'",
   inputSchema: z.object({
     property_value: z
       .number()
@@ -22,9 +22,8 @@ export const calculateTransferFeesTool = tool({
       .describe("The property value in Euros (e.g., 250,000)"),
     joint_names: z
       .boolean()
-      .default(false)
       .describe(
-        "Whether the property is being purchased in joint names (splits calculation per person)"
+        "Whether the property is being purchased in joint names. ALWAYS ask this TOGETHER with property price in ONE question."
       ),
   }),
   execute: ({ property_value, joint_names }) => {

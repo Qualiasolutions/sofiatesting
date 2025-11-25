@@ -156,46 +156,60 @@ export function Chat({
 
   return (
     <>
-      <div className="flex h-dvh">
+      <div className="relative flex h-dvh w-full overflow-hidden bg-background">
+        {/* Ambient Background */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/10 blur-[120px] animate-pulse" />
+          <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-500/10 blur-[120px] animate-pulse delay-1000" />
+        </div>
+
         {/* Main Chat Area */}
-        <div className="overscroll-behavior-contain flex min-w-0 flex-1 touch-pan-y flex-col bg-background">
+        <div className="relative z-10 flex min-w-0 flex-1 flex-col">
           <ChatHeader
             chatId={id}
             isReadonly={isReadonly}
             selectedVisibilityType={initialVisibilityType}
+            className="glass border-b z-20"
           />
 
-          <Messages
-            chatId={id}
-            isArtifactVisible={isArtifactVisible}
-            isReadonly={isReadonly}
-            messages={messages}
-            regenerate={regenerate}
-            selectedModelId={initialChatModel}
-            setMessages={setMessages}
-            status={status}
-            votes={votes}
-          />
-
-          <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
-            {!isReadonly && (
-              <MultimodalInput
-                attachments={attachments}
+          <div className="flex-1 overflow-y-auto overscroll-behavior-contain scroll-smooth">
+            <div className="mx-auto max-w-3xl w-full px-4 py-8">
+              <Messages
                 chatId={id}
-                input={input}
+                isArtifactVisible={isArtifactVisible}
+                isReadonly={isReadonly}
                 messages={messages}
-                onModelChange={setCurrentModelId}
-                selectedModelId={currentModelId}
-                selectedVisibilityType={visibilityType}
-                sendMessage={sendMessage}
-                setAttachments={setAttachments}
-                setInput={setInput}
+                regenerate={regenerate}
+                selectedModelId={initialChatModel}
                 setMessages={setMessages}
                 status={status}
-                stop={stop}
-                usage={usage}
+                votes={votes}
               />
-            )}
+            </div>
+          </div>
+
+          <div className="sticky bottom-0 z-20 mx-auto w-full max-w-3xl px-4 pb-6">
+            <div className="glass-card rounded-2xl p-2 shadow-lg ring-1 ring-border/50">
+              {!isReadonly && (
+                <MultimodalInput
+                  attachments={attachments}
+                  chatId={id}
+                  input={input}
+                  messages={messages}
+                  onModelChange={setCurrentModelId}
+                  selectedModelId={currentModelId}
+                  selectedVisibilityType={visibilityType}
+                  sendMessage={sendMessage}
+                  setAttachments={setAttachments}
+                  setInput={setInput}
+                  setMessages={setMessages}
+                  status={status}
+                  stop={stop}
+                  usage={usage}
+                  className="bg-transparent border-none shadow-none focus-within:ring-0"
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>

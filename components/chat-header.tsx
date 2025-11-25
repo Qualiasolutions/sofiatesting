@@ -13,10 +13,12 @@ function PureChatHeader({
   chatId,
   selectedVisibilityType,
   isReadonly,
+  className,
 }: {
   chatId: string;
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
+  className?: string;
 }) {
   const router = useRouter();
   const { open } = useSidebar();
@@ -24,7 +26,7 @@ function PureChatHeader({
   const { width: windowWidth } = useWindowSize();
 
   return (
-    <header className="sticky top-0 flex items-center gap-2 bg-background px-2 py-1.5 md:px-2">
+    <header className={`sticky top-0 flex items-center gap-2 bg-background px-2 py-1.5 md:px-2 ${className}`}>
       <SidebarToggle />
 
       {(!open || windowWidth < 768) && (
@@ -56,6 +58,7 @@ export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
   return (
     prevProps.chatId === nextProps.chatId &&
     prevProps.selectedVisibilityType === nextProps.selectedVisibilityType &&
-    prevProps.isReadonly === nextProps.isReadonly
+    prevProps.isReadonly === nextProps.isReadonly &&
+    prevProps.className === nextProps.className
   );
 });
