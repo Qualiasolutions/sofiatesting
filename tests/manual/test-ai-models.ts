@@ -13,11 +13,11 @@ import { myProvider } from "@/lib/ai/providers";
 import { streamText } from "ai";
 
 const MODELS_TO_TEST = [
-  "chat-model", // Gemini 2.5 Flash (default)
-  "chat-model-pro", // Gemini 2.5 Pro
-  "chat-model-flash-lite", // Gemini 2.5 Flash-Lite
-  "title-model", // Gemini 2.5 Flash
-  "artifact-model", // Gemini 2.5 Flash
+  "chat-model", // Gemini 1.5 Flash (default)
+  "chat-model-pro", // Gemini 1.5 Pro
+  "chat-model-flash-lite", // Gemini 1.5 Flash-8B
+  "title-model", // Gemini 1.5 Flash
+  "artifact-model", // Gemini 1.5 Flash
 ] as const;
 
 const STRICT_INSTRUCTION_TEST =

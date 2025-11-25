@@ -8,7 +8,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - All optimization tasks and their status
 - Testing protocols
 - Deployment checklists
-- Recent changes (11 tasks completed as of 2025-01-10)
 
 ## Project Overview
 
@@ -32,11 +31,11 @@ GOOGLE_GENERATIVE_AI_API_KEY=required  # Or GEMINI_API_KEY
 # Application will not start without this at runtime (skipped during build)
 ```
 
-Available models via Google Gemini API:
-- `chat-model` → Gemini 2.0 Flash (default) - Best price-performance with thinking
-- `chat-model-pro` → Gemini 1.5 Pro - Most powerful reasoning model
-- `chat-model-flash-lite` → Gemini 2.0 Flash-Lite - Ultra-fast and cheapest
-- `chat-model-flash` → Gemini 2.0 Flash (alias)
+Available models via Google Gemini API (Gemini 2.5 generation):
+- `chat-model` → Gemini 2.5 Flash (default) - Best price-performance with thinking
+- `chat-model-pro` → Gemini 2.5 Pro - Most powerful reasoning model
+- `chat-model-flash-lite` → Gemini 2.5 Flash-Lite - Ultra-fast and cheapest
+- `chat-model-flash` → Gemini 2.5 Flash (alias)
 
 ### Database Architecture
 
@@ -87,6 +86,8 @@ pnpm start                  # Start production server
 pnpm db:generate           # Generate Drizzle migrations
 pnpm db:migrate            # Apply migrations
 pnpm db:studio             # Launch Drizzle Studio GUI
+pnpm db:push               # Push schema directly (skip migrations)
+pnpm db:pull               # Pull schema from database
 
 # Code quality
 pnpm lint                  # Run Ultracite checks
@@ -136,12 +137,13 @@ Main endpoint: `app/(chat)/api/chat/route.ts`
 **Response Format**: Server-Sent Events (SSE) using custom `JsonToSseTransformStream`
 
 The chat endpoint streams responses in real-time:
-1. Client sends POST with messages array and model selection
+1. Client sends POST with messages array and model selection (validated via `postRequestBodySchema` in `schema.ts`)
 2. Server validates rate limits and authentication
-3. Calls `streamText()` from Vercel AI SDK with selected model
-4. Transforms JSON stream to SSE format for browser consumption
-5. Persists final message and tool results to PostgreSQL
-6. Tracks token usage with tokenlens library
+3. Prunes conversation history to prevent unbounded token growth (`lib/ai/conversation-pruning.ts`)
+4. Calls `streamText()` from Vercel AI SDK with selected model
+5. Transforms JSON stream to SSE format for browser consumption
+6. Persists final message and tool results to PostgreSQL
+7. Tracks token usage with tokenlens library
 
 **Key Features**:
 - **Model Selection**: User can choose between different Gemini models (Flash, Pro, Flash-Lite)
@@ -188,32 +190,28 @@ Available tools in `lib/ai/tools/`:
 - `calculate-vat.ts` - VAT calculations
 - `create-listing.ts` - Property listing creation
 - `list-listings.ts` - Query property listings
-- `create-document.ts` - Template-based document generation
-- `update-document.ts` - Document modifications
+- `upload-listing.ts` - Upload listing to Zyprus platform
+- `get-zyprus-data.ts` - Fetch Zyprus taxonomy data
+- `get-general-knowledge.ts` - Cyprus real estate domain knowledge
+- `request-suggestions.ts` - Generate follow-up suggestions
+- `create-document.ts` - Template-based document generation (currently disabled)
+- `update-document.ts` - Document modifications (currently disabled)
 
-## Recent Optimizations (from IMPLEMENTATION_PLAN.md)
+## Code Quality
 
-### Completed (Week 3)
-- ✅ Database indexes for 10-100x faster queries
-- ✅ Telegram typing indicators reduced by 90%
-- ✅ System prompt caching (50-100ms saved per request)
-- ✅ Redis cache for Zyprus taxonomy (95% fewer API calls)
-- ✅ Anthropic prompt caching ($2-5 saved per 1000 requests)
-- ✅ Optimized pagination queries (50% fewer database round-trips)
-- ✅ CASCADE deletes (75% fewer deletion queries)
-- ✅ Enhanced error logging across all database operations
-- ✅ Environment variable consolidation
+### Linting & Formatting (Ultracite/Biome)
 
-### Recent Deployment Fixes (Nov 24, 2025)
-- ✅ Fixed production database connection issues
-- ✅ Migrated to Supabase Session Pooler for IPv4 compatibility
-- ✅ Resolved "Tenant or user not found" errors
-- ✅ Cleaned up broken environment variables
-- ✅ Verified database connectivity with `/api/test-db` endpoint
-- ✅ Production deployment now fully operational
+This project uses Ultracite (Biome-based) for linting and formatting. See `.cursor/rules/ultracite.mdc` for full rules.
 
-### Pending
-- Paid membership tier implementation (requires billing integration)
+**Key rules enforced:**
+- No TypeScript enums - use `as const` objects
+- No `any` type - use proper typing
+- No console.log in production code
+- Use `for...of` instead of `Array.forEach`
+- Use arrow functions over function expressions
+- Use `===` and `!==` (no loose equality)
+- React: No array index as keys, no nested component definitions
+- Always include `type` attribute on buttons
 
 ## Project Structure
 
@@ -319,7 +317,7 @@ Monitor after deployment:
 | Database errors | Run `pnpm db:migrate` |
 | Tool not working | Verify dual registration (tools object + experimental_activeTools) |
 | Slow queries | Check indexes exist (migration 0011) |
-| High API costs | Monitor Anthropic prompt caching hit rate |
+| High API costs | Check Google AI Studio for quota usage |
 
 ### Development Issues
 
@@ -338,22 +336,9 @@ Monitor after deployment:
 1. **Gemini API Only**: Uses Google Gemini API directly (not Vercel AI Gateway)
 2. **Soft deletes**: Always check `deletedAt IS NULL` in queries
 3. **Streaming format**: Use `JsonToSseTransformStream` for SSE responses
-4. **Tool execution**: Tools must be registered in both `tools` object and passed to `streamText()`
+4. **Tool execution**: Tools must be registered in both `tools` object AND `experimental_activeTools` array
 5. **Prompt caching**: Base system prompt cached via Next.js `unstable_cache` (24h TTL)
-6. **Git status**: Check `git status` before making changes - there are uncommitted admin components
-7. **Database schema changes**: Always run `pnpm db:generate` → `pnpm db:migrate` → `pnpm build` in sequence
-8. **Testing after migrations**: Run full test suite after schema changes to verify integrity
-9. **Vercel IPv4 Requirement**: ALWAYS use Session Pooler connection format for production - direct connection will fail with DNS errors
-10. **Supabase MCP Integration**: Can use `mcp__supabase__*` tools to manage database, projects, and deployments programmatically
-
-## Git Workflow
-
-**ALWAYS** run `git status` before making changes to avoid conflicts.
-
-Current uncommitted files:
-- `lib/telegram/message-handler.ts` - Modified (typing indicator optimization)
-- `"GENERAL KNOWLEDGE.html"` - Untracked file
-- `scripts/check-telegram-webhook.ts` - Untracked script
-- `scripts/check-webhook.mjs` - Untracked script
-
-Use `git diff <file>` to review changes before committing.
+6. **Database schema changes**: Always run `pnpm db:generate` → `pnpm db:migrate` → `pnpm build` in sequence
+7. **Vercel IPv4 Requirement**: ALWAYS use Session Pooler connection format for production
+8. **Supabase MCP Integration**: Can use `mcp__supabase__*` tools to manage database programmatically
+9. **Error types**: Use `ChatSDKError` from `lib/errors.ts` for consistent API error responses

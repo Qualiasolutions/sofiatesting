@@ -180,7 +180,9 @@ Calculation:
 
 📊 Capital Gains Tax (20%): €${capitalGainsTax.toLocaleString()}
 
-Note: This is an estimate. Consult a tax professional for accurate assessment.`,
+Note: This is an estimate. Consult a tax professional for accurate assessment.
+
+[Source: Cyprus Tax Department CGT Rules | Verified by SOFIA Calculator]`,
       };
     } catch (error) {
       return {

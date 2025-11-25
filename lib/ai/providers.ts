@@ -67,7 +67,7 @@ export const myProvider = isTestEnvironment
         });
       }
 
-      // Pure Gemini API approach - Latest stable models only
+      // Pure Gemini API approach - Gemini 2.5 models (latest generation)
       // Default to Gemini 2.5 Flash - best price-performance ratio
       const defaultModel = google("gemini-2.5-flash");
 

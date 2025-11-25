@@ -50,20 +50,6 @@ export const chat = pgTable(
 
 export type Chat = InferSelectModel<typeof chat>;
 
-// DEPRECATED: The following schema is deprecated and will be removed in the future.
-// Read the migration guide at https://chat-sdk.dev/docs/migration-guides/message-parts
-export const messageDeprecated = pgTable("Message", {
-  id: uuid("id").primaryKey().notNull().defaultRandom(),
-  chatId: uuid("chatId")
-    .notNull()
-    .references(() => chat.id),
-  role: varchar("role").notNull(),
-  content: json("content").notNull(),
-  createdAt: timestamp("createdAt").notNull(),
-});
-
-export type MessageDeprecated = InferSelectModel<typeof messageDeprecated>;
-
 export const message = pgTable(
   "Message_v2",
   {
@@ -86,28 +72,6 @@ export const message = pgTable(
 );
 
 export type DBMessage = InferSelectModel<typeof message>;
-
-// DEPRECATED: The following schema is deprecated and will be removed in the future.
-// Read the migration guide at https://chat-sdk.dev/docs/migration-guides/message-parts
-export const voteDeprecated = pgTable(
-  "Vote",
-  {
-    chatId: uuid("chatId")
-      .notNull()
-      .references(() => chat.id),
-    messageId: uuid("messageId")
-      .notNull()
-      .references(() => messageDeprecated.id),
-    isUpvoted: boolean("isUpvoted").notNull(),
-  },
-  (table) => {
-    return {
-      pk: primaryKey({ columns: [table.chatId, table.messageId] }),
-    };
-  }
-);
-
-export type VoteDeprecated = InferSelectModel<typeof voteDeprecated>;
 
 export const vote = pgTable(
   "Vote_v2",
@@ -390,47 +354,6 @@ export const calculatorUsageLog = pgTable(
 
 export type CalculatorUsageLog = InferSelectModel<typeof calculatorUsageLog>;
 
-// WhatsApp conversations (for future WhatsApp integration)
-export const whatsappConversation = pgTable(
-  "WhatsAppConversation",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    phoneNumber: varchar("phoneNumber", { length: 20 }).notNull(),
-    userId: uuid("userId").references(() => user.id),
-    status: varchar("status", { length: 20 }).notNull().default("active"), // 'active', 'paused', 'ended'
-    metadata: jsonb("metadata"), // conversation context
-    createdAt: timestamp("createdAt").notNull().defaultNow(),
-    lastMessageAt: timestamp("lastMessageAt"),
-  },
-  (table) => ({
-    phoneNumberIdx: index("WhatsAppConversation_phoneNumber_idx").on(
-      table.phoneNumber
-    ),
-    userIdIdx: index("WhatsAppConversation_userId_idx").on(table.userId),
-    statusIdx: index("WhatsAppConversation_status_idx").on(table.status),
-    lastMessageAtIdx: index("WhatsAppConversation_lastMessageAt_idx").on(
-      table.lastMessageAt
-    ),
-  })
-);
-
-export type WhatsAppConversation = InferSelectModel<
-  typeof whatsappConversation
->;
-
-// Integration status tracking
-export const integrationStatus = pgTable("IntegrationStatus", {
-  service: varchar("service", { length: 50 }).primaryKey(), // 'telegram', 'zyprus', 'ai_gateway', 'whatsapp'
-  isEnabled: boolean("isEnabled").notNull().default(true),
-  lastCheckAt: timestamp("lastCheckAt"),
-  lastSuccessAt: timestamp("lastSuccessAt"),
-  consecutiveFailures: integer("consecutiveFailures").notNull().default(0),
-  config: jsonb("config"), // service-specific configuration
-  errorLog: text("errorLog"), // last error details
-  updatedAt: timestamp("updatedAt").notNull().defaultNow(),
-});
-
-export type IntegrationStatus = InferSelectModel<typeof integrationStatus>;
 
 // Admin audit logs (track admin actions)
 export const adminAuditLog = pgTable(

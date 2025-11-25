@@ -74,8 +74,16 @@ export async function handleTelegramMessage(
       return;
   }
 
+  // Handle quick conversational responses (no AI needed)
+  const quickResponse = getQuickResponse(message.text, message.from.first_name);
+  if (quickResponse) {
+    await sendTelegramMessage(chatId, quickResponse);
+    return;
+  }
+
   // Get the model once for use in both streaming and error logging
-  const chatModel = myProvider.languageModel("chat-model");
+  // Using Flash-Lite for Telegram - cheapest and fastest model
+  const chatModel = myProvider.languageModel("chat-model-flash-lite");
 
   try {
     // Show typing indicator
@@ -139,9 +147,9 @@ export async function handleTelegramMessage(
     while (retryCount <= MAX_RETRIES) {
       try {
         result = await streamText({
-          model: chatModel, // Use Gemini 2.5 Flash for Telegram (reliable & fast)
+          model: chatModel, // Gemini 2.5 Flash-Lite - cheapest & fastest
           system: await systemPrompt({
-            selectedChatModel: "chat-model",
+            selectedChatModel: "chat-model-flash-lite",
             requestHints: {
               latitude: undefined,
               longitude: undefined,
@@ -325,6 +333,78 @@ async function sendTelegramMessage(
 ): Promise<void> {
   const telegramClient = getTelegramClient();
   await telegramClient.sendMessage({ chatId, text });
+}
+
+/**
+ * Get quick response for casual conversation
+ * Returns null if message should go to AI
+ */
+function getQuickResponse(text: string, firstName: string): string | null {
+  const msg = text.toLowerCase().trim();
+
+  // Greetings
+  if (/^(hi|hello|hey|hiya|yo|sup|hola|good morning|good afternoon|good evening|morning|afternoon|evening)[\s!.,?]*$/i.test(msg)) {
+    const greetings = [
+      `Hi ${firstName}! How can I help you with Cyprus property today?`,
+      `Hello! Ready to help with property calculations or documents.`,
+      `Hey ${firstName}! Ask me about VAT, transfer fees, or templates.`,
+    ];
+    return greetings[Math.floor(Math.random() * greetings.length)];
+  }
+
+  // How are you
+  if (/how are you|how r u|how're you|hows it going|what's up|whats up|wassup/i.test(msg)) {
+    return `I'm great, thanks! Ready to help with Cyprus real estate. What do you need?`;
+  }
+
+  // Thank you
+  if (/^(thanks|thank you|thx|ty|cheers|appreciated|much appreciated)[\s!.,?]*$/i.test(msg)) {
+    return `You're welcome! Let me know if you need anything else.`;
+  }
+
+  // Goodbye
+  if (/^(bye|goodbye|see you|cya|later|take care|gtg|gotta go)[\s!.,?]*$/i.test(msg)) {
+    return `Goodbye ${firstName}! Come back anytime for property help.`;
+  }
+
+  // Can you help / what can you do
+  if (/can you help|help me|what can you do|what do you do|your capabilities|your features/i.test(msg)) {
+    return `I can help with:
+- VAT calculations for new properties
+- Transfer fees for purchases
+- Capital gains tax estimates
+- 43 document templates
+
+Just ask! Example: "VAT for 350000 apartment 120sqm"`;
+  }
+
+  // Who are you
+  if (/who are you|what are you|your name|introduce yourself/i.test(msg)) {
+    return `I'm SOFIA, Zyprus Property Group's AI assistant. I help with Cyprus property taxes, fees, and documents. Ask me anything!`;
+  }
+
+  // Yes/No/Ok responses
+  if (/^(yes|yeah|yep|yup|ok|okay|sure|alright|got it|understood|k)[\s!.,?]*$/i.test(msg)) {
+    return `Great! What would you like to know about Cyprus property?`;
+  }
+
+  // No/Nope
+  if (/^(no|nope|nah|not really|nothing)[\s!.,?]*$/i.test(msg)) {
+    return `No problem! I'm here if you need property calculations or documents.`;
+  }
+
+  // Sorry
+  if (/^(sorry|my bad|apologies|oops)[\s!.,?]*$/i.test(msg)) {
+    return `No worries! How can I help you?`;
+  }
+
+  // Emoji-only or very short
+  if (msg.length <= 3 && !/\d/.test(msg)) {
+    return `Need help with Cyprus property? Try "transfer fees for 400000" or /help`;
+  }
+
+  // Not a quick response - let AI handle it
+  return null;
 }
 
 /**

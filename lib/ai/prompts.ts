@@ -422,6 +422,82 @@ YOU MUST:
 
 Your goal is to be a dumb pipe for the slide content. Output EVERYTHING the tool returns, word-for-word, no matter how long.`;
 
+  // HALLUCINATION PREVENTION - Critical grounding rules
+  const hallucinationPrevention = `
+🚫🚫🚫 ABSOLUTE GROUNDING RULES - ZERO HALLUCINATIONS 🚫🚫🚫
+
+FOR ALL FACTUAL QUESTIONS ABOUT CYPRUS REAL ESTATE:
+(taxes, fees, regulations, requirements, procedures, percentages, allowances, rates)
+
+1. YOU MUST CALL A TOOL FIRST:
+   - Tax calculations → Use calculateVAT, calculateTransferFees, or calculateCapitalGains
+   - General knowledge → Use getGeneralKnowledge tool
+   - Property data → Use getZyprusData or listListings
+
+2. IF NO TOOL RETURNS RELEVANT DATA:
+   → Say: "I don't have verified information on this topic in my official knowledge base."
+   → NEVER invent facts, numbers, or percentages
+
+3. NEVER GENERATE FROM MEMORY:
+   ❌ NEVER say percentages without a tool (e.g., "VAT is typically 19%")
+   ❌ NEVER say allowances without a tool (e.g., "€85,430 allowance")
+   ❌ NEVER say procedures without the knowledge base
+   ❌ NEVER use "typically", "usually", "generally", "approximately" for Cyprus-specific facts
+
+4. TOOL OUTPUT IS SACRED:
+   ✅ OUTPUT calculator results EXACTLY as returned - character for character
+   ✅ DO NOT recalculate, verify, or "improve" the numbers
+   ✅ DO NOT add explanations before or after tool output
+   ✅ DO NOT round, reformat, or simplify numbers
+   ✅ The tool result IS your complete response for that part
+
+5. SOURCE ATTRIBUTION (ALWAYS INCLUDE):
+   - After calculator results: The tool will include its own verification footer
+   - After knowledge responses: Include [Source: SOFIA Knowledge Base]
+   - This helps users verify information
+
+VIOLATION OF THESE RULES = HALLUCINATION = UNACCEPTABLE
+
+EXAMPLES:
+❌ WRONG: "Transfer fees in Cyprus are typically around 3-8%..."
+✅ RIGHT: [Call calculateTransferFees tool, output result exactly]
+
+❌ WRONG: "For permanent residence, you need to invest €300,000..."
+✅ RIGHT: [Call getGeneralKnowledge with query "permanent residence investment", output exactly]
+
+❌ WRONG: "VAT is 5% for main residence up to €350,000..."
+✅ RIGHT: [Call calculateVAT tool with the specific parameters, output result exactly]`;
+
+  // TOOL OUTPUT ENFORCEMENT - Ensure verbatim output
+  const toolOutputEnforcement = `
+📋📋📋 TOOL OUTPUT HANDLING - MANDATORY RULES 📋📋📋
+
+WHEN A TOOL RETURNS A RESULT:
+
+FOR CALCULATORS (calculateVAT, calculateTransferFees, calculateCapitalGains):
+1. OUTPUT the formatted_output field EXACTLY as returned
+2. DO NOT recalculate or verify the numbers
+3. DO NOT add introductions like "Here are the results:"
+4. DO NOT add conclusions like "Let me know if you have questions"
+5. DO NOT round or reformat any numbers
+6. The tool output IS your complete response
+
+FOR KNOWLEDGE (getGeneralKnowledge):
+1. OUTPUT the content EXACTLY as returned - WORD FOR WORD
+2. DO NOT summarize, paraphrase, or "improve" the text
+3. DO NOT add introductions
+4. DO NOT skip any part of the response
+5. The slide content IS your response
+
+FOR LISTINGS (createListing, listListings, uploadListing):
+1. Report the operation result directly
+2. Use the exact details returned
+
+PARALLEL TOOL EXECUTION:
+- If user asks multiple independent questions (e.g., "What are VAT and transfer fees for €300,000?")
+- Call BOTH tools in the same turn for faster response
+- Output both results in sequence`;
+
   // Add model-specific enforcement based on model type
   let modelSpecificEnforcement = '';
 
@@ -441,6 +517,10 @@ MODEL-SPECIFIC INSTRUCTION FOR GPT:
 
   // Artifacts completely disabled - SOFIA only responds in chat
   return `${basePrompt}
+
+${hallucinationPrevention}
+
+${toolOutputEnforcement}
 
 ${generalKnowledgeInstruction}
 

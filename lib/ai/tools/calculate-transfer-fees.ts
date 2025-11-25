@@ -69,7 +69,9 @@ Calculation Breakdown:
 ${joint_names ? `• Value per person: €${valuePerPerson.toLocaleString()}\n` : ""}• Base transfer fees: €${fees.toLocaleString()}
 • 50% Exemption (resale): -€${exemptionApplied.toLocaleString()}
 
-📊 Total Transfer Fees: €${totalFees.toLocaleString()}`,
+📊 Total Transfer Fees: €${totalFees.toLocaleString()}
+
+[Source: Cyprus Land Registry Transfer Fee Rates | Verified by SOFIA Calculator]`,
       };
     } catch (error) {
       return {

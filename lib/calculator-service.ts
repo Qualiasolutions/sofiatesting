@@ -93,7 +93,9 @@ Calculation Breakdown:
 ${jointNames ? `- Value per person: €${valuePerPerson.toLocaleString()}\n` : ""}- Base transfer fees: €${fees.toLocaleString()}
 - 50% Exemption (resale): -€${exemptionApplied.toLocaleString()}
 
-📊 Total Transfer Fees: €${totalFees.toLocaleString()}`;
+📊 Total Transfer Fees: €${totalFees.toLocaleString()}
+
+[Source: Cyprus Land Registry Transfer Fee Rates | Verified by SOFIA Calculator]`;
 
     return {
       success: true,
@@ -245,7 +247,9 @@ Calculation:
 
 📊 Capital Gains Tax (20%): €${capitalGainsTax.toLocaleString()}
 
-Note: This is an estimate. Consult a tax professional for accurate assessment.`;
+Note: This is an estimate. Consult a tax professional for accurate assessment.
+
+[Source: Cyprus Tax Department CGT Rules | Verified by SOFIA Calculator]`;
 
     return {
       success: true,
@@ -379,7 +383,9 @@ export function calculateVAT(
           },
           formatted_output: `💵 Total VAT: €${vat19.toLocaleString()}
 
-This calculation is based on the new Cyprus VAT reform law.`,
+This calculation is based on the new Cyprus VAT reform law.
+
+[Source: Cyprus Tax Department VAT Circular 11/2023 | Verified by SOFIA Calculator]`,
         },
         execution_time_ms: Date.now() - startTime,
       };
@@ -396,7 +402,9 @@ This calculation is based on the new Cyprus VAT reform law.`,
 
       const formattedOutput = `💵 Total VAT: €${finalVAT.toFixed(2)}
 
-This calculation is based on the new Cyprus VAT reform law.`;
+This calculation is based on the pre-reform Cyprus VAT rules (before May 1, 2023).
+
+[Source: Cyprus Tax Department VAT Guidelines | Verified by SOFIA Calculator]`;
 
       return {
         success: true,
@@ -489,7 +497,9 @@ This calculation is based on the new Cyprus VAT reform law.`;
 
     const formattedOutput = `💵 Total VAT: €${finalVAT.toFixed(2)}
 
-This calculation is based on the new Cyprus VAT reform law.`;
+This calculation is based on the new Cyprus VAT reform law (VAT Circular 11/2023).
+
+[Source: Cyprus Tax Department VAT Circular 11/2023 | Verified by SOFIA Calculator]`;
 
     return {
       success: true,
