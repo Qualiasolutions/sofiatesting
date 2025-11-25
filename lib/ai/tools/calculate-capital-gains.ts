@@ -23,21 +23,9 @@ export const calculateCapitalGainsTool = tool({
       success: true,
       redirect: true,
       calculator_url: "https://www.zyprus.com/capital-gains-calculator",
-      formatted_output: `📈 Capital Gains Tax Calculator
+      formatted_output: `For accurate capital gains tax calculations, please visit:
 
-For accurate capital gains tax calculations, please use the official Zyprus Capital Gains Calculator:
-
-🔗 **https://www.zyprus.com/capital-gains-calculator**
-
-The calculator will help you determine:
-• Your capital gains tax liability
-• Applicable allowances (main residence: €85,430, other: €17,086)
-• Inflation adjustments based on years held
-• Deductible expenses and improvements
-
-Simply enter your property details on the calculator to get an accurate estimate.
-
-[Official Calculator - Zyprus Property Group]`,
+🔗 **https://www.zyprus.com/capital-gains-calculator**`,
     };
   },
 });
