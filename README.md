@@ -1,10 +1,10 @@
 # SOFIA – Zyprus Property Group AI Assistant
 
-SOFIA is a production-grade Next.js 15 application that serves as the AI-powered assistant for Zyprus Property Group. Built with Vercel's AI SDK and AI Gateway, it provides intelligent real estate document drafting, property listing management, and automated support through web and Telegram interfaces.
+SOFIA is a production-grade Next.js 15 application that serves as the AI-powered assistant for Zyprus Property Group. Built with Vercel's AI SDK and Google Gemini API, it provides intelligent real estate document drafting, property listing management, and automated support through web, Telegram, and WhatsApp interfaces.
 
 ## 🚨 Critical Architecture Update
 
-**SOFIA now exclusively uses Vercel AI Gateway for all AI models**. There are no fallback options - AI Gateway configuration is mandatory. This ensures consistent access to premium models (Claude 4.5 Haiku/Sonnet, GPT-4o Mini) with unified billing and observability.
+**SOFIA exclusively uses Google Gemini API** (Gemini 2.5 generation). There are no fallback options - Gemini API configuration is mandatory. Set `GOOGLE_GENERATIVE_AI_API_KEY` or `GEMINI_API_KEY` environment variable.
 
 ## 🚀 Active Development
 
@@ -19,42 +19,44 @@ All contributors and AI agents MUST reference `IMPLEMENTATION_PLAN.md` before st
 ## Core Features
 
 - **AI-Powered Chat Interface** – Secure, access-code gated UI with guest and registered user sessions
-- **Multi-Model Support** – Claude 4.5 Haiku (default), Claude 4.5 Sonnet, GPT-4o Mini via AI Gateway
+- **Multi-Model Support** – Gemini 2.5 Flash (default), Gemini 2.5 Pro, Gemini 2.5 Flash-Lite
 - **Template Engine** – 38 Cyprus real estate templates with smart field extraction
 - **Property Listing Management** – Create, review, and upload listings to Zyprus API with retry logic
 - **Telegram Bot Integration** – Webhook-powered conversational interface for external support
+- **WhatsApp Integration** – Document detection and DOCX generation
 - **Document Generation** – AI-assisted drafting of contracts, agreements, and property descriptions
 - **Cyprus-Specific Tools** – Transfer fee, capital gains tax, and VAT calculators
 
 ## Tech Stack
 
 - **Framework**: Next.js 15.3.0 with App Router
-- **AI Platform**: Vercel AI SDK 5.0 with AI Gateway
-- **Models**: Claude 4.5 Haiku/Sonnet, GPT-4o Mini
-- **Database**: PostgreSQL with Drizzle ORM
+- **AI Platform**: Vercel AI SDK 5.0 with Google Gemini API
+- **Models**: Gemini 2.5 Flash/Pro/Flash-Lite
+- **Database**: Supabase PostgreSQL with Drizzle ORM
 - **Authentication**: NextAuth.js 5.0 Beta
 - **Rate Limiting**: Upstash Redis
 - **Styling**: Tailwind CSS 4.0
-- **Deployment**: Vercel with Edge Functions
+- **Deployment**: Vercel
 
 ## Requirements
 
 - Node.js 20+
 - pnpm 9.x
-- PostgreSQL (Vercel Postgres/Neon recommended)
+- PostgreSQL (Supabase recommended - Session Pooler for Vercel)
 - Redis (Upstash for rate limiting)
-- **Vercel AI Gateway API Key** (REQUIRED - no fallback)
+- **Google Gemini API Key** (REQUIRED - no fallback)
 - Zyprus API OAuth credentials (for property uploads)
 - Telegram Bot Token (optional, for bot integration)
 
 ## Environment Setup
 
 ```bash
-# Required AI Configuration
-AI_GATEWAY_API_KEY=your_vercel_ai_gateway_key  # MANDATORY - no fallback
+# Required AI Configuration (one of these)
+GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_api_key  # MANDATORY - no fallback
+GEMINI_API_KEY=your_gemini_api_key                # Alternative (Vercel convention)
 
-# Database
-POSTGRES_URL=postgresql://...
+# Database (use Session Pooler for Vercel)
+POSTGRES_URL=postgresql://postgres.PROJECT_ID:PASSWORD@aws-1-eu-west-3.pooler.supabase.com:5432/postgres
 
 # Authentication
 AUTH_SECRET=your_nextauth_secret
@@ -86,7 +88,7 @@ pnpm install
 
 # Set up environment
 cp .env.example .env.local
-# Edit .env.local with your credentials (AI_GATEWAY_API_KEY is mandatory!)
+# Edit .env.local with your credentials (GOOGLE_GENERATIVE_AI_API_KEY is mandatory!)
 
 # Initialize database
 pnpm db:generate
@@ -100,15 +102,15 @@ Visit `http://localhost:3000` and enter the access code to begin.
 
 ## Model Configuration
 
-SOFIA uses these models via AI Gateway (see `lib/ai/providers.ts`):
+SOFIA uses Google Gemini 2.5 models (see `lib/ai/providers.ts`):
 
-| Model | ID | Use Case | Cost |
-|-------|----|----|------|
-| Claude 4.5 Haiku | `anthropic/claude-haiku-4.5` | Default chat, titles, artifacts | $1.00/M input, $5.00/M output |
-| Claude 4.5 Sonnet | `anthropic/claude-sonnet-4.5` | Premium quality responses | $3.00/M input, $15.00/M output |
-| GPT-4o Mini | `openai/gpt-4o-mini` | Ultra-budget option | $0.15/M input, $0.60/M output |
+| Model ID | Actual Model | Use Case |
+|----------|-------------|----------|
+| `chat-model` | Gemini 2.5 Flash | Default - best price-performance with thinking |
+| `chat-model-pro` | Gemini 2.5 Pro | Complex reasoning, extended context |
+| `chat-model-flash-lite` | Gemini 2.5 Flash-Lite | Ultra-fast, cost-efficient |
 
-Claude Haiku 4.5 is the default for optimal price/performance balance.
+Gemini 2.5 Flash is the default for optimal price/performance balance.
 
 ## Development Commands
 
@@ -159,8 +161,9 @@ app/
 
 lib/
 ├── ai/
-│   ├── providers.ts  # AI Gateway configuration
+│   ├── providers.ts  # Gemini API configuration
 │   ├── prompts.ts    # System prompts
+│   ├── knowledge/    # Cyprus real estate knowledge base
 │   └── tools/        # Cyprus real estate tools
 ├── db/
 │   ├── schema.ts     # Drizzle schema
@@ -197,8 +200,8 @@ pnpm i -g vercel
 vercel --prod
 
 # Required environment variables in Vercel dashboard:
-# - AI_GATEWAY_API_KEY (mandatory)
-# - POSTGRES_URL
+# - GOOGLE_GENERATIVE_AI_API_KEY or GEMINI_API_KEY (mandatory)
+# - POSTGRES_URL (Session Pooler format for IPv4)
 # - AUTH_SECRET
 # - All other production credentials
 ```
@@ -210,11 +213,11 @@ vercel --prod
 
 ## Architecture Highlights
 
-### AI Gateway Integration
-- **No Fallbacks**: AI Gateway is mandatory - app won't function without it
-- **Unified Access**: All models accessed through `@ai-sdk/gateway`
-- **Consistent Pricing**: Centralized billing through Vercel
-- **Enhanced Observability**: Built-in monitoring and analytics
+### Google Gemini API Integration
+- **No Fallbacks**: Gemini API key is mandatory - app won't function without it
+- **Unified Access**: All models accessed through `@ai-sdk/google`
+- **Model Selection**: Users can choose between Flash, Pro, and Flash-Lite models
+- **Knowledge Embedding**: Cyprus real estate knowledge embedded in system prompts (24h cache)
 
 ### Authentication Flow
 1. **Access Code Gate**: All pages require `qualia-access=granted` cookie
@@ -233,13 +236,14 @@ vercel --prod
 
 ### Common Issues
 
-**"AI Gateway requires a valid credit card"**
-- Add payment method to your Vercel account
-- AI Gateway requires active billing
+**503 Errors / AI not responding**
+- Verify `GOOGLE_GENERATIVE_AI_API_KEY` or `GEMINI_API_KEY` is set in Vercel
+- Check Google AI Studio for quota limits: https://aistudio.google.com
 
-**"Invalid prompt: system must be a string"**
-- System prompts must be strings, not arrays
-- Check `lib/ai/prompts.ts` for proper format
+**Database connection fails on Vercel**
+- Vercel is IPv4-only - use Session Pooler connection format
+- NOT: `db.PROJECT_ID.supabase.co` (will fail with DNS errors)
+- USE: `aws-1-eu-west-3.pooler.supabase.com`
 
 **Rate limiting errors**
 - Guest users have lower message quotas
