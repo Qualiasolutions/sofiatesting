@@ -18,10 +18,10 @@ type CircuitBreakerOptions = {
 };
 
 const DEFAULT_OPTIONS: Required<CircuitBreakerOptions> = {
-  timeout: 10000, // 10 seconds
+  timeout: 10_000, // 10 seconds
   errorThresholdPercentage: 50, // 50% failure rate trips circuit
-  resetTimeout: 30000, // Try again after 30 seconds
-  rollingCountTimeout: 10000, // 10 second rolling window
+  resetTimeout: 30_000, // Try again after 30 seconds
+  rollingCountTimeout: 10_000, // 10 second rolling window
   rollingCountBuckets: 10, // 10 buckets (1 second each)
   volumeThreshold: 5, // Need at least 5 requests to trip
   name: "anonymous",
@@ -42,7 +42,9 @@ const DEFAULT_OPTIONS: Required<CircuitBreakerOptions> = {
  *
  * const result = await breaker.fire();
  */
-export function createCircuitBreaker<T extends (...args: any[]) => Promise<any>>(
+export function createCircuitBreaker<
+  T extends (...args: any[]) => Promise<any>,
+>(
   fn: T,
   options?: CircuitBreakerOptions
 ): CircuitBreaker<Parameters<T>, ReturnType<T>> {
@@ -124,5 +126,7 @@ export function getCircuitBreakerStats(breaker: CircuitBreaker<any, any>) {
  */
 export function resetCircuitBreaker(breaker: CircuitBreaker<any, any>) {
   breaker.close();
-  console.log(`[CircuitBreaker:${breaker.name}] Manually reset to CLOSED state`);
+  console.log(
+    `[CircuitBreaker:${breaker.name}] Manually reset to CLOSED state`
+  );
 }

@@ -142,7 +142,7 @@ export async function handleTelegramMessage(
     let result;
     let retryCount = 0;
     const MAX_RETRIES = 2;
-    const STREAM_TIMEOUT_MS = 45000; // 45 seconds
+    const STREAM_TIMEOUT_MS = 45_000; // 45 seconds
 
     while (retryCount <= MAX_RETRIES) {
       try {
@@ -343,32 +343,52 @@ function getQuickResponse(text: string, firstName: string): string | null {
   const msg = text.toLowerCase().trim();
 
   // Greetings
-  if (/^(hi|hello|hey|hiya|yo|sup|hola|good morning|good afternoon|good evening|morning|afternoon|evening)[\s!.,?]*$/i.test(msg)) {
+  if (
+    /^(hi|hello|hey|hiya|yo|sup|hola|good morning|good afternoon|good evening|morning|afternoon|evening)[\s!.,?]*$/i.test(
+      msg
+    )
+  ) {
     const greetings = [
       `Hi ${firstName}! How can I help you with Cyprus property today?`,
-      `Hello! Ready to help with property calculations or documents.`,
+      "Hello! Ready to help with property calculations or documents.",
       `Hey ${firstName}! Ask me about VAT, transfer fees, or templates.`,
     ];
     return greetings[Math.floor(Math.random() * greetings.length)];
   }
 
   // How are you
-  if (/how are you|how r u|how're you|hows it going|what's up|whats up|wassup/i.test(msg)) {
+  if (
+    /how are you|how r u|how're you|hows it going|what's up|whats up|wassup/i.test(
+      msg
+    )
+  ) {
     return `I'm great, thanks! Ready to help with Cyprus real estate. What do you need?`;
   }
 
   // Thank you
-  if (/^(thanks|thank you|thx|ty|cheers|appreciated|much appreciated)[\s!.,?]*$/i.test(msg)) {
+  if (
+    /^(thanks|thank you|thx|ty|cheers|appreciated|much appreciated)[\s!.,?]*$/i.test(
+      msg
+    )
+  ) {
     return `You're welcome! Let me know if you need anything else.`;
   }
 
   // Goodbye
-  if (/^(bye|goodbye|see you|cya|later|take care|gtg|gotta go)[\s!.,?]*$/i.test(msg)) {
+  if (
+    /^(bye|goodbye|see you|cya|later|take care|gtg|gotta go)[\s!.,?]*$/i.test(
+      msg
+    )
+  ) {
     return `Goodbye ${firstName}! Come back anytime for property help.`;
   }
 
   // Can you help / what can you do
-  if (/can you help|help me|what can you do|what do you do|your capabilities|your features/i.test(msg)) {
+  if (
+    /can you help|help me|what can you do|what do you do|your capabilities|your features/i.test(
+      msg
+    )
+  ) {
     return `I can help with:
 - VAT calculations for new properties
 - Transfer fees for purchases
@@ -384,8 +404,12 @@ Just ask! Example: "VAT for 350000 apartment 120sqm"`;
   }
 
   // Yes/No/Ok responses
-  if (/^(yes|yeah|yep|yup|ok|okay|sure|alright|got it|understood|k)[\s!.,?]*$/i.test(msg)) {
-    return `Great! What would you like to know about Cyprus property?`;
+  if (
+    /^(yes|yeah|yep|yup|ok|okay|sure|alright|got it|understood|k)[\s!.,?]*$/i.test(
+      msg
+    )
+  ) {
+    return "Great! What would you like to know about Cyprus property?";
   }
 
   // No/Nope
@@ -395,7 +419,7 @@ Just ask! Example: "VAT for 350000 apartment 120sqm"`;
 
   // Sorry
   if (/^(sorry|my bad|apologies|oops)[\s!.,?]*$/i.test(msg)) {
-    return `No worries! How can I help you?`;
+    return "No worries! How can I help you?";
   }
 
   // Emoji-only or very short

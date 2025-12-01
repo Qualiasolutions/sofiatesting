@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle2, MessageSquare, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, CheckCircle2, XCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export async function TelegramStatus() {
   const hasTelegramToken = !!process.env.TELEGRAM_BOT_TOKEN;
@@ -54,22 +54,19 @@ export async function TelegramStatus() {
         )}
       </CardHeader>
       <CardContent className="space-y-4">
-        {!hasTelegramToken ? (
-          <p className="text-sm text-muted-foreground">
-            Telegram bot token not configured. Set TELEGRAM_BOT_TOKEN in
-            environment variables.
-          </p>
-        ) : (
+        {hasTelegramToken ? (
           <>
             {botInfo && (
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold">Bot Information</h4>
+                <h4 className="font-semibold text-sm">Bot Information</h4>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="text-muted-foreground">Username:</span>
                   <span className="font-mono">@{botInfo.username}</span>
                   <span className="text-muted-foreground">Name:</span>
                   <span>{botInfo.first_name}</span>
-                  <span className="text-muted-foreground">Can Join Groups:</span>
+                  <span className="text-muted-foreground">
+                    Can Join Groups:
+                  </span>
                   <span>{botInfo.can_join_groups ? "Yes" : "No"}</span>
                 </div>
               </div>
@@ -77,21 +74,25 @@ export async function TelegramStatus() {
 
             {webhookInfo && (
               <div className="space-y-2 border-t pt-4">
-                <h4 className="text-sm font-semibold">Webhook Status</h4>
+                <h4 className="font-semibold text-sm">Webhook Status</h4>
                 <div className="grid gap-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Webhook URL:</span>
-                    <Badge variant={webhookInfo.url ? "default" : "destructive"}>
+                    <Badge
+                      variant={webhookInfo.url ? "default" : "destructive"}
+                    >
                       {webhookInfo.url ? "Set" : "Not Set"}
                     </Badge>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Pending Updates:</span>
+                    <span className="text-muted-foreground">
+                      Pending Updates:
+                    </span>
                     <span>{webhookInfo.pending_update_count || 0}</span>
                   </div>
                   {webhookInfo.last_error_message && (
                     <div className="rounded bg-destructive/10 p-2">
-                      <p className="text-xs text-destructive">
+                      <p className="text-destructive text-xs">
                         {webhookInfo.last_error_message}
                       </p>
                     </div>
@@ -100,6 +101,11 @@ export async function TelegramStatus() {
               </div>
             )}
           </>
+        ) : (
+          <p className="text-muted-foreground text-sm">
+            Telegram bot token not configured. Set TELEGRAM_BOT_TOKEN in
+            environment variables.
+          </p>
         )}
       </CardContent>
     </Card>

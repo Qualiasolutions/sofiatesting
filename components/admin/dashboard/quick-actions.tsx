@@ -1,16 +1,16 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
-  Database,
-  RefreshCw,
-  FileText,
-  Settings,
   Activity,
+  Database,
+  FileText,
   MessageSquare,
+  RefreshCw,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function QuickActionsCard() {
   const actions = [
@@ -56,11 +56,11 @@ export function QuickActionsCard() {
         <div className="grid grid-cols-2 gap-3">
           {actions.map((action) => (
             <Button
-              key={action.label}
-              variant="outline"
-              className="justify-start"
               asChild={action.href !== "#"}
+              className="justify-start"
+              key={action.label}
               onClick={action.onClick}
+              variant="outline"
             >
               {action.href !== "#" ? (
                 <Link href={action.href}>

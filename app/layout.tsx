@@ -1,8 +1,8 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Analytics } from "@vercel/analytics/next";
 
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
@@ -52,6 +52,8 @@ const THEME_COLOR_SCRIPT = `\
   updateThemeColor();
 })();`;
 
+import { UniversalNavigation } from "@/components/universal-navigation";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -83,6 +85,7 @@ export default function RootLayout({
           enableSystem
         >
           <Toaster position="top-center" />
+          <UniversalNavigation />
           <SessionProvider>{children}</SessionProvider>
           <Analytics />
         </ThemeProvider>

@@ -1,8 +1,7 @@
-import { db } from "@/lib/db/client";
-import { agentExecutionLog, user } from "@/lib/db/schema";
+import { formatDistanceToNow } from "date-fns";
 import { desc, eq } from "drizzle-orm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -11,7 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDistanceToNow } from "date-fns";
+import { db } from "@/lib/db/client";
+import { agentExecutionLog, user } from "@/lib/db/schema";
 
 export async function AgentExecutionTable() {
   const executions = await db
@@ -36,14 +36,16 @@ export async function AgentExecutionTable() {
     const variant = success ? "default" : "destructive";
 
     return (
-      <Badge variant={variant} className="text-xs">
+      <Badge className="text-xs" variant={variant}>
         {success ? "success" : "error"}
       </Badge>
     );
   };
 
   const formatTokens = (tokens: number | null) => {
-    if (tokens === null) return "N/A";
+    if (tokens === null) {
+      return "N/A";
+    }
     return tokens.toLocaleString();
   };
 
@@ -54,7 +56,7 @@ export async function AgentExecutionTable() {
       </CardHeader>
       <CardContent>
         {executions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             No agent executions logged yet
           </p>
         ) : (

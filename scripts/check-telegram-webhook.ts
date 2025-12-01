@@ -4,7 +4,9 @@
  */
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const WEBHOOK_URL = process.env.WEBHOOK_URL || "https://sofiatesting.vercel.app/api/telegram/webhook";
+const WEBHOOK_URL =
+  process.env.WEBHOOK_URL ||
+  "https://sofiatesting.vercel.app/api/telegram/webhook";
 
 if (!TELEGRAM_BOT_TOKEN) {
   console.error("❌ TELEGRAM_BOT_TOKEN environment variable is not set");
@@ -32,7 +34,10 @@ async function checkWebhook() {
     console.log("  URL:", info.url || "(not set)");
     console.log("  Pending updates:", info.pending_update_count);
     console.log("  Max connections:", info.max_connections);
-    console.log("  Allowed updates:", info.allowed_updates?.join(", ") || "all");
+    console.log(
+      "  Allowed updates:",
+      info.allowed_updates?.join(", ") || "all"
+    );
 
     if (info.last_error_date) {
       const errorDate = new Date(info.last_error_date * 1000);
@@ -42,7 +47,9 @@ async function checkWebhook() {
     }
 
     if (info.last_synchronization_error_date) {
-      const syncErrorDate = new Date(info.last_synchronization_error_date * 1000);
+      const syncErrorDate = new Date(
+        info.last_synchronization_error_date * 1000
+      );
       console.log("\n⚠️  Last Synchronization Error:");
       console.log("  Date:", syncErrorDate.toISOString());
     }
@@ -51,15 +58,16 @@ async function checkWebhook() {
     const expectedUrl = WEBHOOK_URL;
     if (info.url === expectedUrl) {
       console.log("\n✅ Webhook is correctly configured!");
-    } else if (!info.url) {
-      console.log("\n⚠️  Webhook is NOT set. Run with --set flag to configure it.");
-    } else {
-      console.log(`\n⚠️  Webhook URL mismatch:`);
+    } else if (info.url) {
+      console.log("\n⚠️  Webhook URL mismatch:");
       console.log(`  Expected: ${expectedUrl}`);
       console.log(`  Current:  ${info.url}`);
       console.log("\n  Run with --set flag to update it.");
+    } else {
+      console.log(
+        "\n⚠️  Webhook is NOT set. Run with --set flag to configure it."
+      );
     }
-
   } catch (error) {
     console.error("❌ Error checking webhook:", error);
   }
@@ -93,7 +101,6 @@ async function setWebhook() {
     } else {
       console.error("❌ Failed to set webhook:", data);
     }
-
   } catch (error) {
     console.error("❌ Error setting webhook:", error);
   }

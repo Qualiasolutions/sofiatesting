@@ -5,11 +5,11 @@ config({ path: ".env.local" });
 
 // Mock listing WITH images (this should work!)
 const mockListing = {
-  id: "test-with-images-" + Date.now(),
+  id: `test-with-images-${Date.now()}`,
   title: "Luxury Sea View Apartment - Limassol",
   description:
     "Stunning 2-bedroom apartment in prime Limassol location with breathtaking Mediterranean sea views. Features modern kitchen, spacious living area, large balcony. Walking distance to beach, restaurants, and shops. Perfect for families or investment.",
-  price: 275000,
+  price: 275_000,
   currency: "EUR",
   bedrooms: 2,
   bathrooms: 1,
@@ -64,16 +64,21 @@ async function testUploadWithImages() {
     console.log("   ✓ All required fields validated");
     console.log("\n🚀 SOFIA IS READY FOR PRODUCTION DEPLOYMENT!");
     console.log("\n📍 Verify on Zyprus:");
-    console.log(`   API: https://dev9.zyprus.com/jsonapi/node/property/${result.listingId}`);
+    console.log(
+      `   API: https://dev9.zyprus.com/jsonapi/node/property/${result.listingId}`
+    );
     console.log(`   Web: ${result.listingUrl}`);
     console.log(`   Check: field_ai_state="draft" and status=false`);
-
   } catch (error: any) {
     console.error("\n❌ UPLOAD FAILED (This should NOT happen!)\n");
     console.error("═══════════════════════════════════════");
     console.error("Error:", error.message);
-    if (error.cause) console.error("Cause:", error.cause);
-    if (error.statusCode) console.error("Status:", error.statusCode);
+    if (error.cause) {
+      console.error("Cause:", error.cause);
+    }
+    if (error.statusCode) {
+      console.error("Status:", error.statusCode);
+    }
 
     // Check for specific errors
     if (error.message?.includes("field_gallery_")) {
@@ -82,7 +87,9 @@ async function testUploadWithImages() {
     }
 
     if (error.message?.includes("circuit breaker")) {
-      console.error("\n⚠️  Circuit breaker is open from previous failed attempts");
+      console.error(
+        "\n⚠️  Circuit breaker is open from previous failed attempts"
+      );
       console.error("   Wait 30 seconds and try again, or restart the test");
     }
 

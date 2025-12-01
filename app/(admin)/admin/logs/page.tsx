@@ -1,14 +1,13 @@
-import { Suspense } from "react";
-
 // Prevent static generation - this page needs real-time data
 export const dynamic = "force-dynamic";
 
-import { db } from "@/lib/db/client";
-import { agentExecutionLog, zyprusAgent } from "@/lib/db/schema";
-import { desc, eq, and, like, sql } from "drizzle-orm";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { format } from "date-fns";
+import { and, desc, eq, sql } from "drizzle-orm";
+import { Download, Filter, Search } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -17,21 +16,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Download, CheckCircle2, XCircle, Clock } from "lucide-react";
-import { format } from "date-fns";
-import { redirect } from "next/navigation";
+import { db } from "@/lib/db/client";
+import { agentExecutionLog } from "@/lib/db/schema";
 
-interface PageProps {
+type PageProps = {
   searchParams: Promise<{
     page?: string;
     agentType?: string;
     status?: string;
     search?: string;
   }>;
-}
+};
 
-async function getLogs(searchParams: { page?: string; agentType?: string; status?: string; search?: string }) {
+async function getLogs(searchParams: {
+  page?: string;
+  agentType?: string;
+  status?: string;
+  search?: string;
+}) {
   const page = Number(searchParams.page) || 1;
   const limit = 50;
   const offset = (page - 1) * limit;
@@ -41,7 +43,9 @@ async function getLogs(searchParams: { page?: string; agentType?: string; status
     conditions.push(eq(agentExecutionLog.agentType, searchParams.agentType));
   }
   if (searchParams.status) {
-    conditions.push(eq(agentExecutionLog.success, searchParams.status === "success"));
+    conditions.push(
+      eq(agentExecutionLog.success, searchParams.status === "success")
+    );
   }
   // Note: search implementation would depend on what we're searching (e.g., action name)
 
@@ -85,7 +89,7 @@ export default async function LogsPage({ searchParams }: PageProps) {
     <div className="space-y-6 p-8 pt-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Agent Logs</h2>
+          <h2 className="font-bold text-3xl tracking-tight">Agent Logs</h2>
           <p className="text-muted-foreground">
             Detailed execution logs of all agent interactions.
           </p>
@@ -104,10 +108,10 @@ export default async function LogsPage({ searchParams }: PageProps) {
             <CardTitle>Execution History</CardTitle>
             <div className="flex items-center gap-2">
               <div className="relative w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search actions..." className="pl-8" />
+                <Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
+                <Input className="pl-8" placeholder="Search actions..." />
               </div>
-              <Button variant="outline" size="icon">
+              <Button size="icon" variant="outline">
                 <Filter className="h-4 w-4" />
               </Button>
             </div>
@@ -131,21 +135,29 @@ export default async function LogsPage({ searchParams }: PageProps) {
               <TableBody>
                 {data.logs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <TableCell
+                      className="py-8 text-center text-muted-foreground"
+                      colSpan={8}
+                    >
                       No logs found.
                     </TableCell>
                   </TableRow>
                 ) : (
                   data.logs.map((log) => (
-                    <TableRow key={log.id} className="hover:bg-muted/50 cursor-pointer">
+                    <TableRow
+                      className="cursor-pointer hover:bg-muted/50"
+                      key={log.id}
+                    >
                       <TableCell className="font-mono text-xs">
                         {format(new Date(log.timestamp), "yyyy-MM-dd HH:mm:ss")}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">{log.agentType}</Badge>
                       </TableCell>
-                      <TableCell className="font-medium">{log.action}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
+                      <TableCell className="font-medium">
+                        {log.action}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-xs">
                         {log.modelUsed || "-"}
                       </TableCell>
                       <TableCell className="text-xs">
@@ -155,11 +167,16 @@ export default async function LogsPage({ searchParams }: PageProps) {
                         {log.tokensUsed?.toLocaleString() || "-"}
                       </TableCell>
                       <TableCell className="text-xs">
-                        {log.costUsd ? `$${Number(log.costUsd).toFixed(6)}` : "-"}
+                        {log.costUsd
+                          ? `$${Number(log.costUsd).toFixed(6)}`
+                          : "-"}
                       </TableCell>
                       <TableCell>
                         {log.success ? (
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                          <Badge
+                            className="border-green-200 bg-green-50 text-green-700"
+                            variant="outline"
+                          >
                             Success
                           </Badge>
                         ) : (
@@ -172,16 +189,20 @@ export default async function LogsPage({ searchParams }: PageProps) {
               </TableBody>
             </Table>
           </div>
-          
+
           {/* Simple Pagination */}
           <div className="flex items-center justify-end space-x-2 py-4">
-            <Button variant="outline" size="sm" disabled={data.page <= 1}>
+            <Button disabled={data.page <= 1} size="sm" variant="outline">
               Previous
             </Button>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-muted-foreground text-sm">
               Page {data.page} of {data.totalPages}
             </div>
-            <Button variant="outline" size="sm" disabled={data.page >= data.totalPages}>
+            <Button
+              disabled={data.page >= data.totalPages}
+              size="sm"
+              variant="outline"
+            >
               Next
             </Button>
           </div>

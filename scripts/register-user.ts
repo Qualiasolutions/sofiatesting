@@ -2,11 +2,11 @@
  * Register a new user in the database
  */
 
+import { genSaltSync, hashSync } from "bcrypt-ts";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { genSaltSync, hashSync } from "bcrypt-ts";
 
-async function registerUser(email: string, password: string, name?: string) {
+async function registerUser(email: string, password: string, _name?: string) {
   const connectionString = process.env.POSTGRES_URL;
 
   if (!connectionString) {
@@ -21,7 +21,8 @@ async function registerUser(email: string, password: string, name?: string) {
     console.log(`🔍 Checking if user ${email} exists...`);
 
     // Check if user already exists
-    const existingUsers: any[] = await client`SELECT * FROM "User" WHERE email = ${email} LIMIT 1`;
+    const existingUsers: any[] =
+      await client`SELECT * FROM "User" WHERE email = ${email} LIMIT 1`;
 
     if (existingUsers.length > 0) {
       console.log(`⚠️  User ${email} already exists!`);
@@ -64,13 +65,13 @@ async function registerUser(email: string, password: string, name?: string) {
     const newUser = result[0];
 
     console.log("✅ User created successfully!");
-    console.log(`\n📋 User Details:`);
+    console.log("\n📋 User Details:");
     console.log(`   Email: ${newUser.email}`);
     console.log(`   User ID: ${newUser.id}`);
     console.log(`   Created: ${newUser.createdAt}`);
-    console.log(`\n🔗 You can now login at:`);
-    console.log(`   http://localhost:3000/login (development)`);
-    console.log(`   https://sofiatesting.vercel.app/login (production)`);
+    console.log("\n🔗 You can now login at:");
+    console.log("   http://localhost:3000/login (development)");
+    console.log("   https://sofiatesting.vercel.app/login (production)");
 
     await client.end();
     process.exit(0);
@@ -87,7 +88,9 @@ const password = process.argv[3];
 if (!email || !password) {
   console.error("❌ Please provide email and password");
   console.log("\nUsage: npx tsx scripts/register-user.ts <email> <password>");
-  console.log("Example: npx tsx scripts/register-user.ts listing@zyprus.com 123123123");
+  console.log(
+    "Example: npx tsx scripts/register-user.ts listing@zyprus.com 123123123"
+  );
   process.exit(1);
 }
 

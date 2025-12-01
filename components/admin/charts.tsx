@@ -1,15 +1,13 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import {
   Area,
   AreaChart,
   Bar,
   BarChart,
-  CartesianGrid,
   Cell,
   Legend,
-  Line,
-  LineChart,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -17,15 +15,20 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTheme } from "next-themes";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
-interface ChartProps {
+type ChartProps = {
   data: any[];
   title?: string;
   description?: string;
   className?: string;
-}
+};
 
 // Custom Tooltip
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -34,7 +37,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <div className="rounded-lg border bg-background p-2 shadow-sm">
         <div className="grid grid-cols-2 gap-2">
           <div className="flex flex-col">
-            <span className="text-[0.70rem] uppercase text-muted-foreground">
+            <span className="text-[0.70rem] text-muted-foreground uppercase">
               {label}
             </span>
             <span className="font-bold text-muted-foreground">
@@ -48,9 +51,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export function OverviewChart({ data, title, description, className }: ChartProps) {
+export function OverviewChart({
+  data,
+  title,
+  description,
+  className,
+}: ChartProps) {
   const { theme } = useTheme();
-  
+
   return (
     <Card className={className}>
       <CardHeader>
@@ -58,35 +66,35 @@ export function OverviewChart({ data, title, description, className }: ChartProp
         <CardDescription>{description || "Activity over time"}</CardDescription>
       </CardHeader>
       <CardContent className="pl-2">
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer height={350} width="100%">
           <AreaChart data={data}>
             <defs>
-              <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+              <linearGradient id="colorTotal" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#8884d8" stopOpacity={0} />
               </linearGradient>
             </defs>
             <XAxis
-              dataKey="name"
-              stroke="#888888"
-              fontSize={12}
-              tickLine={false}
               axisLine={false}
+              dataKey="name"
+              fontSize={12}
+              stroke="#888888"
+              tickLine={false}
             />
             <YAxis
-              stroke="#888888"
-              fontSize={12}
-              tickLine={false}
               axisLine={false}
+              fontSize={12}
+              stroke="#888888"
               tickFormatter={(value) => `${value}`}
+              tickLine={false}
             />
             <Tooltip content={<CustomTooltip />} />
             <Area
-              type="monotone"
               dataKey="total"
-              stroke="#8884d8"
-              fillOpacity={1}
               fill="url(#colorTotal)"
+              fillOpacity={1}
+              stroke="#8884d8"
+              type="monotone"
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -95,33 +103,40 @@ export function OverviewChart({ data, title, description, className }: ChartProp
   );
 }
 
-export function BarStatsChart({ data, title, description, className }: ChartProps) {
+export function BarStatsChart({
+  data,
+  title,
+  description,
+  className,
+}: ChartProps) {
   return (
     <Card className={className}>
       <CardHeader>
         <CardTitle>{title || "Statistics"}</CardTitle>
-        <CardDescription>{description || "Categorical breakdown"}</CardDescription>
+        <CardDescription>
+          {description || "Categorical breakdown"}
+        </CardDescription>
       </CardHeader>
       <CardContent className="pl-2">
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer height={350} width="100%">
           <BarChart data={data}>
             <XAxis
-              dataKey="name"
-              stroke="#888888"
-              fontSize={12}
-              tickLine={false}
               axisLine={false}
+              dataKey="name"
+              fontSize={12}
+              stroke="#888888"
+              tickLine={false}
             />
             <YAxis
-              stroke="#888888"
-              fontSize={12}
-              tickLine={false}
               axisLine={false}
+              fontSize={12}
+              stroke="#888888"
               tickFormatter={(value) => `${value}`}
+              tickLine={false}
             />
             <Tooltip
-              cursor={{ fill: "transparent" }}
               content={<CustomTooltip />}
+              cursor={{ fill: "transparent" }}
             />
             <Bar dataKey="total" fill="#adfa1d" radius={[4, 4, 0, 0]} />
           </BarChart>
@@ -133,7 +148,12 @@ export function BarStatsChart({ data, title, description, className }: ChartProp
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
-export function DistributionChart({ data, title, description, className }: ChartProps) {
+export function DistributionChart({
+  data,
+  title,
+  description,
+  className,
+}: ChartProps) {
   return (
     <Card className={className}>
       <CardHeader>
@@ -141,20 +161,23 @@ export function DistributionChart({ data, title, description, className }: Chart
         <CardDescription>{description || "Proportional view"}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer height={300} width="100%">
           <PieChart>
             <Pie
-              data={data}
               cx="50%"
               cy="50%"
+              data={data}
+              dataKey="value"
+              fill="#8884d8"
               innerRadius={60}
               outerRadius={80}
-              fill="#8884d8"
               paddingAngle={5}
-              dataKey="value"
             >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              {data.map((_entry, index) => (
+                <Cell
+                  fill={COLORS[index % COLORS.length]}
+                  key={`cell-${index}`}
+                />
               ))}
             </Pie>
             <Tooltip />

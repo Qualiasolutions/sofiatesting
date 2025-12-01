@@ -4,13 +4,13 @@
  */
 
 // WaSender Webhook Message Types
-export interface WaSenderWebhookMessage {
+export type WaSenderWebhookMessage = {
   event: "message" | "status" | "connection";
   instanceId: string;
   data: WaSenderMessageData | WaSenderStatusData | WaSenderConnectionData;
-}
+};
 
-export interface WaSenderMessageData {
+export type WaSenderMessageData = {
   id: string;
   from: string;
   to: string;
@@ -23,29 +23,29 @@ export interface WaSenderMessageData {
     id: string;
     name: string;
   };
-}
+};
 
-export interface WaSenderStatusData {
+export type WaSenderStatusData = {
   id: string;
   status: "sent" | "delivered" | "read" | "failed";
   timestamp: number;
-}
+};
 
-export interface WaSenderConnectionData {
+export type WaSenderConnectionData = {
   status: "connected" | "disconnected" | "connecting";
   instanceId: string;
-}
+};
 
 // Document detection result
-export interface DocumentDetectionResult {
+export type DocumentDetectionResult = {
   isForm: boolean;
   templateType: string | null;
   documentName: string;
-}
+};
 
 // DOCX generation options
-export interface DocxGenerationOptions {
+export type DocxGenerationOptions = {
   content: string;
   filename?: string;
   preserveBold?: boolean;
-}
+};

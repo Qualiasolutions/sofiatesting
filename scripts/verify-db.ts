@@ -1,4 +1,5 @@
 console.log("Starting verification script...");
+
 import { config } from "dotenv";
 import postgres from "postgres";
 
@@ -9,7 +10,10 @@ const run = async () => {
     throw new Error("POSTGRES_URL is not defined");
   }
 
-  console.log("Connecting to:", process.env.POSTGRES_URL.replace(/:[^:]*@/, ":****@"));
+  console.log(
+    "Connecting to:",
+    process.env.POSTGRES_URL.replace(/:[^:]*@/, ":****@")
+  );
   const sql = postgres(process.env.POSTGRES_URL);
 
   try {

@@ -92,13 +92,27 @@ export function shouldSendAsDocument(response: string): boolean {
  */
 export function getDocumentType(response: string): string {
   // Check specific patterns in priority order
-  if (/Seller\s*Registration/i.test(response)) return "SellerRegistration";
-  if (/Bank\s*(Property|Land)\s*Registration/i.test(response)) return "BankRegistration";
-  if (/Developer\s*Registration/i.test(response)) return "DeveloperRegistration";
-  if (/Viewing\s*Form/i.test(response)) return "ViewingForm";
-  if (/Property\s*Viewing/i.test(response)) return "ViewingForm";
-  if (/Reservation/i.test(response)) return "Reservation";
-  if (/Marketing\s*Agreement/i.test(response)) return "MarketingAgreement";
+  if (/Seller\s*Registration/i.test(response)) {
+    return "SellerRegistration";
+  }
+  if (/Bank\s*(Property|Land)\s*Registration/i.test(response)) {
+    return "BankRegistration";
+  }
+  if (/Developer\s*Registration/i.test(response)) {
+    return "DeveloperRegistration";
+  }
+  if (/Viewing\s*Form/i.test(response)) {
+    return "ViewingForm";
+  }
+  if (/Property\s*Viewing/i.test(response)) {
+    return "ViewingForm";
+  }
+  if (/Reservation/i.test(response)) {
+    return "Reservation";
+  }
+  if (/Marketing\s*Agreement/i.test(response)) {
+    return "MarketingAgreement";
+  }
 
   // Default fallback
   return "Document";

@@ -18,8 +18,8 @@ import type { VisibilityType } from "@/components/visibility-selector";
 import { ChatSDKError } from "../errors";
 import type { AppUsage } from "../usage";
 import { generateUUID } from "../utils";
+import { db } from "./client";
 import {
-  type Chat,
   chat,
   type DBMessage,
   document,
@@ -35,7 +35,6 @@ import {
   vote,
 } from "./schema";
 import { generateHashedPassword } from "./utils";
-import { db } from "./client";
 
 // Optionally, if not using email/pass login, you can
 // use the Drizzle adapter for Auth.js / NextAuth

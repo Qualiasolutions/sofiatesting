@@ -12,7 +12,7 @@ async function testZyprusAPI() {
   console.log("API URL:", process.env.ZYPRUS_API_URL);
   console.log(
     "Client ID:",
-    process.env.ZYPRUS_CLIENT_ID?.substring(0, 15) + "...\n"
+    `${process.env.ZYPRUS_CLIENT_ID?.substring(0, 15)}...\n`
   );
 
   try {
@@ -79,8 +79,12 @@ async function testZyprusAPI() {
   } catch (error: any) {
     console.error("\n❌ ZYPRUS API TEST FAILED");
     console.error("Error:", error.message);
-    if (error.code) console.error("Code:", error.code);
-    if (error.statusCode) console.error("Status:", error.statusCode);
+    if (error.code) {
+      console.error("Code:", error.code);
+    }
+    if (error.statusCode) {
+      console.error("Status:", error.statusCode);
+    }
     process.exit(1);
   }
 }

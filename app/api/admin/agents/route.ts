@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "node:crypto";
+import { and, desc, eq, ilike, or, type SQL } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
 import { zyprusAgent } from "@/lib/db/schema";
-import { eq, and, ilike, or, desc, SQL } from "drizzle-orm";
-import { randomBytes } from "crypto";
 
 /**
  * GET /api/admin/agents
@@ -23,8 +23,8 @@ export async function GET(request: NextRequest) {
     const role = searchParams.get("role");
     const isActive = searchParams.get("isActive");
     const search = searchParams.get("search");
-    const page = Number.parseInt(searchParams.get("page") || "1");
-    const limit = Number.parseInt(searchParams.get("limit") || "50");
+    const page = Number.parseInt(searchParams.get("page") || "1", 10);
+    const limit = Number.parseInt(searchParams.get("limit") || "50", 10);
     const offset = (page - 1) * limit;
 
     // Build WHERE clause
@@ -39,9 +39,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (isActive !== null) {
-      conditions.push(
-        eq(zyprusAgent.isActive, isActive === "true")
-      );
+      conditions.push(eq(zyprusAgent.isActive, isActive === "true"));
     }
 
     if (search) {
@@ -80,7 +78,10 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("[API /api/admin/agents GET] Error fetching agents:", error);
     return NextResponse.json(
-      { error: "Failed to fetch agents", details: error instanceof Error ? error.message : String(error) },
+      {
+        error: "Failed to fetch agents",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
@@ -157,7 +158,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("[API /api/admin/agents POST] Error creating agent:", error);
     return NextResponse.json(
-      { error: "Failed to create agent", details: error instanceof Error ? error.message : String(error) },
+      {
+        error: "Failed to create agent",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

@@ -15,20 +15,16 @@ export class WhatsAppClient {
     this.instanceId = process.env.WASENDER_INSTANCE_ID || "";
 
     if (!this.apiKey) {
-      console.warn("WASENDER_API_KEY is not set - WhatsApp integration disabled");
+      console.warn(
+        "WASENDER_API_KEY is not set - WhatsApp integration disabled"
+      );
     }
   }
 
   /**
    * Send a text message
    */
-  async sendMessage({
-    to,
-    text,
-  }: {
-    to: string;
-    text: string;
-  }): Promise<any> {
+  async sendMessage({ to, text }: { to: string; text: string }): Promise<any> {
     if (!this.apiKey) {
       console.warn("WhatsApp API key not configured");
       return { success: false, error: "API key not configured" };

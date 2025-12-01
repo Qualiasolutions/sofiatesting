@@ -1,6 +1,10 @@
 "use client";
 
+import { Info, Loader2, MessageSquare, Phone } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,20 +13,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Info, MessageSquare, Phone } from "lucide-react";
-import { toast } from "sonner";
 
-interface PlatformLinkModalProps {
+type PlatformLinkModalProps = {
   agentId: string;
   agentName: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
-}
+};
 
 interface LinkTelegramModalProps extends PlatformLinkModalProps {
   currentTelegramUserId?: number | null;
@@ -44,13 +44,16 @@ export function LinkTelegramModal({
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/admin/agents/${agentId}/link-telegram`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          telegramUserId: Number.parseInt(telegramUserId),
-        }),
-      });
+      const response = await fetch(
+        `/api/admin/agents/${agentId}/link-telegram`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            telegramUserId: Number.parseInt(telegramUserId, 10),
+          }),
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -72,9 +75,12 @@ export function LinkTelegramModal({
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/admin/agents/${agentId}/link-telegram`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/admin/agents/${agentId}/link-telegram`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -92,7 +98,7 @@ export function LinkTelegramModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -111,27 +117,37 @@ export function LinkTelegramModal({
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                This agent's Telegram account is currently linked. You can unlink it or update the user ID.
+                This agent's Telegram account is currently linked. You can
+                unlink it or update the user ID.
               </AlertDescription>
             </Alert>
 
             <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+              <Button
+                disabled={loading}
+                onClick={() => onOpenChange(false)}
+                variant="outline"
+              >
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleUnlink} disabled={loading}>
+              <Button
+                disabled={loading}
+                onClick={handleUnlink}
+                variant="destructive"
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Unlink Account
               </Button>
             </DialogFooter>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                To get the Telegram User ID, the agent should start a conversation with the SOFIA bot
-                (@SofiaZyprusBot). The user ID will appear in the bot logs.
+                To get the Telegram User ID, the agent should start a
+                conversation with the SOFIA bot (@SofiaZyprusBot). The user ID
+                will appear in the bot logs.
               </AlertDescription>
             </Alert>
 
@@ -139,27 +155,27 @@ export function LinkTelegramModal({
               <Label htmlFor="telegramUserId">Telegram User ID *</Label>
               <Input
                 id="telegramUserId"
-                type="number"
-                placeholder="123456789"
-                value={telegramUserId}
                 onChange={(e) => setTelegramUserId(e.target.value)}
+                placeholder="123456789"
                 required
+                type="number"
+                value={telegramUserId}
               />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Enter the numeric Telegram user ID (not the username)
               </p>
             </div>
 
             <DialogFooter>
               <Button
+                disabled={loading}
+                onClick={() => onOpenChange(false)}
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={loading}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading || !telegramUserId}>
+              <Button disabled={loading || !telegramUserId} type="submit">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Link Account
               </Button>
@@ -191,13 +207,16 @@ export function LinkWhatsAppModal({
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/admin/agents/${agentId}/link-whatsapp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phoneNumber: phoneNumber.trim(),
-        }),
-      });
+      const response = await fetch(
+        `/api/admin/agents/${agentId}/link-whatsapp`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phoneNumber: phoneNumber.trim(),
+          }),
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -219,9 +238,12 @@ export function LinkWhatsAppModal({
     setLoading(true);
 
     try {
-      const response = await fetch(`/api/admin/agents/${agentId}/link-whatsapp`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/admin/agents/${agentId}/link-whatsapp`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -239,7 +261,7 @@ export function LinkWhatsAppModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -258,27 +280,37 @@ export function LinkWhatsAppModal({
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                This agent's WhatsApp account is currently linked. You can unlink it or update the phone number.
+                This agent's WhatsApp account is currently linked. You can
+                unlink it or update the phone number.
               </AlertDescription>
             </Alert>
 
             <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+              <Button
+                disabled={loading}
+                onClick={() => onOpenChange(false)}
+                variant="outline"
+              >
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleUnlink} disabled={loading}>
+              <Button
+                disabled={loading}
+                onClick={handleUnlink}
+                variant="destructive"
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Unlink Account
               </Button>
             </DialogFooter>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <Alert>
               <Info className="h-4 w-4" />
               <AlertDescription>
-                The phone number should match the WhatsApp account the agent will use with SOFIA.
-                Include country code without '+' (e.g., 35799123456 for Cyprus).
+                The phone number should match the WhatsApp account the agent
+                will use with SOFIA. Include country code without '+' (e.g.,
+                35799123456 for Cyprus).
               </AlertDescription>
             </Alert>
 
@@ -286,27 +318,27 @@ export function LinkWhatsAppModal({
               <Label htmlFor="phoneNumber">WhatsApp Phone Number *</Label>
               <Input
                 id="phoneNumber"
-                type="tel"
-                placeholder="35799123456"
-                value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="35799123456"
                 required
+                type="tel"
+                value={phoneNumber}
               />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Format: Country code + number (no spaces or special characters)
               </p>
             </div>
 
             <DialogFooter>
               <Button
+                disabled={loading}
+                onClick={() => onOpenChange(false)}
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={loading}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading || !phoneNumber}>
+              <Button disabled={loading || !phoneNumber} type="submit">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Link Account
               </Button>

@@ -1,8 +1,8 @@
 import { config } from "dotenv";
+import { eq } from "drizzle-orm";
 import { db } from "../lib/db/client.js";
 import { PropertyListing } from "../lib/db/schema.js";
 import { uploadToZyprusAPI } from "../lib/zyprus/client.js";
-import { eq } from "drizzle-orm";
 
 // Load environment variables
 config({ path: ".env.local" });
@@ -26,7 +26,7 @@ async function testE2EPropertyUpload() {
         title: "E2E Test Apartment - Limassol Sea View",
         description:
           "Beautiful 2-bedroom apartment in Limassol with stunning sea views. Modern finishes, open plan kitchen, large balcony. Close to beach and amenities.",
-        price: 250000,
+        price: 250_000,
         currency: "EUR",
         bedrooms: 2,
         bathrooms: 1,
@@ -45,7 +45,9 @@ async function testE2EPropertyUpload() {
     // Step 2: Upload to Zyprus
     console.log("🚀 Step 2: Uploading to Zyprus dev9.zyprus.com...");
     console.log(`   Using API URL: ${process.env.ZYPRUS_API_URL}`);
-    console.log(`   Client ID: ${process.env.ZYPRUS_CLIENT_ID?.substring(0, 15)}...\n`);
+    console.log(
+      `   Client ID: ${process.env.ZYPRUS_CLIENT_ID?.substring(0, 15)}...\n`
+    );
 
     const result = await uploadToZyprusAPI(testListing);
 
@@ -66,7 +68,9 @@ async function testE2EPropertyUpload() {
 
     console.log(`   Status: ${updatedListing.status}`);
     console.log(`   Zyprus Node ID: ${updatedListing.zyprusNodeId || "null"}`);
-    console.log(`   Uploaded At: ${updatedListing.uploadedAt?.toISOString() || "null"}\n`);
+    console.log(
+      `   Uploaded At: ${updatedListing.uploadedAt?.toISOString() || "null"}\n`
+    );
 
     // Step 4: Verify on Zyprus (check if accessible)
     console.log("🌐 Step 4: Verifying on Zyprus...");
@@ -84,13 +88,19 @@ async function testE2EPropertyUpload() {
 
       if (verifyResponse.ok) {
         const data = await verifyResponse.json();
-        console.log(`✅ Property found on Zyprus!`);
+        console.log("✅ Property found on Zyprus!");
         console.log(`   Title: ${data.data.attributes.title || "N/A"}`);
-        console.log(`   field_ai_state: ${data.data.attributes.field_ai_state || "N/A"}`);
+        console.log(
+          `   field_ai_state: ${data.data.attributes.field_ai_state || "N/A"}`
+        );
         console.log(`   status: ${data.data.attributes.status}`);
       } else {
-        console.log(`⚠️  Could not verify on Zyprus (Status: ${verifyResponse.status})`);
-        console.log(`   This might be normal - property may need time to index`);
+        console.log(
+          `⚠️  Could not verify on Zyprus (Status: ${verifyResponse.status})`
+        );
+        console.log(
+          "   This might be normal - property may need time to index"
+        );
       }
     }
 
@@ -103,15 +113,20 @@ async function testE2EPropertyUpload() {
     console.log("   ✓ Database updated with Zyprus node ID");
     console.log("   ✓ Property verified on Zyprus");
     console.log("\n🎯 Confidence Level: Production ready for deployment!");
-
   } catch (error: any) {
     console.error("\n❌ E2E TEST FAILED");
     console.error("═══════════════════════════════════════");
     console.error("\nError Details:");
     console.error("Message:", error.message);
-    if (error.cause) console.error("Cause:", error.cause);
-    if (error.statusCode) console.error("Status Code:", error.statusCode);
-    if (error.code) console.error("Error Code:", error.code);
+    if (error.cause) {
+      console.error("Cause:", error.cause);
+    }
+    if (error.statusCode) {
+      console.error("Status Code:", error.statusCode);
+    }
+    if (error.code) {
+      console.error("Error Code:", error.code);
+    }
 
     if (error.stack) {
       console.error("\nStack Trace:");

@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { AgentsTable } from "@/components/admin/agents-table";
-import { AgentsFilterBar } from "@/components/admin/agents-filter-bar";
-import type { zyprusAgent } from "@/lib/db/schema";
-import { toast } from "sonner";
 import { format } from "date-fns";
+import { useState } from "react";
+import { toast } from "sonner";
+import { AgentsFilterBar } from "@/components/admin/agents-filter-bar";
+import { AgentsTable } from "@/components/admin/agents-table";
 
-interface Agent {
+type Agent = {
   id: string;
   userId: string | null;
   fullName: string;
@@ -25,16 +24,16 @@ interface Agent {
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-interface Pagination {
+type Pagination = {
   page: number;
   limit: number;
   total: number;
   totalPages: number;
-}
+};
 
-interface AgentsRegistryClientProps {
+type AgentsRegistryClientProps = {
   initialAgents: Agent[];
   initialPagination: Pagination;
   searchParams: {
@@ -45,7 +44,7 @@ interface AgentsRegistryClientProps {
     isActive?: string;
     search?: string;
   };
-}
+};
 
 export function AgentsRegistryClient({
   initialAgents,
@@ -60,7 +59,9 @@ export function AgentsRegistryClient({
   const handleRefresh = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams(searchParams as Record<string, string>);
+      const params = new URLSearchParams(
+        searchParams as Record<string, string>
+      );
       const response = await fetch(`/api/admin/agents?${params.toString()}`);
       const data = await response.json();
       setAgents(data.agents);
@@ -93,9 +94,10 @@ export function AgentsRegistryClient({
   const handleExportCSV = () => {
     try {
       // Get agents to export (selected or all filtered)
-      const agentsToExport = selectedAgents.size > 0
-        ? agents.filter((a) => selectedAgents.has(a.id))
-        : agents;
+      const agentsToExport =
+        selectedAgents.size > 0
+          ? agents.filter((a) => selectedAgents.has(a.id))
+          : agents;
 
       if (agentsToExport.length === 0) {
         toast.error("No agents to export");
@@ -136,7 +138,9 @@ export function AgentsRegistryClient({
       const csvContent = [
         headers.join(","),
         ...rows.map((row) =>
-          row.map((cell) => `"${cell.toString().replace(/"/g, '""')}"`).join(",")
+          row
+            .map((cell) => `"${cell.toString().replace(/"/g, '""')}"`)
+            .join(",")
         ),
       ].join("\n");
 
@@ -151,7 +155,9 @@ export function AgentsRegistryClient({
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      toast.success(`Exported ${agentsToExport.length} agent${agentsToExport.length > 1 ? "s" : ""} to CSV`);
+      toast.success(
+        `Exported ${agentsToExport.length} agent${agentsToExport.length > 1 ? "s" : ""} to CSV`
+      );
 
       // Clear selection after export
       if (selectedAgents.size > 0) {
@@ -166,20 +172,20 @@ export function AgentsRegistryClient({
   return (
     <div className="space-y-4">
       <AgentsFilterBar
-        searchParams={searchParams}
-        onRefresh={handleRefresh}
-        selectedCount={selectedAgents.size}
         onExportCSV={handleExportCSV}
+        onRefresh={handleRefresh}
+        searchParams={searchParams}
+        selectedCount={selectedAgents.size}
       />
 
       <AgentsTable
         agents={agents}
-        pagination={pagination}
         loading={loading}
-        selectedAgents={selectedAgents}
+        onRefresh={handleRefresh}
         onSelectAgent={handleSelectAgent}
         onSelectAll={handleSelectAll}
-        onRefresh={handleRefresh}
+        pagination={pagination}
+        selectedAgents={selectedAgents}
       />
     </div>
   );

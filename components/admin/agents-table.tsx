@@ -1,18 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Edit,
+  Mail,
+  MoreHorizontal,
+  Phone,
+  Trash2,
+  XCircle,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { AgentEditModal } from "@/components/admin/agent-edit-modal";
+import { AgentProfileSheet } from "@/components/admin/agent-profile-sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,23 +27,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  MoreHorizontal,
-  Mail,
-  Phone,
-  MessageSquare,
-  Edit,
-  Trash2,
-  CheckCircle2,
-  XCircle,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
-import { format } from "date-fns";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { AgentProfileSheet } from "@/components/admin/agent-profile-sheet";
-import { AgentEditModal } from "@/components/admin/agent-edit-modal";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-interface Agent {
+type Agent = {
   id: string;
   userId: string | null;
   fullName: string;
@@ -56,16 +53,16 @@ interface Agent {
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-interface Pagination {
+type Pagination = {
   page: number;
   limit: number;
   total: number;
   totalPages: number;
-}
+};
 
-interface AgentsTableProps {
+type AgentsTableProps = {
   agents: Agent[];
   pagination: Pagination;
   loading: boolean;
@@ -73,7 +70,7 @@ interface AgentsTableProps {
   onSelectAgent: (agentId: string, selected: boolean) => void;
   onSelectAll: (selected: boolean) => void;
   onRefresh: () => void;
-}
+};
 
 export function AgentsTable({
   agents,
@@ -85,7 +82,7 @@ export function AgentsTable({
   onRefresh,
 }: AgentsTableProps) {
   const router = useRouter();
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [selectedAgent, _setSelectedAgent] = useState<Agent | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [agentToEdit, setAgentToEdit] = useState<Agent | null>(null);
@@ -105,8 +102,10 @@ export function AgentsTable({
     router.push(`?${params.toString()}`);
   };
 
-  const allSelected = agents.length > 0 && selectedAgents.size === agents.length;
-  const someSelected = selectedAgents.size > 0 && selectedAgents.size < agents.length;
+  const allSelected =
+    agents.length > 0 && selectedAgents.size === agents.length;
+  const someSelected =
+    selectedAgents.size > 0 && selectedAgents.size < agents.length;
 
   return (
     <>
@@ -116,10 +115,12 @@ export function AgentsTable({
             <TableRow>
               <TableHead className="w-12">
                 <Checkbox
-                  checked={allSelected}
-                  onCheckedChange={(checked) => onSelectAll(checked === true)}
                   aria-label="Select all agents"
-                  className={someSelected ? "data-[state=checked]:bg-primary/50" : ""}
+                  checked={allSelected}
+                  className={
+                    someSelected ? "data-[state=checked]:bg-primary/50" : ""
+                  }
+                  onCheckedChange={(checked) => onSelectAll(checked === true)}
                 />
               </TableHead>
               <TableHead>Name</TableHead>
@@ -129,39 +130,44 @@ export function AgentsTable({
               <TableHead>Role</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Platforms</TableHead>
-              <TableHead className="w-12"></TableHead>
+              <TableHead className="w-12" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8">
+                <TableCell className="py-8 text-center" colSpan={9}>
                   Loading...
                 </TableCell>
               </TableRow>
             ) : agents.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  className="py-8 text-center text-muted-foreground"
+                  colSpan={9}
+                >
                   No agents found
                 </TableCell>
               </TableRow>
             ) : (
               agents.map((agent) => (
                 <TableRow
-                  key={agent.id}
                   className="cursor-pointer hover:bg-muted/50"
+                  key={agent.id}
                   onClick={() => handleRowClick(agent)}
                 >
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Checkbox
+                      aria-label={`Select ${agent.fullName}`}
                       checked={selectedAgents.has(agent.id)}
                       onCheckedChange={(checked) =>
                         onSelectAgent(agent.id, checked === true)
                       }
-                      aria-label={`Select ${agent.fullName}`}
                     />
                   </TableCell>
-                  <TableCell className="font-medium">{agent.fullName}</TableCell>
+                  <TableCell className="font-medium">
+                    {agent.fullName}
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Mail className="h-4 w-4 text-muted-foreground" />
@@ -187,8 +193,8 @@ export function AgentsTable({
                         agent.role === "CEO"
                           ? "default"
                           : agent.role.startsWith("Manager")
-                          ? "secondary"
-                          : "outline"
+                            ? "secondary"
+                            : "outline"
                       }
                     >
                       {agent.role}
@@ -210,31 +216,37 @@ export function AgentsTable({
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {agent.registeredAt && (
-                        <Badge variant="default" className="text-xs">
+                        <Badge className="text-xs" variant="default">
                           Web
                         </Badge>
                       )}
                       {agent.telegramUserId && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge className="text-xs" variant="secondary">
                           Telegram
                         </Badge>
                       )}
                       {agent.whatsappPhoneNumber && (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge className="text-xs" variant="secondary">
                           WhatsApp
                         </Badge>
                       )}
                       {!agent.registeredAt &&
                         !agent.telegramUserId &&
                         !agent.whatsappPhoneNumber && (
-                          <span className="text-muted-foreground text-sm">None</span>
+                          <span className="text-muted-foreground text-sm">
+                            None
+                          </span>
                         )}
                     </div>
                   </TableCell>
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Button
+                          className="h-8 w-8 p-0"
+                          size="sm"
+                          variant="ghost"
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                           <span className="sr-only">Open menu</span>
                         </Button>
@@ -244,7 +256,9 @@ export function AgentsTable({
                         <DropdownMenuItem onClick={() => handleRowClick(agent)}>
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEditClick(agent)}>
+                        <DropdownMenuItem
+                          onClick={() => handleEditClick(agent)}
+                        >
                           <Edit className="mr-2 h-4 w-4" />
                           Edit Agent
                         </DropdownMenuItem>
@@ -269,17 +283,17 @@ export function AgentsTable({
 
       {/* Pagination */}
       <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
+        <div className="text-muted-foreground text-sm">
           Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
           {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
           {pagination.total} agents
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(pagination.page - 1)}
             disabled={pagination.page === 1}
+            onClick={() => handlePageChange(pagination.page - 1)}
+            size="sm"
+            variant="outline"
           >
             <ChevronLeft className="h-4 w-4" />
             Previous
@@ -288,10 +302,10 @@ export function AgentsTable({
             Page {pagination.page} of {pagination.totalPages}
           </div>
           <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handlePageChange(pagination.page + 1)}
             disabled={pagination.page >= pagination.totalPages}
+            onClick={() => handlePageChange(pagination.page + 1)}
+            size="sm"
+            variant="outline"
           >
             Next
             <ChevronRight className="h-4 w-4" />
@@ -303,9 +317,9 @@ export function AgentsTable({
       {selectedAgent && (
         <AgentProfileSheet
           agent={selectedAgent}
-          open={sheetOpen}
           onOpenChange={setSheetOpen}
           onRefresh={onRefresh}
+          open={sheetOpen}
         />
       )}
 
@@ -313,12 +327,12 @@ export function AgentsTable({
       {agentToEdit && (
         <AgentEditModal
           agent={agentToEdit}
-          open={editModalOpen}
           onOpenChange={setEditModalOpen}
           onSuccess={() => {
             onRefresh();
             setAgentToEdit(null);
           }}
+          open={editModalOpen}
         />
       )}
     </>

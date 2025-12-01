@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { and, eq, sql } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
 import { zyprusAgent } from "@/lib/db/schema";
-import { eq, and, sql } from "drizzle-orm";
 
 /**
  * POST /api/admin/agents/[id]/link-whatsapp
@@ -102,7 +102,7 @@ export async function POST(
  * Unlink WhatsApp account from agent
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {

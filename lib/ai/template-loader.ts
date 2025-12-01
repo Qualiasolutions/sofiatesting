@@ -45,7 +45,7 @@ const COMMON_TEMPLATES = ["01", "07", "08", "17", "19"];
  * Helper function to add multiple items to a Set
  */
 function addToSet<T>(set: Set<T>, items: readonly T[]): void {
-  items.forEach(item => set.add(item));
+  items.forEach((item) => set.add(item));
 }
 
 /**
@@ -137,7 +137,7 @@ function extractTemplates(fullContent: string, templateIds: string[]): string {
   const lines = fullContent.split("\n");
   const result: string[] = [];
   let inRelevantSection = false;
-  let currentTemplate = "";
+  let _currentTemplate = "";
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -156,7 +156,7 @@ function extractTemplates(fullContent: string, templateIds: string[]): string {
       // Check if this is a template we want
       if (templateIds.includes(templateNum)) {
         inRelevantSection = true;
-        currentTemplate = templateNum;
+        _currentTemplate = templateNum;
       }
     }
 
@@ -166,9 +166,11 @@ function extractTemplates(fullContent: string, templateIds: string[]): string {
     }
 
     // Stop at certain section markers that indicate end of templates
-    if (line.startsWith("🛠️ COMMON ISSUES & SOLUTIONS") ||
-        line.startsWith("📊 SOPHIA'S INTELLIGENCE FEATURES") ||
-        line.startsWith("🏠 PROPERTY UPLOAD CAPABILITY")) {
+    if (
+      line.startsWith("🛠️ COMMON ISSUES & SOLUTIONS") ||
+      line.startsWith("📊 SOPHIA'S INTELLIGENCE FEATURES") ||
+      line.startsWith("🏠 PROPERTY UPLOAD CAPABILITY")
+    ) {
       break;
     }
   }
@@ -190,9 +192,11 @@ function getBaseInstructions(fullContent: string): string {
     const line = lines[i];
 
     // Major section markers
-    if (line.startsWith("👁️ VIEWING FORM & RESERVATION TEMPLATES") ||
-        line.startsWith("📢 MARKETING AGREEMENT TEMPLATES") ||
-        line.startsWith("📧 CLIENT COMMUNICATION TEMPLATES")) {
+    if (
+      line.startsWith("👁️ VIEWING FORM & RESERVATION TEMPLATES") ||
+      line.startsWith("📢 MARKETING AGREEMENT TEMPLATES") ||
+      line.startsWith("📧 CLIENT COMMUNICATION TEMPLATES")
+    ) {
       skipUntilNextMajorSection = true;
       inTemplateSection = false;
       continue;
@@ -205,14 +209,16 @@ function getBaseInstructions(fullContent: string): string {
     }
 
     // End of template section markers
-    if (line.startsWith("🛠️ COMMON ISSUES & SOLUTIONS") ||
-        line.startsWith("📊 SOPHIA'S INTELLIGENCE FEATURES") ||
-        line.startsWith("🏠 PROPERTY UPLOAD CAPABILITY") ||
-        line.startsWith("🤖 ASSISTANT IDENTITY") ||
-        line.startsWith("📋 CORE CAPABILITIES") ||
-        line.startsWith("🎯 CRITICAL OPERATING PRINCIPLES") ||
-        line.startsWith("🧮 CALCULATOR CAPABILITIES") ||
-        line.startsWith("📚 KNOWLEDGE BASE")) {
+    if (
+      line.startsWith("🛠️ COMMON ISSUES & SOLUTIONS") ||
+      line.startsWith("📊 SOPHIA'S INTELLIGENCE FEATURES") ||
+      line.startsWith("🏠 PROPERTY UPLOAD CAPABILITY") ||
+      line.startsWith("🤖 ASSISTANT IDENTITY") ||
+      line.startsWith("📋 CORE CAPABILITIES") ||
+      line.startsWith("🎯 CRITICAL OPERATING PRINCIPLES") ||
+      line.startsWith("🧮 CALCULATOR CAPABILITIES") ||
+      line.startsWith("📚 KNOWLEDGE BASE")
+    ) {
       skipUntilNextMajorSection = false;
       inTemplateSection = false;
     }
@@ -263,8 +269,8 @@ async function loadFullInstructionsUncached(): Promise<string> {
 
 const loadFullInstructions = unstable_cache(
   loadFullInstructionsUncached,
-  ["sophia-full-instructions"],
-  { revalidate: 86400 } // 24 hours
+  ["sophia-full-instructions-v2"], // v2: fixed touristic zones table
+  { revalidate: 86_400 } // 24 hours
 );
 
 /**
@@ -272,7 +278,9 @@ const loadFullInstructions = unstable_cache(
  *
  * This reduces token usage by 85-93% while maintaining identical behavior
  */
-export async function loadSmartInstructions(userMessage: string): Promise<string> {
+export async function loadSmartInstructions(
+  userMessage: string
+): Promise<string> {
   const fullContent = await loadFullInstructions();
 
   // Detect which templates are relevant
@@ -282,7 +290,10 @@ export async function loadSmartInstructions(userMessage: string): Promise<string
   const baseInstructions = getBaseInstructions(fullContent);
 
   // Extract only relevant templates
-  const relevantTemplateContent = extractTemplates(fullContent, relevantTemplates);
+  const relevantTemplateContent = extractTemplates(
+    fullContent,
+    relevantTemplates
+  );
 
   // Combine: base instructions + relevant templates
   const combinedContent = `${baseInstructions}

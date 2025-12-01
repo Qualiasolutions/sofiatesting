@@ -1,16 +1,16 @@
-import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "node:crypto";
+import { type NextRequest, NextResponse } from "next/server";
+import * as XLSX from "xlsx";
 import { db } from "@/lib/db/client";
 import { zyprusAgent } from "@/lib/db/schema";
-import * as XLSX from "xlsx";
-import { randomBytes } from "crypto";
 
-interface AgentRow {
+type AgentRow = {
   "Fulla Name": string;
   "Mobile Phone": string | number;
   "Email use to communicate": string;
   Region: string;
   Role: string;
-}
+};
 
 function normalizePhoneNumber(phone: string | number): string {
   if (typeof phone === "number") {
@@ -49,10 +49,7 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File;
 
     if (!file) {
-      return NextResponse.json(
-        { error: "No file provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
     // Validate file type
@@ -63,7 +60,8 @@ export async function POST(request: NextRequest) {
     ) {
       return NextResponse.json(
         {
-          error: "Invalid file type. Please upload an Excel (.xlsx, .xls) or CSV file",
+          error:
+            "Invalid file type. Please upload an Excel (.xlsx, .xls) or CSV file",
         },
         { status: 400 }
       );

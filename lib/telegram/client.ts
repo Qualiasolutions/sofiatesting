@@ -106,10 +106,7 @@ export class TelegramClient {
    * @param webhookUrl - The HTTPS URL to send updates to
    * @param secretToken - Optional secret token for webhook security (recommended)
    */
-  async setWebhook(
-    webhookUrl: string,
-    secretToken?: string
-  ): Promise<boolean> {
+  async setWebhook(webhookUrl: string, secretToken?: string): Promise<boolean> {
     try {
       const body: any = {
         url: webhookUrl,

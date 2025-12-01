@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { handleWhatsAppMessage } from "@/lib/whatsapp/message-handler";
-import type { WaSenderWebhookMessage, WaSenderMessageData } from "@/lib/whatsapp/types";
+import type {
+  WaSenderMessageData,
+  WaSenderWebhookMessage,
+} from "@/lib/whatsapp/types";
 
 /**
  * WhatsApp Webhook Endpoint for WaSenderAPI

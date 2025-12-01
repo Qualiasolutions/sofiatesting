@@ -5,11 +5,11 @@ config({ path: ".env.local" });
 
 // Mock the listing structure that uploadToZyprusAPI expects
 const mockListing = {
-  id: "test-" + Date.now(),
+  id: `test-${Date.now()}`,
   title: "Test Property - Modern Apartment",
   description:
     "Beautiful 2-bedroom apartment in Limassol with sea views. Modern finishes, open kitchen, large balcony.",
-  price: 250000,
+  price: 250_000,
   currency: "EUR",
   bedrooms: 2,
   bathrooms: 1,
@@ -53,17 +53,22 @@ async function testActualUploadFunction() {
 
     console.log("🎉 SOFIA upload function works with empty images!");
     console.log("✅ Production deployment is SAFE");
-
   } catch (error: any) {
     console.error("\n❌ UPLOAD FAILED\n");
     console.error("═══════════════════════════════════════");
     console.error("Error:", error.message);
-    if (error.cause) console.error("Cause:", error.cause);
-    if (error.statusCode) console.error("Status:", error.statusCode);
+    if (error.cause) {
+      console.error("Cause:", error.cause);
+    }
+    if (error.statusCode) {
+      console.error("Status:", error.statusCode);
+    }
 
     if (error.message?.includes("field_gallery_")) {
       console.error("\n⚠️  CRITICAL: Zyprus API requires at least one image!");
-      console.error("   Action required: Update SOFIA to enforce image requirement");
+      console.error(
+        "   Action required: Update SOFIA to enforce image requirement"
+      );
     }
 
     console.error("\n⛔ DEPLOYMENT BLOCKED");

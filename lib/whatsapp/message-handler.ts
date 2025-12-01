@@ -1,7 +1,17 @@
 import "server-only";
-import { convertToModelMessages, streamText } from "ai";
+import { convertToModelMessages, generateObject, streamText } from "ai";
+import { db } from "@/lib/db/client";
+import { agentExecutionLog } from "@/lib/db/schema";
+import { ROUTER_MODEL, WORKER_MODEL } from "../ai/models";
 import { systemPrompt } from "../ai/prompts";
 import { myProvider } from "../ai/providers";
+import { IntentClassificationSchema } from "../ai/schemas";
+import {
+  extractDeveloperRegistration,
+  extractMarketingAgreement,
+  extractSellerRegistration,
+  extractViewingForm,
+} from "../ai/template-manager";
 import { calculateCapitalGainsTool } from "../ai/tools/calculate-capital-gains";
 import { calculateTransferFeesTool } from "../ai/tools/calculate-transfer-fees";
 import { calculateVATTool } from "../ai/tools/calculate-vat";
@@ -10,11 +20,9 @@ import { isProductionEnvironment } from "../constants";
 import type { ChatMessage } from "../types";
 import { generateUUID } from "../utils";
 import { getWhatsAppClient } from "./client";
-import type { WaSenderMessageData } from "./types";
-import { shouldSendAsDocument, getDocumentType } from "./document-detector";
+import { getDocumentType, shouldSendAsDocument } from "./document-detector";
 import { generateDocx } from "./docx-generator";
-import { db } from "@/lib/db/client";
-import { agentExecutionLog } from "@/lib/db/schema";
+import type { WaSenderMessageData } from "./types";
 
 /**
  * Handle incoming WhatsApp message and generate AI response
@@ -39,16 +47,6 @@ export async function handleWhatsAppMessage(
   const userMessage = messageData.text;
 
   try {
-    // Get the model for Telegram/WhatsApp interactions
-    const chatModel = myProvider.languageModel("chat-model");
-
-    // Create message for AI
-    const message: ChatMessage = {
-      id: generateUUID(),
-      role: "user",
-      parts: [{ type: "text", text: userMessage }],
-    };
-
     // Log incoming message
     await db.insert(agentExecutionLog).values({
       agentType: "whatsapp",
@@ -62,21 +60,74 @@ export async function handleWhatsAppMessage(
       },
     });
 
-    // Generate AI response
+    // STEP 1: ROUTING (Cost Optimization)
+    // Use Flash-Lite to decide intent
+    const routerModel = myProvider.languageModel(ROUTER_MODEL);
+    const { object: classification } = await generateObject({
+      model: routerModel,
+      schema: IntentClassificationSchema,
+      prompt: `Classify the user intent for this real estate assistant message: "${userMessage}"`,
+    });
+
+    console.log("Router Classification:", classification);
+
+    // STEP 2: EXECUTION BASED ON INTENT
     let fullResponse = "";
+    let extractedData: any = null;
+    const _needsDocument = false;
+
+    // Handle specific intents with Structured Extraction
+    if (classification.confidence > 0.8) {
+      switch (classification.intent) {
+        case "developer_registration":
+          extractedData = await extractDeveloperRegistration(userMessage);
+          // Logic: If we have data, we might still need to ask for missing fields
+          // For now, we pass this context to the main chat model to generate the final response/doc
+          break;
+        case "marketing_agreement":
+          extractedData = await extractMarketingAgreement(userMessage);
+          break;
+        case "viewing_form":
+          extractedData = await extractViewingForm(userMessage);
+          break;
+        case "seller_registration":
+          extractedData = await extractSellerRegistration(userMessage);
+          break;
+      }
+    }
+
+    // Prepare system prompt with extracted data context if available
+    const baseSystemPrompt = await systemPrompt({
+      selectedChatModel: WORKER_MODEL,
+      requestHints: {
+        latitude: undefined,
+        longitude: undefined,
+        city: undefined,
+        country: "Cyprus",
+      },
+      userMessage,
+    });
+
+    let finalSystemPrompt = baseSystemPrompt;
+    if (extractedData) {
+      finalSystemPrompt += `\n\nCONTEXT FROM STRUCTURED EXTRACTION:\n${JSON.stringify(
+        extractedData,
+        null,
+        2
+      )}\n\nUse this extracted data to either generate the document (if complete) or ask for missing fields.`;
+    }
+
+    // Main Chat Execution (Worker Model)
+    const chatModel = myProvider.languageModel(WORKER_MODEL);
+    const message: ChatMessage = {
+      id: generateUUID(),
+      role: "user",
+      parts: [{ type: "text", text: userMessage }],
+    };
 
     const result = await streamText({
       model: chatModel,
-      system: await systemPrompt({
-        selectedChatModel: "chat-model",
-        requestHints: {
-          latitude: undefined,
-          longitude: undefined,
-          city: undefined,
-          country: "Cyprus",
-        },
-        userMessage: userMessage,
-      }),
+      system: finalSystemPrompt,
       messages: convertToModelMessages([message]),
       experimental_activeTools: [
         "calculateTransferFees",
@@ -88,7 +139,7 @@ export async function handleWhatsAppMessage(
         calculateTransferFees: calculateTransferFeesTool,
         calculateCapitalGains: calculateCapitalGainsTool,
         calculateVAT: calculateVATTool,
-        getGeneralKnowledge: getGeneralKnowledge,
+        getGeneralKnowledge,
       },
       experimental_telemetry: {
         isEnabled: isProductionEnvironment,
@@ -133,8 +184,7 @@ export async function handleWhatsAppMessage(
     try {
       await client.sendMessage({
         to: phoneNumber,
-        text:
-          "I encountered an error processing your message. Please try again or rephrase your question.",
+        text: "I encountered an error processing your message. Please try again or rephrase your question.",
       });
     } catch (sendError) {
       console.error("Failed to send error message:", sendError);

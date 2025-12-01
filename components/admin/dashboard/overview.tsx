@@ -1,17 +1,17 @@
+import { gte, isNull, sql } from "drizzle-orm";
+import { FileText, Home, MessageSquare, Users } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/lib/db/client";
 import {
+  documentGenerationLog,
   message,
   propertyListing,
-  documentGenerationLog,
   user,
 } from "@/lib/db/schema";
-import { sql, eq, and, gte, isNull } from "drizzle-orm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageSquare, FileText, Home, Users } from "lucide-react";
 
-interface DashboardOverviewProps {
+type DashboardOverviewProps = {
   userId: string;
-}
+};
 
 export async function DashboardOverview({ userId }: DashboardOverviewProps) {
   const thirtyDaysAgo = new Date();
@@ -92,14 +92,14 @@ export async function DashboardOverview({ userId }: DashboardOverviewProps) {
       {metrics.map((metric) => (
         <Card key={metric.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="font-medium text-sm">
               {metric.title}
             </CardTitle>
             <metric.icon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metric.value}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="font-bold text-2xl">{metric.value}</div>
+            <p className="text-muted-foreground text-xs">
               {metric.description}
             </p>
           </CardContent>

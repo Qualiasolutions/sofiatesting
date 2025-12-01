@@ -321,10 +321,9 @@ export const agentExecutionLog = pgTable(
     userIdIdx: index("AgentExecutionLog_userId_idx").on(table.userId),
     successIdx: index("AgentExecutionLog_success_idx").on(table.success),
     // Composite index for agent performance queries (agentType + timestamp DESC)
-    agentTypeTimestampIdx: index("AgentExecutionLog_agentType_timestamp_idx").on(
-      table.agentType,
-      table.timestamp.desc()
-    ),
+    agentTypeTimestampIdx: index(
+      "AgentExecutionLog_agentType_timestamp_idx"
+    ).on(table.agentType, table.timestamp.desc()),
   })
 );
 
@@ -353,7 +352,6 @@ export const calculatorUsageLog = pgTable(
 );
 
 export type CalculatorUsageLog = InferSelectModel<typeof calculatorUsageLog>;
-
 
 // Admin audit logs (track admin actions)
 export const adminAuditLog = pgTable(

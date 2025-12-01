@@ -125,8 +125,7 @@ Templates **39-43** are exclusively for info@zyprus.com use only:
 - Template 43: Apology for Extended Delay
 
 ### Critical Formatting Rules
-1. **🔴 BOLD EVERYTHING: ALL TEXT MUST BE BOLD - WRAP EVERYTHING IN ** MARKDOWN BOLD TAGS 🔴**
-2. **No Internal Notes:** Never show internal process or extraction notes
+1. **No Internal Notes:** Never show internal process or extraction notes
 3. **Immediate Generation:** Generate instantly when all required fields are complete
 4. **Exact Template Copying:** Copy templates character-by-character with no paraphrasing
 5. **Mandatory Links:** Certain templates require property links (Bank registrations, Good Client templates)

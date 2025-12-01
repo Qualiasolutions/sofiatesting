@@ -1,9 +1,10 @@
-📌 Template 37: Plain Request to info@zyprus.com
+📌 Template 21: Plain Request to info@zyprus.com
 
 **Purpose**: Handle 'Plain Request to info@zyprus.com' communication exactly as per template.
+**IMPORTANT**: This is a 0-field template - GENERATE IMMEDIATELY without asking for any fields!
 
 🔹 Required Fields (MUST Collect Before Generating)
-- Client's Name (e.g., Andreas Andreou)
+- NONE - Generate immediately using "Dear XXXXXXXX," placeholder
 
 🔹 Critical Rules
 - Greeting: Default `Dear XXXXXXXX,` (placeholder) unless template requires personalization; follow template-specific overrides.
@@ -16,13 +17,11 @@
 🔹 Exact Template
 Template 21: Plain Request to info@zyprus.com
 
-Required Fields:
+Required Fields: NONE (Generate immediately)
 
-Client's Name (e.g., Andreas Andreou)
+Subject: Request – Further information Needed
 
-Subject: Request – Further information Needed - [Client's Name]
-
-Dear [Client's Name],
+Dear XXXXXXXX,
 
 Thank you for your email. To best assist you with your property search, we kindly request the following information:
 
@@ -41,24 +40,34 @@ Mortgage Buyer: YES / NO
 By providing us with these details, we can connect you with the right property consultant within our firm, who can offer personalized assistance. We look forward to hearing from you soon.
 
 🔹 Workflow
-1. Detect: Identify template from keywords (e.g., "rental registration" → Template 03).
-2. Extract: Silently extract provided fields (names, reg no., dates, links).
-3. Ask: Minimize questions; only ask missing required fields (e.g., "What time is the viewing?").
-4. Validate: Confirm year for dates; ensure links present where mandatory; ensure greeting style per template.
-5. Generate: Copy Exact Template verbatim, replacing placeholders; omit optional lines when data missing.
+1. Detect: Identify "info@zyprus" or "info request" keywords → Template 21
+2. Check: If number specified (e.g., "4 documents"), generate THAT MANY copies
+3. Generate: Immediately output document(s) - NO fields required!
+4. For batch: Separate each with "---" divider and number them
 
 🔹 Common Mistakes
 ❌ Wrong		✅ Correct
-Bolding subject lines	No bolding except pricing/fees
-Using personalized greeting when placeholder is required	Use `Dear XXXXXXXX,` unless template says otherwise
-Generating with [FIELD] placeholders left	Ask for missing fields, then generate with no placeholders
+Asking for client names	Generate immediately with XXXXXXXX placeholder
+Asking for any fields	Template 21 has 0 required fields - generate immediately
+Not recognizing trigger words	"info@zyprus", "plain request", "info request" = Template 21
 
 🔹 Example Output
-Subject: Request – Further information Needed - [Client's Name]
+Subject: Request – Further information Needed
 
-Email Body:
-(Example body per exact template...)
+Dear XXXXXXXX,
+
+Thank you for your email. To best assist you with your property search, we kindly request the following information:
+
+Your Full Name:
+Your Full Phone Number:
+Property description and desired area(s):
+Purpose: Investment (Buy to let) OR Main Residence
+Budget for ideal property: €
+Mortgage Buyer: YES / NO
+
+By providing us with these details, we can connect you with the right property consultant within our firm, who can offer personalized assistance. We look forward to hearing from you soon.
 
 💡 Pro Tips
-- Keep tone professional and concise.
-- Follow subject format exactly if specified.
+- This is a 0-field template - ALWAYS generate immediately
+- For batch requests, generate ALL documents in one response
+- Never ask for clarification - just generate the requested number

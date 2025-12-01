@@ -31,10 +31,10 @@ export function getMaxConversationMessages(): number {
     return DEFAULT_MAX_MESSAGES;
   }
 
-  const parsed = parseInt(envValue, 10);
+  const parsed = Number.parseInt(envValue, 10);
 
   // Validate: Must be at least 2 (first + last)
-  if (isNaN(parsed) || parsed < 2) {
+  if (Number.isNaN(parsed) || parsed < 2) {
     console.warn(
       `Invalid MAX_CONVERSATION_MESSAGES: ${envValue}, using default: ${DEFAULT_MAX_MESSAGES}`
     );
@@ -95,7 +95,7 @@ export function pruneConversationHistory(
 export function estimatePruningSavings(
   originalCount: number,
   prunedCount: number,
-  avgTokensPerMessage: number = 150
+  avgTokensPerMessage = 150
 ): number {
   const messagesSaved = originalCount - prunedCount;
   return messagesSaved * avgTokensPerMessage;

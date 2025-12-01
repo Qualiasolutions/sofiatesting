@@ -1,7 +1,7 @@
 import "server-only";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
-import { zyprusAgent, agentChatSession, chat } from "@/lib/db/schema";
-import { eq, and } from "drizzle-orm";
+import { agentChatSession, zyprusAgent } from "@/lib/db/schema";
 
 /**
  * Agent Identification Utilities
@@ -10,7 +10,7 @@ import { eq, and } from "drizzle-orm";
  * (web, Telegram, WhatsApp) and track their chat sessions.
  */
 
-export interface IdentifiedAgent {
+export type IdentifiedAgent = {
   id: string;
   userId: string | null;
   fullName: string;
@@ -23,7 +23,7 @@ export interface IdentifiedAgent {
   whatsappPhoneNumber: string | null;
   lastActiveAt: Date | null;
   registeredAt: Date | null;
-}
+};
 
 /**
  * Identify agent by Telegram user ID
@@ -318,13 +318,13 @@ export async function isZyprusAgent(userId: string): Promise<boolean> {
 /**
  * Get agent's current entitlements
  */
-export interface AgentEntitlements {
+export type AgentEntitlements = {
   isAgent: boolean;
   maxMessagesPerDay: number;
   availableModels: string[];
   hasPriorityQueue: boolean;
   hasInternalTools: boolean;
-}
+};
 
 export async function getAgentEntitlements(
   userId: string
@@ -345,11 +345,7 @@ export async function getAgentEntitlements(
   return {
     isAgent: true,
     maxMessagesPerDay: 100_000, // Effectively unlimited
-    availableModels: [
-      "chat-model",
-      "chat-model-sonnet",
-      "chat-model-gpt4o",
-    ],
+    availableModels: ["chat-model", "chat-model-sonnet", "chat-model-gpt4o"],
     hasPriorityQueue: true,
     hasInternalTools: true,
   };

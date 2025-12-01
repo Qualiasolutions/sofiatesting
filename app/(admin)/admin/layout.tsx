@@ -1,10 +1,10 @@
+import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { auth } from "@/app/(auth)/auth";
-import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminHeader } from "@/components/admin/header";
+import { AdminSidebar } from "@/components/admin/sidebar";
 import { db } from "@/lib/db/client";
 import { adminUserRole } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 
 export default async function AdminLayout({
   children,
@@ -26,15 +26,16 @@ export default async function AdminLayout({
 
   // Grant all logged-in users admin access with default permissions
   const userRole = adminRole.length > 0 ? adminRole[0].role : "admin";
-  const permissions = adminRole.length > 0
-    ? (adminRole[0].permissions as Record<string, boolean> | null)
-    : null; // Grant full access by default (null permissions = no restrictions)
+  const permissions =
+    adminRole.length > 0
+      ? (adminRole[0].permissions as Record<string, boolean> | null)
+      : null; // Grant full access by default (null permissions = no restrictions)
 
   return (
     <div className="flex h-screen bg-background">
-      <AdminSidebar role={userRole} permissions={permissions} />
+      <AdminSidebar permissions={permissions} role={userRole} />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <AdminHeader user={session.user} role={userRole} />
+        <AdminHeader role={userRole} user={session.user} />
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>

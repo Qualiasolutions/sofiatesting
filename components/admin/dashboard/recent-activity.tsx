@@ -1,13 +1,13 @@
+import { formatDistanceToNow } from "date-fns";
+import { desc, eq } from "drizzle-orm";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/lib/db/client";
 import { adminAuditLog, user } from "@/lib/db/schema";
-import { desc, eq } from "drizzle-orm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { formatDistanceToNow } from "date-fns";
 
-interface RecentActivityCardProps {
+type RecentActivityCardProps = {
   userId: string;
-}
+};
 
 export async function RecentActivityCard({ userId }: RecentActivityCardProps) {
   const recentActivity = await db
@@ -30,13 +30,13 @@ export async function RecentActivityCard({ userId }: RecentActivityCardProps) {
       action === "create"
         ? "default"
         : action === "update"
-        ? "secondary"
-        : action === "delete"
-        ? "destructive"
-        : "outline";
+          ? "secondary"
+          : action === "delete"
+            ? "destructive"
+            : "outline";
 
     return (
-      <Badge variant={variant} className="text-xs">
+      <Badge className="text-xs" variant={variant}>
         {action}
       </Badge>
     );
@@ -49,32 +49,32 @@ export async function RecentActivityCard({ userId }: RecentActivityCardProps) {
       </CardHeader>
       <CardContent>
         {recentActivity.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No recent activity</p>
+          <p className="text-muted-foreground text-sm">No recent activity</p>
         ) : (
           <div className="space-y-4">
             {recentActivity.map((activity) => (
               <div
-                key={activity.id}
                 className="flex items-start justify-between gap-4"
+                key={activity.id}
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
                     {getActionBadge(activity.action)}
-                    <span className="text-sm font-medium">
+                    <span className="font-medium text-sm">
                       {activity.targetType || "System"}
                     </span>
                   </div>
                   {activity.targetId && (
-                    <p className="text-xs text-muted-foreground mt-1 font-mono">
+                    <p className="mt-1 font-mono text-muted-foreground text-xs">
                       ID: {activity.targetId}
                     </p>
                   )}
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-xs text-muted-foreground">
+                  <div className="mt-1 flex items-center gap-2">
+                    <p className="text-muted-foreground text-xs">
                       {activity.userEmail || "System"}
                     </p>
-                    <span className="text-xs text-muted-foreground">·</span>
-                    <p className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">·</span>
+                    <p className="text-muted-foreground text-xs">
                       {formatDistanceToNow(new Date(activity.timestamp), {
                         addSuffix: true,
                       })}

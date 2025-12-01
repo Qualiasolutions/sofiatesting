@@ -1,5 +1,5 @@
-import type { PropertyListing } from "@/lib/db/schema";
 import { createCircuitBreaker } from "@/lib/circuit-breakers";
+import type { PropertyListing } from "@/lib/db/schema";
 
 export class ZyprusAPIError extends Error {
   code: string;
@@ -106,9 +106,9 @@ async function fetchAccessTokenInternal(): Promise<string> {
 // Circuit breaker for OAuth token fetch
 const oauthBreaker = createCircuitBreaker(fetchAccessTokenInternal, {
   name: "ZyprusOAuth",
-  timeout: 10000, // 10 second timeout
+  timeout: 10_000, // 10 second timeout
   errorThresholdPercentage: 60, // Allow more failures before opening (OAuth is critical)
-  resetTimeout: 60000, // Wait 1 minute before trying again
+  resetTimeout: 60_000, // Wait 1 minute before trying again
 });
 
 /**
@@ -239,68 +239,63 @@ async function uploadToZyprusAPIInternal(
     const imageUrls = listing.image as string[];
     const totalImages = imageUrls.length;
 
-    console.log(
-      `Starting PARALLEL upload of ${totalImages} images to Zyprus`
-    );
+    console.log(`Starting PARALLEL upload of ${totalImages} images to Zyprus`);
 
     // Create upload promise for each image
     const uploadPromises = imageUrls.map(async (imageUrl, i) => {
       console.log(`Uploading image ${i + 1}/${totalImages}: ${imageUrl}`);
 
-        try {
-          // Fetch image from URL (supports both external URLs and Vercel Blob URLs)
-          const imageResponse = await fetch(imageUrl);
-          if (!imageResponse.ok) {
-            throw new Error(
-              `Failed to fetch image: ${imageResponse.status} ${imageResponse.statusText}`
-            );
-          }
-
-          const imageBlob = await imageResponse.blob();
-          const contentType =
-            imageResponse.headers.get("content-type") || "image/jpeg";
-
-          // Determine file extension from content type
-          const ext = contentType.split("/")[1] || "jpg";
-          const filename = `property-image-${i + 1}.${ext}`;
-
-          // IMPORTANT: Zyprus expects raw binary upload with Content-Disposition header
-          // NOT multipart/form-data (as per Postman collection spec)
-          const uploadResponse = await fetch(
-            `${apiUrl}/jsonapi/node/property/field_gallery_`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "User-Agent": "SophiaAI/1.0",
-                "Content-Type": "application/octet-stream",
-                "Content-Disposition": `file; filename="${filename}"`,
-              },
-              body: imageBlob,
-            }
+      try {
+        // Fetch image from URL (supports both external URLs and Vercel Blob URLs)
+        const imageResponse = await fetch(imageUrl);
+        if (!imageResponse.ok) {
+          throw new Error(
+            `Failed to fetch image: ${imageResponse.status} ${imageResponse.statusText}`
           );
-
-          if (!uploadResponse.ok) {
-            const errorText = await uploadResponse.text();
-            throw new Error(
-              `Upload failed: ${uploadResponse.status} - ${errorText}`
-            );
-          }
-
-          const data = await uploadResponse.json();
-          console.log(
-            `Successfully uploaded image ${i + 1}: ${data.data.id}`
-          );
-          return { index: i, id: data.data.id, url: imageUrl };
-        } catch (imgError) {
-          console.error(
-            `Error processing image ${i + 1} (${imageUrl}):`,
-            imgError
-          );
-          throw imgError; // Re-throw to mark as rejected in Promise.allSettled
         }
+
+        const imageBlob = await imageResponse.blob();
+        const contentType =
+          imageResponse.headers.get("content-type") || "image/jpeg";
+
+        // Determine file extension from content type
+        const ext = contentType.split("/")[1] || "jpg";
+        const filename = `property-image-${i + 1}.${ext}`;
+
+        // IMPORTANT: Zyprus expects raw binary upload with Content-Disposition header
+        // NOT multipart/form-data (as per Postman collection spec)
+        const uploadResponse = await fetch(
+          `${apiUrl}/jsonapi/node/property/field_gallery_`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "User-Agent": "SophiaAI/1.0",
+              "Content-Type": "application/octet-stream",
+              "Content-Disposition": `file; filename="${filename}"`,
+            },
+            body: imageBlob,
+          }
+        );
+
+        if (!uploadResponse.ok) {
+          const errorText = await uploadResponse.text();
+          throw new Error(
+            `Upload failed: ${uploadResponse.status} - ${errorText}`
+          );
+        }
+
+        const data = await uploadResponse.json();
+        console.log(`Successfully uploaded image ${i + 1}: ${data.data.id}`);
+        return { index: i, id: data.data.id, url: imageUrl };
+      } catch (imgError) {
+        console.error(
+          `Error processing image ${i + 1} (${imageUrl}):`,
+          imgError
+        );
+        throw imgError; // Re-throw to mark as rejected in Promise.allSettled
       }
-    );
+    });
 
     // Execute all uploads in parallel and collect results
     const results = await Promise.allSettled(uploadPromises);
@@ -597,9 +592,9 @@ export async function getZyprusListings(): Promise<any[]> {
 // Circuit breaker for property upload
 const uploadBreaker = createCircuitBreaker(uploadToZyprusAPIInternal, {
   name: "ZyprusUpload",
-  timeout: 45000, // 45 second timeout (allows for image uploads)
+  timeout: 45_000, // 45 second timeout (allows for image uploads)
   errorThresholdPercentage: 50, // 50% failure rate trips circuit
-  resetTimeout: 30000, // Wait 30 seconds before trying again
+  resetTimeout: 30_000, // Wait 30 seconds before trying again
   volumeThreshold: 3, // Need at least 3 failed requests to trip
 });
 

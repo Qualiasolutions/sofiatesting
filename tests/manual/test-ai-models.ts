@@ -3,14 +3,14 @@
  * Tests temperature=0 enforcement and instruction following
  */
 
+import path from "node:path";
 import dotenv from "dotenv";
-import path from "path";
 
 // Load environment variables from .env.local
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 
-import { myProvider } from "@/lib/ai/providers";
 import { streamText } from "ai";
+import { myProvider } from "@/lib/ai/providers";
 
 const MODELS_TO_TEST = [
   "chat-model", // Gemini 1.5 Flash (default)
@@ -21,7 +21,7 @@ const MODELS_TO_TEST = [
 ] as const;
 
 const STRICT_INSTRUCTION_TEST =
-  "You MUST respond with EXACTLY this JSON format, no additional text: {\"status\":\"ok\",\"temperature\":0}";
+  'You MUST respond with EXACTLY this JSON format, no additional text: {"status":"ok","temperature":0}';
 
 async function testModel(
   modelId: (typeof MODELS_TO_TEST)[number]
@@ -53,17 +53,16 @@ async function testModel(
       if (parsed.status === "ok" && parsed.temperature === 0) {
         console.log(`   ✅ PASS: ${modelId} follows strict instructions`);
         return { success: true, response };
-      } else {
-        console.log(
-          `   ❌ FAIL: ${modelId} returned unexpected JSON: ${response}`
-        );
-        return {
-          success: false,
-          error: "Unexpected JSON structure",
-          response,
-        };
       }
-    } catch (parseError) {
+      console.log(
+        `   ❌ FAIL: ${modelId} returned unexpected JSON: ${response}`
+      );
+      return {
+        success: false,
+        error: "Unexpected JSON structure",
+        response,
+      };
+    } catch (_parseError) {
       console.log(
         `   ⚠️  WARN: ${modelId} did not return valid JSON: ${response}`
       );
@@ -74,8 +73,7 @@ async function testModel(
       };
     }
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : String(error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.log(`   ❌ ERROR: ${modelId} failed with: ${errorMessage}`);
     return { success: false, error: errorMessage };
   }
@@ -83,12 +81,14 @@ async function testModel(
 
 async function main() {
   console.log("🚀 Starting Gemini Model Tests");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
   console.log("\n📋 Testing Configuration:");
-  console.log(`   - Temperature: 0 (strict instruction following)`);
-  console.log(`   - Gemini API: ${process.env.GOOGLE_GENERATIVE_AI_API_KEY ? "✅ Configured" : "❌ Not configured"}`);
+  console.log("   - Temperature: 0 (strict instruction following)");
+  console.log(
+    `   - Gemini API: ${process.env.GOOGLE_GENERATIVE_AI_API_KEY ? "✅ Configured" : "❌ Not configured"}`
+  );
   console.log(`   - Models to test: ${MODELS_TO_TEST.length}`);
-  console.log("\n" + "=".repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
 
   const results = new Map<
     (typeof MODELS_TO_TEST)[number],
@@ -101,9 +101,9 @@ async function main() {
   }
 
   // Summary
-  console.log("\n" + "=".repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
   console.log("📊 Test Results Summary");
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   let passCount = 0;
   let failCount = 0;
@@ -117,10 +117,10 @@ async function main() {
     result.success ? passCount++ : failCount++;
   }
 
-  console.log("\n" + "=".repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
   console.log(`✅ Passed: ${passCount}/${MODELS_TO_TEST.length}`);
   console.log(`❌ Failed: ${failCount}/${MODELS_TO_TEST.length}`);
-  console.log("=" .repeat(60));
+  console.log("=".repeat(60));
 
   if (failCount > 0) {
     console.log("\n⚠️  Some models failed. Check Gemini API configuration.");

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
+import { AgentForm } from "@/components/admin/agent-form";
 import {
   Dialog,
   DialogContent,
@@ -8,11 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AgentForm } from "@/components/admin/agent-form";
 import type { AgentFormData } from "@/lib/validations/agent";
-import { toast } from "sonner";
 
-interface AgentEditModalProps {
+type AgentEditModalProps = {
   agent: {
     id: string;
     fullName: string;
@@ -26,7 +26,7 @@ interface AgentEditModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
-}
+};
 
 export function AgentEditModal({
   agent,
@@ -34,7 +34,7 @@ export function AgentEditModal({
   onOpenChange,
   onSuccess,
 }: AgentEditModalProps) {
-  const [submitting, setSubmitting] = useState(false);
+  const [_submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (data: AgentFormData) => {
     setSubmitting(true);
@@ -62,8 +62,8 @@ export function AgentEditModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <Dialog onOpenChange={onOpenChange} open={open}>
+      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Agent</DialogTitle>
           <DialogDescription>
@@ -81,8 +81,8 @@ export function AgentEditModal({
             isActive: agent.isActive,
             notes: agent.notes || "",
           }}
-          onSubmit={handleSubmit}
           onCancel={() => onOpenChange(false)}
+          onSubmit={handleSubmit}
           submitLabel="Update Agent"
         />
       </DialogContent>

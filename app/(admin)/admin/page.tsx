@@ -1,29 +1,26 @@
-import { Suspense } from "react";
-import { auth } from "@/app/(auth)/auth";
-import { redirect } from "next/navigation";
-import { db } from "@/lib/db/client";
-import { zyprusAgent, agentExecutionLog, systemHealthLog } from "@/lib/db/schema";
-import { count, eq, desc, isNull, sql, and, gte } from "drizzle-orm";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
+import { format, subDays } from "date-fns";
+import { count, desc, eq, isNull } from "drizzle-orm";
 import {
-  Users,
+  Activity,
+  CheckCircle2,
   UserCheck,
   UserPlus,
-  Activity,
-  ArrowRight,
-  TrendingUp,
-  MessageSquare,
-  FileText,
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  Zap,
+  Users,
 } from "lucide-react";
-import { format, subDays } from "date-fns";
-import { OverviewChart, BarStatsChart, DistributionChart } from "@/components/admin/charts";
+import { redirect } from "next/navigation";
+import { auth } from "@/app/(auth)/auth";
+import { DistributionChart, OverviewChart } from "@/components/admin/charts";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { db } from "@/lib/db/client";
+import { systemHealthLog, zyprusAgent } from "@/lib/db/schema";
 
 async function getDashboardStats() {
   // 1. Agent Stats
@@ -38,8 +35,8 @@ async function getDashboardStats() {
     .where(isNull(zyprusAgent.registeredAt));
 
   // 2. Recent Activity (Last 7 days)
-  const sevenDaysAgo = subDays(new Date(), 7);
-  
+  const _sevenDaysAgo = subDays(new Date(), 7);
+
   // Mocking activity data for chart (since we might not have enough real data yet)
   // In a real scenario, we would aggregate `agentExecutionLog` by day
   const activityData = [
@@ -102,7 +99,7 @@ export default async function AdminDashboardPage() {
     <div className="space-y-8 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          <h2 className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text font-bold text-3xl text-transparent tracking-tight">
             Admin Dashboard
           </h2>
           <p className="text-muted-foreground">
@@ -116,52 +113,53 @@ export default async function AdminDashboardPage() {
 
       {/* Key Metrics Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm transition-shadow hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Agents</CardTitle>
+            <CardTitle className="font-medium text-sm">Total Agents</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.agents.total}</div>
-            <p className="text-xs text-muted-foreground">
-              +2 from last month
-            </p>
+            <div className="font-bold text-2xl">{stats.agents.total}</div>
+            <p className="text-muted-foreground text-xs">+2 from last month</p>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border-l-4 border-l-green-500 shadow-sm transition-shadow hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
+            <CardTitle className="font-medium text-sm">Active Agents</CardTitle>
             <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.agents.active}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.agents.total > 0 ? Math.round((stats.agents.active / stats.agents.total) * 100) : 0}% engagement rate
+            <div className="font-bold text-2xl">{stats.agents.active}</div>
+            <p className="text-muted-foreground text-xs">
+              {stats.agents.total > 0
+                ? Math.round((stats.agents.active / stats.agents.total) * 100)
+                : 0}
+              % engagement rate
             </p>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-orange-500 shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border-l-4 border-l-orange-500 shadow-sm transition-shadow hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Approval</CardTitle>
+            <CardTitle className="font-medium text-sm">
+              Pending Approval
+            </CardTitle>
             <UserPlus className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.agents.pending}</div>
-            <p className="text-xs text-muted-foreground">
-              Requires attention
-            </p>
+            <div className="font-bold text-2xl">{stats.agents.pending}</div>
+            <p className="text-muted-foreground text-xs">Requires attention</p>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border-l-4 border-l-purple-500 shadow-sm transition-shadow hover:shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">System Status</CardTitle>
+            <CardTitle className="font-medium text-sm">System Status</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600 flex items-center gap-2">
+            <div className="flex items-center gap-2 font-bold text-2xl text-green-600">
               Healthy <CheckCircle2 className="h-5 w-5" />
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               All systems operational
             </p>
           </CardContent>
@@ -170,17 +168,17 @@ export default async function AdminDashboardPage() {
 
       {/* Charts Section */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <OverviewChart 
-          data={stats.activityData} 
+        <OverviewChart
           className="col-span-4 shadow-sm"
-          title="Agent Activity"
+          data={stats.activityData}
           description="Daily interactions over the last 7 days"
+          title="Agent Activity"
         />
-        <DistributionChart 
-          data={stats.regionalStats} 
+        <DistributionChart
           className="col-span-3 shadow-sm"
-          title="Regional Distribution"
+          data={stats.regionalStats}
           description="Agents by region"
+          title="Regional Distribution"
         />
       </div>
 
@@ -196,23 +194,33 @@ export default async function AdminDashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {stats.recentAgents.map((agent) => (
-                <div key={agent.id} className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0">
+                <div
+                  className="flex items-center justify-between border-b pb-2 last:border-0 last:pb-0"
+                  key={agent.id}
+                >
                   <div className="flex items-center gap-4">
-                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
                       <span className="font-bold text-primary text-xs">
                         {agent.fullName.substring(0, 2).toUpperCase()}
                       </span>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-medium leading-none">{agent.fullName}</p>
-                      <p className="text-xs text-muted-foreground">{agent.email}</p>
+                      <p className="font-medium text-sm leading-none">
+                        {agent.fullName}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        {agent.email}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant={agent.isActive ? "default" : "secondary"} className="text-[10px]">
+                    <Badge
+                      className="text-[10px]"
+                      variant={agent.isActive ? "default" : "secondary"}
+                    >
                       {agent.isActive ? "Active" : "Inactive"}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {format(new Date(agent.createdAt), "MMM dd")}
                     </span>
                   </div>
@@ -225,9 +233,7 @@ export default async function AdminDashboardPage() {
         <Card className="col-span-3 shadow-sm">
           <CardHeader>
             <CardTitle>System Health</CardTitle>
-            <CardDescription>
-              Latest system status checks.
-            </CardDescription>
+            <CardDescription>Latest system status checks.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -237,33 +243,46 @@ export default async function AdminDashboardPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-green-500" />
-                      <span className="text-sm font-medium">Database</span>
+                      <span className="font-medium text-sm">Database</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">100% Uptime</span>
+                    <span className="text-muted-foreground text-xs">
+                      100% Uptime
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-green-500" />
-                      <span className="text-sm font-medium">AI Gateway</span>
+                      <span className="font-medium text-sm">AI Gateway</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">99.9% Uptime</span>
+                    <span className="text-muted-foreground text-xs">
+                      99.9% Uptime
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-green-500" />
-                      <span className="text-sm font-medium">Telegram Bot</span>
+                      <span className="font-medium text-sm">Telegram Bot</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">Operational</span>
+                    <span className="text-muted-foreground text-xs">
+                      Operational
+                    </span>
                   </div>
                 </>
               ) : (
                 stats.healthLogs.map((log) => (
-                  <div key={log.id} className="flex items-center justify-between">
+                  <div
+                    className="flex items-center justify-between"
+                    key={log.id}
+                  >
                     <div className="flex items-center gap-2">
-                      <div className={`h-2 w-2 rounded-full ${log.status === 'healthy' ? 'bg-green-500' : 'bg-red-500'}`} />
-                      <span className="text-sm font-medium capitalize">{log.service}</span>
+                      <div
+                        className={`h-2 w-2 rounded-full ${log.status === "healthy" ? "bg-green-500" : "bg-red-500"}`}
+                      />
+                      <span className="font-medium text-sm capitalize">
+                        {log.service}
+                      </span>
                     </div>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {format(new Date(log.timestamp), "HH:mm:ss")}
                     </span>
                   </div>

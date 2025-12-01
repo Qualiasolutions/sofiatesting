@@ -1,8 +1,8 @@
+import { desc, gte } from "drizzle-orm";
+import { AlertCircle, CheckCircle2, XCircle } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/lib/db/client";
 import { systemHealthLog } from "@/lib/db/schema";
-import { desc, gte } from "drizzle-orm";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 export async function SystemHealthCard() {
   const oneHourAgo = new Date();
@@ -23,17 +23,17 @@ export async function SystemHealthCard() {
       </CardHeader>
       <CardContent className="space-y-4">
         {recentLogs.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             No health events in the last hour
           </p>
         ) : (
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold">Recent Events</h4>
+            <h4 className="font-semibold text-sm">Recent Events</h4>
             {recentLogs.map((log) => {
               const isHealthy = log.status === "healthy";
               const isDegraded = log.status === "degraded";
               return (
-                <div key={log.id} className="flex items-start gap-2">
+                <div className="flex items-start gap-2" key={log.id}>
                   {isHealthy ? (
                     <CheckCircle2 className="h-4 w-4 text-green-500" />
                   ) : isDegraded ? (
@@ -42,15 +42,15 @@ export async function SystemHealthCard() {
                     <XCircle className="h-4 w-4 text-red-500" />
                   )}
                   <div className="flex-1">
-                    <p className="text-sm font-medium capitalize">
+                    <p className="font-medium text-sm capitalize">
                       {log.service.replace(/_/g, " ")}
                     </p>
                     {log.details && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {log.details}
                       </p>
                     )}
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-xs">
                       {new Date(log.timestamp).toLocaleTimeString()}
                     </p>
                   </div>

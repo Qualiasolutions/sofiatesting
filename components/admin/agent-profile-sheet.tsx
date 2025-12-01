@@ -1,6 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import {
+  CheckCircle2,
+  Edit,
+  Mail,
+  MapPin,
+  Phone,
+  Trash2,
+  XCircle,
+} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { AgentEditModal } from "@/components/admin/agent-edit-modal";
+import {
+  LinkTelegramModal,
+  LinkWhatsAppModal,
+} from "@/components/admin/platform-link-modals";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -8,30 +27,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import {
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  MessageSquare,
-  Edit,
-  Trash2,
-  CheckCircle2,
-  XCircle,
-  Activity,
-} from "lucide-react";
-import { format } from "date-fns";
-import { AgentEditModal } from "@/components/admin/agent-edit-modal";
-import {
-  LinkTelegramModal,
-  LinkWhatsAppModal,
-} from "@/components/admin/platform-link-modals";
 
-interface Agent {
+type Agent = {
   id: string;
   userId: string | null;
   fullName: string;
@@ -49,9 +46,9 @@ interface Agent {
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
-}
+};
 
-interface AgentStats {
+type AgentStats = {
   totalSessions: number;
   totalMessages: number;
   totalDocuments: number;
@@ -64,14 +61,14 @@ interface AgentStats {
     telegram: number;
     whatsapp: number;
   };
-}
+};
 
-interface AgentProfileSheetProps {
+type AgentProfileSheetProps = {
   agent: Agent;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRefresh: () => void;
-}
+};
 
 export function AgentProfileSheet({
   agent,
@@ -80,18 +77,12 @@ export function AgentProfileSheet({
   onRefresh,
 }: AgentProfileSheetProps) {
   const [stats, setStats] = useState<AgentStats | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [telegramModalOpen, setTelegramModalOpen] = useState(false);
   const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (open && agent) {
-      fetchAgentStats();
-    }
-  }, [open, agent]);
-
-  const fetchAgentStats = async () => {
+  const fetchAgentStats = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/admin/agents/${agent.id}`);
@@ -102,10 +93,16 @@ export function AgentProfileSheet({
     } finally {
       setLoading(false);
     }
-  };
+  }, [agent.id]);
+
+  useEffect(() => {
+    if (open && agent) {
+      fetchAgentStats();
+    }
+  }, [open, agent, fetchAgentStats]);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet onOpenChange={onOpenChange} open={open}>
       <SheetContent className="w-[600px] overflow-y-auto">
         <SheetHeader>
           <div className="flex items-start justify-between">
@@ -116,12 +113,12 @@ export function AgentProfileSheet({
               </SheetDescription>
             </div>
             {agent.isActive ? (
-              <Badge variant="default" className="flex items-center gap-1">
+              <Badge className="flex items-center gap-1" variant="default">
                 <CheckCircle2 className="h-3 w-3" />
                 Active
               </Badge>
             ) : (
-              <Badge variant="destructive" className="flex items-center gap-1">
+              <Badge className="flex items-center gap-1" variant="destructive">
                 <XCircle className="h-3 w-3" />
                 Inactive
               </Badge>
@@ -156,7 +153,9 @@ export function AgentProfileSheet({
             <h3 className="mb-3 font-semibold">Platform Connections</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Web Account</span>
+                <span className="text-muted-foreground text-sm">
+                  Web Account
+                </span>
                 {agent.registeredAt ? (
                   <Badge variant="default">Connected</Badge>
                 ) : (
@@ -164,42 +163,46 @@ export function AgentProfileSheet({
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Telegram</span>
+                <span className="text-muted-foreground text-sm">Telegram</span>
                 {agent.telegramUserId ? (
                   <Button
-                    variant="outline"
-                    size="sm"
                     onClick={() => setTelegramModalOpen(true)}
+                    size="sm"
+                    variant="outline"
                   >
-                    <Badge variant="default" className="mr-2">Connected</Badge>
+                    <Badge className="mr-2" variant="default">
+                      Connected
+                    </Badge>
                     Manage
                   </Button>
                 ) : (
                   <Button
-                    variant="outline"
-                    size="sm"
                     onClick={() => setTelegramModalOpen(true)}
+                    size="sm"
+                    variant="outline"
                   >
                     Link Account
                   </Button>
                 )}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">WhatsApp</span>
+                <span className="text-muted-foreground text-sm">WhatsApp</span>
                 {agent.whatsappPhoneNumber ? (
                   <Button
-                    variant="outline"
-                    size="sm"
                     onClick={() => setWhatsappModalOpen(true)}
+                    size="sm"
+                    variant="outline"
                   >
-                    <Badge variant="default" className="mr-2">Connected</Badge>
+                    <Badge className="mr-2" variant="default">
+                      Connected
+                    </Badge>
                     Manage
                   </Button>
                 ) : (
                   <Button
-                    variant="outline"
-                    size="sm"
                     onClick={() => setWhatsappModalOpen(true)}
+                    size="sm"
+                    variant="outline"
                   >
                     Link Account
                   </Button>
@@ -214,28 +217,44 @@ export function AgentProfileSheet({
               <h3 className="mb-3 font-semibold">Activity Statistics</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-2xl font-bold">{stats.totalSessions}</div>
-                  <div className="text-sm text-muted-foreground">Total Sessions</div>
+                  <div className="font-bold text-2xl">
+                    {stats.totalSessions}
+                  </div>
+                  <div className="text-muted-foreground text-sm">
+                    Total Sessions
+                  </div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{stats.totalMessages}</div>
-                  <div className="text-sm text-muted-foreground">Messages</div>
+                  <div className="font-bold text-2xl">
+                    {stats.totalMessages}
+                  </div>
+                  <div className="text-muted-foreground text-sm">Messages</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{stats.totalDocuments}</div>
-                  <div className="text-sm text-muted-foreground">Documents</div>
+                  <div className="font-bold text-2xl">
+                    {stats.totalDocuments}
+                  </div>
+                  <div className="text-muted-foreground text-sm">Documents</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{stats.totalCalculations}</div>
-                  <div className="text-sm text-muted-foreground">Calculations</div>
+                  <div className="font-bold text-2xl">
+                    {stats.totalCalculations}
+                  </div>
+                  <div className="text-muted-foreground text-sm">
+                    Calculations
+                  </div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">{stats.totalListings}</div>
-                  <div className="text-sm text-muted-foreground">Listings</div>
+                  <div className="font-bold text-2xl">
+                    {stats.totalListings}
+                  </div>
+                  <div className="text-muted-foreground text-sm">Listings</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold">${stats.totalCost}</div>
-                  <div className="text-sm text-muted-foreground">Total Cost</div>
+                  <div className="font-bold text-2xl">${stats.totalCost}</div>
+                  <div className="text-muted-foreground text-sm">
+                    Total Cost
+                  </div>
                 </div>
               </div>
             </Card>
@@ -246,14 +265,16 @@ export function AgentProfileSheet({
             <h3 className="mb-3 font-semibold">Timestamps</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Created</span>
+                <span className="text-muted-foreground text-sm">Created</span>
                 <span className="text-sm">
                   {format(new Date(agent.createdAt), "PPP")}
                 </span>
               </div>
               {agent.registeredAt && (
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Registered</span>
+                  <span className="text-muted-foreground text-sm">
+                    Registered
+                  </span>
                   <span className="text-sm">
                     {format(new Date(agent.registeredAt), "PPP")}
                   </span>
@@ -261,7 +282,9 @@ export function AgentProfileSheet({
               )}
               {agent.lastActiveAt && (
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Last Active</span>
+                  <span className="text-muted-foreground text-sm">
+                    Last Active
+                  </span>
                   <span className="text-sm">
                     {format(new Date(agent.lastActiveAt), "PPP p")}
                   </span>
@@ -274,7 +297,7 @@ export function AgentProfileSheet({
           {agent.notes && (
             <Card className="p-4">
               <h3 className="mb-3 font-semibold">Notes</h3>
-              <p className="text-sm text-muted-foreground">{agent.notes}</p>
+              <p className="text-muted-foreground text-sm">{agent.notes}</p>
             </Card>
           )}
 
@@ -289,7 +312,7 @@ export function AgentProfileSheet({
               <Mail className="mr-2 h-4 w-4" />
               Send Invite
             </Button>
-            <Button variant="outline" className="text-red-600">
+            <Button className="text-red-600" variant="outline">
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -299,37 +322,37 @@ export function AgentProfileSheet({
       {/* Agent Edit Modal */}
       <AgentEditModal
         agent={agent}
-        open={editModalOpen}
         onOpenChange={setEditModalOpen}
         onSuccess={() => {
           onRefresh();
           fetchAgentStats(); // Refresh stats after edit
         }}
+        open={editModalOpen}
       />
 
       {/* Platform Linking Modals */}
       <LinkTelegramModal
         agentId={agent.id}
         agentName={agent.fullName}
-        open={telegramModalOpen}
-        onOpenChange={setTelegramModalOpen}
         currentTelegramUserId={agent.telegramUserId}
+        onOpenChange={setTelegramModalOpen}
         onSuccess={() => {
           onRefresh();
           fetchAgentStats();
         }}
+        open={telegramModalOpen}
       />
 
       <LinkWhatsAppModal
         agentId={agent.id}
         agentName={agent.fullName}
-        open={whatsappModalOpen}
-        onOpenChange={setWhatsappModalOpen}
         currentWhatsAppPhone={agent.whatsappPhoneNumber}
+        onOpenChange={setWhatsappModalOpen}
         onSuccess={() => {
           onRefresh();
           fetchAgentStats();
         }}
+        open={whatsappModalOpen}
       />
     </Sheet>
   );

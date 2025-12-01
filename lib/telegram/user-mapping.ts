@@ -58,7 +58,7 @@ export function getTelegramChatId(telegramUserId: number): string {
   // Generate a deterministic UUID based on Telegram user ID
   // This creates a single persistent conversation per Telegram user
   // Use namespace UUID v5 to create a valid UUID from the Telegram ID
-  const crypto = require("crypto");
+  const crypto = require("node:crypto");
   const namespace = "6ba7b810-9dad-11d1-80b4-00c04fd430c8"; // DNS namespace UUID
   const name = `telegram_user_${telegramUserId}`;
 
@@ -75,23 +75,35 @@ export function getTelegramChatId(telegramUserId: number): string {
   // Format as UUID v5 (RFC 4122)
   // 8-4-4-4-12 hex character format
   const uuid = [
-    digest.subarray(0, 4).toString("hex"),    // 8 hex chars (time_low)
-    digest.subarray(4, 6).toString("hex"),    // 4 hex chars (time_mid)
-    digest.subarray(6, 8).toString("hex"),    // 4 hex chars (time_hi_and_version)
-    digest.subarray(8, 10).toString("hex"),   // 4 hex chars (clock_seq_hi_and_reserved + clock_seq_low)
-    digest.subarray(10, 16).toString("hex"),  // 12 hex chars (node)
+    digest
+      .subarray(0, 4)
+      .toString("hex"), // 8 hex chars (time_low)
+    digest
+      .subarray(4, 6)
+      .toString("hex"), // 4 hex chars (time_mid)
+    digest
+      .subarray(6, 8)
+      .toString("hex"), // 4 hex chars (time_hi_and_version)
+    digest
+      .subarray(8, 10)
+      .toString("hex"), // 4 hex chars (clock_seq_hi_and_reserved + clock_seq_low)
+    digest
+      .subarray(10, 16)
+      .toString("hex"), // 12 hex chars (node)
   ].join("-");
 
   // Set version (5) and variant bits as per RFC 4122
   const parts = uuid.split("-");
 
   // Set version to 5 (0101) in time_hi_and_version (bits 12-15)
-  const timeHiAndVersion = parseInt(parts[2], 16);
-  parts[2] = ((timeHiAndVersion & 0x0fff) | 0x5000).toString(16).padStart(4, "0");
+  const timeHiAndVersion = Number.parseInt(parts[2], 16);
+  parts[2] = ((timeHiAndVersion & 0x0f_ff) | 0x50_00)
+    .toString(16)
+    .padStart(4, "0");
 
   // Set variant to 10 in clock_seq_hi_and_reserved (bits 6-7)
-  const clockSeq = parseInt(parts[3], 16);
-  parts[3] = ((clockSeq & 0x3fff) | 0x8000).toString(16).padStart(4, "0");
+  const clockSeq = Number.parseInt(parts[3], 16);
+  parts[3] = ((clockSeq & 0x3f_ff) | 0x80_00).toString(16).padStart(4, "0");
 
   return parts.join("-");
 }

@@ -1,14 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { desc, eq } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
-import { zyprusAgent, agentChatSession } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { agentChatSession, zyprusAgent } from "@/lib/db/schema";
 
 /**
  * GET /api/admin/agents/[id]
  * Get agent details including activity statistics
  */
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -161,7 +161,7 @@ export async function PUT(
  * Deactivate an agent (soft delete)
  */
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {

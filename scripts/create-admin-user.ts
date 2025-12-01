@@ -5,9 +5,9 @@
  * Run with: npx tsx scripts/create-admin-user.ts <email>
  */
 
-import { db } from "@/lib/db/client";
-import { user, adminUserRole } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { db } from "@/lib/db/client";
+import { adminUserRole, user } from "@/lib/db/schema";
 
 async function createAdminUser(email: string) {
   try {
@@ -37,7 +37,9 @@ async function createAdminUser(email: string) {
       .limit(1);
 
     if (existingAdmin && existingAdmin.length > 0) {
-      console.log(`⚠️  User is already an admin with role: ${existingAdmin[0].role}`);
+      console.log(
+        `⚠️  User is already an admin with role: ${existingAdmin[0].role}`
+      );
       console.log("\nUpdating to superadmin...");
 
       await db
@@ -77,13 +79,13 @@ async function createAdminUser(email: string) {
     }
 
     console.log("\n🎉 Success!");
-    console.log(`\n📋 Admin Details:`);
+    console.log("\n📋 Admin Details:");
     console.log(`   Email: ${foundUser.email}`);
     console.log(`   User ID: ${foundUser.id}`);
-    console.log(`   Role: superadmin`);
-    console.log(`\n🔗 You can now access the admin panel at:`);
-    console.log(`   http://localhost:3000/admin`);
-    console.log(`   http://localhost:3000/admin/agents-registry`);
+    console.log("   Role: superadmin");
+    console.log("\n🔗 You can now access the admin panel at:");
+    console.log("   http://localhost:3000/admin");
+    console.log("   http://localhost:3000/admin/agents-registry");
 
     process.exit(0);
   } catch (error) {

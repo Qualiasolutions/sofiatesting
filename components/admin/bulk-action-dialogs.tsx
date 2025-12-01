@@ -1,6 +1,9 @@
 "use client";
 
+import { AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,16 +14,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, AlertTriangle, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
 
-interface BulkActionDialogProps {
+type BulkActionDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedCount: number;
   onSuccess: () => void;
-}
+};
 
 interface BulkSendInvitesDialogProps extends BulkActionDialogProps {}
 
@@ -37,7 +37,9 @@ export function BulkSendInvitesDialog({
     try {
       // API call will be implemented when backend is ready
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      toast.success(`Successfully sent invites to ${selectedCount} agent${selectedCount > 1 ? "s" : ""}`);
+      toast.success(
+        `Successfully sent invites to ${selectedCount} agent${selectedCount > 1 ? "s" : ""}`
+      );
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
@@ -48,26 +50,30 @@ export function BulkSendInvitesDialog({
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog onOpenChange={onOpenChange} open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Send Invites to {selectedCount} Agent{selectedCount > 1 ? "s" : ""}?</AlertDialogTitle>
+          <AlertDialogTitle>
+            Send Invites to {selectedCount} Agent{selectedCount > 1 ? "s" : ""}?
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            This will send email invitations to all selected agents who haven't registered yet.
-            They will receive a personalized link to set up their account.
+            This will send email invitations to all selected agents who haven't
+            registered yet. They will receive a personalized link to set up
+            their account.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <Alert>
           <CheckCircle2 className="h-4 w-4" />
           <AlertDescription>
-            Only agents without existing accounts will receive invitations. Agents with registered accounts will be skipped.
+            Only agents without existing accounts will receive invitations.
+            Agents with registered accounts will be skipped.
           </AlertDescription>
         </Alert>
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm} disabled={loading}>
+          <AlertDialogAction disabled={loading} onClick={handleConfirm}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Send {selectedCount} Invite{selectedCount > 1 ? "s" : ""}
           </AlertDialogAction>
@@ -92,7 +98,9 @@ export function BulkDeactivateDialog({
     try {
       // API call will be implemented when backend is ready
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      toast.success(`Successfully deactivated ${selectedCount} agent${selectedCount > 1 ? "s" : ""}`);
+      toast.success(
+        `Successfully deactivated ${selectedCount} agent${selectedCount > 1 ? "s" : ""}`
+      );
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
@@ -103,30 +111,34 @@ export function BulkDeactivateDialog({
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog onOpenChange={onOpenChange} open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Deactivate {selectedCount} Agent{selectedCount > 1 ? "s" : ""}?</AlertDialogTitle>
+          <AlertDialogTitle>
+            Deactivate {selectedCount} Agent{selectedCount > 1 ? "s" : ""}?
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            This action will deactivate the selected agents. They will no longer be able to access SOFIA
-            until they are reactivated by an administrator.
+            This action will deactivate the selected agents. They will no longer
+            be able to access SOFIA until they are reactivated by an
+            administrator.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            Deactivated agents will lose access immediately. Their data and conversations will be preserved.
-            You can reactivate them at any time.
+            Deactivated agents will lose access immediately. Their data and
+            conversations will be preserved. You can reactivate them at any
+            time.
           </AlertDescription>
         </Alert>
 
         <AlertDialogFooter>
           <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            onClick={handleConfirm}
-            disabled={loading}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            disabled={loading}
+            onClick={handleConfirm}
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Deactivate {selectedCount} Agent{selectedCount > 1 ? "s" : ""}

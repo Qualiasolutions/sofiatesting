@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { and, eq, gte, sql } from "drizzle-orm";
+import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
-import { zyprusAgent, agentChatSession } from "@/lib/db/schema";
-import { eq, and, gte, sql } from "drizzle-orm";
+import { agentChatSession, zyprusAgent } from "@/lib/db/schema";
 
 /**
  * GET /api/admin/agents/stats
@@ -14,7 +14,7 @@ import { eq, and, gte, sql } from "drizzle-orm";
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const days = Number.parseInt(searchParams.get("days") || "30");
+    const days = Number.parseInt(searchParams.get("days") || "30", 10);
     const region = searchParams.get("region");
 
     // Calculate date threshold
@@ -132,7 +132,8 @@ export async function GET(request: NextRequest) {
         total: Number(totalAgents[0].count),
         active: Number(activeAgents[0].count),
         registered: Number(registeredAgents[0].count),
-        pending: Number(totalAgents[0].count) - Number(registeredAgents[0].count),
+        pending:
+          Number(totalAgents[0].count) - Number(registeredAgents[0].count),
       },
       byRegion,
       byRole,

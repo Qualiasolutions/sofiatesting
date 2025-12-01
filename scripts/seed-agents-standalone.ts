@@ -1,9 +1,9 @@
+import { randomBytes } from "node:crypto";
 import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { zyprusAgent } from "../lib/db/schema";
 import * as XLSX from "xlsx";
-import { randomBytes } from "crypto";
+import { zyprusAgent } from "../lib/db/schema";
 
 // Load environment variables
 config({ path: ".env.local" });
@@ -17,13 +17,13 @@ config({ path: ".env.local" });
  *   pnpm tsx scripts/seed-agents-standalone.ts
  */
 
-interface AgentRow {
+type AgentRow = {
   "Fulla Name": string;
   "Mobile Phone": string | number;
   "Email use to communicate": string;
   Region: string;
   Role: string;
-}
+};
 
 function normalizePhoneNumber(phone: string | number): string {
   if (typeof phone === "number") {
@@ -164,6 +164,7 @@ async function seedAgents(excelPath: string) {
 
 // Main execution
 const excelPath =
-  process.argv[2] || "/home/qualiasolutions/Downloads/Untitled spreadsheet.xlsx";
+  process.argv[2] ||
+  "/home/qualiasolutions/Downloads/Untitled spreadsheet.xlsx";
 
 seedAgents(excelPath);

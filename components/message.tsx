@@ -24,7 +24,6 @@ import { MessageEditor } from "./message-editor";
 import { MessageReasoning } from "./message-reasoning";
 import { PreviewAttachment } from "./preview-attachment";
 
-
 const PurePreviewMessage = ({
   chatId,
   message,
@@ -140,9 +139,10 @@ const PurePreviewMessage = ({
                       data-testid="message-content"
                       style={
                         message.role === "user"
-                          ? { 
-                              background: "linear-gradient(135deg, #006cff 0%, #4f46e5 100%)",
-                              border: "1px solid rgba(255,255,255,0.1)"
+                          ? {
+                              background:
+                                "linear-gradient(135deg, #006cff 0%, #4f46e5 100%)",
+                              border: "1px solid rgba(255,255,255,0.1)",
                             }
                           : undefined
                       }
@@ -173,8 +173,6 @@ const PurePreviewMessage = ({
                 );
               }
             }
-
-
 
             if (type === "tool-createDocument") {
               const { toolCallId } = part;

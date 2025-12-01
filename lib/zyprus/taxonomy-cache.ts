@@ -1,6 +1,6 @@
 import { getZyprusLocations, getZyprusTaxonomyTerms } from "./client";
 
-export interface TaxonomyCache {
+export type TaxonomyCache = {
   locations?: Map<string, string>; // name → id
   propertyTypes?: Map<string, string>;
   indoorFeatures?: Map<string, string>;
@@ -8,7 +8,7 @@ export interface TaxonomyCache {
   priceModifiers?: Map<string, string>;
   titleDeeds?: Map<string, string>;
   lastUpdated: number;
-}
+};
 
 const CACHE_TTL_SECONDS = 3600; // 1 hour in seconds
 
@@ -151,9 +151,8 @@ export async function getCache(): Promise<TaxonomyCache> {
         console.error("Background cache refresh failed:", err)
       );
       return globalCache;
-    } else {
-      return await refreshCache();
     }
+    return await refreshCache();
   }
 
   return globalCache;
@@ -172,7 +171,9 @@ export async function forceRefreshCache(): Promise<void> {
  */
 export async function findLocationByName(name: string): Promise<string | null> {
   const cache = await getCache();
-  if (!cache.locations) return null;
+  if (!cache.locations) {
+    return null;
+  }
 
   const searchName = name.toLowerCase().trim();
 
@@ -201,7 +202,9 @@ export async function findPropertyTypeByName(
   name: string
 ): Promise<string | null> {
   const cache = await getCache();
-  if (!cache.propertyTypes) return null;
+  if (!cache.propertyTypes) {
+    return null;
+  }
 
   const searchName = name.toLowerCase().trim();
 
@@ -217,11 +220,13 @@ export async function findPropertyTypeByName(
  */
 export async function findIndoorFeatureIds(names: string[]): Promise<string[]> {
   const cache = await getCache();
-  if (!cache.indoorFeatures) return [];
+  if (!cache.indoorFeatures) {
+    return [];
+  }
 
   return names
     .map((name) => name.toLowerCase().trim())
-    .map((name) => cache.indoorFeatures!.get(name))
+    .map((name) => cache.indoorFeatures?.get(name))
     .filter((id): id is string => id !== undefined);
 }
 
@@ -229,11 +234,13 @@ export async function findOutdoorFeatureIds(
   names: string[]
 ): Promise<string[]> {
   const cache = await getCache();
-  if (!cache.outdoorFeatures) return [];
+  if (!cache.outdoorFeatures) {
+    return [];
+  }
 
   return names
     .map((name) => name.toLowerCase().trim())
-    .map((name) => cache.outdoorFeatures!.get(name))
+    .map((name) => cache.outdoorFeatures?.get(name))
     .filter((id): id is string => id !== undefined);
 }
 
@@ -244,7 +251,9 @@ export async function getAllLocations(): Promise<
   Array<{ name: string; id: string }>
 > {
   const cache = await getCache();
-  if (!cache.locations) return [];
+  if (!cache.locations) {
+    return [];
+  }
 
   return Array.from(cache.locations.entries()).map(([name, id]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
@@ -259,7 +268,9 @@ export async function getAllPropertyTypes(): Promise<
   Array<{ name: string; id: string }>
 > {
   const cache = await getCache();
-  if (!cache.propertyTypes) return [];
+  if (!cache.propertyTypes) {
+    return [];
+  }
 
   return Array.from(cache.propertyTypes.entries()).map(([name, id]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
@@ -274,7 +285,9 @@ export async function getAllIndoorFeatures(): Promise<
   Array<{ name: string; id: string }>
 > {
   const cache = await getCache();
-  if (!cache.indoorFeatures) return [];
+  if (!cache.indoorFeatures) {
+    return [];
+  }
 
   return Array.from(cache.indoorFeatures.entries()).map(([name, id]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
@@ -286,7 +299,9 @@ export async function getAllOutdoorFeatures(): Promise<
   Array<{ name: string; id: string }>
 > {
   const cache = await getCache();
-  if (!cache.outdoorFeatures) return [];
+  if (!cache.outdoorFeatures) {
+    return [];
+  }
 
   return Array.from(cache.outdoorFeatures.entries()).map(([name, id]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
@@ -301,7 +316,9 @@ export async function getAllPriceModifiers(): Promise<
   Array<{ name: string; id: string }>
 > {
   const cache = await getCache();
-  if (!cache.priceModifiers) return [];
+  if (!cache.priceModifiers) {
+    return [];
+  }
 
   return Array.from(cache.priceModifiers.entries()).map(([name, id]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
@@ -316,7 +333,9 @@ export async function getAllTitleDeeds(): Promise<
   Array<{ name: string; id: string }>
 > {
   const cache = await getCache();
-  if (!cache.titleDeeds) return [];
+  if (!cache.titleDeeds) {
+    return [];
+  }
 
   return Array.from(cache.titleDeeds.entries()).map(([name, id]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),

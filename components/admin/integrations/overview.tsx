@@ -11,7 +11,7 @@ export async function IntegrationsOverview() {
         <CardTitle>Integration Status Overview</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Integration monitoring coming soon. Status tracking for Telegram,
           Zyprus API, and other services will be displayed here.
         </p>

@@ -4,7 +4,7 @@ import { auth } from "@/app/(auth)/auth";
 import { createPropertyListing } from "@/lib/db/queries";
 
 // Cyprus cities for validation
-const CYPRUS_LOCATIONS = [
+const _CYPRUS_LOCATIONS = [
   "limassol",
   "nicosia",
   "paphos",
@@ -101,7 +101,9 @@ export const createListingTool = tool({
     imageUrls: z
       .array(z.string().url())
       .min(1, "At least one property image is required for Zyprus listings")
-      .describe("Property image URLs (REQUIRED - at least 1 image). Use chat uploads or external URLs."),
+      .describe(
+        "Property image URLs (REQUIRED - at least 1 image). Use chat uploads or external URLs."
+      ),
   }),
   execute: async ({
     name,

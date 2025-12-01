@@ -19,8 +19,8 @@
  * Or with tsx: pnpm exec tsx --test tests/unit/parallel-image-uploads.test.ts
  */
 
-import { describe, test, mock, beforeEach, afterEach } from "node:test";
-import assert from "node:assert";
+import assert from "node:assert/strict";
+import { describe, mock, test } from "node:test";
 
 /**
  * Mock PropertyListing type matching the schema
@@ -101,10 +101,7 @@ async function parallelImageUpload(
       console.log(`Successfully uploaded image ${i + 1}: ${data.data.id}`);
       return { index: i, id: data.data.id, url: imageUrl };
     } catch (imgError) {
-      console.error(
-        `Error processing image ${i + 1} (${imageUrl}):`,
-        imgError
-      );
+      console.error(`Error processing image ${i + 1} (${imageUrl}):`, imgError);
       throw imgError; // Re-throw to mark as rejected in Promise.allSettled
     }
   });
@@ -199,7 +196,11 @@ describe("Parallel Image Upload Tests", () => {
       );
 
       // Verify all 3 images uploaded successfully
-      assert.strictEqual(imageIds.length, 3, "Should have 3 successful uploads");
+      assert.strictEqual(
+        imageIds.length,
+        3,
+        "Should have 3 successful uploads"
+      );
       // Note: Order may vary due to parallel execution
       assert.ok(imageIds.includes("image-id-1"));
       assert.ok(imageIds.includes("image-id-2"));
@@ -279,7 +280,7 @@ describe("Parallel Image Upload Tests", () => {
 
         // Upload requests
         if (typeof url === "string" && url.includes("field_gallery_")) {
-          return createMockUploadResponse(`image-id-success`);
+          return createMockUploadResponse("image-id-success");
         }
 
         // Image fetch for successful images
@@ -314,7 +315,8 @@ describe("Parallel Image Upload Tests", () => {
 
       const mockFetch = mock.fn(async (url: string) => {
         // Check if it's an upload request
-        const isUpload = typeof url === "string" && url.includes("field_gallery_");
+        const isUpload =
+          typeof url === "string" && url.includes("field_gallery_");
 
         if (!isUpload) {
           // Image fetch phase
@@ -372,7 +374,11 @@ describe("Parallel Image Upload Tests", () => {
         mockFetch as any
       );
 
-      assert.strictEqual(imageIds.length, 0, "Should have no successful uploads");
+      assert.strictEqual(
+        imageIds.length,
+        0,
+        "Should have no successful uploads"
+      );
     });
 
     test("should return empty array when all uploads fail", async () => {
@@ -415,7 +421,11 @@ describe("Parallel Image Upload Tests", () => {
       );
 
       assert.strictEqual(imageIds.length, 0);
-      assert.strictEqual(mockFetch.mock.calls.length, 0, "Should not call fetch");
+      assert.strictEqual(
+        mockFetch.mock.calls.length,
+        0,
+        "Should not call fetch"
+      );
     });
 
     test("should handle network timeout errors", async () => {
@@ -497,7 +507,9 @@ describe("Parallel Image Upload Tests", () => {
 
         if (typeof url === "string" && url.includes("field_gallery_")) {
           const callCount = mockFetch.mock.calls.length;
-          return createMockUploadResponse(`image-id-${Math.ceil(callCount / 2)}`);
+          return createMockUploadResponse(
+            `image-id-${Math.ceil(callCount / 2)}`
+          );
         }
 
         return createMockImageFetchResponse();
@@ -596,7 +608,12 @@ describe("Parallel Image Upload Tests", () => {
         return createMockImageFetchResponse();
       });
 
-      await parallelImageUpload(imageUrls, API_URL, MOCK_TOKEN, mockFetch as any);
+      await parallelImageUpload(
+        imageUrls,
+        API_URL,
+        MOCK_TOKEN,
+        mockFetch as any
+      );
 
       // Restore console.log
       console.log = originalLog;
@@ -607,11 +624,11 @@ describe("Parallel Image Upload Tests", () => {
       );
       assert.ok(completionLog, "Should log completion message");
       assert.ok(
-        completionLog!.includes("2/3 successful"),
+        completionLog?.includes("2/3 successful"),
         "Should show correct success count"
       );
       assert.ok(
-        completionLog!.includes("66.7%"),
+        completionLog?.includes("66.7%"),
         "Should show correct success percentage"
       );
     });
@@ -640,12 +657,19 @@ describe("Parallel Image Upload Tests", () => {
         return createMockImageFetchResponse();
       });
 
-      await parallelImageUpload(imageUrls, API_URL, MOCK_TOKEN, mockFetch as any);
+      await parallelImageUpload(
+        imageUrls,
+        API_URL,
+        MOCK_TOKEN,
+        mockFetch as any
+      );
 
       console.error = originalError;
 
       // Should log error for bad image
-      const errorLog = errorLogs.find((log) => log.includes("Image 2 upload failed"));
+      const errorLog = errorLogs.find((log) =>
+        log.includes("Image 2 upload failed")
+      );
       assert.ok(errorLog, "Should log individual failures");
     });
   });
@@ -670,7 +694,12 @@ describe("Parallel Image Upload Tests", () => {
         });
       });
 
-      await parallelImageUpload(imageUrls, API_URL, MOCK_TOKEN, mockFetch as any);
+      await parallelImageUpload(
+        imageUrls,
+        API_URL,
+        MOCK_TOKEN,
+        mockFetch as any
+      );
 
       // Note: In Node.js environment, we can't easily verify FormData filename
       // But we verified the logic exists in the implementation
@@ -747,7 +776,10 @@ describe("Integration Test: Full Upload Flow Simulation", () => {
               id: `zyprus-file-${uploadCounter}`,
             },
           }),
-          { status: 201, headers: { "content-type": "application/vnd.api+json" } }
+          {
+            status: 201,
+            headers: { "content-type": "application/vnd.api+json" },
+          }
         );
       }
 

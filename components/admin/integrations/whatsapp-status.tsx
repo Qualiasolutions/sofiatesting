@@ -1,12 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { MessageCircle, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AlertCircle, MessageCircle } from "lucide-react";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export async function WhatsAppStatus() {
   // WhatsApp is currently disabled (lib/integrations/whatsapp-DISABLED/)
-  const isEnabled = false;
+  const _isEnabled = false;
 
   return (
     <Card>
@@ -21,23 +21,26 @@ export async function WhatsAppStatus() {
         <div className="flex items-start gap-3 rounded-lg bg-muted p-4">
           <AlertCircle className="h-5 w-5 text-muted-foreground" />
           <div className="space-y-2">
-            <p className="text-sm font-medium">
+            <p className="font-medium text-sm">
               WhatsApp integration is prepared but not yet activated
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               The codebase includes WhatsApp Business API integration code in{" "}
-              <code className="text-xs">lib/integrations/whatsapp-DISABLED/</code>
+              <code className="text-xs">
+                lib/integrations/whatsapp-DISABLED/
+              </code>
             </p>
           </div>
         </div>
 
         <div className="space-y-2">
-          <h4 className="text-sm font-semibold">To Enable WhatsApp:</h4>
-          <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+          <h4 className="font-semibold text-sm">To Enable WhatsApp:</h4>
+          <ol className="list-inside list-decimal space-y-1 text-muted-foreground text-sm">
             <li>Set up Meta Business Account</li>
             <li>Configure WhatsApp Business API credentials</li>
-            <li>Set environment variables:
-              <ul className="list-disc list-inside ml-4 mt-1 text-xs">
+            <li>
+              Set environment variables:
+              <ul className="mt-1 ml-4 list-inside list-disc text-xs">
                 <li>WHATSAPP_BUSINESS_ACCOUNT_ID</li>
                 <li>WHATSAPP_PHONE_NUMBER_ID</li>
                 <li>WHATSAPP_ACCESS_TOKEN</li>
@@ -49,7 +52,7 @@ export async function WhatsAppStatus() {
           </ol>
         </div>
 
-        <Button variant="outline" className="w-full" asChild>
+        <Button asChild className="w-full" variant="outline">
           <Link
             href="https://developers.facebook.com/docs/whatsapp/business-management-api"
             target="_blank"

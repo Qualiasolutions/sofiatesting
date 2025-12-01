@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import type { TelegramUpdate, TelegramMessage } from "@/lib/telegram/types";
+import type { TelegramMessage, TelegramUpdate } from "@/lib/telegram/types";
 
 /**
  * E2E Tests for Async Telegram Webhook Implementation
@@ -26,7 +26,7 @@ test.describe("Telegram Async Webhook", () => {
    */
   function createTelegramMessage(
     text: string,
-    chatId = 123456789,
+    chatId = 123_456_789,
     messageId = 1
   ): TelegramMessage {
     return {
@@ -91,7 +91,7 @@ test.describe("Telegram Async Webhook", () => {
             result: {
               message_id: 999,
               date: Math.floor(Date.now() / 1000),
-              chat: { id: 123456789, type: "private" },
+              chat: { id: 123_456_789, type: "private" },
               text: "Mock response",
             },
           }),
@@ -274,12 +274,14 @@ test.describe("Telegram Async Webhook", () => {
     expect(sendMessageCalls.length).toBeGreaterThan(0);
 
     // Verify message was sent with reply
-    const finalMessage = sendMessageCalls[sendMessageCalls.length - 1];
+    const finalMessage = sendMessageCalls.at(-1);
     expect(finalMessage.body.chat_id).toBe(message.chat.id);
     expect(finalMessage.body.reply_to_message_id).toBe(message.message_id);
     expect(finalMessage.body.text).toBeDefined();
 
-    console.log(`✓ Background processing completed with ${apiCalls.length} API calls:`);
+    console.log(
+      `✓ Background processing completed with ${apiCalls.length} API calls:`
+    );
     console.log(`  - sendChatAction: ${chatActionCalls.length}`);
     console.log(`  - sendMessage: ${sendMessageCalls.length}`);
   });

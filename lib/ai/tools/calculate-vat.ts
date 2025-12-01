@@ -37,11 +37,7 @@ export const calculateVATTool = tool({
         "Is this for main residence? Ask: 'Is this for your main residence?' (Yes/No)"
       ),
   }),
-  execute: ({
-    price,
-    buildable_area,
-    is_main_residence = true,
-  }) => {
+  execute: ({ price, buildable_area, is_main_residence = true }) => {
     try {
       // Calculate VAT using the updated service with POST-2023 reform rules
       // Always use current date to ensure post-reform calculation

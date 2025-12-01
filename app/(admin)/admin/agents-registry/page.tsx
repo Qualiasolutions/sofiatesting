@@ -1,12 +1,12 @@
+import { count, desc, eq, isNull } from "drizzle-orm";
 import { Suspense } from "react";
-import { db } from "@/lib/db/client";
-import { zyprusAgent } from "@/lib/db/schema";
-import { desc, count, eq, isNull } from "drizzle-orm";
-import { AgentsRegistryClient } from "./page-client";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { db } from "@/lib/db/client";
+import { zyprusAgent } from "@/lib/db/schema";
+import { AgentsRegistryClient } from "./page-client";
 
-interface PageProps {
+type PageProps = {
   searchParams: Promise<{
     page?: string;
     limit?: string;
@@ -15,20 +15,20 @@ interface PageProps {
     isActive?: string;
     search?: string;
   }>;
-}
+};
 
-interface SearchParams {
+type SearchParams = {
   page?: string;
   limit?: string;
   region?: string;
   role?: string;
   isActive?: string;
   search?: string;
-}
+};
 
 async function getAgentsData(searchParams: SearchParams) {
-  const page = Number.parseInt(searchParams.page || "1");
-  const limit = Number.parseInt(searchParams.limit || "50");
+  const page = Number.parseInt(searchParams.page || "1", 10);
+  const limit = Number.parseInt(searchParams.limit || "50", 10);
   const offset = (page - 1) * limit;
 
   // Build where conditions
@@ -89,7 +89,7 @@ export default async function AgentsRegistryPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Agents Registry</h1>
+          <h1 className="font-bold text-3xl tracking-tight">Agents Registry</h1>
           <p className="text-muted-foreground">
             Manage Zyprus real estate agents across all platforms
           </p>
@@ -100,28 +100,28 @@ export default async function AgentsRegistryPage({ searchParams }: PageProps) {
         <div className="grid gap-4 md:grid-cols-3">
           <Card className="p-6">
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-muted-foreground">
+              <span className="font-medium text-muted-foreground text-sm">
                 Total Agents
               </span>
-              <span className="text-3xl font-bold">{data.metrics.total}</span>
+              <span className="font-bold text-3xl">{data.metrics.total}</span>
             </div>
           </Card>
           <Card className="p-6">
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-muted-foreground">
+              <span className="font-medium text-muted-foreground text-sm">
                 Active Agents
               </span>
-              <span className="text-3xl font-bold text-green-600">
+              <span className="font-bold text-3xl text-green-600">
                 {data.metrics.active}
               </span>
             </div>
           </Card>
           <Card className="p-6">
             <div className="flex flex-col gap-2">
-              <span className="text-sm font-medium text-muted-foreground">
+              <span className="font-medium text-muted-foreground text-sm">
                 Pending Registration
               </span>
-              <span className="text-3xl font-bold text-orange-600">
+              <span className="font-bold text-3xl text-orange-600">
                 {data.metrics.pending}
               </span>
             </div>
@@ -142,7 +142,7 @@ function MetricsSkeleton() {
   return (
     <div className="grid gap-4 md:grid-cols-3">
       {[1, 2, 3].map((i) => (
-        <Card key={i} className="p-6">
+        <Card className="p-6" key={i}>
           <div className="flex flex-col gap-2">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-8 w-16" />

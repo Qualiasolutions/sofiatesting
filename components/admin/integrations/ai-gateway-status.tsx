@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Brain, CheckCircle2, XCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export async function AIGatewayStatus() {
   const hasAIGatewayKey = !!process.env.AI_GATEWAY_API_KEY;
@@ -22,26 +22,16 @@ export async function AIGatewayStatus() {
         )}
       </CardHeader>
       <CardContent className="space-y-4">
-        {!hasAIGatewayKey ? (
-          <div className="rounded bg-destructive/10 p-4">
-            <p className="text-sm font-semibold text-destructive">
-              CRITICAL: AI Gateway is not configured!
-            </p>
-            <p className="text-xs text-destructive mt-1">
-              SOFIA requires AI_GATEWAY_API_KEY to function. The application
-              will not work without this configuration.
-            </p>
-          </div>
-        ) : (
+        {hasAIGatewayKey ? (
           <>
             <div className="space-y-2">
-              <h4 className="text-sm font-semibold">Configuration</h4>
+              <h4 className="font-semibold text-sm">Configuration</h4>
               <div className="grid gap-2 text-sm">
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Status:</span>
                   <Badge variant="default">Active</Badge>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Provider:</span>
                   <span className="font-mono">Vercel AI Gateway</span>
                 </div>
@@ -49,23 +39,23 @@ export async function AIGatewayStatus() {
             </div>
 
             <div className="space-y-2 border-t pt-4">
-              <h4 className="text-sm font-semibold">Available Models</h4>
+              <h4 className="font-semibold text-sm">Available Models</h4>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span>Claude Haiku 4.5</span>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge className="text-xs" variant="outline">
                     Default
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span>Claude Sonnet 4.5</span>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge className="text-xs" variant="outline">
                     Premium
                   </Badge>
                 </div>
                 <div className="flex justify-between">
                   <span>GPT-4o Mini</span>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge className="text-xs" variant="outline">
                     Budget
                   </Badge>
                 </div>
@@ -73,8 +63,8 @@ export async function AIGatewayStatus() {
             </div>
 
             <div className="space-y-2 border-t pt-4">
-              <h4 className="text-sm font-semibold">Features</h4>
-              <ul className="text-xs text-muted-foreground space-y-1">
+              <h4 className="font-semibold text-sm">Features</h4>
+              <ul className="space-y-1 text-muted-foreground text-xs">
                 <li>✓ Streaming responses (Server-Sent Events)</li>
                 <li>✓ Tool execution (Cyprus calculators)</li>
                 <li>✓ Prompt caching (Anthropic models)</li>
@@ -83,6 +73,16 @@ export async function AIGatewayStatus() {
               </ul>
             </div>
           </>
+        ) : (
+          <div className="rounded bg-destructive/10 p-4">
+            <p className="font-semibold text-destructive text-sm">
+              CRITICAL: AI Gateway is not configured!
+            </p>
+            <p className="mt-1 text-destructive text-xs">
+              SOFIA requires AI_GATEWAY_API_KEY to function. The application
+              will not work without this configuration.
+            </p>
+          </div>
         )}
       </CardContent>
     </Card>

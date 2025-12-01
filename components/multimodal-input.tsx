@@ -262,7 +262,7 @@ function PureMultimodalInput({
       />
 
       <PromptInput
-        className="rounded-2xl border border-white/20 bg-white/10 p-3 shadow-lg backdrop-blur-md transition-all duration-200 focus-within:border-white/30 focus-within:bg-white/15 hover:border-white/25 hover:bg-white/15 dark:bg-black/20 dark:focus-within:bg-black/30 dark:hover:bg-black/25"
+        className="rounded-2xl border border-white/20 bg-white/10 p-3 shadow-lg backdrop-blur-md transition-all duration-200 focus-within:border-white/30 focus-within:bg-white/15 hover:border-white/25 hover:bg-white/15 dark:bg-black/20 dark:hover:bg-black/25 dark:focus-within:bg-black/30"
         onSubmit={(event) => {
           event.preventDefault();
           if (status !== "ready") {

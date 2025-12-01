@@ -16,12 +16,7 @@ import type { VisibilityType } from "@/components/visibility-selector";
 import { pruneConversationHistory } from "@/lib/ai/conversation-pruning";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
-import {
-  getBaseSystemPrompt,
-  getDynamicSystemPrompt,
-  type RequestHints,
-  systemPrompt,
-} from "@/lib/ai/prompts";
+import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
 import { myProvider } from "@/lib/ai/providers";
 import { calculateCapitalGainsTool } from "@/lib/ai/tools/calculate-capital-gains";
 import { calculateTransferFeesTool } from "@/lib/ai/tools/calculate-transfer-fees";
@@ -81,15 +76,27 @@ export async function POST(request: Request) {
     if (error instanceof Error) {
       errorMessage = error.message;
     }
-    
+
     // Handle Zod errors specifically for better feedback
-    if (typeof error === 'object' && error !== null && 'issues' in error && Array.isArray((error as any).issues)) {
-       const issues = (error as any).issues;
-       errorMessage = issues.map((i: any) => `${i.path.join('.')}: ${i.message}`).join(', ');
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "issues" in error &&
+      Array.isArray((error as any).issues)
+    ) {
+      const issues = (error as any).issues;
+      errorMessage = issues
+        .map((i: any) => `${i.path.join(".")}: ${i.message}`)
+        .join(", ");
     }
 
-    console.error("Validation error in POST /api/chat:", { error: errorMessage });
-    return new ChatSDKError("bad_request:api", `Validation failed: ${errorMessage}`).toResponse();
+    console.error("Validation error in POST /api/chat:", {
+      error: errorMessage,
+    });
+    return new ChatSDKError(
+      "bad_request:api",
+      `Validation failed: ${errorMessage}`
+    ).toResponse();
   }
 
   try {

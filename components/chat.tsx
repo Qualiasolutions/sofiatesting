@@ -158,22 +158,22 @@ export function Chat({
     <>
       <div className="relative flex h-dvh w-full overflow-hidden bg-background">
         {/* Ambient Background */}
-        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-500/10 blur-[120px] animate-pulse" />
-          <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-500/10 blur-[120px] animate-pulse delay-1000" />
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+          <div className="absolute top-[-20%] left-[-10%] h-[50%] w-[50%] animate-pulse rounded-full bg-blue-500/10 blur-[120px]" />
+          <div className="absolute right-[-10%] bottom-[-20%] h-[50%] w-[50%] animate-pulse rounded-full bg-purple-500/10 blur-[120px] delay-1000" />
         </div>
 
         {/* Main Chat Area */}
         <div className="relative z-10 flex min-w-0 flex-1 flex-col">
           <ChatHeader
             chatId={id}
+            className="glass z-20 border-b"
             isReadonly={isReadonly}
             selectedVisibilityType={initialVisibilityType}
-            className="glass border-b z-20"
           />
 
-          <div className="flex-1 overflow-y-auto overscroll-behavior-contain scroll-smooth">
-            <div className="mx-auto max-w-3xl w-full px-4 py-8">
+          <div className="overscroll-behavior-contain flex-1 overflow-y-auto scroll-smooth">
+            <div className="mx-auto w-full max-w-3xl px-4 py-8">
               <Messages
                 chatId={id}
                 isArtifactVisible={isArtifactVisible}
@@ -194,6 +194,7 @@ export function Chat({
                 <MultimodalInput
                   attachments={attachments}
                   chatId={id}
+                  className="border-none bg-transparent shadow-none focus-within:ring-0"
                   input={input}
                   messages={messages}
                   onModelChange={setCurrentModelId}
@@ -206,7 +207,6 @@ export function Chat({
                   status={status}
                   stop={stop}
                   usage={usage}
-                  className="bg-transparent border-none shadow-none focus-within:ring-0"
                 />
               )}
             </div>

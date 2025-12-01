@@ -8,11 +8,11 @@
  * Purpose: Enforce strict response templates across all models
  */
 
-export interface ResponseTemplate {
-  type: 'field_request' | 'document_generation' | 'error' | 'clarification';
+export type ResponseTemplate = {
+  type: "field_request" | "document_generation" | "error" | "clarification";
   format: string;
   rules: string[];
-}
+};
 
 /**
  * STRICT RESPONSE TEMPLATES
@@ -21,7 +21,7 @@ export interface ResponseTemplate {
 export const RESPONSE_TEMPLATES: Record<string, ResponseTemplate> = {
   // When requesting missing fields
   FIELD_REQUEST: {
-    type: 'field_request',
+    type: "field_request",
     format: `Please provide:
 
 {FIELD_1} (e.g., {EXAMPLE_1})
@@ -29,29 +29,29 @@ export const RESPONSE_TEMPLATES: Record<string, ResponseTemplate> = {
 {FIELD_2} (e.g., {EXAMPLE_2})`,
     rules: [
       'ALWAYS start with "Please provide:"',
-      'Each field on NEW LINE with blank line between',
-      'ALWAYS include example in parentheses',
-      'NO additional text or explanations',
-      'NO greetings or pleasantries',
-      'Maximum 2-3 sentences total'
-    ]
+      "Each field on NEW LINE with blank line between",
+      "ALWAYS include example in parentheses",
+      "NO additional text or explanations",
+      "NO greetings or pleasantries",
+      "Maximum 2-3 sentences total",
+    ],
   },
 
   // When only 1-2 fields missing
   SIMPLE_REQUEST: {
-    type: 'field_request',
-    format: `Please provide {FIELD} (e.g., {EXAMPLE})`,
+    type: "field_request",
+    format: "Please provide {FIELD} (e.g., {EXAMPLE})",
     rules: [
-      'Use for 1-2 fields only',
-      'Single line format',
-      'NO numbered lists',
-      'NO explanations'
-    ]
+      "Use for 1-2 fields only",
+      "Single line format",
+      "NO numbered lists",
+      "NO explanations",
+    ],
   },
 
   // When template type needs clarification
   TEMPLATE_CLARIFICATION: {
-    type: 'clarification',
+    type: "clarification",
     format: `Please specify:
 
 Seller Registration (standard, with marketing, rental, or advanced)
@@ -61,22 +61,22 @@ Bank Registration (property or land)
 Developer Registration (with viewing or no viewing)`,
     rules: [
       'ALWAYS start with "Please specify:"',
-      'List options with categories',
-      'NO additional explanations'
-    ]
+      "List options with categories",
+      "NO additional explanations",
+    ],
   },
 
   // When document is generated
   DOCUMENT_GENERATION: {
-    type: 'document_generation',
-    format: `{DOCUMENT_CONTENT}`,
+    type: "document_generation",
+    format: "{DOCUMENT_CONTENT}",
     rules: [
-      'OUTPUT DOCUMENT ONLY',
-      'NO introductory text',
+      "OUTPUT DOCUMENT ONLY",
+      "NO introductory text",
       'NO "Here is your document" phrases',
-      'NO explanations after document'
-    ]
-  }
+      "NO explanations after document",
+    ],
+  },
 };
 
 /**
@@ -114,15 +114,19 @@ export const FORBIDDEN_PATTERNS = [
   /Should I proceed/i,
   /Would you like me to/i,
   /Is this correct/i,
-  /Please confirm/i
+  /Please confirm/i,
 ];
 
 /**
  * Field request formatter
  * Ensures consistent field request format
  */
-export function formatFieldRequest(fields: Array<{name: string, example: string}>): string {
-  if (fields.length === 0) return '';
+export function formatFieldRequest(
+  fields: Array<{ name: string; example: string }>
+): string {
+  if (fields.length === 0) {
+    return "";
+  }
 
   if (fields.length === 1) {
     return `Please provide ${fields[0].name} (e.g., ${fields[0].example})`;
@@ -133,8 +137,8 @@ export function formatFieldRequest(fields: Array<{name: string, example: string}
   }
 
   // For 3+ fields
-  const fieldLines = fields.map(f => `${f.name} (e.g., ${f.example})`);
-  return `Please provide:\n\n${fieldLines.join('\n\n')}`;
+  const fieldLines = fields.map((f) => `${f.name} (e.g., ${f.example})`);
+  return `Please provide:\n\n${fieldLines.join("\n\n")}`;
 }
 
 /**
@@ -155,29 +159,29 @@ export function validateResponse(response: string): {
   }
 
   // Check response structure
-  const lines = response.split('\n');
-  const firstLine = lines[0]?.trim() || '';
+  const lines = response.split("\n");
+  const firstLine = lines[0]?.trim() || "";
 
   // Valid starts
   const validStarts = [
-    'Please provide',
-    'Please specify',
-    'Subject:', // For email templates
-    'Dear', // For document generation
-    'Registration', // For registration documents
+    "Please provide",
+    "Please specify",
+    "Subject:", // For email templates
+    "Dear", // For document generation
+    "Registration", // For registration documents
   ];
 
-  const hasValidStart = validStarts.some(start =>
+  const hasValidStart = validStarts.some((start) =>
     firstLine.startsWith(start)
   );
 
   if (!hasValidStart && !isDocument(response)) {
-    violations.push('Response does not start with approved phrase');
+    violations.push("Response does not start with approved phrase");
   }
 
   return {
     isValid: violations.length === 0,
-    violations
+    violations,
   };
 }
 
@@ -187,16 +191,16 @@ export function validateResponse(response: string): {
 function isDocument(response: string): boolean {
   // Documents typically have these markers
   const documentMarkers = [
-    'Subject:',
-    'Email Body:',
-    'Dear XXXXXXXX',
-    'Registration –',
-    'This email is to provide',
-    'PROPERTY RESERVATION',
-    'Marketing Agreement'
+    "Subject:",
+    "Email Body:",
+    "Dear XXXXXXXX",
+    "Registration –",
+    "This email is to provide",
+    "PROPERTY RESERVATION",
+    "Marketing Agreement",
   ];
 
-  return documentMarkers.some(marker => response.includes(marker));
+  return documentMarkers.some((marker) => response.includes(marker));
 }
 
 /**
@@ -216,7 +220,7 @@ export function cleanResponse(response: string): string {
   ];
 
   for (const prefix of pleasantryPrefixes) {
-    cleaned = cleaned.replace(prefix, '');
+    cleaned = cleaned.replace(prefix, "");
   }
 
   // Remove explanatory suffixes
@@ -228,7 +232,7 @@ export function cleanResponse(response: string): string {
   ];
 
   for (const suffix of explanatorySuffixes) {
-    cleaned = cleaned.replace(suffix, '');
+    cleaned = cleaned.replace(suffix, "");
   }
 
   return cleaned.trim();
@@ -237,11 +241,11 @@ export function cleanResponse(response: string): string {
 /**
  * Extract field requirements from user message
  */
-export interface ExtractedField {
+export type ExtractedField = {
   type: string;
   value: string;
   source: string;
-}
+};
 
 export function extractFieldsFromMessage(message: string): ExtractedField[] {
   const extracted: ExtractedField[] = [];
@@ -258,9 +262,9 @@ export function extractFieldsFromMessage(message: string): ExtractedField[] {
     const match = message.match(pattern);
     if (match) {
       extracted.push({
-        type: 'client_name',
+        type: "client_name",
         value: match[1].trim(),
-        source: match[0]
+        source: match[0],
       });
       break;
     }
@@ -277,9 +281,9 @@ export function extractFieldsFromMessage(message: string): ExtractedField[] {
     const match = message.match(pattern);
     if (match) {
       extracted.push({
-        type: 'viewing_time',
+        type: "viewing_time",
         value: match[1],
-        source: match[0]
+        source: match[0],
       });
       break;
     }
@@ -297,9 +301,9 @@ export function extractFieldsFromMessage(message: string): ExtractedField[] {
     const match = message.match(pattern);
     if (match) {
       extracted.push({
-        type: 'template_type',
+        type: "template_type",
         value: match[1],
-        source: match[0]
+        source: match[0],
       });
       break;
     }
@@ -316,9 +320,9 @@ export function extractFieldsFromMessage(message: string): ExtractedField[] {
     const match = message.match(pattern);
     if (match) {
       extracted.push({
-        type: 'property_registration',
+        type: "property_registration",
         value: match[1],
-        source: match[0]
+        source: match[0],
       });
       break;
     }
@@ -335,9 +339,9 @@ export function extractFieldsFromMessage(message: string): ExtractedField[] {
     const match = message.match(pattern);
     if (match) {
       extracted.push({
-        type: 'price',
+        type: "price",
         value: match[1],
-        source: match[0]
+        source: match[0],
       });
       break;
     }
@@ -349,14 +353,12 @@ export function extractFieldsFromMessage(message: string): ExtractedField[] {
 /**
  * Generate Sofia-compliant response based on context
  */
-export function generateCompliantResponse(
-  context: {
-    hasAllFields: boolean;
-    missingFields?: Array<{name: string, example: string}>;
-    documentType?: string;
-    generatedDocument?: string;
-  }
-): string {
+export function generateCompliantResponse(context: {
+  hasAllFields: boolean;
+  missingFields?: Array<{ name: string; example: string }>;
+  documentType?: string;
+  generatedDocument?: string;
+}): string {
   // If all fields present, return document only
   if (context.hasAllFields && context.generatedDocument) {
     return context.generatedDocument;
@@ -372,7 +374,7 @@ export function generateCompliantResponse(
     return RESPONSE_TEMPLATES.TEMPLATE_CLARIFICATION.format;
   }
 
-  return '';
+  return "";
 }
 
 /**
@@ -381,34 +383,37 @@ export function generateCompliantResponse(
  */
 export function getModelSpecificPrompt(modelId: string): string {
   const adjustments: Record<string, string> = {
-    'claude-haiku': `
+    "claude-haiku": `
 CRITICAL: You MUST follow these EXACT response formats:
 - Field requests: "Please provide: [field] (e.g., [example])"
 - NO greetings, NO "I'd be happy to", NO explanations
 - OUTPUT ONLY: Field request OR final document`,
 
-    'claude-sonnet': `
+    "claude-sonnet": `
 MANDATORY RESPONSE FORMAT:
 - Use ONLY: "Please provide:" for missing fields
 - NEVER say: "Sure", "Certainly", "I'll help"
 - Generate documents WITHOUT introduction`,
 
-    'gpt-4o': `
+    "gpt-4o": `
 STRICT OUTPUT RULES:
 1. Start with "Please provide:" for fields
 2. No conversational text allowed
 3. Document output only, no commentary`,
 
-    'gpt-4o-mini': `
+    "gpt-4o-mini": `
 RESPONSE CONSTRAINTS:
 - Begin with "Please provide:" ALWAYS
 - Zero explanatory text permitted
-- Direct document generation only`
+- Direct document generation only`,
   };
 
   // Extract base model name
-  const baseModel = modelId.includes('claude') ? 'claude' :
-                     modelId.includes('gpt') ? 'gpt' : 'default';
+  const baseModel = modelId.includes("claude")
+    ? "claude"
+    : modelId.includes("gpt")
+      ? "gpt"
+      : "default";
 
-  return adjustments[baseModel] || adjustments['claude-haiku'];
+  return adjustments[baseModel] || adjustments["claude-haiku"];
 }

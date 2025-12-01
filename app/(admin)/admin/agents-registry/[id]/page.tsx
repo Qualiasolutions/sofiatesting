@@ -1,23 +1,35 @@
-import { Suspense } from "react";
-
 // Prevent static generation - this page needs real-time data
 export const dynamic = "force-dynamic";
 
-import { db } from "@/lib/db/client";
-import { zyprusAgent, agentExecutionLog } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { notFound } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Mail, Phone, MapPin, Calendar, MessageSquare, Smartphone } from "lucide-react";
-import Link from "next/link";
 import { format } from "date-fns";
+import { eq } from "drizzle-orm";
+import {
+  ArrowLeft,
+  Calendar,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Phone,
+  Smartphone,
+} from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { db } from "@/lib/db/client";
+import { zyprusAgent } from "@/lib/db/schema";
 
-interface PageProps {
+type PageProps = {
   params: Promise<{ id: string }>;
-}
+};
 
 async function getAgentDetails(id: string) {
   const [agent] = await db
@@ -25,12 +37,14 @@ async function getAgentDetails(id: string) {
     .from(zyprusAgent)
     .where(eq(zyprusAgent.id, id));
 
-  if (!agent) return null;
+  if (!agent) {
+    return null;
+  }
 
   // Get recent logs for this agent (mocked if no logs yet)
   // In real implementation:
   // const logs = await db.select().from(agentExecutionLog).where(eq(agentExecutionLog.userId, agent.userId)).orderBy(desc(agentExecutionLog.timestamp)).limit(10);
-  
+
   const logs: any[] = []; // Placeholder
 
   return { agent, logs };
@@ -49,23 +63,25 @@ export default async function AgentDetailsPage({ params }: PageProps) {
   return (
     <div className="space-y-6 p-8 pt-6">
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" asChild>
+        <Button asChild size="icon" variant="outline">
           <Link href="/admin/agents-registry">
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">{agent.fullName}</h2>
-          <p className="text-muted-foreground flex items-center gap-2">
+          <h2 className="font-bold text-3xl tracking-tight">
+            {agent.fullName}
+          </h2>
+          <p className="flex items-center gap-2 text-muted-foreground">
             <Badge variant="outline">{agent.role}</Badge>
             <span className="text-sm">•</span>
             <span className="text-sm">{agent.email}</span>
           </p>
         </div>
         <div className="ml-auto">
-          <Badge 
+          <Badge
+            className="px-4 py-1 text-base"
             variant={agent.isActive ? "default" : "destructive"}
-            className="text-base px-4 py-1"
           >
             {agent.isActive ? "Active" : "Inactive"}
           </Badge>
@@ -93,13 +109,15 @@ export default async function AgentDetailsPage({ params }: PageProps) {
             </div>
             <div className="flex items-center gap-3">
               <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Joined {format(new Date(agent.createdAt), "PPP")}</span>
+              <span className="text-sm">
+                Joined {format(new Date(agent.createdAt), "PPP")}
+              </span>
             </div>
-            
+
             <Separator />
-            
+
             <div className="space-y-2">
-              <h4 className="text-sm font-medium">Connected Accounts</h4>
+              <h4 className="font-medium text-sm">Connected Accounts</h4>
               <div className="flex items-center justify-between text-sm">
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <MessageSquare className="h-3 w-3" /> Telegram
@@ -112,7 +130,9 @@ export default async function AgentDetailsPage({ params }: PageProps) {
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <Smartphone className="h-3 w-3" /> WhatsApp
                 </span>
-                <Badge variant={agent.whatsappPhoneNumber ? "secondary" : "outline"}>
+                <Badge
+                  variant={agent.whatsappPhoneNumber ? "secondary" : "outline"}
+                >
                   {agent.whatsappPhoneNumber ? "Linked" : "Not Linked"}
                 </Badge>
               </div>
@@ -121,24 +141,28 @@ export default async function AgentDetailsPage({ params }: PageProps) {
         </Card>
 
         {/* Activity & Stats */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="space-y-6 md:col-span-2">
           <Card>
             <CardHeader>
               <CardTitle>Performance Overview</CardTitle>
               <CardDescription>Key metrics for this agent</CardDescription>
             </CardHeader>
             <CardContent className="grid grid-cols-3 gap-4">
-              <div className="text-center p-4 border rounded-lg bg-muted/50">
-                <div className="text-2xl font-bold">0</div>
-                <div className="text-xs text-muted-foreground">Total Chats</div>
+              <div className="rounded-lg border bg-muted/50 p-4 text-center">
+                <div className="font-bold text-2xl">0</div>
+                <div className="text-muted-foreground text-xs">Total Chats</div>
               </div>
-              <div className="text-center p-4 border rounded-lg bg-muted/50">
-                <div className="text-2xl font-bold">0</div>
-                <div className="text-xs text-muted-foreground">Documents Generated</div>
+              <div className="rounded-lg border bg-muted/50 p-4 text-center">
+                <div className="font-bold text-2xl">0</div>
+                <div className="text-muted-foreground text-xs">
+                  Documents Generated
+                </div>
               </div>
-              <div className="text-center p-4 border rounded-lg bg-muted/50">
-                <div className="text-2xl font-bold">0</div>
-                <div className="text-xs text-muted-foreground">Properties Listed</div>
+              <div className="rounded-lg border bg-muted/50 p-4 text-center">
+                <div className="font-bold text-2xl">0</div>
+                <div className="text-muted-foreground text-xs">
+                  Properties Listed
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -149,11 +173,9 @@ export default async function AgentDetailsPage({ params }: PageProps) {
             </CardHeader>
             <CardContent>
               {logs.length > 0 ? (
-                <div className="space-y-4">
-                  {/* Log list would go here */}
-                </div>
+                <div className="space-y-4">{/* Log list would go here */}</div>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="py-8 text-center text-muted-foreground">
                   No recent activity recorded.
                 </div>
               )}

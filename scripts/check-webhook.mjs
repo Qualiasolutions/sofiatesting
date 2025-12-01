@@ -5,13 +5,17 @@
  */
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const WEBHOOK_URL = process.env.WEBHOOK_URL || "https://sofiatesting.vercel.app/api/telegram/webhook";
+const WEBHOOK_URL =
+  process.env.WEBHOOK_URL ||
+  "https://sofiatesting.vercel.app/api/telegram/webhook";
 
 if (!TELEGRAM_BOT_TOKEN) {
   console.error("❌ TELEGRAM_BOT_TOKEN environment variable is required");
   console.log("\nUsage:");
   console.log("  TELEGRAM_BOT_TOKEN=your_token node scripts/check-webhook.mjs");
-  console.log("  TELEGRAM_BOT_TOKEN=your_token node scripts/check-webhook.mjs --set");
+  console.log(
+    "  TELEGRAM_BOT_TOKEN=your_token node scripts/check-webhook.mjs --set"
+  );
   process.exit(1);
 }
 
@@ -32,13 +36,15 @@ async function getBotInfo() {
       console.log("  ID:", bot.id);
       console.log("\n");
       return true;
-    } else {
-      console.error("❌ Failed to get bot info:", data.description || "Unknown error");
-      console.log("\n⚠️  Possible reasons:");
-      console.log("  - Invalid bot token");
-      console.log("  - Network connectivity issues");
-      return false;
     }
+    console.error(
+      "❌ Failed to get bot info:",
+      data.description || "Unknown error"
+    );
+    console.log("\n⚠️  Possible reasons:");
+    console.log("  - Invalid bot token");
+    console.log("  - Network connectivity issues");
+    return false;
   } catch (error) {
     console.error("❌ Error getting bot info:", error.message);
     return false;
@@ -76,7 +82,9 @@ async function checkWebhook() {
     }
 
     if (info.last_synchronization_error_date) {
-      const syncErrorDate = new Date(info.last_synchronization_error_date * 1000);
+      const syncErrorDate = new Date(
+        info.last_synchronization_error_date * 1000
+      );
       console.log("\n⚠️  Last Synchronization Error:");
       console.log("  Date:", syncErrorDate.toISOString());
     }
@@ -85,19 +93,20 @@ async function checkWebhook() {
     if (info.url === expectedUrl) {
       console.log("\n✅ Webhook is correctly configured!");
       return true;
-    } else if (!info.url) {
-      console.log("\n⚠️  Webhook is NOT set.");
-      console.log("  Run with --set flag to configure it:");
-      console.log(`  TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN} node scripts/check-webhook.mjs --set`);
-      return false;
-    } else {
-      console.log(`\n⚠️  Webhook URL mismatch:`);
+    }
+    if (info.url) {
+      console.log("\n⚠️  Webhook URL mismatch:");
       console.log(`  Expected: ${expectedUrl}`);
       console.log(`  Current:  ${info.url}`);
       console.log("\n  Run with --set flag to update it.");
       return false;
     }
-
+    console.log("\n⚠️  Webhook is NOT set.");
+    console.log("  Run with --set flag to configure it:");
+    console.log(
+      `  TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN} node scripts/check-webhook.mjs --set`
+    );
+    return false;
   } catch (error) {
     console.error("❌ Error checking webhook:", error.message);
     return false;
@@ -129,13 +138,11 @@ async function setWebhook() {
       console.log("✅ Webhook set successfully!");
       console.log("  Description:", data.description);
       console.log("\nVerifying configuration...\n");
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1 second
       return await checkWebhook();
-    } else {
-      console.error("❌ Failed to set webhook:", data.description);
-      return false;
     }
-
+    console.error("❌ Failed to set webhook:", data.description);
+    return false;
   } catch (error) {
     console.error("❌ Error setting webhook:", error.message);
     return false;

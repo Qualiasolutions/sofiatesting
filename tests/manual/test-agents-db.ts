@@ -1,8 +1,8 @@
 import { config } from "dotenv";
+import { count, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { zyprusAgent } from "../../lib/db/schema";
-import { eq, count, sql } from "drizzle-orm";
 
 // Load environment variables
 config({ path: ".env.local" });
@@ -124,9 +124,15 @@ async function testAgentsDatabase() {
       console.log(`   Region: ${sample.region}`);
       console.log(`   Role: ${sample.role}`);
       console.log(`   Active: ${sample.isActive}`);
-      console.log(`   Invite Token: ${sample.inviteToken?.substring(0, 16)}...`);
-      console.log(`   Telegram Linked: ${sample.telegramUserId ? "Yes" : "No"}`);
-      console.log(`   WhatsApp Linked: ${sample.whatsappPhoneNumber ? "Yes" : "No"}`);
+      console.log(
+        `   Invite Token: ${sample.inviteToken?.substring(0, 16)}...`
+      );
+      console.log(
+        `   Telegram Linked: ${sample.telegramUserId ? "Yes" : "No"}`
+      );
+      console.log(
+        `   WhatsApp Linked: ${sample.whatsappPhoneNumber ? "Yes" : "No"}`
+      );
       console.log(`   Created: ${sample.createdAt?.toISOString()}`);
     }
     console.log();

@@ -1,19 +1,19 @@
 import {
+  AlignmentType,
   Document,
+  HeadingLevel,
   Packer,
   Paragraph,
   TextRun,
-  HeadingLevel,
-  AlignmentType,
 } from "docx";
 
 /**
  * Parse text with bold markers (**text**) into segments
  */
-interface TextSegment {
+type TextSegment = {
   text: string;
   bold: boolean;
-}
+};
 
 function parseBoldText(line: string): TextSegment[] {
   const parts: TextSegment[] = [];
@@ -67,7 +67,11 @@ export async function generateDocx(content: string): Promise<Buffer> {
     }
 
     // Check if line is a header (starts with ** and ends with **)
-    if (line.startsWith("**") && line.endsWith("**") && !line.includes("**", 2)) {
+    if (
+      line.startsWith("**") &&
+      line.endsWith("**") &&
+      !line.includes("**", 2)
+    ) {
       // This is a title/header
       const headerText = line.replace(/^\*\*/, "").replace(/\*\*$/, "");
       children.push(

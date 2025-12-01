@@ -36,15 +36,15 @@ export async function GET(request: NextRequest) {
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
-    
+
     const errorMessage = error instanceof Error ? error.message : String(error);
     console.error("Unexpected error in GET /api/history:", {
       error: errorMessage,
-      stack: error instanceof Error ? error.stack : undefined
+      stack: error instanceof Error ? error.stack : undefined,
     });
-    
+
     return new ChatSDKError(
-      "bad_request:database", 
+      "bad_request:database",
       `Failed to fetch history: ${errorMessage}`
     ).toResponse();
   }

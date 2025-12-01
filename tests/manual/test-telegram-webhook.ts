@@ -4,18 +4,18 @@
  */
 
 const TELEGRAM_TEST_MESSAGE = {
-  update_id: 123456789,
+  update_id: 123_456_789,
   message: {
     message_id: 1,
     from: {
-      id: 123456,
+      id: 123_456,
       is_bot: false,
       first_name: "Test",
       last_name: "User",
       username: "testuser",
     },
     chat: {
-      id: 123456,
+      id: 123_456,
       first_name: "Test",
       last_name: "User",
       username: "testuser",

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Check `IMPLEMENTATION_PLAN.md` before starting work** - tracks optimization tasks and deployment status.
 
-**Slash commands**: `/deploy-checklist`, `/test-all`, `/tool-audit`, `/new-tool <name> <desc>`, `/telegram-debug`, `/db-check`
+**Slash commands** (`.claude/commands/`): `/deploy-checklist`, `/test-all`, `/tool-audit`, `/new-tool <name> <desc>`, `/telegram-debug`, `/db-check`
 
 ## Project Overview
 
@@ -36,7 +36,7 @@ POSTGRES_URL="postgresql://postgres.ebgsbtqtkdgaafqejjye:[PASSWORD]@aws-1-eu-wes
 # NOT: postgresql://postgres:[PASSWORD]@db.ebgsbtqtkdgaafqejjye.supabase.co:5432/postgres (will fail)
 ```
 
-**Schema**: `User`, `Chat`, `Message_v2`, `PropertyListing`, `Vote_v2` (Drizzle ORM)
+**Schema**: `User`, `Chat`, `Message_v2`, `PropertyListing`, `Vote_v2` (Drizzle ORM with CASCADE deletes)
 
 ## Authentication
 
@@ -55,9 +55,10 @@ pnpm db:generate      # Generate Drizzle migrations
 pnpm db:migrate       # Apply migrations
 pnpm db:studio        # Drizzle Studio GUI
 
-pnpm test:unit        # Unit tests
-pnpm test:ai-models   # Test AI model connectivity
-PLAYWRIGHT=True pnpm test  # E2E tests
+pnpm test:unit                    # All unit tests
+pnpm exec tsx --test tests/unit/FILE.test.ts  # Single test file
+pnpm test:ai-models               # Test AI model connectivity
+PLAYWRIGHT=True pnpm test         # E2E tests (requires dev server)
 ```
 
 ## Adding AI Tools
@@ -170,13 +171,5 @@ See `.env.example` for complete list.
 - **Error responses**: Use `ChatSDKError` from `lib/errors.ts`
 - **DB schema changes**: `pnpm db:generate` → `pnpm db:migrate` → `pnpm build`
 - **Streaming**: Use `JsonToSseTransformStream` for SSE
-
-## MCP Tools (Supabase)
-
-Project ID: `ebgsbtqtkdgaafqejjye`
-
-- `mcp__supabase__execute_sql` - Run queries
-- `mcp__supabase__apply_migration` - DDL migrations
-- `mcp__supabase__list_tables` - List tables
-- `mcp__supabase__get_logs` - Service logs
-- `mcp__supabase__get_advisors` - Security/performance checks
+- **Conversation pruning**: `pruneConversationHistory()` prevents unbounded token growth
+- **Tool call limits**: `stopWhen: stepCountIs(5)` limits chained tool calls

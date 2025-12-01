@@ -3,7 +3,8 @@
  */
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const WEBHOOK_URL = "https://sofiatesting-ogj0npcn8-qualiasolutionscy.vercel.app/api/telegram/webhook";
+const WEBHOOK_URL =
+  "https://sofiatesting-ogj0npcn8-qualiasolutionscy.vercel.app/api/telegram/webhook";
 
 if (!TELEGRAM_BOT_TOKEN) {
   console.error("❌ TELEGRAM_BOT_TOKEN not found in environment");

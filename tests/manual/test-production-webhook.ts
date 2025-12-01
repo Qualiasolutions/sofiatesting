@@ -2,20 +2,21 @@
  * Test production Telegram webhook
  */
 
-const PRODUCTION_WEBHOOK_URL = "https://sofiatesting-ogj0npcn8-qualiasolutionscy.vercel.app/api/telegram/webhook";
+const PRODUCTION_WEBHOOK_URL =
+  "https://sofiatesting-ogj0npcn8-qualiasolutionscy.vercel.app/api/telegram/webhook";
 
 const TEST_MESSAGE = {
-  update_id: 999999999,
+  update_id: 999_999_999,
   message: {
     message_id: 999,
     from: {
-      id: 999999,
+      id: 999_999,
       is_bot: false,
       first_name: "ProductionTest",
       username: "prodtest",
     },
     chat: {
-      id: 999999,
+      id: 999_999,
       type: "private",
     },
     date: Math.floor(Date.now() / 1000),
@@ -45,7 +46,9 @@ async function testProductionWebhook() {
     if (response.ok) {
       console.log("\n✅ Production webhook test PASSED");
       console.log("\nNOTE: Check your Telegram bot for the response message!");
-      console.log("(The error message is expected if TELEGRAM_BOT_TOKEN is not valid in production)");
+      console.log(
+        "(The error message is expected if TELEGRAM_BOT_TOKEN is not valid in production)"
+      );
     } else {
       console.log("\n❌ Production webhook test FAILED");
       process.exit(1);

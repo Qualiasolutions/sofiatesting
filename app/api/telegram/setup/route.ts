@@ -20,9 +20,7 @@ function validateAdminAuth(request: Request): boolean {
   const expectedKey = process.env.ADMIN_API_KEY;
 
   if (!expectedKey) {
-    console.error(
-      "ADMIN_API_KEY not configured - setup endpoint is disabled"
-    );
+    console.error("ADMIN_API_KEY not configured - setup endpoint is disabled");
     return false;
   }
 

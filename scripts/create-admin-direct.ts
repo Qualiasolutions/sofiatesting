@@ -6,7 +6,7 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
 // Schema definitions (inline to avoid server-only issues)
-const schema = {
+const _schema = {
   user: {
     tableName: "User",
   },
@@ -51,7 +51,9 @@ async function createAdmin(email: string) {
     );
 
     if (existingAdmins.length > 0) {
-      console.log(`⚠️  User is already an admin with role: ${existingAdmins[0].role}`);
+      console.log(
+        `⚠️  User is already an admin with role: ${existingAdmins[0].role}`
+      );
       console.log("\nUpdating to superadmin...");
 
       await db.execute(
@@ -85,13 +87,13 @@ async function createAdmin(email: string) {
     }
 
     console.log("\n🎉 Success!");
-    console.log(`\n📋 Admin Details:`);
+    console.log("\n📋 Admin Details:");
     console.log(`   Email: ${foundUser.email}`);
     console.log(`   User ID: ${foundUser.id}`);
-    console.log(`   Role: superadmin`);
-    console.log(`\n🔗 You can now access the admin panel at:`);
-    console.log(`   https://sofiatesting.vercel.app/admin`);
-    console.log(`   https://sofiatesting.vercel.app/admin/agents-registry`);
+    console.log("   Role: superadmin");
+    console.log("\n🔗 You can now access the admin panel at:");
+    console.log("   https://sofiatesting.vercel.app/admin");
+    console.log("   https://sofiatesting.vercel.app/admin/agents-registry");
 
     await client.end();
     process.exit(0);
@@ -107,7 +109,9 @@ const email = process.argv[2];
 if (!email) {
   console.error("❌ Please provide an email address");
   console.log("\nUsage: npx tsx scripts/create-admin-direct.ts <email>");
-  console.log("Example: npx tsx scripts/create-admin-direct.ts admin@zyprus.com");
+  console.log(
+    "Example: npx tsx scripts/create-admin-direct.ts admin@zyprus.com"
+  );
   process.exit(1);
 }
 

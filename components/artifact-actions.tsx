@@ -71,7 +71,8 @@ function PureArtifactActions({
                   console.error("Artifact action error:", {
                     actionDescription: action.description,
                     artifactKind: artifact.kind,
-                    error: error instanceof Error ? error.message : "Unknown error",
+                    error:
+                      error instanceof Error ? error.message : "Unknown error",
                     stack: error instanceof Error ? error.stack : undefined,
                   });
                   toast.error("Failed to execute action");

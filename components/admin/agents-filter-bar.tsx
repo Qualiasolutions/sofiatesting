@@ -1,9 +1,17 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { debounce } from "lodash";
+import { Download, Mail, RefreshCw, Search, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Input } from "@/components/ui/input";
+import { useCallback, useEffect, useState } from "react";
+import { AgentCreateModal } from "@/components/admin/agent-create-modal";
+import {
+  BulkDeactivateDialog,
+  BulkSendInvitesDialog,
+} from "@/components/admin/bulk-action-dialogs";
+import { ImportAgentsModal } from "@/components/admin/import-agents-modal";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -11,16 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, RefreshCw, Download, Mail, UserPlus } from "lucide-react";
-import { debounce } from "lodash";
-import { ImportAgentsModal } from "@/components/admin/import-agents-modal";
-import { AgentCreateModal } from "@/components/admin/agent-create-modal";
-import {
-  BulkSendInvitesDialog,
-  BulkDeactivateDialog,
-} from "@/components/admin/bulk-action-dialogs";
 
-interface AgentsFilterBarProps {
+type AgentsFilterBarProps = {
   searchParams: {
     page?: string;
     limit?: string;
@@ -32,10 +32,27 @@ interface AgentsFilterBarProps {
   onRefresh: () => void;
   selectedCount: number;
   onExportCSV?: () => void;
-}
+};
 
-const REGIONS = ["All", "Limassol", "Paphos", "Larnaca", "Famagusta", "Nicosia"];
-const ROLES = ["All", "Normal Agent", "Manager Limassol", "Manager Paphos", "Manager Larnaca", "Manager Famagusta", "Manager Nicosia", "CEO", "Listing Admin"];
+const REGIONS = [
+  "All",
+  "Limassol",
+  "Paphos",
+  "Larnaca",
+  "Famagusta",
+  "Nicosia",
+];
+const ROLES = [
+  "All",
+  "Normal Agent",
+  "Manager Limassol",
+  "Manager Paphos",
+  "Manager Larnaca",
+  "Manager Famagusta",
+  "Manager Nicosia",
+  "CEO",
+  "Listing Admin",
+];
 const STATUS_OPTIONS = [
   { value: "all", label: "All Status" },
   { value: "true", label: "Active" },
@@ -67,7 +84,7 @@ export function AgentsFilterBar({
       params.set("page", "1"); // Reset to first page on search
       router.push(`?${params.toString()}`);
     }, 300),
-    [router]
+    []
   );
 
   useEffect(() => {
@@ -94,18 +111,18 @@ export function AgentsFilterBar({
     <div className="space-y-4">
       <div className="flex items-center gap-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
           <Input
+            className="pl-9"
+            onChange={(e) => setSearchValue(e.target.value)}
             placeholder="Search by name or email..."
             value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            className="pl-9"
           />
         </div>
 
         <Select
-          value={searchParams.region || "All"}
           onValueChange={(value) => handleFilterChange("region", value)}
+          value={searchParams.region || "All"}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Region" />
@@ -120,8 +137,8 @@ export function AgentsFilterBar({
         </Select>
 
         <Select
-          value={searchParams.role || "All"}
           onValueChange={(value) => handleFilterChange("role", value)}
+          value={searchParams.role || "All"}
         >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Role" />
@@ -136,8 +153,8 @@ export function AgentsFilterBar({
         </Select>
 
         <Select
-          value={searchParams.isActive || "all"}
           onValueChange={(value) => handleFilterChange("isActive", value)}
+          value={searchParams.isActive || "all"}
         >
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Status" />
@@ -151,11 +168,11 @@ export function AgentsFilterBar({
           </SelectContent>
         </Select>
 
-        <Button variant="outline" size="sm" onClick={handleClearFilters}>
+        <Button onClick={handleClearFilters} size="sm" variant="outline">
           Clear Filters
         </Button>
 
-        <Button variant="outline" size="sm" onClick={onRefresh}>
+        <Button onClick={onRefresh} size="sm" variant="outline">
           <RefreshCw className="h-4 w-4" />
         </Button>
       </div>
@@ -163,31 +180,27 @@ export function AgentsFilterBar({
       {/* Bulk Actions Bar */}
       {selectedCount > 0 && (
         <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-4">
-          <div className="text-sm font-medium">
+          <div className="font-medium text-sm">
             {selectedCount} agent{selectedCount > 1 ? "s" : ""} selected
           </div>
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
-              size="sm"
               onClick={() => setSendInvitesDialogOpen(true)}
+              size="sm"
+              variant="outline"
             >
               <Mail className="mr-2 h-4 w-4" />
               Send Invites
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onExportCSV}
-            >
+            <Button onClick={onExportCSV} size="sm" variant="outline">
               <Download className="mr-2 h-4 w-4" />
               Export CSV
             </Button>
             <Button
-              variant="outline"
-              size="sm"
               className="text-red-600"
               onClick={() => setDeactivateDialogOpen(true)}
+              size="sm"
+              variant="outline"
             >
               Deactivate
             </Button>
@@ -201,7 +214,7 @@ export function AgentsFilterBar({
           <UserPlus className="mr-2 h-4 w-4" />
           Add New Agent
         </Button>
-        <Button variant="outline" onClick={() => setImportModalOpen(true)}>
+        <Button onClick={() => setImportModalOpen(true)} variant="outline">
           <Download className="mr-2 h-4 w-4" />
           Import from Excel
         </Button>
@@ -209,31 +222,31 @@ export function AgentsFilterBar({
 
       {/* Import Modal */}
       <ImportAgentsModal
-        open={importModalOpen}
         onOpenChange={setImportModalOpen}
         onSuccess={onRefresh}
+        open={importModalOpen}
       />
 
       {/* Create Modal */}
       <AgentCreateModal
-        open={createModalOpen}
         onOpenChange={setCreateModalOpen}
         onSuccess={onRefresh}
+        open={createModalOpen}
       />
 
       {/* Bulk Action Dialogs */}
       <BulkSendInvitesDialog
-        open={sendInvitesDialogOpen}
         onOpenChange={setSendInvitesDialogOpen}
-        selectedCount={selectedCount}
         onSuccess={onRefresh}
+        open={sendInvitesDialogOpen}
+        selectedCount={selectedCount}
       />
 
       <BulkDeactivateDialog
-        open={deactivateDialogOpen}
         onOpenChange={setDeactivateDialogOpen}
-        selectedCount={selectedCount}
         onSuccess={onRefresh}
+        open={deactivateDialogOpen}
+        selectedCount={selectedCount}
       />
     </div>
   );

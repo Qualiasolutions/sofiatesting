@@ -1,5 +1,5 @@
-import { db } from "@/lib/db/client";
 import { sql } from "drizzle-orm";
+import { db } from "@/lib/db/client";
 
 export async function GET() {
   try {
@@ -10,15 +10,18 @@ export async function GET() {
       status: "connected",
       database: "postgres",
       result: result[0],
-      message: "Database connection successful!"
+      message: "Database connection successful!",
     });
   } catch (error) {
     console.error("Database connection test failed:", error);
 
-    return Response.json({
-      status: "error",
-      message: error instanceof Error ? error.message : String(error),
-      details: error instanceof Error ? error.stack : undefined
-    }, { status: 500 });
+    return Response.json(
+      {
+        status: "error",
+        message: error instanceof Error ? error.message : String(error),
+        details: error instanceof Error ? error.stack : undefined,
+      },
+      { status: 500 }
+    );
   }
 }

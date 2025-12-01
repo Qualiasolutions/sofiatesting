@@ -251,9 +251,5 @@ As we move forward, Silicon Valley continues to reinvent itself. While some pred
     ];
   }
 
-
-
-
-
   return [{ id: "6", type: "text-delta", delta: "Unknown test prompt!" }];
 };

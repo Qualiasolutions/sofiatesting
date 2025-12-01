@@ -3,7 +3,7 @@ import { config } from "dotenv";
 // Load environment variables
 config({ path: ".env.local" });
 
-interface PropertyData {
+type PropertyData = {
   id: string;
   title: string;
   description: string;
@@ -14,7 +14,7 @@ interface PropertyData {
   location: string;
   propertyType: string;
   imageUrls: string[];
-}
+};
 
 async function getOAuthToken(): Promise<string> {
   const clientId = process.env.ZYPRUS_CLIENT_ID;
@@ -107,7 +107,9 @@ async function uploadProperty(token: string, property: PropertyData) {
   console.log("📤 Uploading property to Zyprus...");
   console.log(`   Title: ${property.title}`);
   console.log(`   Price: €${property.price.toLocaleString()}`);
-  console.log(`   Bedrooms: ${property.bedrooms}, Bathrooms: ${property.bathrooms}`);
+  console.log(
+    `   Bedrooms: ${property.bedrooms}, Bathrooms: ${property.bathrooms}`
+  );
   console.log(`   Covered Area: ${property.coveredArea}m²\n`);
 
   const response = await fetch(`${apiUrl}/jsonapi/node/property`, {
@@ -145,7 +147,9 @@ async function verifyProperty(token: string, nodeId: string) {
   });
 
   if (!response.ok) {
-    console.log(`⚠️  Could not verify (${response.status}). Property may need time to index.`);
+    console.log(
+      `⚠️  Could not verify (${response.status}). Property may need time to index.`
+    );
     return null;
   }
 
@@ -165,11 +169,11 @@ async function testDirectUpload() {
 
     // Step 2: Create test property data
     const testProperty: PropertyData = {
-      id: "test-" + Date.now(),
+      id: `test-${Date.now()}`,
       title: "E2E Test - Luxury Sea View Apartment",
       description:
         "Modern 2-bedroom apartment in Limassol with breathtaking Mediterranean sea views. Features open-plan living, contemporary kitchen, spacious balcony. Walking distance to beach and amenities. Perfect for families or investment.",
-      price: 250000,
+      price: 250_000,
       bedrooms: 2,
       bathrooms: 1,
       coveredArea: 85,
@@ -210,13 +214,16 @@ async function testDirectUpload() {
     console.log("\n🚀 CONCLUSION: Integration is production-ready!");
     console.log("\n📍 View on Zyprus:");
     console.log(`   https://dev9.zyprus.com/jsonapi/node/property/${nodeId}`);
-
   } catch (error: any) {
     console.error("\n❌ DIRECT UPLOAD TEST FAILED");
     console.error("═══════════════════════════════════════");
     console.error("\nError:", error.message);
-    if (error.cause) console.error("Cause:", error.cause);
-    if (error.stack) console.error("\nStack:", error.stack);
+    if (error.cause) {
+      console.error("Cause:", error.cause);
+    }
+    if (error.stack) {
+      console.error("\nStack:", error.stack);
+    }
 
     console.error("\n⚠️  DEPLOYMENT BLOCKED - Fix required before production");
     process.exit(1);

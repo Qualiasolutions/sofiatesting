@@ -1,8 +1,9 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { agentSchema, type AgentFormData } from "@/lib/validations/agent";
+import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,7 +14,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -21,18 +21,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Loader2 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { type AgentFormData, agentSchema } from "@/lib/validations/agent";
 
-interface AgentFormProps {
+type AgentFormProps = {
   initialData?: Partial<AgentFormData> & { id?: string };
   onSubmit: (data: AgentFormData) => Promise<void>;
   onCancel: () => void;
   submitLabel?: string;
-}
+};
 
-const REGIONS = ["Limassol", "Paphos", "Larnaca", "Famagusta", "Nicosia", "All"];
+const REGIONS = [
+  "Limassol",
+  "Paphos",
+  "Larnaca",
+  "Famagusta",
+  "Nicosia",
+  "All",
+];
 const ROLES = [
   "Normal Agent",
   "Manager Limassol",
@@ -67,14 +74,14 @@ export function AgentForm({
     try {
       await onSubmit(data);
       form.reset();
-    } catch (error) {
+    } catch (_error) {
       // Error handled by parent
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+      <form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
         {/* Full Name */}
         <FormField
           control={form.control}
@@ -98,7 +105,7 @@ export function AgentForm({
             <FormItem>
               <FormLabel>Email *</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="john@zyprus.com" {...field} />
+                <Input placeholder="john@zyprus.com" type="email" {...field} />
               </FormControl>
               <FormDescription>
                 This will be used for login and communication
@@ -134,7 +141,10 @@ export function AgentForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Region *</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  defaultValue={field.value}
+                  onValueChange={field.onChange}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select region" />
@@ -160,7 +170,10 @@ export function AgentForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Role *</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  defaultValue={field.value}
+                  onValueChange={field.onChange}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select role" />
@@ -193,7 +206,10 @@ export function AgentForm({
                 </FormDescription>
               </div>
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} />
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -208,8 +224,8 @@ export function AgentForm({
               <FormLabel>Notes</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Optional notes about this agent..."
                   className="resize-none"
+                  placeholder="Optional notes about this agent..."
                   {...field}
                 />
               </FormControl>
@@ -223,17 +239,17 @@ export function AgentForm({
 
         {/* Form Actions */}
         <div className="flex items-center gap-3">
-          <Button type="submit" disabled={form.formState.isSubmitting}>
+          <Button disabled={form.formState.isSubmitting} type="submit">
             {form.formState.isSubmitting && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             {submitLabel}
           </Button>
           <Button
+            disabled={form.formState.isSubmitting}
+            onClick={onCancel}
             type="button"
             variant="outline"
-            onClick={onCancel}
-            disabled={form.formState.isSubmitting}
           >
             Cancel
           </Button>

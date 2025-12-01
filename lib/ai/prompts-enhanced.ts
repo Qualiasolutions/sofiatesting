@@ -3,7 +3,7 @@
  * Enforces consistent responses across all LLM models
  */
 
-import { getModelSpecificPrompt } from './response-enforcer';
+import { getModelSpecificPrompt } from "./response-enforcer";
 
 /**
  * CRITICAL RESPONSE RULES
@@ -154,15 +154,15 @@ REQUEST CONTEXT:
 Location: ${requestHints.city}, ${requestHints.country}
 Coordinates: ${requestHints.latitude}, ${requestHints.longitude}
 Model: ${modelId}
-Current Date: ${new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+Current Date: ${new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   })}
-Current Time: ${new Date().toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'Asia/Nicosia',
+Current Time: ${new Date().toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Asia/Nicosia",
   })} (Cyprus time)
 
 REMINDER: Follow UNIVERSAL RESPONSE RULES above. No exceptions.`;
@@ -172,7 +172,10 @@ REMINDER: Follow UNIVERSAL RESPONSE RULES above. No exceptions.`;
  * Response post-processor
  * Cleans up model output to ensure compliance
  */
-export function postProcessResponse(response: string, modelId: string): string {
+export function postProcessResponse(
+  response: string,
+  _modelId: string
+): string {
   let processed = response;
 
   // Remove common non-compliant prefixes
@@ -189,7 +192,7 @@ export function postProcessResponse(response: string, modelId: string): string {
   ];
 
   for (const prefix of unwantedPrefixes) {
-    processed = processed.replace(prefix, '');
+    processed = processed.replace(prefix, "");
   }
 
   // Remove unwanted suffixes
@@ -202,19 +205,22 @@ export function postProcessResponse(response: string, modelId: string): string {
   ];
 
   for (const suffix of unwantedSuffixes) {
-    processed = processed.replace(suffix, '');
+    processed = processed.replace(suffix, "");
   }
 
   // Ensure proper field request format
-  if (processed.includes('Please provide') && !processed.includes(':')) {
+  if (processed.includes("Please provide") && !processed.includes(":")) {
     // Check if it's a simple request (1-2 fields)
     const fieldCount = (processed.match(/\(e\.g\.,/g) || []).length;
     if (fieldCount <= 2) {
       // Keep simple format
-      processed = processed.replace(/Please provide\s+/i, 'Please provide ');
+      processed = processed.replace(/Please provide\s+/i, "Please provide ");
     } else {
       // Convert to multi-field format
-      processed = processed.replace(/Please provide\s+/i, 'Please provide:\n\n');
+      processed = processed.replace(
+        /Please provide\s+/i,
+        "Please provide:\n\n"
+      );
     }
   }
 
@@ -227,10 +233,10 @@ export function postProcessResponse(response: string, modelId: string): string {
 export function validateSofiaResponse(response: string): {
   isValid: boolean;
   issues: string[];
-  severity: 'pass' | 'warning' | 'fail';
+  severity: "pass" | "warning" | "fail";
 } {
   const issues: string[] = [];
-  let severity: 'pass' | 'warning' | 'fail' = 'pass';
+  let severity: "pass" | "warning" | "fail" = "pass";
 
   // Check for forbidden phrases
   const forbiddenPhrases = [
@@ -249,84 +255,90 @@ export function validateSofiaResponse(response: string): {
   for (const phrase of forbiddenPhrases) {
     if (response.toLowerCase().includes(phrase.toLowerCase())) {
       issues.push(`Contains forbidden phrase: "${phrase}"`);
-      severity = 'fail';
+      severity = "fail";
     }
   }
 
   // Check response structure
   const startsCorrectly =
-    response.startsWith('Please provide') ||
-    response.startsWith('Please specify') ||
-    response.startsWith('Subject:') ||
-    response.startsWith('Dear') ||
-    response.includes('Registration –') ||
+    response.startsWith("Please provide") ||
+    response.startsWith("Please specify") ||
+    response.startsWith("Subject:") ||
+    response.startsWith("Dear") ||
+    response.includes("Registration –") ||
     isDocument(response);
 
   if (!startsCorrectly) {
-    issues.push('Response does not start with approved format');
-    severity = severity === 'pass' ? 'warning' : severity;
+    issues.push("Response does not start with approved format");
+    severity = severity === "pass" ? "warning" : severity;
   }
 
   // Check for explanatory text in field requests
-  if (response.includes('Please provide')) {
-    const afterProvide = response.split('Please provide')[1] || '';
-    if (afterProvide.includes('so I can') ||
-        afterProvide.includes('in order to') ||
-        afterProvide.includes('This will')) {
-      issues.push('Field request contains explanatory text');
-      severity = 'warning';
+  if (response.includes("Please provide")) {
+    const afterProvide = response.split("Please provide")[1] || "";
+    if (
+      afterProvide.includes("so I can") ||
+      afterProvide.includes("in order to") ||
+      afterProvide.includes("This will")
+    ) {
+      issues.push("Field request contains explanatory text");
+      severity = "warning";
     }
   }
 
   return {
     isValid: issues.length === 0,
     issues,
-    severity
+    severity,
   };
 }
 
 function isDocument(response: string): boolean {
   const documentMarkers = [
-    'Email Body:',
-    'Registration Details:',
-    'PROPERTY RESERVATION',
-    'Marketing Agreement',
-    'This email is to provide',
-    'Viewing Form',
+    "Email Body:",
+    "Registration Details:",
+    "PROPERTY RESERVATION",
+    "Marketing Agreement",
+    "This email is to provide",
+    "Viewing Form",
   ];
 
-  return documentMarkers.some(marker => response.includes(marker));
+  return documentMarkers.some((marker) => response.includes(marker));
 }
 
 /**
  * Field extraction helper
  */
-export function extractFieldsFromUserMessage(message: string): Record<string, any> {
+export function extractFieldsFromUserMessage(
+  message: string
+): Record<string, any> {
   const extracted: Record<string, any> = {};
 
   // Client name extraction
-  const clientMatch = message.match(/(?:the )?client is ([^,.\n]+)/i) ||
-                      message.match(/([^,.\n]+) is the client/i);
+  const clientMatch =
+    message.match(/(?:the )?client is ([^,.\n]+)/i) ||
+    message.match(/([^,.\n]+) is the client/i);
   if (clientMatch) {
     extracted.clientName = clientMatch[1].trim();
   }
 
   // Time extraction
-  const timeMatch = message.match(/(?:tomorrow|today) at (\d{1,2}:?\d{0,2}(?:am|pm)?)/i) ||
-                    message.match(/at (\d{1,2}:?\d{0,2}(?:am|pm)?)/i);
+  const timeMatch =
+    message.match(/(?:tomorrow|today) at (\d{1,2}:?\d{0,2}(?:am|pm)?)/i) ||
+    message.match(/at (\d{1,2}:?\d{0,2}(?:am|pm)?)/i);
   if (timeMatch) {
     extracted.viewingTime = convertTo24Hour(timeMatch[1]);
   }
 
   // Template type extraction
   if (/registration developer|developer registration/i.test(message)) {
-    extracted.templateType = 'developer_registration';
+    extracted.templateType = "developer_registration";
   } else if (/email marketing|marketing email/i.test(message)) {
-    extracted.templateType = 'email_marketing';
+    extracted.templateType = "email_marketing";
   } else if (/standard registration/i.test(message)) {
-    extracted.templateType = 'standard_seller';
+    extracted.templateType = "standard_seller";
   } else if (/bank registration/i.test(message)) {
-    extracted.templateType = 'bank_registration';
+    extracted.templateType = "bank_registration";
   }
 
   // Property registration number
@@ -336,8 +348,8 @@ export function extractFieldsFromUserMessage(message: string): Record<string, an
   }
 
   // Price extraction
-  const priceMatch = message.match(/€([\d,]+)/i) ||
-                     message.match(/([\d,]+) ?(?:euro|EUR)/i);
+  const priceMatch =
+    message.match(/€([\d,]+)/i) || message.match(/([\d,]+) ?(?:euro|EUR)/i);
   if (priceMatch) {
     extracted.price = priceMatch[1];
   }
@@ -347,39 +359,39 @@ export function extractFieldsFromUserMessage(message: string): Record<string, an
 
 function convertTo24Hour(time: string): string {
   // Already in 24-hour format
-  if (time.includes(':') && !time.match(/am|pm/i)) {
+  if (time.includes(":") && !time.match(/am|pm/i)) {
     return time;
   }
 
   // Convert 12-hour to 24-hour
   const match = time.match(/(\d{1,2}):?(\d{0,2})\s*(am|pm)/i);
   if (match) {
-    let hours = parseInt(match[1]);
-    const minutes = match[2] || '00';
+    let hours = Number.parseInt(match[1], 10);
+    const minutes = match[2] || "00";
     const period = match[3].toLowerCase();
 
-    if (period === 'pm' && hours !== 12) {
+    if (period === "pm" && hours !== 12) {
       hours += 12;
-    } else if (period === 'am' && hours === 12) {
+    } else if (period === "am" && hours === 12) {
       hours = 0;
     }
 
-    return `${hours.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    return `${hours.toString().padStart(2, "0")}:${minutes.padStart(2, "0")}`;
   }
 
   // Simple number (e.g., "3pm" -> "15:00")
   const simpleMatch = time.match(/(\d{1,2})\s*(am|pm)/i);
   if (simpleMatch) {
-    let hours = parseInt(simpleMatch[1]);
+    let hours = Number.parseInt(simpleMatch[1], 10);
     const period = simpleMatch[2].toLowerCase();
 
-    if (period === 'pm' && hours !== 12) {
+    if (period === "pm" && hours !== 12) {
       hours += 12;
-    } else if (period === 'am' && hours === 12) {
+    } else if (period === "am" && hours === 12) {
       hours = 0;
     }
 
-    return `${hours.toString().padStart(2, '0')}:00`;
+    return `${hours.toString().padStart(2, "0")}:00`;
   }
 
   return time;
@@ -390,7 +402,7 @@ function convertTo24Hour(time: string): string {
  */
 export function generateSofiaResponse(
   extractedFields: Record<string, any>,
-  requiredFields: Array<{name: string, example: string}>,
+  requiredFields: Array<{ name: string; example: string }>,
   documentContent?: string
 ): string {
   // If document is ready, return it directly
@@ -399,14 +411,14 @@ export function generateSofiaResponse(
   }
 
   // Determine missing fields
-  const missingFields = requiredFields.filter(field => {
-    const fieldKey = field.name.toLowerCase().replace(/\s+/g, '_');
+  const missingFields = requiredFields.filter((field) => {
+    const fieldKey = field.name.toLowerCase().replace(/\s+/g, "_");
     return !extractedFields[fieldKey];
   });
 
   // Format field request
   if (missingFields.length === 0) {
-    return ''; // All fields present, should generate document
+    return ""; // All fields present, should generate document
   }
 
   if (missingFields.length === 1) {
@@ -418,6 +430,6 @@ export function generateSofiaResponse(
   }
 
   // 3+ fields
-  const fieldLines = missingFields.map(f => `${f.name} (e.g., ${f.example})`);
-  return `Please provide:\n\n${fieldLines.join('\n\n')}`;
+  const fieldLines = missingFields.map((f) => `${f.name} (e.g., ${f.example})`);
+  return `Please provide:\n\n${fieldLines.join("\n\n")}`;
 }

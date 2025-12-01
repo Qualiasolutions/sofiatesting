@@ -1,7 +1,7 @@
+import { randomBytes } from "node:crypto";
+import * as XLSX from "xlsx";
 import { db } from "../lib/db/client";
 import { zyprusAgent } from "../lib/db/schema";
-import * as XLSX from "xlsx";
-import { randomBytes } from "crypto";
 
 /**
  * Seed Script: Import Zyprus Agents from Excel Spreadsheet
@@ -16,13 +16,13 @@ import { randomBytes } from "crypto";
  *   pnpm tsx scripts/seed-agents.ts /path/to/agents.xlsx
  */
 
-interface AgentRow {
+type AgentRow = {
   "Fulla Name": string;
   "Mobile Phone": string | number;
   "Email use to communicate": string;
   Region: string;
   Role: string;
-}
+};
 
 function normalizePhoneNumber(phone: string | number): string {
   if (typeof phone === "number") {
@@ -157,6 +157,7 @@ async function seedAgents(excelPath: string) {
 
 // Main execution
 const excelPath =
-  process.argv[2] || "/home/qualiasolutions/Downloads/Untitled spreadsheet.xlsx";
+  process.argv[2] ||
+  "/home/qualiasolutions/Downloads/Untitled spreadsheet.xlsx";
 
 seedAgents(excelPath);

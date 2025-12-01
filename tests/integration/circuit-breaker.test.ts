@@ -19,8 +19,7 @@
  * 7. Circuit stats tracking (failures, successes, timeouts, rejects)
  */
 
-import { test, expect } from "@playwright/test";
-import CircuitBreaker from "opossum";
+import { expect, test } from "@playwright/test";
 import {
   createCircuitBreaker,
   getCircuitBreakerStats,
@@ -110,8 +109,8 @@ test.describe("Circuit Breaker Integration Tests", () => {
         timeout: 1000,
         errorThresholdPercentage: 50,
         volumeThreshold: 5,
-        resetTimeout: 60000, // Long reset to prevent auto-recovery during test
-        rollingCountTimeout: 10000, // 10 second rolling window
+        resetTimeout: 60_000, // Long reset to prevent auto-recovery during test
+        rollingCountTimeout: 10_000, // 10 second rolling window
         rollingCountBuckets: 10,
       });
 
@@ -306,7 +305,7 @@ test.describe("Circuit Breaker Integration Tests", () => {
         timeout: 1000,
         errorThresholdPercentage: 50,
         volumeThreshold: 5,
-        resetTimeout: 60000,
+        resetTimeout: 60_000,
       });
 
       let rejectEventFired = false;
@@ -415,7 +414,7 @@ test.describe("Circuit Breaker Integration Tests", () => {
 
       try {
         await breaker.fire();
-      } catch (error) {
+      } catch (_error) {
         // Timeout error expected
       }
 
@@ -442,7 +441,7 @@ test.describe("Circuit Breaker Integration Tests", () => {
       try {
         await breaker.fire();
         expect.fail("Should have thrown timeout error");
-      } catch (error) {
+      } catch (_error) {
         const elapsed = Date.now() - startTime;
         // Should fail around 300ms, not wait for full 1000ms
         expect(elapsed).toBeLessThan(800);
@@ -477,8 +476,8 @@ test.describe("Circuit Breaker Integration Tests", () => {
         timeout: 500,
         errorThresholdPercentage: 50,
         volumeThreshold: 5,
-        resetTimeout: 60000,
-        rollingCountTimeout: 10000,
+        resetTimeout: 60_000,
+        rollingCountTimeout: 10_000,
         rollingCountBuckets: 10,
       });
 
@@ -587,7 +586,7 @@ test.describe("Circuit Breaker Integration Tests", () => {
         timeout: 1000,
         errorThresholdPercentage: 50,
         volumeThreshold: 5,
-        resetTimeout: 60000, // Long timeout
+        resetTimeout: 60_000, // Long timeout
       });
 
       // Open circuit
@@ -654,12 +653,12 @@ test.describe("Circuit Breaker Integration Tests", () => {
         timeout: 1000,
         errorThresholdPercentage: 50,
         volumeThreshold: 5,
-        resetTimeout: 60000,
+        resetTimeout: 60_000,
       });
 
       // Rapid successive failures
       control.shouldFail = true;
-      const promises = Array(20)
+      const promises = new Array(20)
         .fill(0)
         .map(() => breaker.fire().catch(() => {}));
 
@@ -680,7 +679,7 @@ test.describe("Circuit Breaker Integration Tests", () => {
         timeout: 1000,
         errorThresholdPercentage: 50,
         volumeThreshold: 5,
-        resetTimeout: 60000,
+        resetTimeout: 60_000,
       });
 
       control.shouldFail = true;
@@ -724,12 +723,10 @@ test.describe("Circuit Breaker Integration Tests", () => {
 
       // Fire 10 concurrent requests (5 succeed, 5 fail)
       control.shouldFail = false;
-      const successPromises = Array(5)
-        .fill(0)
-        .map(() => breaker.fire());
+      const successPromises = new Array(5).fill(0).map(() => breaker.fire());
 
       control.shouldFail = true;
-      const failurePromises = Array(5)
+      const failurePromises = new Array(5)
         .fill(0)
         .map(() => breaker.fire().catch(() => "failed"));
 
