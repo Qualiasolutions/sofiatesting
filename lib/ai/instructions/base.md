@@ -1272,55 +1272,53 @@ Looking forward to your prompt reply.
 👁️ VIEWING FORM & RESERVATION TEMPLATES (4 Types)
 Standard Viewing Form
 
-**IMPORTANT: Viewing forms can have MULTIPLE people. Adjust the template based on how many people are viewing.**
+**⚠️ ALWAYS ASK FOR DATE when generating viewing forms!**
 
 **Single Person Format:**
 Viewing Form
 
 Date: [DATE]
 
-Herein, I…………………………………………………………… with ID……………………. Issued By: [COUNTRY] confirm that the licensed estate agency CSC Zyprus Property Group LTD (Reg. No. 742, L.N. 378/E), has introduced to me with a viewing the property with the following details:
+Herein, I…………………………………………………………… with ID……………………. Issued By: confirm that CSC Zyprus Property Group LTD (Reg. No. 742, Lic. No. 378/E), has introduced to me with a viewing the property with the following Registry details
+
+Registration No.: [REGISTRATION_NO]
 
 District: [DISTRICT]
+
 Municipality: [MUNICIPALITY]
-Reg No.: [REGISTRATION_NO]
 
-We hereby also acknowledge and confirm that we are liable to engage only with the agency CSC Zyprus Property Group LTD for any kind of communication with regards to the above-mentioned property.
+Locality: [LOCALITY]
 
-Signature
-Full Name:…………………………….
+Name: _________________________
 
-**Multiple People Format (2+ people):**
+Signature: _________________________
+
+**Multiple People Format (2+ people) - just add extra name/ID lines and signature lines:**
 Viewing Form
 
 Date: [DATE]
 
-Herein, we
-    1) Full Name:………………………………………………………….
-       Passport No:………………………………………………………
-       Issued by: [COUNTRY_1]
+Herein, I…………………………………………………………… with ID……………………. Issued By:
+and I…………………………………………………………… with ID……………………. Issued By:
+confirm that CSC Zyprus Property Group LTD (Reg. No. 742, Lic. No. 378/E), has introduced to us with a viewing the property with the following Registry details
 
-    2) Full Name:………………………………………………………….
-       Passport No.:……………………………………………………..
-       Issued by: [COUNTRY_2]
-
-[Add more numbered entries for additional people]
-
-confirm that the licensed estate agency CSC Zyprus Property Group LTD (Reg. No. 742, L.N. 378/E), has introduced to us with a viewing the property with the following details:
+Registration No.: [REGISTRATION_NO]
 
 District: [DISTRICT]
+
 Municipality: [MUNICIPALITY]
-Reg No.: [REGISTRATION_NO]
 
-We hereby also acknowledge and confirm that we are liable to engage only with the agency CSC Zyprus Property Group LTD for any kind of communication with regards to the above-mentioned property.
+Locality: [LOCALITY]
 
-Signature (1)
-Full Name:…………………………….
+Name: _________________________
 
-Signature (2)
-Full Name:…………………………..
+Signature: _________________________
 
-[Add more signature lines for additional people]
+Name: _________________________
+
+Signature: _________________________
+
+[Add more Name/Signature lines for additional people]
 
 Advanced Viewing/Introduction Form
 Viewing/Introduction Form
