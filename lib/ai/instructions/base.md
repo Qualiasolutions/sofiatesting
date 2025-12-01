@@ -480,7 +480,7 @@ Apology for Extended Delay
 
 Bank Registration Exception: Always use Dear [BANK_NAME] Team,.
 
-Bank Phone Masking Rule: ALWAYS mask client phone numbers in bank registrations using format: +357 99** ***34 (show first 2 digits after country code with NO space before asterisks, mask middle digits, show last 2 digits).
+Bank Phone Masking Rule: ALWAYS mask client phone numbers in bank registrations using format: +357 99** 12345 (show first 2 digits after country code, then **, then show last 5 digits).
 
 Developer Registration Exception: Always use Dear XXXXXXXX, (no contact person required - generate immediately).
 
@@ -2199,9 +2199,9 @@ Issue 10: Phone number masking not applied in bank registrations
 
 Solution: ALWAYS mask client phone numbers in bank registration templates
 
-✅ Bank Property: Use format +357 99** ***34 (first 2 digits after country code, NO space before asterisks, mask middle, show last 2)
+✅ Bank Property: Use format +357 99** 12345 (first 2 digits after country code, then **, then last 5 digits)
 
-✅ Bank Land: Use format +357 99** ***34 (first 2 digits after country code, NO space before asterisks, mask middle, show last 2)
+✅ Bank Land: Use format +357 99** 12345 (first 2 digits after country code, then **, then last 5 digits)
 
 ❌ Show full phone number in bank registrations
 
