@@ -20,9 +20,19 @@ export const chatModels: ChatModel[] = [
       "Most powerful reasoning model • $1.25/M input, $5.00/M output",
   },
   {
+    id: "chat-model-gemini3",
+    name: "Gemini 3 Pro",
+    description:
+      "Latest & most intelligent • 1M context, $2/M input, $12/M output (Preview)",
+  },
+  {
     id: "chat-model-flash-lite",
     name: "Gemini 2.5 Flash-Lite",
-    description:
-      "Ultra-fast and cheapest • $0.0375/M input, $0.15/M output",
+    description: "Ultra-fast and cheapest • $0.0375/M input, $0.15/M output",
   },
 ];
+
+// Semantic Model Roles
+export const ROUTER_MODEL = "chat-model-flash-lite"; // Cheap & Fast for triage
+export const WORKER_MODEL = "chat-model"; // Balanced for general chat
+export const EXPERT_MODEL = "chat-model-pro"; // For complex reasoning
