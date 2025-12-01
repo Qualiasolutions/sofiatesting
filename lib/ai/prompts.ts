@@ -25,10 +25,10 @@ function loadCyprusKnowledgeUncached(): string {
   }
 }
 
-// Cache knowledge for 24 hours - v2: fixed touristic zones table
+// Cache knowledge for 24 hours - v6: client not providing phone natural language
 const loadCyprusKnowledge = unstable_cache(
   async () => loadCyprusKnowledgeUncached(),
-  ["cyprus-knowledge-base-v2"],
+  ["cyprus-knowledge-base-v6"],
   { revalidate: 86_400 }
 );
 
@@ -71,10 +71,10 @@ async function loadSophiaInstructionsUncached(): Promise<string> {
   return content;
 }
 
-// Cache base instructions for 24 hours - v2: fixed touristic zones table
+// Cache base instructions for 24 hours - v6: client not providing phone natural language
 const loadSophiaInstructions = unstable_cache(
   loadSophiaInstructionsUncached,
-  ["sophia-base-prompt-v2"],
+  ["sophia-base-prompt-v6"],
   {
     revalidate: 86_400, // 24 hours in seconds
   }
