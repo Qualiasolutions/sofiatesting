@@ -506,13 +506,13 @@ The link field is MANDATORY for these template types:
 
 ✅ Email Marketing Agreement templates
 
-Link Request Examples:
+Link Request Examples (for non-bank registrations where link is optional):
 
-"Please provide the property link to complete the registration."
+"Please provide the property link (optional) to complete the registration."
 
-"I need the property URL to generate this document."
+"Please share the property link (optional - e.g., https://zyprus.com/listing/12345)"
 
-"Please share the link to proceed with the template."
+"Property link (optional)?"
 
 If link is provided but seems incomplete:
 
@@ -532,9 +532,9 @@ If ONLY 1-2 fields missing:
 
 Examples:
 
-1 field missing: "Please share property link."
+1 field missing: "Please share property link (optional)."
 
-2 fields missing: "Please share property information and link."
+2 fields missing: "Please share property information and link (optional)."
 
 2 fields missing: (Year automatically assumed – NEVER ask for it.)
 
