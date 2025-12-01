@@ -973,6 +973,21 @@ Client Communication Templates
 
 23: Client Rushing/Insisting - Patience Request
 
+📧 INFO@ZYPRUS.COM TEMPLATES (4 Templates)
+
+**⚠️ IMPORTANT: These 4 templates are ONLY for info@zyprus.com - NOT for individual Zyprus agents/consultants!**
+
+**When asked about "info@zyprus.com templates" or "templates for info@zyprus", list ALL 4:**
+
+| # | Template Name | Purpose |
+|---|---------------|---------|
+| 19 | Different Regions Request | Client interested in multiple/different regions |
+| 20 | Client Follow Up - No Reply Yet | Following up with unresponsive clients |
+| 21 | Plain Request to info@zyprus.com | General information request from new inquiries |
+| 22 | Apology for Extended Delay | Apologizing when response was delayed |
+
+🚫 **DO NOT use these templates for individual agents** - they are exclusively for the info@zyprus.com general inbox.
+
 📋 FIELD REQUIREMENTS MATRIX
 
 Template	Required Fields	Auto-Fields	Subject Line	Special Notes
@@ -1018,17 +1033,16 @@ Apology for Extended Delay	Client's Name (OPTIONAL)	-	NO SUBJECT	Name optional -
 Client Rushing/Insisting	Client's Name (OPTIONAL)	-	NO SUBJECT	Name optional - use if mentioned, otherwise Dear XXXXXXXX, for impatient clients
 
 🔄 REGISTRATION TEMPLATES (8 Types)
+
+**⚠️ ALL SELLER REGISTRATIONS: NEVER ask for seller's name - always use "Dear XXXXXXXX, (Seller)"**
+
 Template 01: Standard Seller Registration
 
-Required Fields:
-
-Buyer Names (e.g., Elena Lamprou)
-
-Property Registration: Please provide the property's registration information (e.g., Reg. No. 0/2453 Odyessyas Building OR Reg. No. 0/1789 Germasogeia, Limassol)
-
-Viewing Date & Time (e.g., November 25, 2025 at 15:00)
-
-Property Link (optional - only if agent provides it)
+Required Fields (DO NOT ask for seller name - use XXXXXXXX):
+- Buyer Names (e.g., Elena Lamprou)
+- Property Registration (e.g., Reg. No. 0/1789 Germasogeia, Limassol)
+- Viewing Date & Time (e.g., November 25, 2025 at 15:00)
+- Property Link (OPTIONAL)
 
 Subject: Registration – [BUYER_NAMES] – Reg No. [REG_NUMBER] – [PROPERTY_DESCRIPTION]
 
@@ -1052,6 +1066,15 @@ For the confirmation, Could you please reply **''Yes I confirm''**
 
 Looking forward to your prompt confirmation.
 Template 02: Seller with Marketing Agreement
+
+Required Fields (DO NOT ask for seller name - use XXXXXXXX):
+- Buyer Names (e.g., John Smith)
+- Registration Number (e.g., 0/1789)
+- Location (e.g., Germasogeia, Limassol)
+- Viewing Date/Time (e.g., tomorrow at 15:00)
+- Property Link (OPTIONAL - omit line if not provided)
+
+**CRITICAL: NEVER ask for seller's name - always use "Dear XXXXXXXX, (Seller)"**
 
 Subject: Registration – [BUYER_NAMES] – Reg No. [REG_NUMBER] – [PROPERTY_DESCRIPTION]
 
