@@ -171,6 +171,8 @@ See `.env.example` for complete list.
 | Tool not working | Verify dual registration (both arrays) |
 | Drizzle type errors | Run `pnpm db:generate` |
 | "Cannot find module" | Check path aliases (@/lib, @/app) |
+| Zyprus API 404 errors | Run `pnpm exec tsx tests/manual/test-zyprus-api.ts` to discover correct endpoint names |
+| "Unable to create listing" | Check Vercel logs for taxonomy errors; vocabulary names may have changed |
 
 ## Key Patterns
 
@@ -240,18 +242,21 @@ headers: {
 
 Fetched via `getZyprusTaxonomyTerms(vocabulary)` and cached in memory:
 
-| Vocabulary ID | Field | Used By |
-|---------------|-------|---------|
-| `property_type` | Villa, Apartment, House, etc. | Property |
-| `land_type` | Plot, Agricultural, Residential, etc. | Land |
-| `indoor_property_features` | Air conditioning, Fireplace, etc. | Property |
-| `outdoor_property_features` | Pool, Garden, Parking, etc. | Property |
-| `infrastructure_` | Electricity, Water, Road Access | Land |
-| `property_views` | Sea View, Mountain View, City View | Both |
-| `property_status` | Resale, New Build, Under Construction, Off Plan | Both |
-| `listing_type` | For Sale, For Rent, Exchange | Both |
-| `price_modifier` | Per sqm, Negotiable, etc. | Both |
-| `title_deed` | Full, Pending, etc. | Both |
+| Vocabulary ID | Field | Used By | Items |
+|---------------|-------|---------|-------|
+| `property_type` | Villa, Apartment, House, etc. | Property | 18 |
+| `land_type` | Plot, Agricultural, Residential, etc. | Land | 4 |
+| `indoor_property_views` | Air conditioning, Fireplace, etc. | Property | 34 |
+| `outdoor_property_features` | Pool, Garden, Parking, etc. | Property | 18 |
+| `infrastructure_` | Electricity, Water, Road Access | Land | 4 |
+| `property_views` | Sea View, Mountain View, City View | Both | 8 |
+| `property_status` | Off-plan, Resale | Both | 2 |
+| `listing_type` | Sale, Rent | Both | 2 |
+| `price_modifier` | Price, Per sqm, Negotiable, etc. | Both | 5 |
+| `title_deed` | Available, Pending, etc. | Both | 4 |
+
+**IMPORTANT**: The indoor features vocabulary is `indoor_property_views` (NOT `indoor_property_features`).
+The Drupal relationship field is `field_indoor_property_features` but uses `taxonomy_term--indoor_property_views`.
 
 ### Property Upload Payload
 
@@ -318,11 +323,11 @@ Fetched via `getZyprusTaxonomyTerms(vocabulary)` and cached in memory:
           { type: "taxonomy_term--property_views", id: "view2-uuid" }
         ]
       },
-      // Features (multi-value)
-      field_indoor_features: {
-        data: [{ type: "taxonomy_term--indoor_property_features", id: "uuid" }]
+      // Features (multi-value) - NOTE: indoor uses "indoor_property_views" vocabulary
+      field_indoor_property_features: {
+        data: [{ type: "taxonomy_term--indoor_property_views", id: "uuid" }]
       },
-      field_outdoor_features: {
+      field_outdoor_property_features: {
         data: [{ type: "taxonomy_term--outdoor_property_features", id: "uuid" }]
       }
     }
@@ -489,8 +494,12 @@ const types = await getAllPropertyTypes();
 |-------|-------|----------|
 | 401 Unauthorized | Token expired/invalid | Re-authenticate |
 | 403 Forbidden | Missing User-Agent header | Add `User-Agent: SophiaAI/1.0` |
+| 404 on taxonomy | Wrong vocabulary machine name | Run `tests/manual/test-zyprus-api.ts` to discover correct names |
 | 422 Unprocessable | Invalid relationship UUID | Verify taxonomy IDs from cache |
 | 500 Server Error | Malformed JSON:API payload | Check data structure |
+
+**Debugging Taxonomy 404s**: Run `pnpm exec tsx tests/manual/test-zyprus-api.ts` to test all endpoints
+and discover available vocabularies. Check property relationships to find actual vocabulary names.
 
 ### Postman MCP Integration
 
