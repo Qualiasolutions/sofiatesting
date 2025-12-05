@@ -383,7 +383,7 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
         // NEW: Optional fields
         field_energy_class: listing.energyClass || null,
         field_video_walkthrough: listing.videoUrl || null,
-        field_phone_number: listing.phoneNumber || null,
+        // NOTE: field_phone_number removed - OAuth client doesn't have permission
         field_property_notes: listing.propertyNotes || null,
         // FIX: field_map now includes latlon field (required by Zyprus API)
         field_map: hasCoordinates
@@ -829,7 +829,7 @@ async function uploadLandToZyprusAPIInternal(
         field_floors: listing.maxFloors || null,
         field_height: listing.maxHeight || null,
         field_own_reference_id: listing.referenceId || `AI-LAND-${Date.now()}`,
-        field_phone_number: listing.phoneNumber || null,
+        // NOTE: field_phone_number removed - OAuth client doesn't have permission
         field_property_notes: listing.notes || null,
         field_map: hasCoordinates
           ? {
