@@ -38,7 +38,7 @@ async function getLogs(searchParams: {
   const limit = 50;
   const offset = (page - 1) * limit;
 
-  const conditions = [];
+  const conditions: ReturnType<typeof eq>[] = [];
   if (searchParams.agentType) {
     conditions.push(eq(agentExecutionLog.agentType, searchParams.agentType));
   }

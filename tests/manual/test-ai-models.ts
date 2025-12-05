@@ -1,30 +1,35 @@
 /**
  * Test script to verify all Gemini models work correctly
  * Tests temperature=0 enforcement and instruction following
+ *
+ * NOTE: Must load dotenv BEFORE any other imports because ESM imports are hoisted.
+ * Using dynamic imports to ensure env vars are available when providers.ts loads.
  */
 
 import path from "node:path";
 import dotenv from "dotenv";
 
-// Load environment variables from .env.local
+// Load environment variables from .env.local FIRST
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 
-import { streamText } from "ai";
-import { myProvider } from "@/lib/ai/providers";
-
 const MODELS_TO_TEST = [
-  "chat-model", // Gemini 1.5 Flash (default)
-  "chat-model-pro", // Gemini 1.5 Pro
-  "chat-model-flash-lite", // Gemini 1.5 Flash-8B
-  "title-model", // Gemini 1.5 Flash
-  "artifact-model", // Gemini 1.5 Flash
+  "chat-model", // Gemini 2.5 Flash (default)
+  "chat-model-pro", // Gemini 2.5 Pro
+  "chat-model-flash-lite", // Gemini 2.5 Flash-Lite
+  "title-model", // Gemini 2.5 Flash
+  "artifact-model", // Gemini 2.5 Flash
 ] as const;
 
 const STRICT_INSTRUCTION_TEST =
   'You MUST respond with EXACTLY this JSON format, no additional text: {"status":"ok","temperature":0}';
 
+type StreamTextFn = typeof import("ai").streamText;
+type MyProviderType = typeof import("@/lib/ai/providers").myProvider;
+
 async function testModel(
-  modelId: (typeof MODELS_TO_TEST)[number]
+  modelId: (typeof MODELS_TO_TEST)[number],
+  streamText: StreamTextFn,
+  myProvider: MyProviderType
 ): Promise<{ success: boolean; error?: string; response?: string }> {
   try {
     console.log(`\n🧪 Testing ${modelId}...`);
@@ -80,6 +85,10 @@ async function testModel(
 }
 
 async function main() {
+  // Now dynamically import modules that depend on env vars
+  const { streamText } = await import("ai");
+  const { myProvider } = await import("@/lib/ai/providers");
+
   console.log("🚀 Starting Gemini Model Tests");
   console.log("=".repeat(60));
   console.log("\n📋 Testing Configuration:");
@@ -96,7 +105,7 @@ async function main() {
   >();
 
   for (const modelId of MODELS_TO_TEST) {
-    const result = await testModel(modelId);
+    const result = await testModel(modelId, streamText, myProvider);
     results.set(modelId, result);
   }
 

@@ -898,9 +898,7 @@ export async function getLandListingsByUserId({
     return await db
       .select()
       .from(landListing)
-      .where(
-        and(eq(landListing.userId, userId), isNull(landListing.deletedAt))
-      )
+      .where(and(eq(landListing.userId, userId), isNull(landListing.deletedAt)))
       .orderBy(desc(landListing.createdAt))
       .limit(limit);
   } catch (error) {

@@ -32,7 +32,7 @@ async function getAgentsData(searchParams: SearchParams) {
   const offset = (page - 1) * limit;
 
   // Build where conditions
-  const conditions = [];
+  const conditions: ReturnType<typeof eq>[] = [];
   if (searchParams.region) {
     conditions.push(eq(zyprusAgent.region, searchParams.region));
   }

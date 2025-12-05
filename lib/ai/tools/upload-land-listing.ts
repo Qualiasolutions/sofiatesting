@@ -123,9 +123,7 @@ export const uploadLandListingTool = tool({
             ? Number(listing.siteCoverage)
             : undefined,
           maxFloors: listing.maxFloors ?? undefined,
-          maxHeight: listing.maxHeight
-            ? Number(listing.maxHeight)
-            : undefined,
+          maxHeight: listing.maxHeight ? Number(listing.maxHeight) : undefined,
           // Features
           infrastructureIds: listing.infrastructureIds ?? undefined,
           viewIds: listing.viewIds ?? undefined,

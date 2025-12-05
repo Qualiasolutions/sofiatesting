@@ -53,7 +53,8 @@ export async function getOrCreateWhatsAppUser(phoneNumber: string): Promise<{
     }
 
     // Agent exists but no linked user - create one
-    const email = agent.email || `whatsapp_${normalizedPhone}@sofia.zyprus.local`;
+    const email =
+      agent.email || `whatsapp_${normalizedPhone}@sofia.zyprus.local`;
     const newUserId = generateUUID();
 
     await db.insert(user).values({
@@ -168,9 +169,7 @@ export async function getOrCreateWhatsAppChat(
  * Check if a WhatsApp phone number is a registered Zyprus agent.
  * Used to determine permissions and capabilities.
  */
-export async function isRegisteredAgent(
-  phoneNumber: string
-): Promise<boolean> {
+export async function isRegisteredAgent(phoneNumber: string): Promise<boolean> {
   const normalizedPhone = phoneNumber.replace(/\s+/g, "");
 
   const [agent] = await db

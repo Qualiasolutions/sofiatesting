@@ -41,28 +41,30 @@ export async function POST(request: Request) {
       // Process message asynchronously - don't await
       // The serverless function will stay alive until completion
       const startTime = Date.now();
-      
-      handleTelegramMessage(body.message).then(() => {
-        const duration = Date.now() - startTime;
-        console.log("[TELEGRAM WEBHOOK] Message processed successfully:", {
-          update_id: body.update_id,
-          chat_id: body.message?.chat.id,
-          duration_ms: duration,
-          timestamp: new Date().toISOString(),
+
+      handleTelegramMessage(body.message)
+        .then(() => {
+          const duration = Date.now() - startTime;
+          console.log("[TELEGRAM WEBHOOK] Message processed successfully:", {
+            update_id: body.update_id,
+            chat_id: body.message?.chat.id,
+            duration_ms: duration,
+            timestamp: new Date().toISOString(),
+          });
+        })
+        .catch((error) => {
+          const duration = Date.now() - startTime;
+          console.error("[TELEGRAM WEBHOOK] Error in async message handler:", {
+            update_id: body.update_id,
+            chat_id: body.message?.chat.id,
+            from_user: body.message?.from?.username,
+            message_text: body.message?.text?.substring(0, 100),
+            duration_ms: duration,
+            error: error instanceof Error ? error.message : "Unknown error",
+            stack: error instanceof Error ? error.stack : undefined,
+            timestamp: new Date().toISOString(),
+          });
         });
-      }).catch((error) => {
-        const duration = Date.now() - startTime;
-        console.error("[TELEGRAM WEBHOOK] Error in async message handler:", {
-          update_id: body.update_id,
-          chat_id: body.message?.chat.id,
-          from_user: body.message?.from?.username,
-          message_text: body.message?.text?.substring(0, 100),
-          duration_ms: duration,
-          error: error instanceof Error ? error.message : "Unknown error",
-          stack: error instanceof Error ? error.stack : undefined,
-          timestamp: new Date().toISOString(),
-        });
-      });
 
       // Return immediately to prevent Telegram timeout
       return NextResponse.json({ ok: true }, { status: 200 });

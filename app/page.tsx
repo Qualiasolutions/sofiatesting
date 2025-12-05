@@ -1,58 +1,58 @@
+import { Building2, LayoutDashboard, MessageSquare } from "lucide-react";
 import Link from "next/link";
-import { MessageSquare, LayoutDashboard, Building2 } from "lucide-react";
 
 export default function PortalPage() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 animate-in fade-in duration-500">
-      <div className="max-w-4xl w-full space-y-8 text-center">
+    <div className="fade-in flex min-h-screen animate-in flex-col items-center justify-center bg-background p-4 duration-500">
+      <div className="w-full max-w-4xl space-y-8 text-center">
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight lg:text-5xl text-foreground">
+          <h1 className="font-bold text-4xl text-foreground tracking-tight lg:text-5xl">
             Qualia AI Agents Suite™
           </h1>
-          <p className="text-xl text-muted-foreground">
+          <p className="text-muted-foreground text-xl">
             Select a module to continue
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+        <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Chat Module */}
           <Link
+            className="group hover:-translate-y-1 relative flex flex-col items-center justify-center rounded-xl border border-border bg-card p-8 text-card-foreground shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
             href="/chat"
-            className="group relative flex flex-col items-center justify-center p-8 rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-primary/50 hover:-translate-y-1"
           >
-            <div className="mb-4 p-4 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
-              <MessageSquare className="w-8 h-8 text-primary" />
+            <div className="mb-4 rounded-full bg-primary/10 p-4 transition-colors group-hover:bg-primary/20">
+              <MessageSquare className="h-8 w-8 text-primary" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">Chat with SOFIA</h2>
-            <p className="text-sm text-muted-foreground text-center">
+            <h2 className="mb-2 font-semibold text-xl">Chat with SOFIA</h2>
+            <p className="text-center text-muted-foreground text-sm">
               AI Assistant for Real Estate Services
             </p>
           </Link>
 
           {/* Admin Module */}
           <Link
+            className="group hover:-translate-y-1 relative flex flex-col items-center justify-center rounded-xl border border-border bg-card p-8 text-card-foreground shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
             href="/admin"
-            className="group relative flex flex-col items-center justify-center p-8 rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-primary/50 hover:-translate-y-1"
           >
-            <div className="mb-4 p-4 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
-              <LayoutDashboard className="w-8 h-8 text-primary" />
+            <div className="mb-4 rounded-full bg-primary/10 p-4 transition-colors group-hover:bg-primary/20">
+              <LayoutDashboard className="h-8 w-8 text-primary" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">Admin Dashboard</h2>
-            <p className="text-sm text-muted-foreground text-center">
+            <h2 className="mb-2 font-semibold text-xl">Admin Dashboard</h2>
+            <p className="text-center text-muted-foreground text-sm">
               System Management & Configuration
             </p>
           </Link>
 
           {/* Properties Module */}
           <Link
+            className="group hover:-translate-y-1 relative flex flex-col items-center justify-center rounded-xl border border-border bg-card p-8 text-card-foreground shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
             href="/properties"
-            className="group relative flex flex-col items-center justify-center p-8 rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-primary/50 hover:-translate-y-1"
           >
-            <div className="mb-4 p-4 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
-              <Building2 className="w-8 h-8 text-primary" />
+            <div className="mb-4 rounded-full bg-primary/10 p-4 transition-colors group-hover:bg-primary/20">
+              <Building2 className="h-8 w-8 text-primary" />
             </div>
-            <h2 className="text-xl font-semibold mb-2">Properties</h2>
-            <p className="text-sm text-muted-foreground text-center">
+            <h2 className="mb-2 font-semibold text-xl">Properties</h2>
+            <p className="text-center text-muted-foreground text-sm">
               Listing Management & Search
             </p>
           </Link>

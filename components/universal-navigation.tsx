@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  LayoutGrid,
-  MessageSquare,
-  LayoutDashboard,
   Building2,
   Home,
+  LayoutDashboard,
+  LayoutGrid,
+  MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -30,9 +30,9 @@ export function UniversalNavigation() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="outline"
+            className="rounded-full border-muted-foreground/20 bg-background/80 shadow-md backdrop-blur-sm hover:bg-accent"
             size="icon"
-            className="rounded-full shadow-md bg-background/80 backdrop-blur-sm border-muted-foreground/20 hover:bg-accent"
+            variant="outline"
           >
             <LayoutGrid className="h-5 w-5" />
             <span className="sr-only">Open Menu</span>
@@ -41,30 +41,33 @@ export function UniversalNavigation() {
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>Navigation</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          
+
           <DropdownMenuItem asChild>
-            <Link href="/" className="flex items-center cursor-pointer">
+            <Link className="flex cursor-pointer items-center" href="/">
               <Home className="mr-2 h-4 w-4" />
               <span>Portal Home</span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
-            <Link href="/chat" className="flex items-center cursor-pointer">
+            <Link className="flex cursor-pointer items-center" href="/chat">
               <MessageSquare className="mr-2 h-4 w-4" />
               <span>Chat with SOFIA</span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
-            <Link href="/admin" className="flex items-center cursor-pointer">
+            <Link className="flex cursor-pointer items-center" href="/admin">
               <LayoutDashboard className="mr-2 h-4 w-4" />
               <span>Admin Dashboard</span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
-            <Link href="/properties" className="flex items-center cursor-pointer">
+            <Link
+              className="flex cursor-pointer items-center"
+              href="/properties"
+            >
               <Building2 className="mr-2 h-4 w-4" />
               <span>Properties</span>
             </Link>

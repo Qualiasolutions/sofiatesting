@@ -43,12 +43,13 @@ export async function GET(request: NextRequest) {
     }
 
     if (search) {
-      conditions.push(
-        or(
-          ilike(zyprusAgent.fullName, `%${search}%`),
-          ilike(zyprusAgent.email, `%${search}%`)
-        )!
+      const searchCondition = or(
+        ilike(zyprusAgent.fullName, `%${search}%`),
+        ilike(zyprusAgent.email, `%${search}%`)
       );
+      if (searchCondition) {
+        conditions.push(searchCondition);
+      }
     }
 
     // Execute query with pagination

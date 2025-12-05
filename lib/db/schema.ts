@@ -194,7 +194,10 @@ export const propertyListing = pgTable(
     phoneNumber: varchar("phoneNumber", { length: 20 }), // Contact phone number
     propertyNotes: text("propertyNotes"), // Internal notes
     duplicateDetected: boolean("duplicateDetected").default(false), // Flag for potential duplicate
-    coordinates: jsonb("coordinates").$type<{ latitude: number; longitude: number }>(), // GPS coordinates
+    coordinates: jsonb("coordinates").$type<{
+      latitude: number;
+      longitude: number;
+    }>(), // GPS coordinates
     amenityFeature: jsonb("amenityFeature"), // array of features [DEPRECATED - use featureIds above]
     image: jsonb("image"), // array of image URLs
     status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, queued, uploading, uploaded, failed, published
@@ -296,7 +299,10 @@ export const landListing = pgTable(
     viewIds: uuid("viewIds").array(), // UUIDs from zyprus.com taxonomy_term--property_views
 
     // Location
-    coordinates: jsonb("coordinates").$type<{ latitude: number; longitude: number }>(),
+    coordinates: jsonb("coordinates").$type<{
+      latitude: number;
+      longitude: number;
+    }>(),
 
     // Media
     image: jsonb("image").$type<string[]>(),

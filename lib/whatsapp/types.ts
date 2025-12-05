@@ -17,7 +17,14 @@ export type WaSenderMessageData = {
   id: string;
   from: string;
   to: string;
-  type: "text" | "image" | "document" | "audio" | "video" | "location" | "vcard";
+  type:
+    | "text"
+    | "image"
+    | "document"
+    | "audio"
+    | "video"
+    | "location"
+    | "vcard";
   text?: string;
   timestamp: number;
   isGroup: boolean;

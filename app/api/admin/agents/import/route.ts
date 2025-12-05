@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
-import * as XLSX from "xlsx";
+import { read, utils } from "xlsx";
 import { db } from "@/lib/db/client";
 import { zyprusAgent } from "@/lib/db/schema";
 
@@ -69,10 +69,10 @@ export async function POST(request: NextRequest) {
 
     // Read file buffer
     const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: "array" });
+    const workbook = read(buffer, { type: "array" });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    const rawData = XLSX.utils.sheet_to_json<AgentRow>(worksheet);
+    const rawData = utils.sheet_to_json<AgentRow>(worksheet);
 
     if (rawData.length === 0) {
       return NextResponse.json(

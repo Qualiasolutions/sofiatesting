@@ -240,9 +240,7 @@ export type ZyprusListingInput = PropertyListing & {
 /**
  * Internal property upload function (wrapped by circuit breaker)
  */
-async function uploadToZyprusAPIInternal(
-  listing: ZyprusListingInput
-): Promise<{
+async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
   listingId: string;
   listingUrl: string;
 }> {
@@ -661,9 +659,7 @@ const uploadBreaker = createCircuitBreaker(uploadToZyprusAPIInternal, {
  * - Property status and views: propertyStatusId, viewIds
  * - Optional fields: energyClass, videoUrl, phoneNumber, propertyNotes
  */
-export async function uploadToZyprusAPI(
-  listing: ZyprusListingInput
-): Promise<{
+export async function uploadToZyprusAPI(listing: ZyprusListingInput): Promise<{
   listingId: string;
   listingUrl: string;
 }> {
@@ -725,7 +721,9 @@ async function uploadLandToZyprusAPIInternal(
     const imageUrls = listing.images;
     const totalImages = imageUrls.length;
 
-    console.log(`Starting PARALLEL upload of ${totalImages} land images to Zyprus`);
+    console.log(
+      `Starting PARALLEL upload of ${totalImages} land images to Zyprus`
+    );
 
     const uploadPromises = imageUrls.map(async (imageUrl, i) => {
       console.log(`Uploading land image ${i + 1}/${totalImages}: ${imageUrl}`);
@@ -767,7 +765,9 @@ async function uploadLandToZyprusAPIInternal(
         }
 
         const data = await uploadResponse.json();
-        console.log(`Successfully uploaded land image ${i + 1}: ${data.data.id}`);
+        console.log(
+          `Successfully uploaded land image ${i + 1}: ${data.data.id}`
+        );
         return { index: i, id: data.data.id, url: imageUrl };
       } catch (imgError) {
         console.error(
@@ -786,7 +786,9 @@ async function uploadLandToZyprusAPIInternal(
       } else {
         console.error(
           "Land image upload failed:",
-          result.reason instanceof Error ? result.reason.message : "Unknown error"
+          result.reason instanceof Error
+            ? result.reason.message
+            : "Unknown error"
         );
       }
     }
@@ -797,7 +799,8 @@ async function uploadLandToZyprusAPIInternal(
   }
 
   // Build land-specific field_map
-  const hasCoordinates = listing.coordinates?.latitude && listing.coordinates?.longitude;
+  const hasCoordinates =
+    listing.coordinates?.latitude && listing.coordinates?.longitude;
 
   // Build JSON:API payload for land listing
   const payload: JsonApiDocument = {
@@ -1018,9 +1021,7 @@ const landUploadBreaker = createCircuitBreaker(uploadLandToZyprusAPIInternal, {
  * - Infrastructure: infrastructureIds (Electricity, Water, Road Access)
  * - AI tracking: chatId, duplicateDetected
  */
-export async function uploadLandToZyprusAPI(
-  listing: ZyprusLandInput
-): Promise<{
+export async function uploadLandToZyprusAPI(listing: ZyprusLandInput): Promise<{
   listingId: string;
   listingUrl: string;
 }> {
@@ -1035,16 +1036,16 @@ export async function uploadLandToZyprusAPI(
  * Supported file upload fields for property and land
  */
 export type PropertyFileField =
-  | "field_gallery_"      // Main property images (MANDATORY)
-  | "field_floor_plan"    // Floor plan images
+  | "field_gallery_" // Main property images (MANDATORY)
+  | "field_floor_plan" // Floor plan images
   | "field_pdf_floor_plan" // Floor plan PDF
-  | "field_epc";          // Energy Performance Certificate PDF
+  | "field_epc"; // Energy Performance Certificate PDF
 
 export type LandFileField =
-  | "field_land_gallery"        // Main land images (MANDATORY)
+  | "field_land_gallery" // Main land images (MANDATORY)
   | "field_marketing_agreement" // Marketing agreement PDF
-  | "field_title_deed_file"     // Title deed scan PDF
-  | "field_other_document";     // Other documents PDF
+  | "field_title_deed_file" // Title deed scan PDF
+  | "field_other_document"; // Other documents PDF
 
 /**
  * Upload files to a specific field on a Zyprus listing
@@ -1074,7 +1075,8 @@ export async function uploadFilesToZyprus(
       }
 
       const blob = await response.blob();
-      const contentType = response.headers.get("content-type") || "application/octet-stream";
+      const contentType =
+        response.headers.get("content-type") || "application/octet-stream";
 
       // Extract filename from URL or generate one
       const urlPath = new URL(url).pathname;
@@ -1095,7 +1097,9 @@ export async function uploadFilesToZyprus(
 
       if (!uploadResponse.ok) {
         const errorText = await uploadResponse.text();
-        throw new Error(`Upload failed: ${uploadResponse.status} - ${errorText}`);
+        throw new Error(
+          `Upload failed: ${uploadResponse.status} - ${errorText}`
+        );
       }
 
       const data = await uploadResponse.json();
@@ -1118,7 +1122,9 @@ export async function uploadFilesToZyprus(
     }
   }
 
-  console.log(`File upload complete: ${fileIds.length}/${fileUrls.length} successful`);
+  console.log(
+    `File upload complete: ${fileIds.length}/${fileUrls.length} successful`
+  );
   return fileIds;
 }
 
@@ -1154,7 +1160,11 @@ export async function uploadFloorPlanPdf(
   propertyId: string,
   pdfUrl: string
 ): Promise<string | null> {
-  const ids = await uploadFilesToZyprus([pdfUrl], "property", "field_pdf_floor_plan");
+  const ids = await uploadFilesToZyprus(
+    [pdfUrl],
+    "property",
+    "field_pdf_floor_plan"
+  );
   return ids[0] || null;
 }
 
@@ -1206,13 +1216,16 @@ export async function checkForDuplicates(
   const siteUrl = process.env.ZYPRUS_SITE_URL || "https://dev9.zyprus.com";
   const token = await getAccessToken();
 
-  const endpoint = type === "property" ? "/jsonapi/node/property" : "/jsonapi/node/land";
+  const endpoint =
+    type === "property" ? "/jsonapi/node/property" : "/jsonapi/node/land";
 
   // Build filter query - prioritize reference ID as exact match
   const filters: string[] = [];
 
   if (criteria.referenceId) {
-    filters.push(`filter[field_own_reference_id]=${encodeURIComponent(criteria.referenceId)}`);
+    filters.push(
+      `filter[field_own_reference_id]=${encodeURIComponent(criteria.referenceId)}`
+    );
   }
 
   if (criteria.locationId) {
@@ -1224,8 +1237,8 @@ export async function checkForDuplicates(
     // Search within 10% price range
     const minPrice = Math.floor(criteria.price * 0.9);
     const maxPrice = Math.ceil(criteria.price * 1.1);
-    filters.push(`filter[field_price][condition][path]=field_price`);
-    filters.push(`filter[field_price][condition][operator]=BETWEEN`);
+    filters.push("filter[field_price][condition][path]=field_price");
+    filters.push("filter[field_price][condition][operator]=BETWEEN");
     filters.push(`filter[field_price][condition][value][0]=${minPrice}`);
     filters.push(`filter[field_price][condition][value][1]=${maxPrice}`);
   }
@@ -1251,7 +1264,11 @@ export async function checkForDuplicates(
     }
 
     const data: JsonApiDocument = await response.json();
-    const items = Array.isArray(data.data) ? data.data : data.data ? [data.data] : [];
+    const items = Array.isArray(data.data)
+      ? data.data
+      : data.data
+        ? [data.data]
+        : [];
 
     // Filter further by title similarity if provided
     let matches = items;
@@ -1317,9 +1334,10 @@ export async function getListingFromZyprus(
   const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
   const token = await getAccessToken();
 
-  const endpoint = type === "property"
-    ? `/jsonapi/node/property/${id}`
-    : `/jsonapi/node/land/${id}`;
+  const endpoint =
+    type === "property"
+      ? `/jsonapi/node/property/${id}`
+      : `/jsonapi/node/land/${id}`;
 
   try {
     const response = await fetch(`${apiUrl}${endpoint}`, {
@@ -1390,7 +1408,8 @@ export async function searchZyprusListings(
   const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
   const token = await getAccessToken();
 
-  const endpoint = type === "property" ? "/jsonapi/node/property" : "/jsonapi/node/land";
+  const endpoint =
+    type === "property" ? "/jsonapi/node/property" : "/jsonapi/node/land";
 
   // Build filter query
   const queryParams: string[] = [];
@@ -1408,14 +1427,16 @@ export async function searchZyprusListings(
   }
 
   if (filters.minPrice !== undefined) {
-    queryParams.push(`filter[field_price][condition][path]=field_price`);
-    queryParams.push(`filter[field_price][condition][operator]=>=`);
-    queryParams.push(`filter[field_price][condition][value]=${filters.minPrice}`);
+    queryParams.push("filter[field_price][condition][path]=field_price");
+    queryParams.push("filter[field_price][condition][operator]=>=");
+    queryParams.push(
+      `filter[field_price][condition][value]=${filters.minPrice}`
+    );
   }
 
   if (filters.maxPrice !== undefined) {
-    queryParams.push(`filter[max_price][condition][path]=field_price`);
-    queryParams.push(`filter[max_price][condition][operator]=<=`);
+    queryParams.push("filter[max_price][condition][path]=field_price");
+    queryParams.push("filter[max_price][condition][operator]=<=");
     queryParams.push(`filter[max_price][condition][value]=${filters.maxPrice}`);
   }
 
@@ -1442,7 +1463,11 @@ export async function searchZyprusListings(
     }
 
     const data: JsonApiDocument = await response.json();
-    const items = Array.isArray(data.data) ? data.data : data.data ? [data.data] : [];
+    const items = Array.isArray(data.data)
+      ? data.data
+      : data.data
+        ? [data.data]
+        : [];
 
     return items.map((item: any) => ({
       id: item.id,

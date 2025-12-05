@@ -252,15 +252,15 @@ ${name}
 💰 €${price.toLocaleString()}
 🛏️ ${bedrooms} bedroom${bedrooms > 1 ? "s" : ""} | 🚿 ${bathrooms} bath${bathrooms > 1 ? "s" : ""}
 📐 ${squareFootage}m²
-${listingTypeId ? `🏷️ Listing Type: Set` : ""}
-${propertyTypeId ? `🏠 Property Type: Set` : ""}
-${propertyStatusId ? `📊 Property Status: Set` : ""}
+${listingTypeId ? "🏷️ Listing Type: Set" : ""}
+${propertyTypeId ? "🏠 Property Type: Set" : ""}
+${propertyStatusId ? "📊 Property Status: Set" : ""}
 ${viewIds && viewIds.length > 0 ? `👁️ Views: ${viewIds.length} selected` : ""}
 ${indoorFeatureIds && indoorFeatureIds.length > 0 ? `🏠 Indoor Features: ${indoorFeatureIds.length} selected` : ""}
 ${outdoorFeatureIds && outdoorFeatureIds.length > 0 ? `🌳 Outdoor Features: ${outdoorFeatureIds.length} selected` : ""}
 ${yearBuilt ? `📅 Year Built: ${yearBuilt}` : ""}
 ${energyClass ? `⚡ Energy Class: ${energyClass}` : ""}
-${videoUrl ? `🎥 Video: Included` : ""}
+${videoUrl ? "🎥 Video: Included" : ""}
 ${referenceId ? `🔖 Reference: ${referenceId}` : ""}
 ${coordinates ? `📍 GPS: ${coordinates.latitude.toFixed(4)}, ${coordinates.longitude.toFixed(4)}` : ""}
 ${imageUrls && imageUrls.length > 0 ? `📸 Images: ${imageUrls.length} photo${imageUrls.length > 1 ? "s" : ""}` : ""}

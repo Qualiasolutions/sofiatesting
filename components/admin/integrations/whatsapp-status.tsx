@@ -57,9 +57,9 @@ export async function WhatsAppStatus() {
             <li>
               Create account at{" "}
               <Link
+                className="text-primary hover:underline"
                 href="https://wasenderapi.com"
                 target="_blank"
-                className="text-primary hover:underline"
               >
                 wasenderapi.com
               </Link>{" "}

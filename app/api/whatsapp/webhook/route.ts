@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { handleWhatsAppMessage } from "@/lib/whatsapp/message-handler";
 import type {
   WaSenderMessageData,
-  WaSenderWebhookPayload,
-  WaSenderStatusData,
   WaSenderSessionData,
+  WaSenderStatusData,
+  WaSenderWebhookPayload,
 } from "@/lib/whatsapp/types";
 
 /**

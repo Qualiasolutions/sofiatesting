@@ -17,7 +17,9 @@ export const createLandListingTool = tool({
       .string()
       .min(20)
       .max(2000)
-      .describe("Detailed land description including location, features, zoning info"),
+      .describe(
+        "Detailed land description including location, features, zoning info"
+      ),
     price: z
       .number()
       .positive()
@@ -88,7 +90,9 @@ export const createLandListingTool = tool({
       .string()
       .uuid()
       .optional()
-      .describe("Price modifier UUID (Guide Price, etc.). Use getZyprusData tool."),
+      .describe(
+        "Price modifier UUID (Guide Price, etc.). Use getZyprusData tool."
+      ),
     titleDeedId: z
       .string()
       .uuid()

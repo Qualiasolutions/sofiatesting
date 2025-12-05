@@ -78,7 +78,7 @@ async function refreshCache(): Promise<TaxonomyCache> {
     ] = await Promise.all([
       getZyprusLocations(),
       getZyprusTaxonomyTerms("property_type"),
-      getZyprusTaxonomyTerms("indoor_property_features"),
+      getZyprusTaxonomyTerms("indoor_property_views"), // NOTE: Drupal uses "indoor_property_views" not "indoor_property_features"
       getZyprusTaxonomyTerms("outdoor_property_features"),
       getZyprusTaxonomyTerms("price_modifier"),
       getZyprusTaxonomyTerms("title_deed"),
@@ -433,7 +433,9 @@ export async function findLandTypeByName(name: string): Promise<string | null> {
 /**
  * Find infrastructure IDs by names (Electricity, Water, Road Access, etc.)
  */
-export async function findInfrastructureIds(names: string[]): Promise<string[]> {
+export async function findInfrastructureIds(
+  names: string[]
+): Promise<string[]> {
   const cache = await getCache();
   if (!cache.infrastructure) {
     return [];
