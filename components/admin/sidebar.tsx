@@ -3,6 +3,7 @@
 import {
   Activity,
   Bot,
+  Building2,
   Calculator,
   Database,
   FileText,
@@ -37,6 +38,12 @@ const navigationItems = [
     href: "/admin/agents-registry",
     icon: Users,
     requiredPermission: "manage_users",
+  },
+  {
+    name: "Listings Review",
+    href: "/admin/listings",
+    icon: Building2,
+    requiredPermission: null,
   },
   {
     name: "Execution Logs",
