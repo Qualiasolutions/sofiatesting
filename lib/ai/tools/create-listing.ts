@@ -2,7 +2,16 @@ import { tool } from "ai";
 import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
 import { getUserContext } from "@/lib/ai/context";
-import { createPropertyListing } from "@/lib/db/queries";
+import {
+  createPropertyListing,
+  updateListingStatus,
+  logListingUploadAttempt,
+} from "@/lib/db/queries";
+import {
+  uploadToZyprusAPI,
+  ZyprusAPIError,
+  isPermanentError,
+} from "@/lib/zyprus/client";
 
 // Cyprus cities for validation
 const _CYPRUS_LOCATIONS = [
@@ -308,29 +317,109 @@ export const createListingTool = tool({
         draftExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       });
 
-      return {
-        success: true,
-        listingId: listing.id,
-        message: `✅ **Listing Saved for Review!**
+      // Now automatically upload to Zyprus as DRAFT (status: false = unpublished)
+      const startTime = Date.now();
+      let zyprusResult: { listingId: string; listingUrl: string } | null = null;
+      let uploadError: string | null = null;
+
+      try {
+        // Update to uploading status
+        await updateListingStatus({ id: listing.id, status: "uploading" });
+
+        // Upload to Zyprus API - it creates as unpublished draft (status: false)
+        zyprusResult = await uploadToZyprusAPI({
+          ...listing,
+          name,
+          description,
+          price: price.toString(),
+          currency: "EUR",
+          numberOfRooms: bedrooms,
+          numberOfBathroomsTotal: bathrooms.toString(),
+          floorSize: squareFootage.toString(),
+          locationId,
+          propertyTypeId,
+          indoorFeatureIds,
+          outdoorFeatureIds,
+          priceModifierId,
+          titleDeedId,
+          listingTypeId,
+          propertyStatusId,
+          viewIds,
+          yearBuilt,
+          energyClass,
+          videoUrl,
+          referenceId,
+          image: imageUrls || [],
+          ...(coordinates && {
+            address: {
+              streetAddress: "",
+              addressLocality: "Cyprus",
+              addressCountry: "CY",
+              geo: {
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude,
+              },
+            },
+          }),
+        } as any);
+
+        const durationMs = Date.now() - startTime;
+
+        // Success - update local listing with Zyprus IDs
+        await updateListingStatus({
+          id: listing.id,
+          status: "uploaded",
+          zyprusListingId: zyprusResult.listingId,
+          zyprusListingUrl: zyprusResult.listingUrl,
+          publishedAt: new Date(),
+        });
+
+        // Log successful attempt
+        await logListingUploadAttempt({
+          listingId: listing.id,
+          attemptNumber: 1,
+          status: "success",
+          durationMs,
+        });
+      } catch (err) {
+        const durationMs = Date.now() - startTime;
+        uploadError = err instanceof Error ? err.message : "Unknown error";
+        const errorCode = err instanceof ZyprusAPIError ? err.code : "UNKNOWN";
+
+        // Log failed attempt
+        await logListingUploadAttempt({
+          listingId: listing.id,
+          attemptNumber: 1,
+          status: "failed",
+          errorMessage: uploadError,
+          errorCode,
+          durationMs,
+        });
+
+        // Update status based on error type
+        const newStatus =
+          err instanceof ZyprusAPIError && isPermanentError(err)
+            ? "failed"
+            : "draft";
+        await updateListingStatus({ id: listing.id, status: newStatus });
+
+        console.error("Error uploading to Zyprus:", err);
+      }
+
+      // Build response message
+      if (zyprusResult) {
+        return {
+          success: true,
+          listingId: listing.id,
+          zyprusListingId: zyprusResult.listingId,
+          zyprusListingUrl: zyprusResult.listingUrl,
+          message: `🎉 **Listing Created on Zyprus!**
 
 📋 **Property Summary**
 ${name}
-📍 Location ID: ${locationId}
 💰 €${price.toLocaleString()}
 🛏️ ${bedrooms} bedroom${bedrooms > 1 ? "s" : ""} | 🚿 ${bathrooms} bath${bathrooms > 1 ? "s" : ""}
 📐 ${squareFootage}m²
-${listingTypeId ? "🏷️ Listing Type: Set" : ""}
-${propertyTypeId ? "🏠 Property Type: Set" : ""}
-${propertyStatusId ? "📊 Property Status: Set" : ""}
-${viewIds && viewIds.length > 0 ? `👁️ Views: ${viewIds.length} selected` : ""}
-${indoorFeatureIds && indoorFeatureIds.length > 0 ? `🏠 Indoor Features: ${indoorFeatureIds.length} selected` : ""}
-${outdoorFeatureIds && outdoorFeatureIds.length > 0 ? `🌳 Outdoor Features: ${outdoorFeatureIds.length} selected` : ""}
-${yearBuilt ? `📅 Year Built: ${yearBuilt}` : ""}
-${energyClass ? `⚡ Energy Class: ${energyClass}` : ""}
-${videoUrl ? "🎥 Video: Included" : ""}
-${referenceId ? `🔖 Reference: ${referenceId}` : ""}
-${coordinates ? `📍 GPS: ${coordinates.latitude.toFixed(4)}, ${coordinates.longitude.toFixed(4)}` : ""}
-${imageUrls && imageUrls.length > 0 ? `📸 Images: ${imageUrls.length} photo${imageUrls.length > 1 ? "s" : ""}` : ""}
 
 **Owner/Agent Details**
 👤 ${ownerName}
@@ -340,15 +429,29 @@ ${imageUrls && imageUrls.length > 0 ? `📸 Images: ${imageUrls.length} photo${i
 🏊 Swimming Pool: ${swimmingPool === "private" ? "Private Pool" : swimmingPool === "communal" ? "Communal Pool" : "No Pool"}
 🚗 Parking: ${hasParking ? "Yes" : "No"}
 ❄️ Air Conditioning: ${hasAirConditioning ? "Yes" : "No"}
-${verandaArea ? `🪴 Veranda: ${verandaArea}m²` : ""}
-${plotArea ? `🏡 Plot: ${plotArea}m²` : ""}
-${googleMapsUrl ? "📍 Google Maps: Provided" : ""}
-${backofficeNotes ? "📝 Notes: Included" : ""}
 
-Status: **Pending Review** (awaiting approval)
+✅ **Uploaded to Zyprus as DRAFT**
+🔗 Zyprus ID: ${zyprusResult.listingId}
+🌐 View: ${zyprusResult.listingUrl}
 
-The listing has been saved and will be reviewed by the team before publishing to zyprus.com.`,
-      };
+The listing is now on zyprus.com as an **unpublished draft** waiting for admin review and publishing.`,
+        };
+      } else {
+        return {
+          success: false,
+          listingId: listing.id,
+          error: `⚠️ **Listing Saved Locally** (Upload to Zyprus failed)
+
+📋 **Property Summary**
+${name}
+💰 €${price.toLocaleString()}
+🛏️ ${bedrooms} bedroom${bedrooms > 1 ? "s" : ""} | 🚿 ${bathrooms} bath${bathrooms > 1 ? "s" : ""}
+
+❌ **Upload Error**: ${uploadError}
+
+The listing has been saved locally and can be uploaded manually later.`,
+        };
+      }
     } catch (error) {
       console.error("Error creating listing:", error);
       return {
