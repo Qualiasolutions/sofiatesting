@@ -33,7 +33,7 @@ async function getAccessToken(): Promise<string> {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      "User-Agent": "SophiaAI/1.0",
+      "User-Agent": "SophiaAI",
     },
     body: new URLSearchParams({
       grant_type: "client_credentials",
@@ -65,7 +65,7 @@ async function testEndpoint(
       headers: {
         "Content-Type": "application/vnd.api+json",
         Authorization: `Bearer ${token}`,
-        "User-Agent": "SophiaAI/1.0",
+        "User-Agent": "SophiaAI",
       },
     });
 

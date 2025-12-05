@@ -8,7 +8,7 @@ The system is configured to use the Zyprus development environment at `https://d
 
 **All API requests MUST include the following header to bypass Cloudflare protection:**
 ```
-User-Agent: SophiaAI/1.0
+User-Agent: SophiaAI
 ```
 
 Without this header, all requests will return a 403 Forbidden error with a Cloudflare challenge page.

@@ -84,7 +84,7 @@ async function parallelImageUpload(
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
-            "User-Agent": "SophiaAI/1.0",
+            "User-Agent": "SophiaAI",
           },
           body: formData,
         }

@@ -68,7 +68,7 @@ async function fetchAccessTokenInternal(): Promise<string> {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        "User-Agent": "SophiaAI/1.0",
+        "User-Agent": "SophiaAI",
       },
       body: new URLSearchParams({
         grant_type: "client_credentials",
@@ -139,7 +139,7 @@ export async function getZyprusLocations(): Promise<any[]> {
       headers: {
         "Content-Type": "application/vnd.api+json",
         Authorization: `Bearer ${token}`,
-        "User-Agent": "SophiaAI/1.0",
+        "User-Agent": "SophiaAI",
       },
     });
 
@@ -183,7 +183,7 @@ export async function getZyprusTaxonomyTerms(
         headers: {
           "Content-Type": "application/vnd.api+json",
           Authorization: `Bearer ${token}`,
-          "User-Agent": "SophiaAI/1.0",
+          "User-Agent": "SophiaAI",
         },
       }
     );
@@ -284,7 +284,7 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
-              "User-Agent": "SophiaAI/1.0",
+              "User-Agent": "SophiaAI",
               "Content-Type": "application/octet-stream",
               "Content-Disposition": `file; filename="${filename}"`,
             },
@@ -536,7 +536,7 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
         "Content-Type": "application/vnd.api+json",
         Authorization: `Bearer ${token}`,
         Accept: "application/vnd.api+json",
-        "User-Agent": "SophiaAI/1.0",
+        "User-Agent": "SophiaAI",
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
@@ -615,7 +615,7 @@ export async function getZyprusListings(): Promise<any[]> {
       headers: {
         "Content-Type": "application/vnd.api+json",
         Authorization: `Bearer ${token}`,
-        "User-Agent": "SophiaAI/1.0",
+        "User-Agent": "SophiaAI",
       },
     });
 
@@ -749,7 +749,7 @@ async function uploadLandToZyprusAPIInternal(
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
-              "User-Agent": "SophiaAI/1.0",
+              "User-Agent": "SophiaAI",
               "Content-Type": "application/octet-stream",
               "Content-Disposition": `file; filename="${filename}"`,
             },
@@ -939,7 +939,7 @@ async function uploadLandToZyprusAPIInternal(
         "Content-Type": "application/vnd.api+json",
         Authorization: `Bearer ${token}`,
         Accept: "application/vnd.api+json",
-        "User-Agent": "SophiaAI/1.0",
+        "User-Agent": "SophiaAI",
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
@@ -1088,7 +1088,7 @@ export async function uploadFilesToZyprus(
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "User-Agent": "SophiaAI/1.0",
+          "User-Agent": "SophiaAI",
           "Content-Type": "application/octet-stream",
           "Content-Disposition": `file; filename="${filename}"`,
         },
@@ -1254,7 +1254,7 @@ export async function checkForDuplicates(
       headers: {
         "Content-Type": "application/vnd.api+json",
         Authorization: `Bearer ${token}`,
-        "User-Agent": "SophiaAI/1.0",
+        "User-Agent": "SophiaAI",
       },
     });
 
@@ -1345,7 +1345,7 @@ export async function getListingFromZyprus(
       headers: {
         "Content-Type": "application/vnd.api+json",
         Authorization: `Bearer ${token}`,
-        "User-Agent": "SophiaAI/1.0",
+        "User-Agent": "SophiaAI",
       },
     });
 
@@ -1450,7 +1450,7 @@ export async function searchZyprusListings(
       headers: {
         "Content-Type": "application/vnd.api+json",
         Authorization: `Bearer ${token}`,
-        "User-Agent": "SophiaAI/1.0",
+        "User-Agent": "SophiaAI",
       },
     });
 

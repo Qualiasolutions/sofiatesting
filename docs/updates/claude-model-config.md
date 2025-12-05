@@ -259,7 +259,7 @@ SOFIA includes AI-powered property listing tools that are **now active** in prod
 ### Zyprus API Integration (Property Management System)
 SOFIA integrates with the Zyprus Property Management System via JSON:API for property listings:
 - **Authentication**: OAuth 2.0 client credentials flow with automatic token caching and refresh
-- **Critical Headers**: `User-Agent: SophiaAI/1.0` header is **mandatory** to bypass Cloudflare protection
+- **Critical Headers**: `User-Agent: SophiaAI` header is **mandatory** (Cloudflare whitelist)
 - **API Client**: `lib/zyprus/client.ts` provides comprehensive integration functions
 - **Key Functions**:
   - `uploadToZyprusAPI()` - Upload property listings with JSON:API format (includes mandatory relationships)

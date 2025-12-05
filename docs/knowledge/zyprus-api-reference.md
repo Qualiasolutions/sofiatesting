@@ -58,7 +58,7 @@ const headers = {
   "Authorization": `Bearer ${accessToken}`,
   "Content-Type": "application/vnd.api+json",
   "Accept": "application/vnd.api+json",
-  "User-Agent": "SophiaAI/1.0"  // MANDATORY - API rejects without this
+  "User-Agent": "SophiaAI"  // MANDATORY - Cloudflare whitelist (exact value required)
 };
 ```
 
@@ -375,7 +375,7 @@ Authorization: Bearer {token}
 Content-Type: application/octet-stream
 Content-Disposition: file; filename="property-image-1.jpg"
 Accept: application/vnd.api+json
-User-Agent: SophiaAI/1.0
+User-Agent: SophiaAI
 
 {binary image data}
 ```
@@ -696,7 +696,7 @@ interface Collection {
 
 ## Common Gotchas
 
-1. **User-Agent Required**: API returns 403 without `User-Agent: SophiaAI/1.0`
+1. **User-Agent Required**: API returns 403 without `User-Agent: SophiaAI` (exact value - Cloudflare whitelist)
 
 2. **LON before LAT**: POINT format is `POINT (longitude latitude)`
 

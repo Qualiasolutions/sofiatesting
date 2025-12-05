@@ -29,7 +29,7 @@ async function getOAuthToken(): Promise<string> {
   const response = await fetch(`${apiUrl}/oauth/token`, {
     method: "POST",
     headers: {
-      "User-Agent": "SophiaAI/1.0",
+      "User-Agent": "SophiaAI",
       "Content-Type": "application/x-www-form-urlencoded",
     },
     body: new URLSearchParams({
@@ -115,7 +115,7 @@ async function uploadProperty(token: string, property: PropertyData) {
   const response = await fetch(`${apiUrl}/jsonapi/node/property`, {
     method: "POST",
     headers: {
-      "User-Agent": "SophiaAI/1.0",
+      "User-Agent": "SophiaAI",
       "Content-Type": "application/vnd.api+json",
       Authorization: `Bearer ${token}`,
     },
@@ -140,7 +140,7 @@ async function verifyProperty(token: string, nodeId: string) {
   console.log("\n🔍 Verifying property on Zyprus...");
   const response = await fetch(`${apiUrl}/jsonapi/node/property/${nodeId}`, {
     headers: {
-      "User-Agent": "SophiaAI/1.0",
+      "User-Agent": "SophiaAI",
       "Content-Type": "application/vnd.api+json",
       Authorization: `Bearer ${token}`,
     },

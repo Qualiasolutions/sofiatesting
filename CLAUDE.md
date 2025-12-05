@@ -225,7 +225,7 @@ headers: {
   "Authorization": `Bearer ${token}`,
   "Content-Type": "application/vnd.api+json",
   "Accept": "application/vnd.api+json",
-  "User-Agent": "SophiaAI/1.0"  // REQUIRED - API rejects without this
+  "User-Agent": "SophiaAI"  // REQUIRED - Cloudflare whitelist (exact value)
 }
 ```
 
@@ -493,7 +493,7 @@ const types = await getAllPropertyTypes();
 | Error | Cause | Solution |
 |-------|-------|----------|
 | 401 Unauthorized | Token expired/invalid | Re-authenticate |
-| 403 Forbidden | Missing User-Agent header | Add `User-Agent: SophiaAI/1.0` |
+| 403 Forbidden | Missing User-Agent header | Add `User-Agent: SophiaAI` (exact value) |
 | 403 on field_phone_number | OAuth client lacks permission | Field removed from payload - don't re-add |
 | 404 on taxonomy | Wrong vocabulary machine name | Run `tests/manual/test-zyprus-api.ts` to discover correct names |
 | 422 Unprocessable | Invalid relationship UUID | Verify taxonomy IDs from cache |

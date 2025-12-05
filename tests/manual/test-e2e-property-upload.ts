@@ -81,7 +81,7 @@ async function testE2EPropertyUpload() {
       // Try to fetch the created property
       const verifyResponse = await fetch(verifyUrl, {
         headers: {
-          "User-Agent": "SophiaAI/1.0",
+          "User-Agent": "SophiaAI",
           "Content-Type": "application/vnd.api+json",
         },
       });
