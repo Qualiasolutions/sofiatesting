@@ -23,11 +23,13 @@ import { calculateTransferFeesTool } from "@/lib/ai/tools/calculate-transfer-fee
 import { calculateVATTool } from "@/lib/ai/tools/calculate-vat";
 // import { getGeneralKnowledge } from "@/lib/ai/tools/get-general-knowledge"; // DISABLED - Knowledge now embedded in system prompt
 // import { createDocument } from "@/lib/ai/tools/create-document"; // DISABLED - No artifacts needed
+import { createLandListingTool } from "@/lib/ai/tools/create-land-listing";
 import { createListingTool } from "@/lib/ai/tools/create-listing";
 import { getZyprusDataTool } from "@/lib/ai/tools/get-zyprus-data";
 import { listListingsTool } from "@/lib/ai/tools/list-listings";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
 // import { updateDocument } from "@/lib/ai/tools/update-document"; // DISABLED - No artifacts needed
+import { uploadLandListingTool } from "@/lib/ai/tools/upload-land-listing";
 import { uploadListingTool } from "@/lib/ai/tools/upload-listing";
 import { isProductionEnvironment } from "@/lib/constants";
 import {
@@ -220,12 +222,14 @@ export async function POST(request: Request) {
             "createListing",
             "listListings",
             "uploadListing",
+            "createLandListing",
+            "uploadLandListing",
             "getZyprusData",
             // "getGeneralKnowledge", // DISABLED - Knowledge now embedded in system prompt
             // "createDocument", // DISABLED - No artifacts needed
             // "updateDocument", // DISABLED - No artifacts needed
             "requestSuggestions",
-          ], // SOFIA can use calculator, property listing, and taxonomy tools - general knowledge is now embedded
+          ], // SOFIA can use calculator, property listing, land listing, and taxonomy tools
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             calculateTransferFees: calculateTransferFeesTool,
@@ -234,12 +238,14 @@ export async function POST(request: Request) {
             createListing: createListingTool,
             listListings: listListingsTool,
             uploadListing: uploadListingTool,
+            createLandListing: createLandListingTool,
+            uploadLandListing: uploadLandListingTool,
             getZyprusData: getZyprusDataTool,
             // getGeneralKnowledge: getGeneralKnowledge, // DISABLED - Knowledge now embedded in system prompt
             // createDocument: createDocument({ session, dataStream }), // DISABLED - No artifacts needed
             // updateDocument: updateDocument({ session, dataStream }), // DISABLED - No artifacts needed
             requestSuggestions: requestSuggestions({ session, dataStream }),
-          }, // Cyprus real estate tools - general knowledge is now embedded in system prompt
+          }, // Cyprus real estate tools - property listings, land listings, taxonomy
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
             functionId: "stream-text",

@@ -184,6 +184,17 @@ export const propertyListing = pgTable(
     outdoorFeatureIds: uuid("outdoorFeatureIds").array(), // UUIDs from zyprus.com taxonomy_term--outdoor_property_features
     priceModifierId: uuid("priceModifierId"), // UUID from zyprus.com taxonomy_term--price_modifier
     titleDeedId: uuid("titleDeedId"), // UUID from zyprus.com taxonomy_term--title_deed
+    listingTypeId: uuid("listingTypeId"), // UUID from zyprus.com taxonomy_term--listing_type (For Sale, For Rent)
+    propertyStatusId: uuid("propertyStatusId"), // UUID from zyprus.com taxonomy_term--property_status (Resale, New Build)
+    viewIds: uuid("viewIds").array(), // UUIDs from zyprus.com taxonomy_term--property_views (Sea View, Mountain View)
+    yearBuilt: integer("yearBuilt"), // Year the property was built
+    referenceId: text("referenceId"), // Internal reference number
+    energyClass: varchar("energyClass", { length: 5 }), // Energy efficiency rating (A+, A, B, C, etc.)
+    videoUrl: text("videoUrl"), // Property video URL (YouTube, Vimeo)
+    phoneNumber: varchar("phoneNumber", { length: 20 }), // Contact phone number
+    propertyNotes: text("propertyNotes"), // Internal notes
+    duplicateDetected: boolean("duplicateDetected").default(false), // Flag for potential duplicate
+    coordinates: jsonb("coordinates").$type<{ latitude: number; longitude: number }>(), // GPS coordinates
     amenityFeature: jsonb("amenityFeature"), // array of features [DEPRECATED - use featureIds above]
     image: jsonb("image"), // array of image URLs
     status: varchar("status", { length: 20 }).notNull().default("draft"), // draft, queued, uploading, uploaded, failed, published
@@ -251,6 +262,86 @@ export const listingUploadAttempt = pgTable(
 export type ListingUploadAttempt = InferSelectModel<
   typeof listingUploadAttempt
 >;
+
+// Land Listing Table (for plot/land listings on zyprus.com)
+export const landListing = pgTable(
+  "LandListing",
+  {
+    id: uuid("id").primaryKey().notNull().defaultRandom(),
+    userId: uuid("userId")
+      .notNull()
+      .references(() => user.id),
+    chatId: uuid("chatId").references(() => chat.id),
+    name: text("name").notNull(),
+    description: text("description").notNull(),
+    price: numeric("price").notNull(),
+    currency: varchar("currency", { length: 3 }).default("EUR").notNull(),
+
+    // Land-specific fields
+    landSize: numeric("landSize").notNull(), // sqm
+    landTypeId: uuid("landTypeId").notNull(), // UUID from zyprus.com taxonomy_term--land_type
+    locationId: uuid("locationId"), // UUID from zyprus.com node--location
+    listingTypeId: uuid("listingTypeId").notNull(), // UUID from zyprus.com taxonomy_term--listing_type
+    priceModifierId: uuid("priceModifierId"), // UUID from zyprus.com taxonomy_term--price_modifier
+    titleDeedId: uuid("titleDeedId"), // UUID from zyprus.com taxonomy_term--title_deed
+
+    // Building permissions
+    buildingDensity: numeric("buildingDensity"), // % density allowed
+    siteCoverage: numeric("siteCoverage"), // % site coverage allowed
+    maxFloors: integer("maxFloors"), // Max floors allowed
+    maxHeight: numeric("maxHeight"), // Max building height in meters
+
+    // Features
+    infrastructureIds: uuid("infrastructureIds").array(), // UUIDs from zyprus.com taxonomy_term--infrastructure_
+    viewIds: uuid("viewIds").array(), // UUIDs from zyprus.com taxonomy_term--property_views
+
+    // Location
+    coordinates: jsonb("coordinates").$type<{ latitude: number; longitude: number }>(),
+
+    // Media
+    image: jsonb("image").$type<string[]>(),
+
+    // Optional
+    referenceId: text("referenceId"),
+    phoneNumber: varchar("phoneNumber", { length: 20 }),
+    notes: text("notes"),
+    duplicateDetected: boolean("duplicateDetected").default(false),
+
+    // Status
+    status: varchar("status", { length: 20 }).default("draft").notNull(),
+    zyprusListingId: text("zyprusListingId"),
+    zyprusListingUrl: text("zyprusListingUrl"),
+
+    // Timestamps
+    createdAt: timestamp("createdAt").defaultNow().notNull(),
+    updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+    publishedAt: timestamp("publishedAt"),
+    deletedAt: timestamp("deletedAt"),
+    draftExpiresAt: timestamp("draftExpiresAt"),
+  },
+  (table) => ({
+    userIdx: index("LandListing_userId_idx").on(table.userId),
+    statusIdx: index("LandListing_status_idx").on(table.status),
+    createdAtIdx: index("LandListing_createdAt_idx").on(table.createdAt),
+    deletedAtIdx: index("LandListing_deletedAt_idx").on(table.deletedAt),
+    chatIdIdx: index("LandListing_chatId_idx").on(table.chatId),
+    locationIdx: index("LandListing_locationId_idx").on(table.locationId),
+    landTypeIdx: index("LandListing_landTypeId_idx").on(table.landTypeId),
+    userIdStatusIdx: index("LandListing_userId_status_idx").on(
+      table.userId,
+      table.status
+    ),
+    userIdCreatedAtIdx: index("LandListing_userId_createdAt_idx").on(
+      table.userId,
+      table.createdAt.desc()
+    ),
+    draftExpiresAtIdx: index("LandListing_draftExpiresAt_idx").on(
+      table.draftExpiresAt
+    ),
+  })
+);
+
+export type LandListing = InferSelectModel<typeof landListing>;
 
 // ===================================================================
 // ADMIN PANEL TABLES

@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
+import { getUserContext } from "@/lib/ai/context";
 import { getListingsByUserId } from "@/lib/db/queries";
 
 const STATUS_EMOJIS: Record<string, string> = {
@@ -26,9 +27,12 @@ export const listListingsTool = tool({
   }),
   execute: async ({ limit }) => {
     try {
-      // Get session for user authentication
+      // Get session for user authentication (web) or context (WhatsApp/Telegram)
       const session = await auth();
-      if (!session?.user?.id) {
+      const context = getUserContext();
+      const userId = session?.user?.id ?? context?.user.id;
+
+      if (!userId) {
         return {
           success: false,
           error: "Authentication required to view listings",
@@ -37,7 +41,7 @@ export const listListingsTool = tool({
 
       // Get listings from database
       const listings = await getListingsByUserId({
-        userId: session.user.id,
+        userId,
         limit: Math.min(limit, 100), // Max 100 listings
       });
 

@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
+import { getUserContext } from "@/lib/ai/context";
 import {
   getListingById,
   getListingsByUserId,
@@ -27,9 +28,12 @@ export const uploadListingTool = tool({
     const startTime = Date.now();
 
     try {
-      // Get session for user authentication
+      // Get session for user authentication (web) or context (WhatsApp/Telegram)
       const session = await auth();
-      if (!session?.user?.id) {
+      const context = getUserContext();
+      const userId = session?.user?.id ?? context?.user.id;
+
+      if (!userId) {
         return {
           success: false,
           error: "Authentication required to upload listing",
@@ -40,7 +44,7 @@ export const uploadListingTool = tool({
       let listing: Awaited<ReturnType<typeof getListingById>> | undefined;
       if (listingId) {
         listing = await getListingById({ id: listingId });
-        if (listing && listing.userId !== session.user.id) {
+        if (listing && listing.userId !== userId) {
           return {
             success: false,
             error: "You don't have permission to upload this listing",
@@ -48,7 +52,7 @@ export const uploadListingTool = tool({
         }
       } else {
         const listings = await getListingsByUserId({
-          userId: session.user.id,
+          userId,
           limit: 1,
         });
         listing = listings[0];
@@ -90,12 +94,39 @@ export const uploadListingTool = tool({
       try {
         const result = await uploadToZyprusAPI({
           ...listing,
+          // Required location
           locationId: listing.locationId ?? undefined,
+          // Property classification
           propertyTypeId: listing.propertyTypeId ?? undefined,
+          listingTypeId: listing.listingTypeId ?? undefined,
+          propertyStatusId: listing.propertyStatusId ?? undefined,
+          // Features
           indoorFeatureIds: listing.indoorFeatureIds ?? undefined,
           outdoorFeatureIds: listing.outdoorFeatureIds ?? undefined,
+          viewIds: listing.viewIds ?? undefined,
+          // Price and title
           priceModifierId: listing.priceModifierId ?? undefined,
           titleDeedId: listing.titleDeedId ?? undefined,
+          // Property details
+          yearBuilt: listing.yearBuilt ?? undefined,
+          energyClass: listing.energyClass ?? undefined,
+          videoUrl: listing.videoUrl ?? undefined,
+          referenceId: listing.referenceId ?? undefined,
+          phoneNumber: listing.phoneNumber ?? undefined,
+          propertyNotes: listing.propertyNotes ?? undefined,
+          // AI tracking
+          chatId: listing.chatId ?? undefined,
+          duplicateDetected: listing.duplicateDetected ?? undefined,
+          // Use coordinates from the listing if available, or extract from address
+          ...(listing.coordinates && {
+            address: {
+              ...(listing.address as any),
+              geo: {
+                latitude: listing.coordinates.latitude,
+                longitude: listing.coordinates.longitude,
+              },
+            },
+          }),
         } as any);
         const durationMs = Date.now() - startTime;
 

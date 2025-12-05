@@ -1,5 +1,6 @@
 import "server-only";
 import { convertToModelMessages, generateObject, streamText } from "ai";
+import { runWithUserContext } from "@/lib/ai/context";
 import { db } from "@/lib/db/client";
 import { agentExecutionLog } from "@/lib/db/schema";
 import { ROUTER_MODEL, WORKER_MODEL } from "../ai/models";
@@ -15,7 +16,13 @@ import {
 import { calculateCapitalGainsTool } from "../ai/tools/calculate-capital-gains";
 import { calculateTransferFeesTool } from "../ai/tools/calculate-transfer-fees";
 import { calculateVATTool } from "../ai/tools/calculate-vat";
+import { createLandListingTool } from "../ai/tools/create-land-listing";
+import { createListingTool } from "../ai/tools/create-listing";
 import { getGeneralKnowledge } from "../ai/tools/get-general-knowledge";
+import { getZyprusDataTool } from "../ai/tools/get-zyprus-data";
+import { listListingsTool } from "../ai/tools/list-listings";
+import { uploadLandListingTool } from "../ai/tools/upload-land-listing";
+import { uploadListingTool } from "../ai/tools/upload-listing";
 import { isProductionEnvironment } from "../constants";
 import type { ChatMessage } from "../types";
 import { generateUUID } from "../utils";
@@ -23,6 +30,11 @@ import { getWhatsAppClient } from "./client";
 import { getDocumentType, shouldSendAsDocument } from "./document-detector";
 import { generateDocx } from "./docx-generator";
 import type { WaSenderMessageData } from "./types";
+import {
+  getOrCreateWhatsAppChat,
+  getOrCreateWhatsAppUser,
+  updateAgentLastActive,
+} from "./user-mapping";
 
 /**
  * Handle incoming WhatsApp message and generate AI response
@@ -47,6 +59,18 @@ export async function handleWhatsAppMessage(
   const userMessage = messageData.text;
 
   try {
+    // Get or create user for this WhatsApp phone number
+    const whatsappUser = await getOrCreateWhatsAppUser(phoneNumber);
+    const chatSession = await getOrCreateWhatsAppChat(
+      whatsappUser.id,
+      phoneNumber
+    );
+
+    // Update agent last active if this is a registered agent
+    if (whatsappUser.agentId) {
+      await updateAgentLastActive(whatsappUser.agentId);
+    }
+
     // Log incoming message
     await db.insert(agentExecutionLog).values({
       agentType: "whatsapp",
@@ -57,6 +81,9 @@ export async function handleWhatsAppMessage(
         from: phoneNumber,
         message: userMessage,
         isGroup: messageData.isGroup,
+        userId: whatsappUser.id,
+        chatId: chatSession.id,
+        isAgent: whatsappUser.isAgent,
       },
     });
 
@@ -125,32 +152,58 @@ export async function handleWhatsAppMessage(
       parts: [{ type: "text", text: userMessage }],
     };
 
-    const result = await streamText({
-      model: chatModel,
-      system: finalSystemPrompt,
-      messages: convertToModelMessages([message]),
-      experimental_activeTools: [
-        "calculateTransferFees",
-        "calculateCapitalGains",
-        "calculateVAT",
-        "getGeneralKnowledge",
-      ],
-      tools: {
-        calculateTransferFees: calculateTransferFeesTool,
-        calculateCapitalGains: calculateCapitalGainsTool,
-        calculateVAT: calculateVATTool,
-        getGeneralKnowledge,
+    // Wrap AI execution with user context so tools can access user info
+    const userContext = {
+      user: {
+        id: whatsappUser.id,
+        email: whatsappUser.email,
+        name: whatsappUser.name,
+        type: whatsappUser.type,
       },
-      experimental_telemetry: {
-        isEnabled: isProductionEnvironment,
-        functionId: "whatsapp-stream-text",
-      },
-    });
+    };
 
-    // Collect the response
-    for await (const textPart of result.textStream) {
-      fullResponse += textPart;
-    }
+    fullResponse = await runWithUserContext(userContext, async () => {
+      const result = await streamText({
+        model: chatModel,
+        system: finalSystemPrompt,
+        messages: convertToModelMessages([message]),
+        experimental_activeTools: [
+          "calculateTransferFees",
+          "calculateCapitalGains",
+          "calculateVAT",
+          "getGeneralKnowledge",
+          "createListing",
+          "listListings",
+          "uploadListing",
+          "getZyprusData",
+          "createLandListing",
+          "uploadLandListing",
+        ],
+        tools: {
+          calculateTransferFees: calculateTransferFeesTool,
+          calculateCapitalGains: calculateCapitalGainsTool,
+          calculateVAT: calculateVATTool,
+          getGeneralKnowledge,
+          createListing: createListingTool,
+          listListings: listListingsTool,
+          uploadListing: uploadListingTool,
+          getZyprusData: getZyprusDataTool,
+          createLandListing: createLandListingTool,
+          uploadLandListing: uploadLandListingTool,
+        },
+        experimental_telemetry: {
+          isEnabled: isProductionEnvironment,
+          functionId: "whatsapp-stream-text",
+        },
+      });
+
+      // Collect the response
+      let response = "";
+      for await (const textPart of result.textStream) {
+        response += textPart;
+      }
+      return response;
+    });
 
     // Determine if response should be sent as document (forms) or text (emails)
     if (shouldSendAsDocument(fullResponse)) {
@@ -167,8 +220,9 @@ export async function handleWhatsAppMessage(
       });
     } else {
       // Send as plain text message (emails, calculations, etc.)
+      // Use sendLongMessage for automatic splitting if response exceeds WhatsApp's 4096 char limit
       const formattedResponse = formatForWhatsApp(fullResponse);
-      await client.sendMessage({
+      await client.sendLongMessage({
         to: phoneNumber,
         text: formattedResponse,
       });

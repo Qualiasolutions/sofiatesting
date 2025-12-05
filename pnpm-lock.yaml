@@ -239,6 +239,9 @@ importers:
       usehooks-ts:
         specifier: ^3.1.0
         version: 3.1.1(react@19.0.0-rc-45804af1-20241021)
+      wasenderapi:
+        specifier: ^0.1.5
+        version: 0.1.5
       xlsx:
         specifier: ^0.18.5
         version: 0.18.5
@@ -4743,6 +4746,9 @@ packages:
 
   w3c-keyname@2.2.8:
     resolution: {integrity: sha512-dpojBhNsCNN7T82Tm7k26A6G9ML3NkhDsnw9n/eoxSRlVBB4CEtIQ/KTCLI2Fwf3ataSXRhYFkQi3SlnFwPvPQ==}
+
+  wasenderapi@0.1.5:
+    resolution: {integrity: sha512-bxLyqrR3PWF7xNJ74+BYvjyjOmHCJggQNDJjsVlR7yVK/df84Ft08su5AvaoqnE+YYST7HgiHQVTMf8Of3vVdA==}
 
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
@@ -9503,6 +9509,10 @@ snapshots:
   vscode-uri@3.0.8: {}
 
   w3c-keyname@2.2.8: {}
+
+  wasenderapi@0.1.5:
+    dependencies:
+      dotenv: 16.4.7
 
   web-namespaces@2.0.1: {}
 

@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
+import { getUserContext } from "@/lib/ai/context";
 import { createPropertyListing } from "@/lib/db/queries";
 
 // Cyprus cities for validation
@@ -94,6 +95,55 @@ export const createListingTool = tool({
       .describe(
         "Title deed UUID from zyprus.com. Use getZyprusData tool to fetch available title deed types."
       ),
+    listingTypeId: z
+      .string()
+      .uuid()
+      .optional()
+      .describe(
+        "Listing type UUID (For Sale, For Rent, Exchange). Use getZyprusData tool to fetch options."
+      ),
+    propertyStatusId: z
+      .string()
+      .uuid()
+      .optional()
+      .describe(
+        "Property status UUID (Resale, New Build, Off Plan, Under Construction). Use getZyprusData tool."
+      ),
+    viewIds: z
+      .array(z.string().uuid())
+      .optional()
+      .describe(
+        "Property view UUIDs (Sea View, Mountain View, City View, etc.). Use getZyprusData tool."
+      ),
+    yearBuilt: z
+      .number()
+      .int()
+      .min(1900)
+      .max(2030)
+      .optional()
+      .describe("Year the property was built (e.g., 2020)"),
+    energyClass: z
+      .string()
+      .max(5)
+      .optional()
+      .describe("Energy efficiency rating (A+, A, B, C, D, E, F, G)"),
+    videoUrl: z
+      .string()
+      .url()
+      .optional()
+      .describe("Property video URL (YouTube, Vimeo, etc.)"),
+    referenceId: z
+      .string()
+      .max(50)
+      .optional()
+      .describe("Your internal reference number for this property"),
+    coordinates: z
+      .object({
+        latitude: z.number().min(-90).max(90),
+        longitude: z.number().min(-180).max(180),
+      })
+      .optional()
+      .describe("GPS coordinates of the property (latitude, longitude)"),
     features: z
       .array(z.string())
       .optional()
@@ -118,13 +168,24 @@ export const createListingTool = tool({
     outdoorFeatureIds,
     priceModifierId,
     titleDeedId,
+    listingTypeId,
+    propertyStatusId,
+    viewIds,
+    yearBuilt,
+    energyClass,
+    videoUrl,
+    referenceId,
+    coordinates,
     features,
     imageUrls,
   }) => {
     try {
-      // Get session for user authentication
+      // Get session for user authentication (web) or context (WhatsApp/Telegram)
       const session = await auth();
-      if (!session?.user?.id) {
+      const context = getUserContext();
+      const userId = session?.user?.id ?? context?.user.id;
+
+      if (!userId) {
         return {
           success: false,
           error: "Authentication required to create listing",
@@ -142,7 +203,7 @@ export const createListingTool = tool({
 
       // Create listing directly in database with taxonomy data
       const listing = await createPropertyListing({
-        userId: session.user.id,
+        userId,
         name,
         description,
         address: {
@@ -157,11 +218,21 @@ export const createListingTool = tool({
         numberOfBathroomsTotal: bathrooms.toString(),
         floorSize: squareFootage.toString(),
         // Store taxonomy IDs for upload
+        locationId,
         propertyTypeId,
         indoorFeatureIds,
         outdoorFeatureIds,
         priceModifierId,
         titleDeedId,
+        // New fields for complete Zyprus API integration
+        listingTypeId,
+        propertyStatusId,
+        viewIds,
+        yearBuilt,
+        energyClass,
+        videoUrl,
+        referenceId,
+        coordinates,
         // Deprecated: still support old text features for backward compatibility
         propertyType: "", // Deprecated field - using propertyTypeId instead
         amenityFeature: features || [],
@@ -181,12 +252,17 @@ ${name}
 💰 €${price.toLocaleString()}
 🛏️ ${bedrooms} bedroom${bedrooms > 1 ? "s" : ""} | 🚿 ${bathrooms} bath${bathrooms > 1 ? "s" : ""}
 📐 ${squareFootage}m²
-${propertyTypeId ? `🏠 Property Type ID: ${propertyTypeId}` : ""}
+${listingTypeId ? `🏷️ Listing Type: Set` : ""}
+${propertyTypeId ? `🏠 Property Type: Set` : ""}
+${propertyStatusId ? `📊 Property Status: Set` : ""}
+${viewIds && viewIds.length > 0 ? `👁️ Views: ${viewIds.length} selected` : ""}
 ${indoorFeatureIds && indoorFeatureIds.length > 0 ? `🏠 Indoor Features: ${indoorFeatureIds.length} selected` : ""}
 ${outdoorFeatureIds && outdoorFeatureIds.length > 0 ? `🌳 Outdoor Features: ${outdoorFeatureIds.length} selected` : ""}
-${priceModifierId ? `🏷️ Price Modifier ID: ${priceModifierId}` : ""}
-${titleDeedId ? `📜 Title Deed ID: ${titleDeedId}` : ""}
-${features && features.length > 0 ? `✨ Features: ${features.join(", ")}` : ""}
+${yearBuilt ? `📅 Year Built: ${yearBuilt}` : ""}
+${energyClass ? `⚡ Energy Class: ${energyClass}` : ""}
+${videoUrl ? `🎥 Video: Included` : ""}
+${referenceId ? `🔖 Reference: ${referenceId}` : ""}
+${coordinates ? `📍 GPS: ${coordinates.latitude.toFixed(4)}, ${coordinates.longitude.toFixed(4)}` : ""}
 ${imageUrls && imageUrls.length > 0 ? `📸 Images: ${imageUrls.length} photo${imageUrls.length > 1 ? "s" : ""}` : ""}
 
 Status: **Draft** (expires in 7 days)

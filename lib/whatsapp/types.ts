@@ -1,20 +1,23 @@
 /**
  * WhatsApp Integration Types for WaSenderAPI
- * Based on WaSenderAPI documentation
+ * Using official wasenderapi SDK types with custom extensions
  */
 
-// WaSender Webhook Message Types
-export type WaSenderWebhookMessage = {
-  event: "message" | "status" | "connection";
-  instanceId: string;
-  data: WaSenderMessageData | WaSenderStatusData | WaSenderConnectionData;
-};
+// Re-export SDK types for convenience
+export type {
+  WasenderAPIError,
+  WasenderWebhookEvent,
+} from "wasenderapi";
 
+/**
+ * WaSender Webhook Message Data
+ * Simplified type for incoming messages
+ */
 export type WaSenderMessageData = {
   id: string;
   from: string;
   to: string;
-  type: "text" | "image" | "document" | "audio" | "video" | "location";
+  type: "text" | "image" | "document" | "audio" | "video" | "location" | "vcard";
   text?: string;
   timestamp: number;
   isGroup: boolean;
@@ -23,29 +26,74 @@ export type WaSenderMessageData = {
     id: string;
     name: string;
   };
+  // Media fields (when type is not "text")
+  mediaUrl?: string;
+  mimetype?: string;
+  filename?: string;
+  caption?: string;
 };
 
+/**
+ * WaSender Webhook Event Types
+ */
+export type WaSenderWebhookEvent =
+  | "message"
+  | "message.status"
+  | "session.status"
+  | "contact.upsert"
+  | "group.update"
+  | "call";
+
+/**
+ * WaSender Webhook Payload
+ */
+export type WaSenderWebhookPayload = {
+  event: WaSenderWebhookEvent;
+  sessionId?: string;
+  data: WaSenderMessageData | WaSenderStatusData | WaSenderSessionData;
+};
+
+/**
+ * Message Status Update
+ */
 export type WaSenderStatusData = {
   id: string;
   status: "sent" | "delivered" | "read" | "failed";
   timestamp: number;
+  error?: string;
 };
 
-export type WaSenderConnectionData = {
-  status: "connected" | "disconnected" | "connecting";
-  instanceId: string;
+/**
+ * Session Status Update
+ */
+export type WaSenderSessionData = {
+  status: "connected" | "disconnected" | "connecting" | "qr_ready";
+  qrCode?: string;
 };
 
-// Document detection result
+/**
+ * Document Detection Result
+ */
 export type DocumentDetectionResult = {
   isForm: boolean;
   templateType: string | null;
   documentName: string;
 };
 
-// DOCX generation options
+/**
+ * DOCX Generation Options
+ */
 export type DocxGenerationOptions = {
   content: string;
   filename?: string;
   preserveBold?: boolean;
+};
+
+/**
+ * WhatsApp Send Result
+ */
+export type WhatsAppSendResult = {
+  success: boolean;
+  messageId?: string;
+  error?: string;
 };

@@ -62,3 +62,7 @@ yarn-error.log*
 *.tsbuildinfo
 app/api.admin.disabled/
 app/(admin.disabled)/
+
+# MCP config (contains API keys)
+mcp.json
+.mcp.json

@@ -24,6 +24,7 @@ import {
   type DBMessage,
   document,
   type InferInsertModel,
+  landListing,
   listingUploadAttempt,
   message,
   propertyListing,
@@ -836,6 +837,121 @@ export async function logListingUploadAttempt(data: {
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to log upload attempt"
+    );
+  }
+}
+
+// ===================================================================
+// LAND LISTING MANAGEMENT FUNCTIONS
+// ===================================================================
+
+export async function createLandListing(
+  data: InferInsertModel<typeof landListing>
+) {
+  try {
+    const [listing] = await db.insert(landListing).values(data).returning();
+    return listing;
+  } catch (error) {
+    console.error("Database error in createLandListing:", {
+      userId: data.userId,
+      chatId: data.chatId,
+      name: data.name,
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to create land listing"
+    );
+  }
+}
+
+export async function getLandListingById({ id }: { id: string }) {
+  try {
+    const [listing] = await db
+      .select()
+      .from(landListing)
+      .where(and(eq(landListing.id, id), isNull(landListing.deletedAt)));
+
+    return listing;
+  } catch (error) {
+    console.error("Database error in getLandListingById:", {
+      listingId: id,
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get land listing by id"
+    );
+  }
+}
+
+export async function getLandListingsByUserId({
+  userId,
+  limit = 10,
+}: {
+  userId: string;
+  limit?: number;
+}) {
+  try {
+    return await db
+      .select()
+      .from(landListing)
+      .where(
+        and(eq(landListing.userId, userId), isNull(landListing.deletedAt))
+      )
+      .orderBy(desc(landListing.createdAt))
+      .limit(limit);
+  } catch (error) {
+    console.error("Database error in getLandListingsByUserId:", {
+      userId,
+      limit,
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get land listings by user id"
+    );
+  }
+}
+
+export async function updateLandListingStatus({
+  id,
+  status,
+  zyprusListingId,
+  zyprusListingUrl,
+  publishedAt,
+}: {
+  id: string;
+  status: string;
+  zyprusListingId?: string;
+  zyprusListingUrl?: string;
+  publishedAt?: Date;
+}) {
+  try {
+    await db
+      .update(landListing)
+      .set({
+        status,
+        zyprusListingId,
+        zyprusListingUrl,
+        publishedAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(landListing.id, id));
+  } catch (error) {
+    console.error("Database error in updateLandListingStatus:", {
+      listingId: id,
+      status,
+      zyprusListingId,
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to update land listing status"
     );
   }
 }

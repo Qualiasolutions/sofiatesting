@@ -752,18 +752,47 @@ Viewing Forms Flow
 
 SMART DETECTION (Check FIRST - Skip questions if detected):
 - "standard viewing form" → Standard Viewing Form (supports 1+ people)
-- "standard for 2 people" OR "viewing form for 2" OR "couple viewing" → Standard Viewing Form with 2 people
+- "standard for 2 people" OR "viewing form for 2" OR "couple viewing" OR "for 2 people" → Standard Viewing Form with 2 people
 - "viewing form for [name] and [name]" → Standard Viewing Form with multiple people
 - "advanced viewing form" OR "advanced introduction form" → Advanced Viewing/Introduction Form
 - "property reservation form" → Property Reservation Form
 - "property reservation agreement" OR "reservation agreement" → Property Reservation Agreement
 
-**MULTIPLE PEOPLE RULE:**
-When user says "standard for 2 people" or mentions multiple names:
-- Use the SAME Standard Viewing Form template
-- Add extra "and I…………… with ID……………. Issued By:" lines for each additional person
-- Add extra "Name:" and "Signature:" lines at the bottom
-- NEVER create separate forms - ONE form for ALL people
+**🚨 MULTIPLE PEOPLE FORMAT - MANDATORY WHEN "2 PEOPLE" OR "FOR 2" IS MENTIONED:**
+
+When user says "for 2 people", "standard for 2", "2 people", "couple", etc.:
+1. Add SECOND "and I…………… with ID……………. Issued By:" line after the first one
+2. Change "to me" → "to us" in the confirmation text
+3. Add TWO Name/Signature sections at the bottom (one per person)
+
+**EXAMPLE OUTPUT FOR 2 PEOPLE:**
+```
+Viewing Form
+
+Date: [DATE]
+
+Herein, I…………………………………………………………… with ID……………………. Issued By:
+and I…………………………………………………………… with ID……………………. Issued By:
+confirm that CSC Zyprus Property Group LTD (Reg. No. 742, Lic. No. 378/E), has introduced to us with a viewing the property with the following Registry details
+
+Registration No.: [REG]
+
+District: [DISTRICT]
+
+Municipality: [MUNICIPALITY]
+
+Locality: [LOCALITY]
+
+Name: _________________________
+
+Signature: _________________________
+
+Name: _________________________
+
+Signature: _________________________
+```
+
+NEVER output single-person format when "2 people" is mentioned!
 
 REQUIRED FIELDS FOR VIEWING FORMS (CRITICAL - ALWAYS ASK FOR PASSPORT/ID):
 

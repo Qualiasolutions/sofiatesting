@@ -7,6 +7,14 @@ export type TaxonomyCache = {
   outdoorFeatures?: Map<string, string>;
   priceModifiers?: Map<string, string>;
   titleDeeds?: Map<string, string>;
+  // NEW: Land-specific taxonomies
+  landTypes?: Map<string, string>;
+  infrastructure?: Map<string, string>;
+  // NEW: Shared taxonomies for property and land
+  propertyViews?: Map<string, string>;
+  propertyStatus?: Map<string, string>;
+  // NEW: Listing types (For Sale, For Rent, Exchange)
+  listingTypes?: Map<string, string>;
   lastUpdated: number;
 };
 
@@ -53,16 +61,34 @@ async function refreshCache(): Promise<TaxonomyCache> {
   }
 
   try {
-    const locations = await getZyprusLocations();
-    const propertyTypes = await getZyprusTaxonomyTerms("property_type");
-    const indoorFeatures = await getZyprusTaxonomyTerms(
-      "indoor_property_features"
-    );
-    const outdoorFeatures = await getZyprusTaxonomyTerms(
-      "outdoor_property_features"
-    );
-    const priceModifiers = await getZyprusTaxonomyTerms("price_modifier");
-    const titleDeeds = await getZyprusTaxonomyTerms("title_deed");
+    // Fetch all taxonomies in parallel for performance
+    const [
+      locations,
+      propertyTypes,
+      indoorFeatures,
+      outdoorFeatures,
+      priceModifiers,
+      titleDeeds,
+      // NEW: Land-specific and shared taxonomies
+      landTypes,
+      infrastructure,
+      propertyViews,
+      propertyStatus,
+      listingTypes,
+    ] = await Promise.all([
+      getZyprusLocations(),
+      getZyprusTaxonomyTerms("property_type"),
+      getZyprusTaxonomyTerms("indoor_property_features"),
+      getZyprusTaxonomyTerms("outdoor_property_features"),
+      getZyprusTaxonomyTerms("price_modifier"),
+      getZyprusTaxonomyTerms("title_deed"),
+      // NEW: Land-specific and shared taxonomies
+      getZyprusTaxonomyTerms("land_type"),
+      getZyprusTaxonomyTerms("infrastructure_"),
+      getZyprusTaxonomyTerms("property_views"),
+      getZyprusTaxonomyTerms("property_status"),
+      getZyprusTaxonomyTerms("listing_type"),
+    ]);
 
     const newCache: TaxonomyCache = {
       locations: new Map(
@@ -99,6 +125,38 @@ async function refreshCache(): Promise<TaxonomyCache> {
         titleDeeds.map((deed: any) => [
           deed.attributes.name.toLowerCase(),
           deed.id,
+        ])
+      ),
+      // NEW: Land-specific taxonomies
+      landTypes: new Map(
+        landTypes.map((type: any) => [
+          type.attributes.name.toLowerCase(),
+          type.id,
+        ])
+      ),
+      infrastructure: new Map(
+        infrastructure.map((item: any) => [
+          item.attributes.name.toLowerCase(),
+          item.id,
+        ])
+      ),
+      // NEW: Shared taxonomies for property and land
+      propertyViews: new Map(
+        propertyViews.map((view: any) => [
+          view.attributes.name.toLowerCase(),
+          view.id,
+        ])
+      ),
+      propertyStatus: new Map(
+        propertyStatus.map((status: any) => [
+          status.attributes.name.toLowerCase(),
+          status.id,
+        ])
+      ),
+      listingTypes: new Map(
+        listingTypes.map((type: any) => [
+          type.attributes.name.toLowerCase(),
+          type.id,
         ])
       ),
       lastUpdated: Date.now(),
@@ -338,6 +396,204 @@ export async function getAllTitleDeeds(): Promise<
   }
 
   return Array.from(cache.titleDeeds.entries()).map(([name, id]) => ({
+    name: name.charAt(0).toUpperCase() + name.slice(1),
+    id,
+  }));
+}
+
+// =====================================================
+// NEW: Land-specific taxonomy helpers
+// =====================================================
+
+/**
+ * Find land type ID by name
+ */
+export async function findLandTypeByName(name: string): Promise<string | null> {
+  const cache = await getCache();
+  if (!cache.landTypes) {
+    return null;
+  }
+
+  const searchName = name.toLowerCase().trim();
+
+  if (cache.landTypes.has(searchName)) {
+    return cache.landTypes.get(searchName)!;
+  }
+
+  // Partial match
+  for (const [typeName, id] of cache.landTypes) {
+    if (typeName.includes(searchName) || searchName.includes(typeName)) {
+      return id;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Find infrastructure IDs by names (Electricity, Water, Road Access, etc.)
+ */
+export async function findInfrastructureIds(names: string[]): Promise<string[]> {
+  const cache = await getCache();
+  if (!cache.infrastructure) {
+    return [];
+  }
+
+  return names
+    .map((name) => name.toLowerCase().trim())
+    .map((name) => cache.infrastructure?.get(name))
+    .filter((id): id is string => id !== undefined);
+}
+
+/**
+ * Find property view IDs by names (Sea View, Mountain View, City View, etc.)
+ */
+export async function findPropertyViewIds(names: string[]): Promise<string[]> {
+  const cache = await getCache();
+  if (!cache.propertyViews) {
+    return [];
+  }
+
+  return names
+    .map((name) => name.toLowerCase().trim())
+    .map((name) => cache.propertyViews?.get(name))
+    .filter((id): id is string => id !== undefined);
+}
+
+/**
+ * Find property status ID by name (Under Construction, Resale, Off Plan, etc.)
+ */
+export async function findPropertyStatusByName(
+  name: string
+): Promise<string | null> {
+  const cache = await getCache();
+  if (!cache.propertyStatus) {
+    return null;
+  }
+
+  const searchName = name.toLowerCase().trim();
+
+  if (cache.propertyStatus.has(searchName)) {
+    return cache.propertyStatus.get(searchName)!;
+  }
+
+  // Partial match
+  for (const [statusName, id] of cache.propertyStatus) {
+    if (statusName.includes(searchName) || searchName.includes(statusName)) {
+      return id;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Find listing type ID by name (For Sale, For Rent, Exchange, etc.)
+ */
+export async function findListingTypeByName(
+  name: string
+): Promise<string | null> {
+  const cache = await getCache();
+  if (!cache.listingTypes) {
+    return null;
+  }
+
+  const searchName = name.toLowerCase().trim();
+
+  if (cache.listingTypes.has(searchName)) {
+    return cache.listingTypes.get(searchName)!;
+  }
+
+  // Partial match
+  for (const [typeName, id] of cache.listingTypes) {
+    if (typeName.includes(searchName) || searchName.includes(typeName)) {
+      return id;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Get all land types
+ */
+export async function getAllLandTypes(): Promise<
+  Array<{ name: string; id: string }>
+> {
+  const cache = await getCache();
+  if (!cache.landTypes) {
+    return [];
+  }
+
+  return Array.from(cache.landTypes.entries()).map(([name, id]) => ({
+    name: name.charAt(0).toUpperCase() + name.slice(1),
+    id,
+  }));
+}
+
+/**
+ * Get all infrastructure options
+ */
+export async function getAllInfrastructure(): Promise<
+  Array<{ name: string; id: string }>
+> {
+  const cache = await getCache();
+  if (!cache.infrastructure) {
+    return [];
+  }
+
+  return Array.from(cache.infrastructure.entries()).map(([name, id]) => ({
+    name: name.charAt(0).toUpperCase() + name.slice(1),
+    id,
+  }));
+}
+
+/**
+ * Get all property views
+ */
+export async function getAllPropertyViews(): Promise<
+  Array<{ name: string; id: string }>
+> {
+  const cache = await getCache();
+  if (!cache.propertyViews) {
+    return [];
+  }
+
+  return Array.from(cache.propertyViews.entries()).map(([name, id]) => ({
+    name: name.charAt(0).toUpperCase() + name.slice(1),
+    id,
+  }));
+}
+
+/**
+ * Get all property status options
+ */
+export async function getAllPropertyStatus(): Promise<
+  Array<{ name: string; id: string }>
+> {
+  const cache = await getCache();
+  if (!cache.propertyStatus) {
+    return [];
+  }
+
+  return Array.from(cache.propertyStatus.entries()).map(([name, id]) => ({
+    name: name.charAt(0).toUpperCase() + name.slice(1),
+    id,
+  }));
+}
+
+/**
+ * Get all listing types
+ */
+export async function getAllListingTypes(): Promise<
+  Array<{ name: string; id: string }>
+> {
+  const cache = await getCache();
+  if (!cache.listingTypes) {
+    return [];
+  }
+
+  return Array.from(cache.listingTypes.entries()).map(([name, id]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
     id,
   }));
