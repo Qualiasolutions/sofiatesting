@@ -494,12 +494,17 @@ const types = await getAllPropertyTypes();
 |-------|-------|----------|
 | 401 Unauthorized | Token expired/invalid | Re-authenticate |
 | 403 Forbidden | Missing User-Agent header | Add `User-Agent: SophiaAI/1.0` |
+| 403 on field_phone_number | OAuth client lacks permission | Field removed from payload - don't re-add |
 | 404 on taxonomy | Wrong vocabulary machine name | Run `tests/manual/test-zyprus-api.ts` to discover correct names |
 | 422 Unprocessable | Invalid relationship UUID | Verify taxonomy IDs from cache |
 | 500 Server Error | Malformed JSON:API payload | Check data structure |
 
 **Debugging Taxonomy 404s**: Run `pnpm exec tsx tests/manual/test-zyprus-api.ts` to test all endpoints
 and discover available vocabularies. Check property relationships to find actual vocabulary names.
+
+**Unpublished Listings**: AI-generated listings are created with `status: false` (unpublished draft).
+The public URL won't work until a Zyprus admin reviews and publishes the listing. This is intentional
+to prevent unreviewed AI content from going live.
 
 ### Postman MCP Integration
 
