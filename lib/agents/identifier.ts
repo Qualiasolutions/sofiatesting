@@ -19,7 +19,7 @@ export type IdentifiedAgent = {
   region: string;
   role: string;
   isActive: boolean;
-  telegramUserId: number | null; // Changed from bigint to number (drizzle returns number for bigint mode: "number")
+  telegramUserId: string | null; // Stored as varchar(64) for Telegram user IDs
   whatsappPhoneNumber: string | null;
   lastActiveAt: Date | null;
   registeredAt: Date | null;
@@ -29,15 +29,17 @@ export type IdentifiedAgent = {
  * Identify agent by Telegram user ID
  */
 export async function identifyAgentByTelegram(
-  telegramUserId: number
+  telegramUserId: string | number
 ): Promise<IdentifiedAgent | null> {
+  // Convert number to string if needed (Telegram sends numbers)
+  const userIdStr = typeof telegramUserId === "number" ? String(telegramUserId) : telegramUserId;
   try {
     const [agent] = await db
       .select()
       .from(zyprusAgent)
       .where(
         and(
-          eq(zyprusAgent.telegramUserId, telegramUserId),
+          eq(zyprusAgent.telegramUserId, userIdStr),
           eq(zyprusAgent.isActive, true)
         )
       )

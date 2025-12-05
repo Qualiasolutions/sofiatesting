@@ -37,7 +37,8 @@ type Agent = {
   region: string;
   role: string;
   isActive: boolean;
-  telegramUserId: number | null;
+  canReceiveLeads: boolean;
+  telegramUserId: string | null;
   whatsappPhoneNumber: string | null;
   lastActiveAt: Date | null;
   registeredAt: Date | null;

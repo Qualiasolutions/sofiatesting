@@ -154,6 +154,49 @@ export const createListingTool = tool({
       .describe(
         "Property image URLs (REQUIRED - at least 1 image). Use chat uploads or external URLs."
       ),
+    // New REQUIRED fields for Zyprus workflow (Nov 2025 requirements)
+    ownerName: z
+      .string()
+      .min(2)
+      .max(256)
+      .describe("Property owner or listing agent name (REQUIRED)"),
+    ownerPhone: z
+      .string()
+      .min(8)
+      .max(64)
+      .describe("Owner/agent phone number (REQUIRED) - for back office contact"),
+    swimmingPool: z
+      .enum(["private", "communal", "none"])
+      .describe("Swimming pool status (REQUIRED) - private pool, communal pool, or no pool"),
+    hasParking: z
+      .boolean()
+      .describe("Does property have parking? (REQUIRED)"),
+    hasAirConditioning: z
+      .boolean()
+      .describe("Does property have air conditioning or AC provisions? (REQUIRED)"),
+    // Optional additional fields
+    backofficeNotes: z
+      .string()
+      .max(2000)
+      .optional()
+      .describe("Notes for the review team - viewing schedule, tenant status, special instructions"),
+    googleMapsUrl: z
+      .string()
+      .url()
+      .optional()
+      .describe("Google Maps link with pin on the property for exact location verification"),
+    verandaArea: z
+      .number()
+      .positive()
+      .max(500)
+      .optional()
+      .describe("Veranda/outdoor covered area in square meters"),
+    plotArea: z
+      .number()
+      .positive()
+      .max(50000)
+      .optional()
+      .describe("Total plot size in square meters (for houses/villas)"),
   }),
   execute: async ({
     name,
@@ -178,6 +221,17 @@ export const createListingTool = tool({
     coordinates,
     features,
     imageUrls,
+    // New required fields (Nov 2025)
+    ownerName,
+    ownerPhone,
+    swimmingPool,
+    hasParking,
+    hasAirConditioning,
+    // New optional fields
+    backofficeNotes,
+    googleMapsUrl,
+    verandaArea,
+    plotArea,
   }) => {
     try {
       // Get session for user authentication (web) or context (WhatsApp/Telegram)
@@ -237,14 +291,27 @@ export const createListingTool = tool({
         propertyType: "", // Deprecated field - using propertyTypeId instead
         amenityFeature: features || [],
         image: imageUrls || [], // Store image URLs
+        // New REQUIRED fields for Zyprus workflow (Nov 2025)
+        ownerName,
+        ownerPhone,
+        swimmingPool,
+        hasParking,
+        hasAirConditioning,
+        // New optional fields
+        backofficeNotes,
+        googleMapsUrl,
+        verandaArea,
+        plotArea,
+        // Listing goes to draft for review - NOT auto-uploaded
         status: "draft",
+        reviewStatus: "pending", // Requires reviewer approval
         draftExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       });
 
       return {
         success: true,
         listingId: listing.id,
-        message: `✅ **Listing Draft Created!**
+        message: `✅ **Listing Saved for Review!**
 
 📋 **Property Summary**
 ${name}
@@ -265,9 +332,22 @@ ${referenceId ? `🔖 Reference: ${referenceId}` : ""}
 ${coordinates ? `📍 GPS: ${coordinates.latitude.toFixed(4)}, ${coordinates.longitude.toFixed(4)}` : ""}
 ${imageUrls && imageUrls.length > 0 ? `📸 Images: ${imageUrls.length} photo${imageUrls.length > 1 ? "s" : ""}` : ""}
 
-Status: **Draft** (expires in 7 days)
+**Owner/Agent Details**
+👤 ${ownerName}
+📞 ${ownerPhone}
 
-Say "upload listing" to publish to zyprus.com`,
+**Property Features**
+🏊 Swimming Pool: ${swimmingPool === "private" ? "Private Pool" : swimmingPool === "communal" ? "Communal Pool" : "No Pool"}
+🚗 Parking: ${hasParking ? "Yes" : "No"}
+❄️ Air Conditioning: ${hasAirConditioning ? "Yes" : "No"}
+${verandaArea ? `🪴 Veranda: ${verandaArea}m²` : ""}
+${plotArea ? `🏡 Plot: ${plotArea}m²` : ""}
+${googleMapsUrl ? "📍 Google Maps: Provided" : ""}
+${backofficeNotes ? "📝 Notes: Included" : ""}
+
+Status: **Pending Review** (awaiting approval)
+
+The listing has been saved and will be reviewed by the team before publishing to zyprus.com.`,
       };
     } catch (error) {
       console.error("Error creating listing:", error);

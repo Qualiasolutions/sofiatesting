@@ -10,6 +10,7 @@ import {
   numeric,
   pgTable,
   primaryKey,
+  real,
   text,
   timestamp,
   uuid,
@@ -194,6 +195,23 @@ export const propertyListing = pgTable(
     phoneNumber: varchar("phoneNumber", { length: 20 }), // Contact phone number
     propertyNotes: text("propertyNotes"), // Internal notes
     duplicateDetected: boolean("duplicateDetected").default(false), // Flag for potential duplicate
+    // New fields for Zyprus workflow (Nov 2025)
+    ownerName: varchar("ownerName", { length: 256 }), // Property owner or agent name
+    ownerPhone: varchar("ownerPhone", { length: 64 }), // Owner/agent phone number
+    swimmingPool: varchar("swimmingPool", { length: 32 }), // private, communal, none - REQUIRED
+    hasParking: boolean("hasParking"), // Does property have parking?
+    hasAirConditioning: boolean("hasAirConditioning"), // Has AC or provisions?
+    backofficeNotes: text("backofficeNotes"), // Notes for review team
+    googleMapsUrl: text("googleMapsUrl"), // Google Maps link with pin
+    verandaArea: real("verandaArea"), // Veranda/outdoor covered area in sqm
+    plotArea: real("plotArea"), // Total plot size in sqm (for houses)
+    // Review workflow fields
+    reviewStatus: varchar("reviewStatus", { length: 32 }).default("pending"), // pending, approved, rejected
+    firstReviewerId: uuid("firstReviewerId"), // First reviewer (usually Lauren)
+    secondReviewerId: uuid("secondReviewerId"), // Second reviewer (regional manager)
+    submittedByAgentId: uuid("submittedByAgentId"), // Agent who submitted via Telegram/WhatsApp
+    reviewNotes: text("reviewNotes"), // Reviewer comments
+    reviewedAt: timestamp("reviewedAt"), // When reviewed
     coordinates: jsonb("coordinates").$type<{
       latitude: number;
       longitude: number;
@@ -549,13 +567,14 @@ export const zyprusAgent = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     userId: uuid("userId").references(() => user.id), // Optional - set after agent registers
-    fullName: text("fullName").notNull(),
+    fullName: text("fullName").notNull(), // Agent full name
     email: varchar("email", { length: 255 }).notNull().unique(),
     phoneNumber: varchar("phoneNumber", { length: 20 }), // Cyprus mobile: +357 XX XXX XXX
     region: varchar("region", { length: 50 }).notNull(), // Limassol, Paphos, Larnaca, Famagusta, Nicosia, All
     role: varchar("role", { length: 50 }).notNull(), // CEO, Manager Limassol, Manager Paphos, Normal Agent, Listing Admin
     isActive: boolean("isActive").notNull().default(true),
-    telegramUserId: bigint("telegramUserId", { mode: "number" }), // For Telegram identification
+    canReceiveLeads: boolean("canReceiveLeads").notNull().default(true), // Whether agent can receive forwarded leads
+    telegramUserId: varchar("telegramUserId", { length: 64 }), // Telegram user ID (string for compatibility)
     whatsappPhoneNumber: varchar("whatsappPhoneNumber", { length: 20 }), // For WhatsApp identification
     lastActiveAt: timestamp("lastActiveAt"),
     registeredAt: timestamp("registeredAt"), // When they completed registration
@@ -633,5 +652,115 @@ export const agentChatSession = pgTable(
 );
 
 export type AgentChatSession = InferSelectModel<typeof agentChatSession>;
+
+// ===================================================================
+// TELEGRAM LEAD MANAGEMENT TABLES
+// ===================================================================
+
+// Telegram group configuration (for lead monitoring)
+export const telegramGroup = pgTable(
+  "TelegramGroup",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    groupId: bigint("groupId", { mode: "number" }).notNull().unique(), // Telegram group chat ID
+    groupName: varchar("groupName", { length: 256 }).notNull(), // ZyprusAlla, ZyprusLimassol, etc.
+    groupType: varchar("groupType", { length: 32 }).notNull(), // all, limassol, paphos, others
+    region: varchar("region", { length: 50 }), // Associated region for routing
+    isActive: boolean("isActive").notNull().default(true),
+    leadRoutingEnabled: boolean("leadRoutingEnabled").notNull().default(true),
+    defaultForwardTo: uuid("defaultForwardTo").references(() => zyprusAgent.id), // Default agent to forward leads
+    alternateForwardTo: uuid("alternateForwardTo").references(() => zyprusAgent.id), // Alternate agent (for rotation)
+    lastMessageAt: timestamp("lastMessageAt"),
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+  },
+  (table) => ({
+    groupIdIdx: index("TelegramGroup_groupId_idx").on(table.groupId),
+    groupTypeIdx: index("TelegramGroup_groupType_idx").on(table.groupType),
+    regionIdx: index("TelegramGroup_region_idx").on(table.region),
+    isActiveIdx: index("TelegramGroup_isActive_idx").on(table.isActive),
+  })
+);
+
+export type TelegramGroup = InferSelectModel<typeof telegramGroup>;
+
+// Telegram lead tracking (for forwarded leads from groups)
+export const telegramLead = pgTable(
+  "TelegramLead",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // Source information
+    sourceGroupId: bigint("sourceGroupId", { mode: "number" }).notNull(), // Which Telegram group
+    sourceGroupName: varchar("sourceGroupName", { length: 256 }),
+    originalMessageId: varchar("originalMessageId", { length: 64 }), // Telegram message ID
+    originalMessageText: text("originalMessageText"), // Full message content
+    senderTelegramId: bigint("senderTelegramId", { mode: "number" }), // Who posted in group
+    senderName: varchar("senderName", { length: 256 }), // Name of sender
+    // Property information (extracted from message)
+    propertyReferenceId: varchar("propertyReferenceId", { length: 64 }), // ZYP-1234 extracted
+    propertyUrl: text("propertyUrl"), // zyprus.com link if found
+    propertyTitle: text("propertyTitle"), // From lookup
+    propertyRegion: varchar("propertyRegion", { length: 50 }), // Determined from lookup
+    propertyOwnerId: uuid("propertyOwnerId").references(() => zyprusAgent.id), // Listing owner
+    // Client information (extracted from message)
+    clientName: varchar("clientName", { length: 256 }),
+    clientPhone: varchar("clientPhone", { length: 64 }),
+    clientEmail: varchar("clientEmail", { length: 256 }),
+    clientLanguage: varchar("clientLanguage", { length: 20 }), // russian, english, greek, etc.
+    // Forwarding information
+    forwardedToAgentId: uuid("forwardedToAgentId").references(() => zyprusAgent.id),
+    forwardedToTelegramId: bigint("forwardedToTelegramId", { mode: "number" }),
+    forwardedToName: varchar("forwardedToName", { length: 256 }),
+    forwardedMessageId: varchar("forwardedMessageId", { length: 64 }), // ID of forwarded message
+    groupAckMessageId: varchar("groupAckMessageId", { length: 64 }), // ID of "Lead forwarded" message
+    // Status
+    status: varchar("status", { length: 32 }).notNull().default("forwarded"), // forwarded, contacted, closed, failed
+    errorMessage: text("errorMessage"), // If forwarding failed
+    // Follow-up
+    agentResponseAt: timestamp("agentResponseAt"), // When agent responded to client
+    closedAt: timestamp("closedAt"),
+    closedReason: varchar("closedReason", { length: 100 }), // sold, not_interested, no_response, etc.
+    notes: text("notes"),
+    // Timestamps
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+  },
+  (table) => ({
+    sourceGroupIdIdx: index("TelegramLead_sourceGroupId_idx").on(table.sourceGroupId),
+    propertyRefIdx: index("TelegramLead_propertyReferenceId_idx").on(table.propertyReferenceId),
+    forwardedToIdx: index("TelegramLead_forwardedToAgentId_idx").on(table.forwardedToAgentId),
+    statusIdx: index("TelegramLead_status_idx").on(table.status),
+    createdAtIdx: index("TelegramLead_createdAt_idx").on(table.createdAt.desc()),
+    // Composite index for agent lead queries
+    agentStatusIdx: index("TelegramLead_agent_status_idx").on(
+      table.forwardedToAgentId,
+      table.status
+    ),
+    // Composite index for group analytics
+    groupCreatedAtIdx: index("TelegramLead_group_createdAt_idx").on(
+      table.sourceGroupId,
+      table.createdAt.desc()
+    ),
+  })
+);
+
+export type TelegramLead = InferSelectModel<typeof telegramLead>;
+
+// Lead forwarding rotation tracker (for fair distribution)
+export const leadForwardingRotation = pgTable(
+  "LeadForwardingRotation",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    region: varchar("region", { length: 50 }).notNull().unique(), // limassol, paphos, etc.
+    lastForwardedToAgentId: uuid("lastForwardedToAgentId").references(() => zyprusAgent.id),
+    forwardCount: integer("forwardCount").notNull().default(0),
+    updatedAt: timestamp("updatedAt").notNull().defaultNow(),
+  },
+  (table) => ({
+    regionIdx: index("LeadForwardingRotation_region_idx").on(table.region),
+  })
+);
+
+export type LeadForwardingRotation = InferSelectModel<typeof leadForwardingRotation>;
 
 export type { InferInsertModel } from "drizzle-orm";

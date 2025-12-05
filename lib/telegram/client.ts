@@ -184,6 +184,187 @@ export class TelegramClient {
   }
 
   /**
+   * Forward a message from one chat to another
+   * Used for lead forwarding from groups to individual agents
+   */
+  async forwardMessage({
+    chatId,
+    fromChatId,
+    messageId,
+  }: {
+    chatId: number | string;
+    fromChatId: number | string;
+    messageId: number;
+  }): Promise<any> {
+    try {
+      const response = await fetch(`${this.apiUrl}/forwardMessage`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          from_chat_id: fromChatId,
+          message_id: messageId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.ok) {
+        console.error("Telegram forwardMessage error:", {
+          description: data.description,
+          errorCode: data.error_code,
+          chatId,
+          fromChatId,
+          messageId,
+        });
+        throw new Error(data.description || "Failed to forward message");
+      }
+
+      return data.result;
+    } catch (error) {
+      console.error("Error forwarding Telegram message:", {
+        error: error instanceof Error ? error.message : "Unknown error",
+        chatId,
+        fromChatId,
+        messageId,
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Get file information from Telegram servers
+   * Used for downloading photos and documents
+   */
+  async getFile(fileId: string): Promise<{
+    file_id: string;
+    file_unique_id: string;
+    file_size?: number;
+    file_path?: string;
+  } | null> {
+    try {
+      const response = await fetch(`${this.apiUrl}/getFile`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          file_id: fileId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.ok) {
+        console.error("Telegram getFile error:", {
+          description: data.description,
+          fileId,
+        });
+        return null;
+      }
+
+      return data.result;
+    } catch (error) {
+      console.error("Error getting file from Telegram:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Download a file from Telegram servers
+   * Returns the file as a Buffer
+   */
+  async downloadFile(filePath: string): Promise<Buffer | null> {
+    try {
+      const botToken = this.apiUrl.split("/bot")[1];
+      const downloadUrl = `https://api.telegram.org/file/bot${botToken}/${filePath}`;
+
+      const response = await fetch(downloadUrl);
+
+      if (!response.ok) {
+        console.error("Failed to download file:", response.statusText);
+        return null;
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      return Buffer.from(arrayBuffer);
+    } catch (error) {
+      console.error("Error downloading file from Telegram:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Get file and download it in one operation
+   * Returns file buffer and metadata
+   */
+  async getAndDownloadFile(fileId: string): Promise<{
+    buffer: Buffer;
+    fileName?: string;
+    mimeType?: string;
+  } | null> {
+    const fileInfo = await this.getFile(fileId);
+    if (!fileInfo?.file_path) {
+      return null;
+    }
+
+    const buffer = await this.downloadFile(fileInfo.file_path);
+    if (!buffer) {
+      return null;
+    }
+
+    // Extract filename from path
+    const fileName = fileInfo.file_path.split("/").pop();
+
+    return {
+      buffer,
+      fileName,
+    };
+  }
+
+  /**
+   * Get information about a chat
+   * Useful for getting group info and storing group IDs
+   */
+  async getChat(chatId: number | string): Promise<{
+    id: number;
+    type: "private" | "group" | "supergroup" | "channel";
+    title?: string;
+    username?: string;
+    first_name?: string;
+    last_name?: string;
+  } | null> {
+    try {
+      const response = await fetch(`${this.apiUrl}/getChat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!data.ok) {
+        console.error("Telegram getChat error:", {
+          description: data.description,
+          chatId,
+        });
+        return null;
+      }
+
+      return data.result;
+    } catch (error) {
+      console.error("Error getting chat info:", error);
+      return null;
+    }
+  }
+
+  /**
    * Send a long message by splitting it into chunks
    */
   async sendLongMessage({

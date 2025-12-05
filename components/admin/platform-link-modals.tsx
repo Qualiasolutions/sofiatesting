@@ -25,7 +25,7 @@ type PlatformLinkModalProps = {
 };
 
 interface LinkTelegramModalProps extends PlatformLinkModalProps {
-  currentTelegramUserId?: number | null;
+  currentTelegramUserId?: string | null;
 }
 
 export function LinkTelegramModal({

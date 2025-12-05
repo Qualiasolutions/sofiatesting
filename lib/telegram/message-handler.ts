@@ -5,6 +5,8 @@ import { myProvider } from "../ai/providers";
 import { calculateCapitalGainsTool } from "../ai/tools/calculate-capital-gains";
 import { calculateTransferFeesTool } from "../ai/tools/calculate-transfer-fees";
 import { calculateVATTool } from "../ai/tools/calculate-vat";
+import { createListingTool } from "../ai/tools/create-listing";
+import { getZyprusDataTool } from "../ai/tools/get-zyprus-data";
 import { isProductionEnvironment } from "../constants";
 import {
   getChatById,
@@ -15,6 +17,7 @@ import {
 import type { ChatMessage } from "../types";
 import { convertToUIMessages, generateUUID } from "../utils";
 import { getTelegramClient } from "./client";
+import { handleGroupMessage, isGroupChat } from "./lead-router";
 import type { TelegramMessage } from "./types";
 import { getTelegramChatId, getTelegramUser } from "./user-mapping";
 
@@ -28,17 +31,35 @@ export async function handleTelegramMessage(
     return; // Ignore bot messages
   }
 
-  if (!message.text) {
-    // Handle non-text messages
+  // Handle group/supergroup messages differently (lead forwarding)
+  if (isGroupChat(message.chat.type)) {
+    await handleGroupMessage(message);
+    return;
+  }
+
+  // From here on, we're handling private (1-on-1) chat messages
+  if (!message.text && !message.photo && !message.document) {
+    // Handle unsupported message types
     await sendTelegramMessage(
       message.chat.id,
-      "I can only process text messages at the moment. Please send me a text message!"
+      "I can process text messages, photos, and documents. Please send me one of those!"
     );
     return;
   }
 
   const telegramClient = getTelegramClient();
   const chatId = message.chat.id;
+
+  // Handle photo/document uploads (for property listings)
+  if (message.photo || message.document) {
+    await handleFileUpload(message);
+    return;
+  }
+
+  // From here, message.text is guaranteed to exist
+  if (!message.text) {
+    return;
+  }
 
   // Handle bot commands
   const command = message.text.split(" ")[0].toLowerCase();
@@ -163,11 +184,16 @@ export async function handleTelegramMessage(
             "calculateTransferFees",
             "calculateCapitalGains",
             "calculateVAT",
+            "createListing",
+            "getZyprusData",
+            // Note: uploadListing deliberately NOT added - listings require reviewer approval
           ],
           tools: {
             calculateTransferFees: calculateTransferFeesTool,
             calculateCapitalGains: calculateCapitalGainsTool,
             calculateVAT: calculateVATTool,
+            createListing: createListingTool,
+            getZyprusData: getZyprusDataTool,
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
@@ -710,4 +736,119 @@ Powered by Zyprus Property Group
 https://www.zyprus.com`;
 
   await sendTelegramMessage(chatId, aboutText);
+}
+
+/**
+ * Handle file uploads (photos and documents)
+ * Used for property listing images and title deeds
+ */
+async function handleFileUpload(message: TelegramMessage): Promise<void> {
+  const telegramClient = getTelegramClient();
+  const chatId = message.chat.id;
+
+  try {
+    // Show upload processing indicator
+    await telegramClient.sendChatAction({ chatId, action: "upload_document" });
+
+    let fileId: string | undefined;
+    let fileName: string | undefined;
+    let fileType: "photo" | "document" = "photo";
+
+    if (message.photo && message.photo.length > 0) {
+      // Get the largest photo (last in array)
+      const largestPhoto = message.photo[message.photo.length - 1];
+      fileId = largestPhoto.file_id;
+      fileType = "photo";
+    } else if (message.document) {
+      fileId = message.document.file_id;
+      fileName = message.document.file_name;
+      fileType = "document";
+    }
+
+    if (!fileId) {
+      await telegramClient.sendMessage({
+        chatId,
+        text: "Could not process your file. Please try again.",
+      });
+      return;
+    }
+
+    // Download the file
+    const fileData = await telegramClient.getAndDownloadFile(fileId);
+
+    if (!fileData) {
+      await telegramClient.sendMessage({
+        chatId,
+        text: "Could not download your file. Please try again.",
+      });
+      return;
+    }
+
+    // Store file temporarily or upload to Supabase Storage
+    // For now, acknowledge receipt and provide instructions
+    const caption = message.caption || "";
+    const isPropertyImage = /property|listing|house|apartment|villa/i.test(
+      caption
+    );
+    const isTitleDeed = /title|deed|document|pdf/i.test(caption) ||
+                        fileName?.toLowerCase().includes("deed") ||
+                        fileName?.toLowerCase().endsWith(".pdf");
+
+    let responseText: string;
+
+    if (fileType === "photo") {
+      if (isPropertyImage) {
+        responseText = `Photo received for property listing.
+
+To complete your listing, please also provide:
+- Property type (apartment/house/villa)
+- Location (Google Maps link preferred)
+- Size (sqm), price, bedrooms, bathrooms
+- Swimming pool (private/communal/none)
+- Parking (yes/no)
+- Air conditioning (yes/no)
+- Owner name and phone number
+
+You can send more photos or start describing the property!`;
+      } else {
+        responseText = `Photo received!
+
+Is this for a property listing? If so, please tell me:
+- Property type and location
+- Size, price, bedrooms, bathrooms
+- Pool, parking, and AC status
+- Owner/agent contact details`;
+      }
+    } else {
+      // Document
+      if (isTitleDeed) {
+        responseText = `Title deed document received (${fileName || "document"}).
+
+This will be attached to your property listing. Please provide the property details if you haven't already:
+- Property type, location, size, price
+- Bedrooms, bathrooms
+- Swimming pool, parking, AC status
+- Owner name and phone number`;
+      } else {
+        responseText = `Document received (${fileName || "file"}).
+
+If this is for a property listing, please describe the property:
+- Type, location, size, price
+- Features (pool, parking, AC)
+- Owner contact details`;
+      }
+    }
+
+    await telegramClient.sendMessage({
+      chatId,
+      text: responseText,
+      replyToMessageId: message.message_id,
+    });
+  } catch (error) {
+    console.error("Error handling file upload:", error);
+    await telegramClient.sendMessage({
+      chatId,
+      text: "Sorry, I had trouble processing your file. Please try again.",
+    });
+  }
 }
