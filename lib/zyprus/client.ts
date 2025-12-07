@@ -1,25 +1,27 @@
 import { createCircuitBreaker } from "@/lib/circuit-breakers";
 import type { PropertyListing } from "@/lib/db/schema";
 
+type ZyprusAPIErrorOptions = {
+  message: string;
+  code: string;
+  statusCode?: number;
+  details?: string;
+  errors?: any[];
+};
+
 export class ZyprusAPIError extends Error {
   code: string;
   statusCode?: number;
   details?: string;
   errors?: any[];
 
-  constructor(
-    message: string,
-    code: string,
-    statusCode?: number,
-    details?: string,
-    errors?: any[]
-  ) {
-    super(message);
+  constructor(options: ZyprusAPIErrorOptions) {
+    super(options.message);
     this.name = "ZyprusAPIError";
-    this.code = code;
-    this.statusCode = statusCode;
-    this.details = details;
-    this.errors = errors;
+    this.code = options.code;
+    this.statusCode = options.statusCode;
+    this.details = options.details;
+    this.errors = options.errors;
   }
 }
 
@@ -57,10 +59,10 @@ async function fetchAccessTokenInternal(): Promise<string> {
   const clientSecret = process.env.ZYPRUS_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    throw new ZyprusAPIError(
-      "ZYPRUS_CLIENT_ID or ZYPRUS_CLIENT_SECRET not configured",
-      "CONFIG_ERROR"
-    );
+    throw new ZyprusAPIError({
+      message: "ZYPRUS_CLIENT_ID or ZYPRUS_CLIENT_SECRET not configured",
+      code: "CONFIG_ERROR",
+    });
   }
 
   try {
@@ -79,11 +81,12 @@ async function fetchAccessTokenInternal(): Promise<string> {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new ZyprusAPIError(
-        errorData.error_description || `OAuth error: ${response.status}`,
-        errorData.error || "OAUTH_ERROR",
-        response.status
-      );
+      throw new ZyprusAPIError({
+        message:
+          errorData.error_description || `OAuth error: ${response.status}`,
+        code: errorData.error || "OAUTH_ERROR",
+        statusCode: response.status,
+      });
     }
 
     const tokenData: OAuthToken = await response.json();
@@ -96,10 +99,10 @@ async function fetchAccessTokenInternal(): Promise<string> {
       throw error;
     }
 
-    throw new ZyprusAPIError(
-      `OAuth token error: ${error instanceof Error ? error.message : "Unknown error"}`,
-      "OAUTH_ERROR"
-    );
+    throw new ZyprusAPIError({
+      message: `OAuth token error: ${error instanceof Error ? error.message : "Unknown error"}`,
+      code: "OAUTH_ERROR",
+    });
   }
 }
 
@@ -145,11 +148,12 @@ export async function getZyprusLocations(): Promise<any[]> {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new ZyprusAPIError(
-        errorData.errors?.[0]?.title || `API error: ${response.status}`,
-        errorData.errors?.[0]?.code || "API_ERROR",
-        response.status
-      );
+      throw new ZyprusAPIError({
+        message:
+          errorData.errors?.[0]?.title || `API error: ${response.status}`,
+        code: errorData.errors?.[0]?.code || "API_ERROR",
+        statusCode: response.status,
+      });
     }
 
     const data: JsonApiDocument = await response.json();
@@ -159,10 +163,10 @@ export async function getZyprusLocations(): Promise<any[]> {
       throw error;
     }
 
-    throw new ZyprusAPIError(
-      `Failed to fetch locations: ${error instanceof Error ? error.message : "Unknown error"}`,
-      "NETWORK_ERROR"
-    );
+    throw new ZyprusAPIError({
+      message: `Failed to fetch locations: ${error instanceof Error ? error.message : "Unknown error"}`,
+      code: "NETWORK_ERROR",
+    });
   }
 }
 
@@ -190,11 +194,12 @@ export async function getZyprusTaxonomyTerms(
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new ZyprusAPIError(
-        errorData.errors?.[0]?.title || `API error: ${response.status}`,
-        errorData.errors?.[0]?.code || "API_ERROR",
-        response.status
-      );
+      throw new ZyprusAPIError({
+        message:
+          errorData.errors?.[0]?.title || `API error: ${response.status}`,
+        code: errorData.errors?.[0]?.code || "API_ERROR",
+        statusCode: response.status,
+      });
     }
 
     const data: JsonApiDocument = await response.json();
@@ -204,10 +209,10 @@ export async function getZyprusTaxonomyTerms(
       throw error;
     }
 
-    throw new ZyprusAPIError(
-      `Failed to fetch taxonomy terms: ${error instanceof Error ? error.message : "Unknown error"}`,
-      "NETWORK_ERROR"
-    );
+    throw new ZyprusAPIError({
+      message: `Failed to fetch taxonomy terms: ${error instanceof Error ? error.message : "Unknown error"}`,
+      code: "NETWORK_ERROR",
+    });
   }
 }
 
@@ -567,13 +572,13 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
         errorDetails = JSON.stringify(errorData.errors);
       }
 
-      throw new ZyprusAPIError(
-        errorMessage,
-        errorData.errors?.[0]?.code || "API_ERROR",
-        response.status,
-        errorDetails,
-        errorData.errors
-      );
+      throw new ZyprusAPIError({
+        message: errorMessage,
+        code: errorData.errors?.[0]?.code || "API_ERROR",
+        statusCode: response.status,
+        details: errorDetails,
+        errors: errorData.errors,
+      });
     }
 
     const responseData: JsonApiDocument = await response.json();
@@ -590,15 +595,21 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
 
     if (error instanceof Error) {
       if (error.name === "AbortError") {
-        throw new ZyprusAPIError("Request timeout after 30 seconds", "TIMEOUT");
+        throw new ZyprusAPIError({
+          message: "Request timeout after 30 seconds",
+          code: "TIMEOUT",
+        });
       }
-      throw new ZyprusAPIError(
-        `Network error: ${error.message}`,
-        "NETWORK_ERROR"
-      );
+      throw new ZyprusAPIError({
+        message: `Network error: ${error.message}`,
+        code: "NETWORK_ERROR",
+      });
     }
 
-    throw new ZyprusAPIError("Unknown error occurred", "UNKNOWN");
+    throw new ZyprusAPIError({
+      message: "Unknown error occurred",
+      code: "UNKNOWN",
+    });
   }
 }
 
@@ -621,11 +632,12 @@ export async function getZyprusListings(): Promise<any[]> {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new ZyprusAPIError(
-        errorData.errors?.[0]?.title || `API error: ${response.status}`,
-        errorData.errors?.[0]?.code || "API_ERROR",
-        response.status
-      );
+      throw new ZyprusAPIError({
+        message:
+          errorData.errors?.[0]?.title || `API error: ${response.status}`,
+        code: errorData.errors?.[0]?.code || "API_ERROR",
+        statusCode: response.status,
+      });
     }
 
     const data: JsonApiDocument = await response.json();
@@ -635,10 +647,10 @@ export async function getZyprusListings(): Promise<any[]> {
       throw error;
     }
 
-    throw new ZyprusAPIError(
-      `Failed to fetch listings: ${error instanceof Error ? error.message : "Unknown error"}`,
-      "NETWORK_ERROR"
-    );
+    throw new ZyprusAPIError({
+      message: `Failed to fetch listings: ${error instanceof Error ? error.message : "Unknown error"}`,
+      code: "NETWORK_ERROR",
+    });
   }
 }
 
@@ -969,13 +981,13 @@ async function uploadLandToZyprusAPIInternal(
         errorDetails = JSON.stringify(errorData.errors);
       }
 
-      throw new ZyprusAPIError(
-        errorMessage,
-        errorData.errors?.[0]?.code || "API_ERROR",
-        response.status,
-        errorDetails,
-        errorData.errors
-      );
+      throw new ZyprusAPIError({
+        message: errorMessage,
+        code: errorData.errors?.[0]?.code || "API_ERROR",
+        statusCode: response.status,
+        details: errorDetails,
+        errors: errorData.errors,
+      });
     }
 
     const responseData: JsonApiDocument = await response.json();
@@ -992,15 +1004,21 @@ async function uploadLandToZyprusAPIInternal(
 
     if (error instanceof Error) {
       if (error.name === "AbortError") {
-        throw new ZyprusAPIError("Request timeout after 30 seconds", "TIMEOUT");
+        throw new ZyprusAPIError({
+          message: "Request timeout after 30 seconds",
+          code: "TIMEOUT",
+        });
       }
-      throw new ZyprusAPIError(
-        `Network error: ${error.message}`,
-        "NETWORK_ERROR"
-      );
+      throw new ZyprusAPIError({
+        message: `Network error: ${error.message}`,
+        code: "NETWORK_ERROR",
+      });
     }
 
-    throw new ZyprusAPIError("Unknown error occurred", "UNKNOWN");
+    throw new ZyprusAPIError({
+      message: "Unknown error occurred",
+      code: "UNKNOWN",
+    });
   }
 }
 
@@ -1146,7 +1164,7 @@ function getExtensionFromMime(mimeType: string): string {
 /**
  * Upload floor plan images to a property
  */
-export async function uploadFloorPlanImages(
+export function uploadFloorPlanImages(
   _propertyId: string,
   floorPlanUrls: string[]
 ): Promise<string[]> {
@@ -1353,11 +1371,11 @@ export async function getListingFromZyprus(
       if (response.status === 404) {
         return null;
       }
-      throw new ZyprusAPIError(
-        `Failed to fetch listing: ${response.status}`,
-        "API_ERROR",
-        response.status
-      );
+      throw new ZyprusAPIError({
+        message: `Failed to fetch listing: ${response.status}`,
+        code: "API_ERROR",
+        statusCode: response.status,
+      });
     }
 
     const data: JsonApiDocument = await response.json();
@@ -1455,11 +1473,11 @@ export async function searchZyprusListings(
     });
 
     if (!response.ok) {
-      throw new ZyprusAPIError(
-        `Failed to search listings: ${response.status}`,
-        "API_ERROR",
-        response.status
-      );
+      throw new ZyprusAPIError({
+        message: `Failed to search listings: ${response.status}`,
+        code: "API_ERROR",
+        statusCode: response.status,
+      });
     }
 
     const data: JsonApiDocument = await response.json();

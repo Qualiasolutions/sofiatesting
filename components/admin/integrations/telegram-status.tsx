@@ -38,9 +38,7 @@ export async function TelegramStatus() {
       if (webhookResponse.ok) {
         const data = await webhookResponse.json();
         webhookInfo = data.result;
-        isHealthy = !!(
-          webhookInfo?.url && webhookInfo?.last_error_date === 0
-        );
+        isHealthy = !!(webhookInfo?.url && webhookInfo?.last_error_date === 0);
       }
     } catch (error) {
       console.error("Telegram health check failed:", error);

@@ -254,6 +254,7 @@ function getBaseInstructions(fullContent: string): string {
 /**
  * Load full instruction file (cached for 24 hours)
  */
+// biome-ignore lint/suspicious/useAwait: unstable_cache requires async function
 async function loadFullInstructionsUncached(): Promise<string> {
   const basePath = join(
     process.cwd(),

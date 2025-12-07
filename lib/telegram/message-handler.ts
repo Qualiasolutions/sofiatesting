@@ -184,7 +184,6 @@ export async function handleTelegramMessage(
     // Generate AI response with retry mechanism
     let fullResponse = "";
     const assistantMessageId = generateUUID();
-    // biome-ignore lint/suspicious/noExplicitAny: Complex AI SDK generic types
     let result: any = null;
     let retryCount = 0;
     const MAX_RETRIES = 2;

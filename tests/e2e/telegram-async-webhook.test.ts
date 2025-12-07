@@ -502,24 +502,24 @@ test.describe("Telegram Async Webhook", () => {
     const results = await Promise.all(webhookPromises);
 
     // THEN: All webhooks should return 200 immediately
-    results.forEach((result) => {
+    for (const result of results) {
       expect(result.status).toBe(200);
       expect(result.responseTime).toBeLessThan(500);
-    });
+    }
 
     console.log("✓ All concurrent webhooks returned immediately:");
-    results.forEach((r) =>
-      console.log(`  - Chat ${r.chatId}: ${r.responseTime}ms`)
-    );
+    for (const r of results) {
+      console.log(`  - Chat ${r.chatId}: ${r.responseTime}ms`);
+    }
 
     // WAIT: For background processing
     await new Promise((resolve) => setTimeout(resolve, 3000));
 
     // VERIFY: All messages were processed independently
     expect(processedMessages.size).toBe(chatIds.length);
-    chatIds.forEach((chatId) => {
+    for (const chatId of chatIds) {
       expect(processedMessages.has(chatId)).toBe(true);
-    });
+    }
 
     console.log(`✓ All ${chatIds.length} messages processed independently`);
   });
@@ -537,7 +537,9 @@ test.describe("Telegram Async Webhook", () => {
 
     // WHEN: We send a message from a bot (is_bot: true)
     const botMessage = createTelegramMessage("Bot message");
-    botMessage.from!.is_bot = true;
+    if (botMessage.from) {
+      botMessage.from.is_bot = true;
+    }
     const update = createTelegramUpdate(botMessage);
 
     const response = await request.post(WEBHOOK_URL, {

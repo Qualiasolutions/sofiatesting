@@ -3,11 +3,13 @@ import postgres from "postgres";
 
 config({ path: ".env.local" });
 
+const MASK_PASSWORD_PATTERN = /:[^:]*@/;
+
 const testConnection = async () => {
   console.log("Testing connection...");
   // Try unpooled first
   const url = process.env.POSTGRES_URL_UNPOOLED || process.env.POSTGRES_URL;
-  console.log("Using URL:", url?.replace(/:[^:]*@/, ":***@")); // Mask password
+  console.log("Using URL:", url?.replace(MASK_PASSWORD_PATTERN, ":***@")); // Mask password
 
   if (!url) {
     console.error("URL missing");

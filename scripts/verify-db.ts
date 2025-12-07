@@ -5,6 +5,8 @@ import postgres from "postgres";
 
 config({ path: ".env.local" });
 
+const MASK_PASSWORD_PATTERN = /:[^:]*@/;
+
 const run = async () => {
   if (!process.env.POSTGRES_URL) {
     throw new Error("POSTGRES_URL is not defined");
@@ -12,7 +14,7 @@ const run = async () => {
 
   console.log(
     "Connecting to:",
-    process.env.POSTGRES_URL.replace(/:[^:]*@/, ":****@")
+    process.env.POSTGRES_URL.replace(MASK_PASSWORD_PATTERN, ":****@")
   );
   const sql = postgres(process.env.POSTGRES_URL);
 

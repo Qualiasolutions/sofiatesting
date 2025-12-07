@@ -76,7 +76,7 @@ function createMockFunction(): [() => Promise<string>, MockFunctionControl] {
 
 test.describe("Circuit Breaker Integration Tests", () => {
   test.describe("Basic Circuit Breaker Creation", () => {
-    test("should create circuit breaker with default options", async () => {
+    test("should create circuit breaker with default options", () => {
       const [mockFn] = createMockFunction();
       const breaker = createCircuitBreaker(mockFn, { name: "TestBreaker" });
 
@@ -86,7 +86,7 @@ test.describe("Circuit Breaker Integration Tests", () => {
       expect(breaker.halfOpen).toBe(false);
     });
 
-    test("should create circuit breaker with custom options", async () => {
+    test("should create circuit breaker with custom options", () => {
       const [mockFn] = createMockFunction();
       const breaker = createCircuitBreaker(mockFn, {
         name: "CustomBreaker",
@@ -126,22 +126,42 @@ test.describe("Circuit Breaker Integration Tests", () => {
       // Execute more requests to ensure volume threshold is met and circuit opens
       // 6 failures, 4 successes = 10 total (60% failure rate > 50% threshold)
       control.shouldFail = true;
-      await breaker.fire().catch(() => {}); // Failure 1
-      await breaker.fire().catch(() => {}); // Failure 2
-      await breaker.fire().catch(() => {}); // Failure 3
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      }); // Failure 1
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      }); // Failure 2
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      }); // Failure 3
 
       control.shouldFail = false;
-      await breaker.fire().catch(() => {}); // Success 1
-      await breaker.fire().catch(() => {}); // Success 2
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      }); // Success 1
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      }); // Success 2
 
       control.shouldFail = true;
-      await breaker.fire().catch(() => {}); // Failure 4
-      await breaker.fire().catch(() => {}); // Failure 5
-      await breaker.fire().catch(() => {}); // Failure 6
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      }); // Failure 4
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      }); // Failure 5
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      }); // Failure 6
 
       control.shouldFail = false;
-      await breaker.fire().catch(() => {}); // Success 3
-      await breaker.fire().catch(() => {}); // Success 4
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      }); // Success 3
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      }); // Success 4
 
       // Wait for circuit breaker to process stats
       await wait(200);
@@ -172,9 +192,15 @@ test.describe("Circuit Breaker Integration Tests", () => {
 
       // Only 3 requests (below threshold), all fail
       control.shouldFail = true;
-      await breaker.fire().catch(() => {});
-      await breaker.fire().catch(() => {});
-      await breaker.fire().catch(() => {});
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      });
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      });
+      await breaker.fire().catch(() => {
+        /* expected failure */
+      });
 
       await wait(100);
 
@@ -201,7 +227,9 @@ test.describe("Circuit Breaker Integration Tests", () => {
       // Open the circuit by causing failures
       control.shouldFail = true;
       for (let i = 0; i < 10; i++) {
-        await breaker.fire().catch(() => {});
+        await breaker.fire().catch(() => {
+          /* expected */
+        });
       }
 
       await wait(100);
@@ -234,7 +262,9 @@ test.describe("Circuit Breaker Integration Tests", () => {
       // Open the circuit
       control.shouldFail = true;
       for (let i = 0; i < 10; i++) {
-        await breaker.fire().catch(() => {});
+        await breaker.fire().catch(() => {
+          /* expected */
+        });
       }
       await wait(100);
 
@@ -278,7 +308,9 @@ test.describe("Circuit Breaker Integration Tests", () => {
       // Open the circuit
       control.shouldFail = true;
       for (let i = 0; i < 10; i++) {
-        await breaker.fire().catch(() => {});
+        await breaker.fire().catch(() => {
+          /* expected */
+        });
       }
       await wait(100);
       expect(reopenCount).toBe(1); // First open
@@ -288,7 +320,9 @@ test.describe("Circuit Breaker Integration Tests", () => {
       expect(breaker.halfOpen).toBe(true);
 
       // Test fails in half-open state
-      await breaker.fire().catch(() => {});
+      await breaker.fire().catch(() => {
+        /* expected */
+      });
       await wait(100);
 
       // Circuit should be open again
@@ -316,7 +350,9 @@ test.describe("Circuit Breaker Integration Tests", () => {
       // Open the circuit
       control.shouldFail = true;
       for (let i = 0; i < 10; i++) {
-        await breaker.fire().catch(() => {});
+        await breaker.fire().catch(() => {
+          /* expected */
+        });
       }
       await wait(100);
       expect(breaker.opened).toBe(true);
@@ -361,7 +397,9 @@ test.describe("Circuit Breaker Integration Tests", () => {
       // 1. Cause failures to open circuit
       control.shouldFail = true;
       for (let i = 0; i < 10; i++) {
-        await breaker.fire().catch(() => {});
+        await breaker.fire().catch(() => {
+          /* expected */
+        });
       }
       await wait(100);
 
@@ -369,7 +407,9 @@ test.describe("Circuit Breaker Integration Tests", () => {
       expect(events).toContain("open");
 
       // 2. Try request while open - should be rejected
-      await breaker.fire().catch(() => {});
+      await breaker.fire().catch(() => {
+        /* expected */
+      });
       expect(events).toContain("reject");
 
       // 3. Wait for half-open
@@ -500,7 +540,9 @@ test.describe("Circuit Breaker Integration Tests", () => {
       // 8 failures (should open circuit with 8/11 = 72% failure rate)
       control.shouldFail = true;
       for (let i = 0; i < 8; i++) {
-        await breaker.fire().catch(() => {});
+        await breaker.fire().catch(() => {
+          /* expected */
+        });
       }
       await wait(200);
 
@@ -510,8 +552,12 @@ test.describe("Circuit Breaker Integration Tests", () => {
       expect(breaker.opened).toBe(true);
 
       // 2 rejects (circuit is open)
-      await breaker.fire().catch(() => {});
-      await breaker.fire().catch(() => {});
+      await breaker.fire().catch(() => {
+        /* expected */
+      });
+      await breaker.fire().catch(() => {
+        /* expected */
+      });
 
       stats = getCircuitBreakerStats(breaker);
       expect(stats.rejects).toBeGreaterThanOrEqual(2);
@@ -537,7 +583,9 @@ test.describe("Circuit Breaker Integration Tests", () => {
       // Open circuit
       control.shouldFail = true;
       for (let i = 0; i < 10; i++) {
-        await breaker.fire().catch(() => {});
+        await breaker.fire().catch(() => {
+          /* expected */
+        });
       }
       await wait(100);
 
@@ -592,7 +640,9 @@ test.describe("Circuit Breaker Integration Tests", () => {
       // Open circuit
       control.shouldFail = true;
       for (let i = 0; i < 10; i++) {
-        await breaker.fire().catch(() => {});
+        await breaker.fire().catch(() => {
+          /* expected */
+        });
       }
       await wait(100);
       expect(breaker.opened).toBe(true);
@@ -628,11 +678,15 @@ test.describe("Circuit Breaker Integration Tests", () => {
 
       // Simulate intermittent failures (not enough to open circuit)
       control.shouldFail = true;
-      await breaker.fire().catch(() => {}); // Fail
+      await breaker.fire().catch(() => {
+        /* expected */
+      }); // Fail
       control.shouldFail = false;
       await breaker.fire(); // Success
       control.shouldFail = true;
-      await breaker.fire().catch(() => {}); // Fail
+      await breaker.fire().catch(() => {
+        /* expected */
+      }); // Fail
       control.shouldFail = false;
       await breaker.fire(); // Success
       await breaker.fire(); // Success
@@ -658,9 +712,11 @@ test.describe("Circuit Breaker Integration Tests", () => {
 
       // Rapid successive failures
       control.shouldFail = true;
-      const promises = new Array(20)
-        .fill(0)
-        .map(() => breaker.fire().catch(() => {}));
+      const promises = new Array(20).fill(0).map(() =>
+        breaker.fire().catch(() => {
+          /* expected */
+        })
+      );
 
       await Promise.all(promises);
       await wait(100);
@@ -686,7 +742,9 @@ test.describe("Circuit Breaker Integration Tests", () => {
 
       // First wave of failures (opens circuit)
       for (let i = 0; i < 10; i++) {
-        await breaker.fire().catch(() => {});
+        await breaker.fire().catch(() => {
+          /* expected */
+        });
       }
       await wait(100);
 
@@ -697,7 +755,9 @@ test.describe("Circuit Breaker Integration Tests", () => {
       // Second wave - should be rejected immediately (protecting system)
       const startTime = Date.now();
       for (let i = 0; i < 100; i++) {
-        await breaker.fire().catch(() => {});
+        await breaker.fire().catch(() => {
+          /* expected */
+        });
       }
       const elapsed = Date.now() - startTime;
 

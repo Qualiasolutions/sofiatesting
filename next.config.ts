@@ -54,6 +54,7 @@ const nextConfig: NextConfig = {
   generateEtags: false,
 
   // Security headers for all routes
+  // biome-ignore lint/suspicious/useAwait: Next.js headers config requires async
   headers: async () => {
     return [
       {

@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Sofia AI Features", () => {
-  test.beforeEach(async ({ page, context }) => {
+  test.beforeEach(async ({ context }) => {
     // Set access cookie
     await context.addCookies([
       {

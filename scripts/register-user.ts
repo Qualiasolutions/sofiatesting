@@ -6,7 +6,11 @@ import { genSaltSync, hashSync } from "bcrypt-ts";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-async function registerUser(email: string, password: string, _name?: string) {
+async function registerUser(
+  userEmail: string,
+  userPassword: string,
+  _name?: string
+) {
   const connectionString = process.env.POSTGRES_URL;
 
   if (!connectionString) {
@@ -18,27 +22,27 @@ async function registerUser(email: string, password: string, _name?: string) {
   const db = drizzle(client);
 
   try {
-    console.log(`🔍 Checking if user ${email} exists...`);
+    console.log(`🔍 Checking if user ${userEmail} exists...`);
 
     // Check if user already exists
     const existingUsers: any[] =
-      await client`SELECT * FROM "User" WHERE email = ${email} LIMIT 1`;
+      await client`SELECT * FROM "User" WHERE email = ${userEmail} LIMIT 1`;
 
     if (existingUsers.length > 0) {
-      console.log(`⚠️  User ${email} already exists!`);
+      console.log(`⚠️  User ${userEmail} already exists!`);
       console.log(`   User ID: ${existingUsers[0].id}`);
       console.log(`   Created: ${existingUsers[0].createdAt}`);
 
       // Ask if we should update password
       console.log("\n🔐 Updating password...");
       const salt = genSaltSync(10);
-      const hashedPassword = hashSync(password, salt);
+      const hashedPassword = hashSync(userPassword, salt);
 
       await db.execute(
         postgres.sql`
           UPDATE "User"
           SET password = ${hashedPassword}
-          WHERE email = ${email}
+          WHERE email = ${userEmail}
         `
       );
 
@@ -51,13 +55,13 @@ async function registerUser(email: string, password: string, _name?: string) {
 
     // Hash password
     const salt = genSaltSync(10);
-    const hashedPassword = hashSync(password, salt);
+    const hashedPassword = hashSync(userPassword, salt);
 
     // Create user
     const result: any[] = await db.execute(
       postgres.sql`
         INSERT INTO "User" (id, email, password)
-        VALUES (gen_random_uuid(), ${email}, ${hashedPassword})
+        VALUES (gen_random_uuid(), ${userEmail}, ${hashedPassword})
         RETURNING id, email, "createdAt"
       `
     );

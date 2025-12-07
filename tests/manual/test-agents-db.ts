@@ -34,9 +34,9 @@ async function testAgentsDatabase() {
       .groupBy(zyprusAgent.region)
       .orderBy(sql`count(*) DESC`);
 
-    byRegion.forEach((r) => {
+    for (const r of byRegion) {
       console.log(`   ${r.region}: ${r.count} agents`);
-    });
+    }
     console.log();
 
     // Test 3: Count by role
@@ -50,9 +50,9 @@ async function testAgentsDatabase() {
       .groupBy(zyprusAgent.role)
       .orderBy(sql`count(*) DESC`);
 
-    byRole.forEach((r) => {
+    for (const r of byRole) {
       console.log(`   ${r.role}: ${r.count} agents`);
-    });
+    }
     console.log();
 
     // Test 4: Check CEO

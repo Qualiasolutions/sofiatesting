@@ -9,19 +9,19 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { adminUserRole, user } from "@/lib/db/schema";
 
-async function createAdminUser(email: string) {
+async function createAdminUser(userEmail: string) {
   try {
-    console.log(`🔍 Looking for user with email: ${email}`);
+    console.log(`🔍 Looking for user with email: ${userEmail}`);
 
     // Find user by email
     const existingUser = await db
       .select()
       .from(user)
-      .where(eq(user.email, email))
+      .where(eq(user.email, userEmail))
       .limit(1);
 
     if (!existingUser || existingUser.length === 0) {
-      console.error(`❌ User with email ${email} not found.`);
+      console.error(`❌ User with email ${userEmail} not found.`);
       console.log("\n💡 Please register an account first at /register");
       process.exit(1);
     }

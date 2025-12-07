@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import * as XLSX from "xlsx";
+import { read, utils } from "xlsx";
 import { zyprusAgent } from "../lib/db/schema";
 
 // Load environment variables
@@ -54,9 +54,9 @@ function generateInviteToken(): string {
   return randomBytes(32).toString("hex");
 }
 
-async function seedAgents(excelPath: string) {
+async function seedAgents(sourceExcelPath: string) {
   console.log("🚀 Starting Zyprus Agent Import");
-  console.log(`📄 Reading Excel file: ${excelPath}\n`);
+  console.log(`📄 Reading Excel file: ${sourceExcelPath}\n`);
 
   // Create database connection
   if (!process.env.POSTGRES_URL) {
@@ -68,10 +68,10 @@ async function seedAgents(excelPath: string) {
 
   try {
     // Read Excel file
-    const workbook = XLSX.readFile(excelPath);
+    const workbook = read(sourceExcelPath, { type: "file" });
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    const rawData = XLSX.utils.sheet_to_json<AgentRow>(worksheet);
+    const rawData = utils.sheet_to_json<AgentRow>(worksheet);
 
     console.log(`📊 Found ${rawData.length} agents in Excel file\n`);
 
@@ -104,11 +104,11 @@ async function seedAgents(excelPath: string) {
     );
 
     console.log("📍 Regional Breakdown:");
-    Object.entries(regionCounts)
-      .sort(([, a], [, b]) => b - a)
-      .forEach(([region, count]) => {
-        console.log(`   ${region}: ${count} agents`);
-      });
+    for (const [region, count] of Object.entries(regionCounts).sort(
+      ([, a], [, b]) => b - a
+    )) {
+      console.log(`   ${region}: ${count} agents`);
+    }
 
     // Role breakdown
     const roleCounts = agents.reduce(
@@ -120,11 +120,11 @@ async function seedAgents(excelPath: string) {
     );
 
     console.log("\n👥 Role Breakdown:");
-    Object.entries(roleCounts)
-      .sort(([, a], [, b]) => b - a)
-      .forEach(([role, count]) => {
-        console.log(`   ${role}: ${count} agents`);
-      });
+    for (const [role, count] of Object.entries(roleCounts).sort(
+      ([, a], [, b]) => b - a
+    )) {
+      console.log(`   ${role}: ${count} agents`);
+    }
 
     console.log("\n💾 Inserting agents into database...");
 

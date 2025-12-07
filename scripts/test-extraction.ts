@@ -12,17 +12,15 @@
 // We will print "Test script loaded successfully" and exit.
 // Real integration testing would require a real API key or a sophisticated mock.
 
-async function runTest() {
+function runTest() {
   console.log("Test script loaded successfully.");
   console.log("Verifying imports...");
 
   try {
-    const { DeveloperRegistrationSchema } = require("../lib/ai/schemas");
+    require("../lib/ai/schemas");
     console.log("Schemas imported successfully.");
 
-    const {
-      extractDeveloperRegistration,
-    } = require("../lib/ai/template-manager");
+    require("../lib/ai/template-manager");
     console.log("Template manager imported successfully.");
 
     console.log("All checks passed!");

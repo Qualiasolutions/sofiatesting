@@ -15,7 +15,7 @@ const _schema = {
   },
 };
 
-async function createAdmin(email: string) {
+async function createAdmin(userEmail: string) {
   const connectionString = process.env.POSTGRES_URL;
 
   if (!connectionString) {
@@ -27,15 +27,15 @@ async function createAdmin(email: string) {
   const db = drizzle(client);
 
   try {
-    console.log(`🔍 Looking for user with email: ${email}`);
+    console.log(`🔍 Looking for user with email: ${userEmail}`);
 
     // Find user
     const users: any[] = await db.execute(
-      postgres.typed`SELECT * FROM "User" WHERE email = ${email} LIMIT 1`
+      postgres.typed`SELECT * FROM "User" WHERE email = ${userEmail} LIMIT 1`
     );
 
     if (users.length === 0) {
-      console.error(`❌ User with email ${email} not found.`);
+      console.error(`❌ User with email ${userEmail} not found.`);
       console.log("\n💡 Please register an account first at:");
       console.log("   https://sofiatesting.vercel.app/register");
       await client.end();

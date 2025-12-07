@@ -478,8 +478,9 @@ export async function findPropertyStatusByName(
 
   const searchName = name.toLowerCase().trim();
 
-  if (cache.propertyStatus.has(searchName)) {
-    return cache.propertyStatus.get(searchName)!;
+  const exactMatch = cache.propertyStatus.get(searchName);
+  if (exactMatch) {
+    return exactMatch;
   }
 
   // Partial match
@@ -505,8 +506,9 @@ export async function findListingTypeByName(
 
   const searchName = name.toLowerCase().trim();
 
-  if (cache.listingTypes.has(searchName)) {
-    return cache.listingTypes.get(searchName)!;
+  const exactMatch = cache.listingTypes.get(searchName);
+  if (exactMatch) {
+    return exactMatch;
   }
 
   // Partial match
@@ -607,6 +609,6 @@ export async function getAllListingTypes(): Promise<
 /**
  * Check if cache has data (even if stale)
  */
-export async function hasCacheData(): Promise<boolean> {
+export function hasCacheData(): boolean {
   return globalCache.lastUpdated > 0;
 }
