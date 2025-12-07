@@ -12,7 +12,11 @@ import {
 import Papa from "papaparse";
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import * as XLSX from "xlsx";
+import { read as xlsxRead, utils as xlsxUtils } from "xlsx";
+
+// Top-level regex for email validation (performance optimization)
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -80,7 +84,7 @@ export function ImportAgentsModal({
   const [importing, setImporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const autoMapColumns = useCallback((headers: string[]) => {
+  const autoMapColumns = useCallback((headersList: string[]) => {
     const mapping: ColumnMapping = {
       fullName: null,
       email: null,
@@ -89,7 +93,7 @@ export function ImportAgentsModal({
       role: null,
     };
 
-    headers.forEach((header) => {
+    for (const header of headersList) {
       const lower = header.toLowerCase();
       if (lower.includes("name") || lower.includes("full")) {
         mapping.fullName = header;
@@ -114,24 +118,24 @@ export function ImportAgentsModal({
       ) {
         mapping.role = header;
       }
-    });
+    }
 
     setColumnMapping(mapping);
   }, []);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0];
-      if (!file) {
+      const selectedFile = acceptedFiles[0];
+      if (!selectedFile) {
         return;
       }
 
-      setFile(file);
+      setFile(selectedFile);
       setError(null);
 
       // Parse file
-      if (file.name.endsWith(".csv")) {
-        Papa.parse(file, {
+      if (selectedFile.name.endsWith(".csv")) {
+        Papa.parse(selectedFile, {
           header: true,
           skipEmptyLines: true,
           complete: (results) => {
@@ -140,19 +144,22 @@ export function ImportAgentsModal({
             autoMapColumns(results.meta.fields || []);
             setStep(2);
           },
-          error: (error) => {
-            setError(`Failed to parse CSV: ${error.message}`);
+          error: (parseError) => {
+            setError(`Failed to parse CSV: ${parseError.message}`);
           },
         });
-      } else if (file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
+      } else if (
+        selectedFile.name.endsWith(".xlsx") ||
+        selectedFile.name.endsWith(".xls")
+      ) {
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
             const data = e.target?.result;
-            const workbook = XLSX.read(data, { type: "binary" });
+            const workbook = xlsxRead(data, { type: "binary" });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
-            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+            const jsonData = xlsxUtils.sheet_to_json(worksheet, { header: 1 });
 
             if (jsonData.length < 2) {
               setError(
@@ -161,24 +168,24 @@ export function ImportAgentsModal({
               return;
             }
 
-            const headers = jsonData[0] as string[];
+            const excelHeaders = jsonData[0] as string[];
             const rows = jsonData.slice(1).map((row: any) => {
               const obj: any = {};
-              headers.forEach((header, index) => {
+              for (const [index, header] of excelHeaders.entries()) {
                 obj[header] = row[index];
-              });
+              }
               return obj;
             });
 
-            setHeaders(headers);
+            setHeaders(excelHeaders);
             setRawData(rows);
-            autoMapColumns(headers);
+            autoMapColumns(excelHeaders);
             setStep(2);
-          } catch (error) {
-            setError(`Failed to parse Excel file: ${error}`);
+          } catch (excelError) {
+            setError(`Failed to parse Excel file: ${excelError}`);
           }
         };
-        reader.readAsBinaryString(file);
+        reader.readAsBinaryString(selectedFile);
       } else {
         setError("Unsupported file type. Please upload CSV or Excel file.");
       }
@@ -245,7 +252,7 @@ export function ImportAgentsModal({
       }
       if (!agent.email) {
         errors.push("Email is required");
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(agent.email)) {
+      } else if (!EMAIL_REGEX.test(agent.email)) {
         errors.push("Invalid email format");
       }
       if (!agent.region) {
@@ -298,8 +305,8 @@ export function ImportAgentsModal({
       onSuccess();
       onOpenChange(false);
       resetModal();
-    } catch (error: any) {
-      setError(error.message || "Failed to import agents");
+    } catch (importError: any) {
+      setError(importError.message || "Failed to import agents");
     } finally {
       setImporting(false);
     }
@@ -590,8 +597,11 @@ export function ImportAgentsModal({
                   </tr>
                 </thead>
                 <tbody>
-                  {parsedAgents.map((agent, index) => (
-                    <tr className="border-t" key={index}>
+                  {parsedAgents.map((agent) => (
+                    <tr
+                      className="border-t"
+                      key={agent.email || agent.fullName}
+                    >
                       <td className="p-2">{agent.fullName}</td>
                       <td className="p-2">{agent.email}</td>
                       <td className="p-2">{agent.region}</td>

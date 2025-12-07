@@ -239,7 +239,7 @@ export class WhatsAppClient {
     let current = "";
 
     for (const paragraph of text.split("\n\n")) {
-      if ((current + "\n\n" + paragraph).length > MAX_LENGTH) {
+      if (`${current}\n\n${paragraph}`.length > MAX_LENGTH) {
         if (current) {
           chunks.push(current.trim());
         }
@@ -248,14 +248,18 @@ export class WhatsAppClient {
           const sentences = paragraph.match(/[^.!?]+[.!?]+/g) || [paragraph];
           let sentenceChunk = "";
           for (const sentence of sentences) {
-            if ((sentenceChunk + " " + sentence).length > MAX_LENGTH) {
-              if (sentenceChunk) chunks.push(sentenceChunk.trim());
+            if (`${sentenceChunk} ${sentence}`.length > MAX_LENGTH) {
+              if (sentenceChunk) {
+                chunks.push(sentenceChunk.trim());
+              }
               sentenceChunk = sentence;
             } else {
               sentenceChunk += (sentenceChunk ? " " : "") + sentence;
             }
           }
-          if (sentenceChunk) chunks.push(sentenceChunk.trim());
+          if (sentenceChunk) {
+            chunks.push(sentenceChunk.trim());
+          }
           current = "";
         } else {
           current = paragraph;

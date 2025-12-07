@@ -180,7 +180,9 @@ export default function AdminListingsPage() {
           size="sm"
           variant="outline"
         >
-          <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+          <RefreshCw
+            className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+          />
           Refresh
         </Button>
       </div>
@@ -188,7 +190,9 @@ export default function AdminListingsPage() {
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
+            <CardTitle className="font-medium text-sm">
+              Pending Review
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
@@ -199,7 +203,7 @@ export default function AdminListingsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Uploaded</CardTitle>
+            <CardTitle className="font-medium text-sm">Uploaded</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
@@ -210,7 +214,7 @@ export default function AdminListingsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total</CardTitle>
+            <CardTitle className="font-medium text-sm">Total</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
@@ -303,18 +307,19 @@ export default function AdminListingsPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {listing.swimmingPool && listing.swimmingPool !== "none" && (
-                          <Badge variant="outline" className="text-xs">
-                            🏊 {listing.swimmingPool}
-                          </Badge>
-                        )}
+                        {listing.swimmingPool &&
+                          listing.swimmingPool !== "none" && (
+                            <Badge className="text-xs" variant="outline">
+                              🏊 {listing.swimmingPool}
+                            </Badge>
+                          )}
                         {listing.hasParking && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge className="text-xs" variant="outline">
                             🅿️ Parking
                           </Badge>
                         )}
                         {listing.hasAirConditioning && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge className="text-xs" variant="outline">
                             ❄️ AC
                           </Badge>
                         )}
@@ -328,7 +333,10 @@ export default function AdminListingsPage() {
                         })}
                       </div>
                       <div className="text-muted-foreground text-xs">
-                        via {listing.userEmail?.startsWith("guest-") ? "Telegram" : "Web"}
+                        via{" "}
+                        {listing.userEmail?.startsWith("guest-")
+                          ? "Telegram"
+                          : "Web"}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
@@ -348,9 +356,11 @@ export default function AdminListingsPage() {
                       )}
                       {listing.zyprusListingUrl && (
                         <Button
-                          onClick={() =>
-                            window.open(listing.zyprusListingUrl!, "_blank")
-                          }
+                          onClick={() => {
+                            if (listing.zyprusListingUrl) {
+                              window.open(listing.zyprusListingUrl, "_blank");
+                            }
+                          }}
                           size="sm"
                           variant="outline"
                         >

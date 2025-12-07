@@ -2,7 +2,7 @@ import { Brain, CheckCircle2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export async function AIGatewayStatus() {
+export function AIGatewayStatus() {
   const hasAIGatewayKey = !!process.env.AI_GATEWAY_API_KEY;
 
   // AI Gateway is MANDATORY - application won't work without it

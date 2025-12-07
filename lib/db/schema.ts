@@ -669,7 +669,9 @@ export const telegramGroup = pgTable(
     isActive: boolean("isActive").notNull().default(true),
     leadRoutingEnabled: boolean("leadRoutingEnabled").notNull().default(true),
     defaultForwardTo: uuid("defaultForwardTo").references(() => zyprusAgent.id), // Default agent to forward leads
-    alternateForwardTo: uuid("alternateForwardTo").references(() => zyprusAgent.id), // Alternate agent (for rotation)
+    alternateForwardTo: uuid("alternateForwardTo").references(
+      () => zyprusAgent.id
+    ), // Alternate agent (for rotation)
     lastMessageAt: timestamp("lastMessageAt"),
     createdAt: timestamp("createdAt").notNull().defaultNow(),
     updatedAt: timestamp("updatedAt").notNull().defaultNow(),
@@ -708,7 +710,9 @@ export const telegramLead = pgTable(
     clientEmail: varchar("clientEmail", { length: 256 }),
     clientLanguage: varchar("clientLanguage", { length: 20 }), // russian, english, greek, etc.
     // Forwarding information
-    forwardedToAgentId: uuid("forwardedToAgentId").references(() => zyprusAgent.id),
+    forwardedToAgentId: uuid("forwardedToAgentId").references(
+      () => zyprusAgent.id
+    ),
     forwardedToTelegramId: bigint("forwardedToTelegramId", { mode: "number" }),
     forwardedToName: varchar("forwardedToName", { length: 256 }),
     forwardedMessageId: varchar("forwardedMessageId", { length: 64 }), // ID of forwarded message
@@ -726,11 +730,19 @@ export const telegramLead = pgTable(
     updatedAt: timestamp("updatedAt").notNull().defaultNow(),
   },
   (table) => ({
-    sourceGroupIdIdx: index("TelegramLead_sourceGroupId_idx").on(table.sourceGroupId),
-    propertyRefIdx: index("TelegramLead_propertyReferenceId_idx").on(table.propertyReferenceId),
-    forwardedToIdx: index("TelegramLead_forwardedToAgentId_idx").on(table.forwardedToAgentId),
+    sourceGroupIdIdx: index("TelegramLead_sourceGroupId_idx").on(
+      table.sourceGroupId
+    ),
+    propertyRefIdx: index("TelegramLead_propertyReferenceId_idx").on(
+      table.propertyReferenceId
+    ),
+    forwardedToIdx: index("TelegramLead_forwardedToAgentId_idx").on(
+      table.forwardedToAgentId
+    ),
     statusIdx: index("TelegramLead_status_idx").on(table.status),
-    createdAtIdx: index("TelegramLead_createdAt_idx").on(table.createdAt.desc()),
+    createdAtIdx: index("TelegramLead_createdAt_idx").on(
+      table.createdAt.desc()
+    ),
     // Composite index for agent lead queries
     agentStatusIdx: index("TelegramLead_agent_status_idx").on(
       table.forwardedToAgentId,
@@ -752,7 +764,9 @@ export const leadForwardingRotation = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     region: varchar("region", { length: 50 }).notNull().unique(), // limassol, paphos, etc.
-    lastForwardedToAgentId: uuid("lastForwardedToAgentId").references(() => zyprusAgent.id),
+    lastForwardedToAgentId: uuid("lastForwardedToAgentId").references(
+      () => zyprusAgent.id
+    ),
     forwardCount: integer("forwardCount").notNull().default(0),
     updatedAt: timestamp("updatedAt").notNull().defaultNow(),
   },
@@ -761,6 +775,8 @@ export const leadForwardingRotation = pgTable(
   })
 );
 
-export type LeadForwardingRotation = InferSelectModel<typeof leadForwardingRotation>;
+export type LeadForwardingRotation = InferSelectModel<
+  typeof leadForwardingRotation
+>;
 
 export type { InferInsertModel } from "drizzle-orm";

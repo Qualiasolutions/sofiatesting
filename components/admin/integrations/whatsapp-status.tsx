@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export async function WhatsAppStatus() {
+export function WhatsAppStatus() {
   // Check if WaSenderAPI is configured
   const isConfigured = !!(
     process.env.WASENDER_API_KEY && process.env.WASENDER_INSTANCE_ID

@@ -10,12 +10,15 @@ type SlideContent = {
   content: string;
 };
 
-interface ScoredSlide extends SlideContent {
+type ScoredSlide = SlideContent & {
   score: number;
-}
+};
 
 // Cache the parsed slides content to avoid reading file multiple times
 let cachedSlides: SlideContent[] | null = null;
+
+// Top-level regex pattern for whitespace splitting
+const WHITESPACE_SPLIT_PATTERN = /\s+/;
 
 // Cyprus real estate domain-specific synonyms for better search recall
 const SYNONYMS: Record<string, string[]> = {
@@ -57,13 +60,13 @@ function parseSlidesContent(): SlideContent[] {
       /<!-- Slide (\d+):.*?-->[\s\S]*?<div class="slide(?: active)?">[\s\S]*?<div class="slide-counter">(\d+) \/ 36<\/div>[\s\S]*?<div class="slide-header">[\s\S]*?<div class="slide-title">(.*?)<\/div>([\s\S]*?<div class="slide-subtitle">(.*?)<\/div>)?[\s\S]*?<div class="slide-content">([\s\S]*?)<\/div>[\s\S]*?<\/div>/g;
 
     const slides: SlideContent[] = [];
-    let match;
 
-    while ((match = slideRegex.exec(htmlContent)) !== null) {
-      const slideNumber = Number.parseInt(match[1], 10);
-      const title = match[3].trim();
-      const subtitle = match[5] ? match[5].trim() : undefined;
-      let content = match[6].trim();
+    // Use matchAll for cleaner iteration pattern
+    for (const slideMatch of htmlContent.matchAll(slideRegex)) {
+      const slideNumber = Number.parseInt(slideMatch[1], 10);
+      const title = slideMatch[3].trim();
+      const subtitle = slideMatch[5] ? slideMatch[5].trim() : undefined;
+      let content = slideMatch[6].trim();
 
       // Clean up HTML content and convert to plain text
       // We want to preserve the text structure but remove HTML tags
@@ -150,7 +153,7 @@ function expandQueryWithSynonyms(query: string): string[] {
   const expandedTerms = new Set<string>([queryLower]);
 
   // Add synonyms for each word in the query
-  const words = queryLower.split(/\s+/);
+  const words = queryLower.split(WHITESPACE_SPLIT_PATTERN);
   for (const word of words) {
     expandedTerms.add(word);
     if (SYNONYMS[word]) {
@@ -237,7 +240,7 @@ export const getGeneralKnowledge = tool({
       .optional()
       .describe("Optional specific slide number to retrieve (1-36)"),
   }),
-  execute: async ({ query, slideNumber }) => {
+  execute: ({ query, slideNumber }) => {
     try {
       const slides = parseSlidesContent();
 

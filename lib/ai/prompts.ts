@@ -39,7 +39,7 @@ const loadCyprusKnowledge = unstable_cache(
  * This maintains the original behavior with all 42 templates in a single document
  */
 
-async function loadSophiaInstructionsUncached(): Promise<string> {
+function loadSophiaInstructionsUncached(): string {
   const basePath = join(
     process.cwd(),
     "docs/knowledge/sophia-ai-assistant-instructions.md"
@@ -73,7 +73,7 @@ async function loadSophiaInstructionsUncached(): Promise<string> {
 
 // Cache base instructions for 24 hours - v7: viewing form 2 people explicit example
 const loadSophiaInstructions = unstable_cache(
-  loadSophiaInstructionsUncached,
+  async () => loadSophiaInstructionsUncached(),
   ["sophia-base-prompt-v7"],
   {
     revalidate: 86_400, // 24 hours in seconds

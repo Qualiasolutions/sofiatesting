@@ -120,6 +120,9 @@ export async function handleWhatsAppMessage(
         case "seller_registration":
           extractedData = await extractSellerRegistration(userMessage);
           break;
+        default:
+          // Other intents handled by main chat model
+          break;
       }
     }
 

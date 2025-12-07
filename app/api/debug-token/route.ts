@@ -12,14 +12,14 @@ export async function GET() {
       );
       const data = await response.json();
       isValid = data.ok === true;
-    } catch (error) {
+    } catch (_error) {
       // ignore
     }
   }
 
   return NextResponse.json({
     hasToken: !!token,
-    tokenPrefix: token ? token.substring(0, 20) + "..." : "none",
+    tokenPrefix: token ? `${token.substring(0, 20)}...` : "none",
     tokenLength: token?.length || 0,
     isValid,
   });

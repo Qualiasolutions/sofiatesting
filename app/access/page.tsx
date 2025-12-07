@@ -9,9 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const ACCESS_CODE = "the8thchakra";
 const ACCESS_COOKIE_NAME = "qualia-access";
-const ACCESS_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24;
 
 export default function AccessPage() {
   const [code, setCode] = useState("");
@@ -22,38 +20,27 @@ export default function AccessPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    if (code === ACCESS_CODE) {
-      const expires = Date.now() + ACCESS_COOKIE_MAX_AGE_SECONDS * 1000;
-      const browserWindow = window as typeof window & {
-        cookieStore?: {
-          set?: (options: {
-            name: string;
-            value: string;
-            expires?: number | Date;
-            path?: string;
-            sameSite?: "strict" | "lax" | "none";
-          }) => Promise<void>;
-        };
-      };
+    try {
+      const response = await fetch("/api/access/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
 
-      if (browserWindow.cookieStore?.set) {
-        await browserWindow.cookieStore.set({
-          name: ACCESS_COOKIE_NAME,
-          value: "granted",
-          expires,
-          path: "/",
-          sameSite: "lax",
-        });
+      if (response.ok) {
+        toast.success("Access granted! Welcome to Qualia AI Agents Suite™");
+        router.push("/");
+      } else if (response.status === 429) {
+        toast.error(
+          "Too many failed attempts. Please try again in 15 minutes."
+        );
+        setCode("");
       } else {
-        /* biome-ignore lint/suspicious/noDocumentCookie: CookieStore API fallback */
-        document.cookie = `${ACCESS_COOKIE_NAME}=granted; path=/; max-age=${ACCESS_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
+        toast.error("Invalid access code. Please try again.");
+        setCode("");
       }
-
-      toast.success("Access granted! Welcome to Qualia AI Agents Suite™");
-      router.push("/");
-    } else {
-      toast.error("Invalid access code. Please try again.");
-      setCode("");
+    } catch {
+      toast.error("Network error. Please try again.");
     }
 
     setIsLoading(false);

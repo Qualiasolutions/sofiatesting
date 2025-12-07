@@ -115,7 +115,7 @@ export async function POST(request: Request): Promise<Response> {
  * GET - Webhook verification endpoint
  * Used by WaSenderAPI to verify webhook URL is accessible
  */
-export async function GET(): Promise<Response> {
+export function GET(): Response {
   return NextResponse.json({
     status: "active",
     service: "SOFIA WhatsApp Integration",

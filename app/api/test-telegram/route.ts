@@ -22,7 +22,7 @@ export async function GET() {
 
     return NextResponse.json({
       tokenLength: token.length,
-      tokenPrefix: token.substring(0, 20) + "...",
+      tokenPrefix: `${token.substring(0, 20)}...`,
       botInfo: meData,
       webhookInfo: webhookData,
     });

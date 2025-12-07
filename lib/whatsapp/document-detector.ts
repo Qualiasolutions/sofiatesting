@@ -8,6 +8,15 @@
  * EMAILS/COMMUNICATIONS (Templates 17-43) → Send as plain text
  */
 
+// Top-level regex patterns for document type detection (performance optimization)
+const SELLER_REGISTRATION_PATTERN = /Seller\s*Registration/i;
+const BANK_REGISTRATION_PATTERN = /Bank\s*(Property|Land)\s*Registration/i;
+const DEVELOPER_REGISTRATION_PATTERN = /Developer\s*Registration/i;
+const VIEWING_FORM_PATTERN = /Viewing\s*Form/i;
+const PROPERTY_VIEWING_PATTERN = /Property\s*Viewing/i;
+const RESERVATION_PATTERN = /Reservation/i;
+const MARKETING_AGREEMENT_PATTERN = /Marketing\s*Agreement/i;
+
 // Form templates that should be sent as .docx documents
 const FORM_TEMPLATE_PATTERNS = [
   // Templates 01-04: Seller Registrations
@@ -91,26 +100,26 @@ export function shouldSendAsDocument(response: string): boolean {
  * Used for naming the generated .docx file
  */
 export function getDocumentType(response: string): string {
-  // Check specific patterns in priority order
-  if (/Seller\s*Registration/i.test(response)) {
+  // Check specific patterns in priority order (using top-level patterns)
+  if (SELLER_REGISTRATION_PATTERN.test(response)) {
     return "SellerRegistration";
   }
-  if (/Bank\s*(Property|Land)\s*Registration/i.test(response)) {
+  if (BANK_REGISTRATION_PATTERN.test(response)) {
     return "BankRegistration";
   }
-  if (/Developer\s*Registration/i.test(response)) {
+  if (DEVELOPER_REGISTRATION_PATTERN.test(response)) {
     return "DeveloperRegistration";
   }
-  if (/Viewing\s*Form/i.test(response)) {
+  if (VIEWING_FORM_PATTERN.test(response)) {
     return "ViewingForm";
   }
-  if (/Property\s*Viewing/i.test(response)) {
+  if (PROPERTY_VIEWING_PATTERN.test(response)) {
     return "ViewingForm";
   }
-  if (/Reservation/i.test(response)) {
+  if (RESERVATION_PATTERN.test(response)) {
     return "Reservation";
   }
-  if (/Marketing\s*Agreement/i.test(response)) {
+  if (MARKETING_AGREEMENT_PATTERN.test(response)) {
     return "MarketingAgreement";
   }
 

@@ -22,9 +22,7 @@ async function getAccessToken(): Promise<string> {
   const clientSecret = process.env.ZYPRUS_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    throw new Error(
-      "ZYPRUS_CLIENT_ID or ZYPRUS_CLIENT_SECRET not configured"
-    );
+    throw new Error("ZYPRUS_CLIENT_ID or ZYPRUS_CLIENT_SECRET not configured");
   }
 
   console.log(`\nGetting OAuth token from ${apiUrl}/oauth/token...`);
@@ -75,17 +73,21 @@ async function testEndpoint(
         status: response.status,
         ok: true,
         data: Array.isArray(data.data)
-          ? { count: data.data.length, sample: data.data[0]?.attributes?.name || data.data[0]?.attributes?.title }
+          ? {
+              count: data.data.length,
+              sample:
+                data.data[0]?.attributes?.name ||
+                data.data[0]?.attributes?.title,
+            }
           : data,
       };
-    } else {
-      const errorText = await response.text();
-      return {
-        status: response.status,
-        ok: false,
-        error: errorText.slice(0, 200),
-      };
     }
+    const errorText = await response.text();
+    return {
+      status: response.status,
+      ok: false,
+      error: errorText.slice(0, 200),
+    };
   } catch (error) {
     return {
       status: 0,
@@ -103,7 +105,9 @@ async function main() {
   const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
   console.log(`\nAPI URL: ${apiUrl}`);
   console.log(`Client ID: ${process.env.ZYPRUS_CLIENT_ID ? "Set" : "Missing"}`);
-  console.log(`Client Secret: ${process.env.ZYPRUS_CLIENT_SECRET ? "Set" : "Missing"}`);
+  console.log(
+    `Client Secret: ${process.env.ZYPRUS_CLIENT_SECRET ? "Set" : "Missing"}`
+  );
 
   // Get OAuth token
   let token: string;
@@ -115,7 +119,7 @@ async function main() {
   }
 
   // Test JSON:API root to see available resources
-  console.log("\n" + "=".repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
   console.log("TESTING JSON:API ROOT ENDPOINT");
   console.log("=".repeat(60));
 
@@ -127,13 +131,17 @@ async function main() {
     const availableResources = Object.keys(links).filter(
       (key) => key !== "self" && key !== "meta"
     );
-    console.log(`\nAvailable JSON:API resources (${availableResources.length} total):`);
+    console.log(
+      `\nAvailable JSON:API resources (${availableResources.length} total):`
+    );
 
     // Filter to show taxonomy and node resources
     const taxonomyResources = availableResources.filter((r) =>
       r.includes("taxonomy_term")
     );
-    const nodeResources = availableResources.filter((r) => r.includes("node--"));
+    const nodeResources = availableResources.filter((r) =>
+      r.includes("node--")
+    );
 
     console.log("\nNode types:");
     for (const resource of nodeResources.slice(0, 15)) {
@@ -148,11 +156,13 @@ async function main() {
       console.log(`  - ${resource}`);
     }
   } else {
-    console.log(`\n/jsonapi failed: ${rootResult.status} - ${rootResult.error}`);
+    console.log(
+      `\n/jsonapi failed: ${rootResult.status} - ${rootResult.error}`
+    );
   }
 
   // Test specific endpoints we're using
-  console.log("\n" + "=".repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
   console.log("TESTING CURRENT TAXONOMY ENDPOINTS");
   console.log("=".repeat(60));
 
@@ -175,11 +185,13 @@ async function main() {
     const info = result.ok
       ? `${result.data?.count || 0} items${result.data?.sample ? ` (e.g., "${result.data.sample}")` : ""}`
       : `${result.status} - ${result.error?.slice(0, 50)}`;
-    console.log(`[${status}] ${endpoint.replace("/jsonapi/taxonomy_term/", "")}: ${info}`);
+    console.log(
+      `[${status}] ${endpoint.replace("/jsonapi/taxonomy_term/", "")}: ${info}`
+    );
   }
 
   // Test node endpoints
-  console.log("\n" + "=".repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
   console.log("TESTING NODE ENDPOINTS");
   console.log("=".repeat(60));
 
@@ -195,10 +207,12 @@ async function main() {
     const info = result.ok
       ? `${result.data?.count || 0} items${result.data?.sample ? ` (e.g., "${result.data.sample}")` : ""}`
       : `${result.status} - ${result.error?.slice(0, 50)}`;
-    console.log(`[${status}] ${endpoint.replace("/jsonapi/node/", "")}: ${info}`);
+    console.log(
+      `[${status}] ${endpoint.replace("/jsonapi/node/", "")}: ${info}`
+    );
   }
 
-  console.log("\n" + "=".repeat(60));
+  console.log(`\n${"=".repeat(60)}`);
   console.log("TEST COMPLETE");
   console.log("=".repeat(60));
 }

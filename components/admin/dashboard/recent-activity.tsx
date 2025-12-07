@@ -9,7 +9,9 @@ type RecentActivityCardProps = {
   userId: string;
 };
 
-export async function RecentActivityCard({ userId }: RecentActivityCardProps) {
+export async function RecentActivityCard({
+  userId: _userId,
+}: RecentActivityCardProps) {
   const recentActivity = await db
     .select({
       id: adminAuditLog.id,

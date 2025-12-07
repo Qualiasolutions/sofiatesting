@@ -5,6 +5,45 @@
 
 import { getModelSpecificPrompt } from "./response-enforcer";
 
+// Top-level regex patterns for post-processing (performance optimization)
+const UNWANTED_PREFIX_HAPPY = /^I'd be happy to help[^.!]*[.!]\s*/gi;
+const UNWANTED_PREFIX_SURE = /^Sure[^.!]*[.!]\s*/gi;
+const UNWANTED_PREFIX_CERTAINLY = /^Certainly[^.!]*[.!]\s*/gi;
+const UNWANTED_PREFIX_LETME = /^Let me [^.!]*[.!]\s*/gi;
+const UNWANTED_PREFIX_ICAN = /^I can [^.!]*[.!]\s*/gi;
+const UNWANTED_PREFIX_ILL = /^I'll [^.!]*[.!]\s*/gi;
+const UNWANTED_PREFIX_HERE = /^Here is [^:]*:\s*/gi;
+const UNWANTED_PREFIX_IVE = /^I've [^.!]*[.!]\s*/gi;
+const UNWANTED_PREFIX_BASED = /^Based on [^,]*,\s*/gi;
+
+const UNWANTED_SUFFIX_WOULDYOU = /\n\nWould you like[^?]*\?$/gi;
+const UNWANTED_SUFFIX_LETMEKNOW = /\n\nLet me know[^.]*\.$/gi;
+const UNWANTED_SUFFIX_IMHERE = /\n\nI'm here[^.]*\.$/gi;
+const UNWANTED_SUFFIX_FEELFREE = /\n\nFeel free[^.]*\.$/gi;
+const UNWANTED_SUFFIX_ISTHERE = /\n\nIs there[^?]*\?$/gi;
+
+const PLEASE_PROVIDE_PATTERN = /Please provide\s+/i;
+
+// Field extraction patterns
+const CLIENT_PATTERN_1 = /(?:the )?client is ([^,.\n]+)/i;
+const CLIENT_PATTERN_2 = /([^,.\n]+) is the client/i;
+const TIME_PATTERN_TOMORROW =
+  /(?:tomorrow|today) at (\d{1,2}:?\d{0,2}(?:am|pm)?)/i;
+const TIME_PATTERN_AT = /at (\d{1,2}:?\d{0,2}(?:am|pm)?)/i;
+const TEMPLATE_DEVELOPER_PATTERN =
+  /registration developer|developer registration/i;
+const TEMPLATE_EMAIL_PATTERN = /email marketing|marketing email/i;
+const TEMPLATE_STANDARD_PATTERN = /standard registration/i;
+const TEMPLATE_BANK_PATTERN = /bank registration/i;
+const PROPERTY_REG_PATTERN = /(?:reg\.? ?no\.?|property) ?(\d+\/\d+)/i;
+const PRICE_EURO_PATTERN = /€([\d,]+)/i;
+const PRICE_WORD_PATTERN = /([\d,]+) ?(?:euro|EUR)/i;
+
+// Time conversion patterns
+const TIME_AMPM_CHECK = /am|pm/i;
+const TIME_FULL_PATTERN = /(\d{1,2}):?(\d{0,2})\s*(am|pm)/i;
+const TIME_SIMPLE_PATTERN = /(\d{1,2})\s*(am|pm)/i;
+
 /**
  * CRITICAL RESPONSE RULES
  * These override EVERYTHING else in the prompts
@@ -178,30 +217,30 @@ export function postProcessResponse(
 ): string {
   let processed = response;
 
-  // Remove common non-compliant prefixes
+  // Remove common non-compliant prefixes (using top-level patterns)
   const unwantedPrefixes = [
-    /^I'd be happy to help[^.!]*[.!]\s*/gi,
-    /^Sure[^.!]*[.!]\s*/gi,
-    /^Certainly[^.!]*[.!]\s*/gi,
-    /^Let me [^.!]*[.!]\s*/gi,
-    /^I can [^.!]*[.!]\s*/gi,
-    /^I'll [^.!]*[.!]\s*/gi,
-    /^Here is [^:]*:\s*/gi,
-    /^I've [^.!]*[.!]\s*/gi,
-    /^Based on [^,]*,\s*/gi,
+    UNWANTED_PREFIX_HAPPY,
+    UNWANTED_PREFIX_SURE,
+    UNWANTED_PREFIX_CERTAINLY,
+    UNWANTED_PREFIX_LETME,
+    UNWANTED_PREFIX_ICAN,
+    UNWANTED_PREFIX_ILL,
+    UNWANTED_PREFIX_HERE,
+    UNWANTED_PREFIX_IVE,
+    UNWANTED_PREFIX_BASED,
   ];
 
   for (const prefix of unwantedPrefixes) {
     processed = processed.replace(prefix, "");
   }
 
-  // Remove unwanted suffixes
+  // Remove unwanted suffixes (using top-level patterns)
   const unwantedSuffixes = [
-    /\n\nWould you like[^?]*\?$/gi,
-    /\n\nLet me know[^.]*\.$/gi,
-    /\n\nI'm here[^.]*\.$/gi,
-    /\n\nFeel free[^.]*\.$/gi,
-    /\n\nIs there[^?]*\?$/gi,
+    UNWANTED_SUFFIX_WOULDYOU,
+    UNWANTED_SUFFIX_LETMEKNOW,
+    UNWANTED_SUFFIX_IMHERE,
+    UNWANTED_SUFFIX_FEELFREE,
+    UNWANTED_SUFFIX_ISTHERE,
   ];
 
   for (const suffix of unwantedSuffixes) {
@@ -214,11 +253,11 @@ export function postProcessResponse(
     const fieldCount = (processed.match(/\(e\.g\.,/g) || []).length;
     if (fieldCount <= 2) {
       // Keep simple format
-      processed = processed.replace(/Please provide\s+/i, "Please provide ");
+      processed = processed.replace(PLEASE_PROVIDE_PATTERN, "Please provide ");
     } else {
       // Convert to multi-field format
       processed = processed.replace(
-        /Please provide\s+/i,
+        PLEASE_PROVIDE_PATTERN,
         "Please provide:\n\n"
       );
     }
@@ -314,42 +353,40 @@ export function extractFieldsFromUserMessage(
 ): Record<string, any> {
   const extracted: Record<string, any> = {};
 
-  // Client name extraction
+  // Client name extraction (using top-level patterns)
   const clientMatch =
-    message.match(/(?:the )?client is ([^,.\n]+)/i) ||
-    message.match(/([^,.\n]+) is the client/i);
+    message.match(CLIENT_PATTERN_1) || message.match(CLIENT_PATTERN_2);
   if (clientMatch) {
     extracted.clientName = clientMatch[1].trim();
   }
 
-  // Time extraction
+  // Time extraction (using top-level patterns)
   const timeMatch =
-    message.match(/(?:tomorrow|today) at (\d{1,2}:?\d{0,2}(?:am|pm)?)/i) ||
-    message.match(/at (\d{1,2}:?\d{0,2}(?:am|pm)?)/i);
+    message.match(TIME_PATTERN_TOMORROW) || message.match(TIME_PATTERN_AT);
   if (timeMatch) {
     extracted.viewingTime = convertTo24Hour(timeMatch[1]);
   }
 
-  // Template type extraction
-  if (/registration developer|developer registration/i.test(message)) {
+  // Template type extraction (using top-level patterns)
+  if (TEMPLATE_DEVELOPER_PATTERN.test(message)) {
     extracted.templateType = "developer_registration";
-  } else if (/email marketing|marketing email/i.test(message)) {
+  } else if (TEMPLATE_EMAIL_PATTERN.test(message)) {
     extracted.templateType = "email_marketing";
-  } else if (/standard registration/i.test(message)) {
+  } else if (TEMPLATE_STANDARD_PATTERN.test(message)) {
     extracted.templateType = "standard_seller";
-  } else if (/bank registration/i.test(message)) {
+  } else if (TEMPLATE_BANK_PATTERN.test(message)) {
     extracted.templateType = "bank_registration";
   }
 
-  // Property registration number
-  const propMatch = message.match(/(?:reg\.? ?no\.?|property) ?(\d+\/\d+)/i);
+  // Property registration number (using top-level pattern)
+  const propMatch = message.match(PROPERTY_REG_PATTERN);
   if (propMatch) {
     extracted.propertyReg = propMatch[1];
   }
 
-  // Price extraction
+  // Price extraction (using top-level patterns)
   const priceMatch =
-    message.match(/€([\d,]+)/i) || message.match(/([\d,]+) ?(?:euro|EUR)/i);
+    message.match(PRICE_EURO_PATTERN) || message.match(PRICE_WORD_PATTERN);
   if (priceMatch) {
     extracted.price = priceMatch[1];
   }
@@ -358,13 +395,13 @@ export function extractFieldsFromUserMessage(
 }
 
 function convertTo24Hour(time: string): string {
-  // Already in 24-hour format
-  if (time.includes(":") && !time.match(/am|pm/i)) {
+  // Already in 24-hour format (using top-level pattern)
+  if (time.includes(":") && !TIME_AMPM_CHECK.test(time)) {
     return time;
   }
 
-  // Convert 12-hour to 24-hour
-  const match = time.match(/(\d{1,2}):?(\d{0,2})\s*(am|pm)/i);
+  // Convert 12-hour to 24-hour (using top-level pattern)
+  const match = time.match(TIME_FULL_PATTERN);
   if (match) {
     let hours = Number.parseInt(match[1], 10);
     const minutes = match[2] || "00";
@@ -379,8 +416,8 @@ function convertTo24Hour(time: string): string {
     return `${hours.toString().padStart(2, "0")}:${minutes.padStart(2, "0")}`;
   }
 
-  // Simple number (e.g., "3pm" -> "15:00")
-  const simpleMatch = time.match(/(\d{1,2})\s*(am|pm)/i);
+  // Simple number (e.g., "3pm" -> "15:00") (using top-level pattern)
+  const simpleMatch = time.match(TIME_SIMPLE_PATTERN);
   if (simpleMatch) {
     let hours = Number.parseInt(simpleMatch[1], 10);
     const period = simpleMatch[2].toLowerCase();

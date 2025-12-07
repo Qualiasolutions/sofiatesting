@@ -21,6 +21,27 @@ import { handleGroupMessage, isGroupChat } from "./lead-router";
 import type { TelegramMessage } from "./types";
 import { getTelegramChatId, getTelegramUser } from "./user-mapping";
 
+// Top-level regex patterns for quick responses (performance optimization)
+const GREETING_PATTERN =
+  /^(hi|hello|hey|hiya|yo|sup|hola|good morning|good afternoon|good evening|morning|afternoon|evening)[\s!.,?]*$/i;
+const HOW_ARE_YOU_PATTERN =
+  /how are you|how r u|how're you|hows it going|what's up|whats up|wassup/i;
+const THANKS_PATTERN =
+  /^(thanks|thank you|thx|ty|cheers|appreciated|much appreciated)[\s!.,?]*$/i;
+const GOODBYE_PATTERN =
+  /^(bye|goodbye|see you|cya|later|take care|gtg|gotta go)[\s!.,?]*$/i;
+const HELP_PATTERN =
+  /can you help|help me|what can you do|what do you do|your capabilities|your features/i;
+const WHO_ARE_YOU_PATTERN =
+  /who are you|what are you|your name|introduce yourself/i;
+const YES_PATTERN =
+  /^(yes|yeah|yep|yup|ok|okay|sure|alright|got it|understood|k)[\s!.,?]*$/i;
+const NO_PATTERN = /^(no|nope|nah|not really|nothing)[\s!.,?]*$/i;
+const SORRY_PATTERN = /^(sorry|my bad|apologies|oops)[\s!.,?]*$/i;
+const DIGIT_PATTERN = /\d/;
+const PROPERTY_IMAGE_PATTERN = /property|listing|house|apartment|villa/i;
+const TITLE_DEED_PATTERN = /title|deed|document|pdf/i;
+
 /**
  * Handle incoming Telegram message and generate AI response
  */
@@ -93,6 +114,9 @@ export async function handleTelegramMessage(
     case "/about":
       await handleAboutCommand(chatId);
       return;
+    default:
+      // Not a known command, continue to handle as regular message
+      break;
   }
 
   // Handle quick conversational responses (no AI needed)
@@ -160,7 +184,8 @@ export async function handleTelegramMessage(
     // Generate AI response with retry mechanism
     let fullResponse = "";
     const assistantMessageId = generateUUID();
-    let result;
+    // biome-ignore lint/suspicious/noExplicitAny: Complex AI SDK generic types
+    let result: any = null;
     let retryCount = 0;
     const MAX_RETRIES = 2;
     const STREAM_TIMEOUT_MS = 45_000; // 45 seconds
@@ -368,12 +393,8 @@ async function sendTelegramMessage(
 function getQuickResponse(text: string, firstName: string): string | null {
   const msg = text.toLowerCase().trim();
 
-  // Greetings
-  if (
-    /^(hi|hello|hey|hiya|yo|sup|hola|good morning|good afternoon|good evening|morning|afternoon|evening)[\s!.,?]*$/i.test(
-      msg
-    )
-  ) {
+  // Greetings (using top-level pattern)
+  if (GREETING_PATTERN.test(msg)) {
     const greetings = [
       `Hi ${firstName}! How can I help you with Cyprus property today?`,
       "Hello! Ready to help with property calculations or documents.",
@@ -382,39 +403,23 @@ function getQuickResponse(text: string, firstName: string): string | null {
     return greetings[Math.floor(Math.random() * greetings.length)];
   }
 
-  // How are you
-  if (
-    /how are you|how r u|how're you|hows it going|what's up|whats up|wassup/i.test(
-      msg
-    )
-  ) {
+  // How are you (using top-level pattern)
+  if (HOW_ARE_YOU_PATTERN.test(msg)) {
     return `I'm great, thanks! Ready to help with Cyprus real estate. What do you need?`;
   }
 
-  // Thank you
-  if (
-    /^(thanks|thank you|thx|ty|cheers|appreciated|much appreciated)[\s!.,?]*$/i.test(
-      msg
-    )
-  ) {
+  // Thank you (using top-level pattern)
+  if (THANKS_PATTERN.test(msg)) {
     return `You're welcome! Let me know if you need anything else.`;
   }
 
-  // Goodbye
-  if (
-    /^(bye|goodbye|see you|cya|later|take care|gtg|gotta go)[\s!.,?]*$/i.test(
-      msg
-    )
-  ) {
+  // Goodbye (using top-level pattern)
+  if (GOODBYE_PATTERN.test(msg)) {
     return `Goodbye ${firstName}! Come back anytime for property help.`;
   }
 
-  // Can you help / what can you do
-  if (
-    /can you help|help me|what can you do|what do you do|your capabilities|your features/i.test(
-      msg
-    )
-  ) {
+  // Can you help / what can you do (using top-level pattern)
+  if (HELP_PATTERN.test(msg)) {
     return `I can help with:
 - VAT calculations for new properties
 - Transfer fees for purchases
@@ -424,32 +429,28 @@ function getQuickResponse(text: string, firstName: string): string | null {
 Just ask! Example: "VAT for 350000 apartment 120sqm"`;
   }
 
-  // Who are you
-  if (/who are you|what are you|your name|introduce yourself/i.test(msg)) {
+  // Who are you (using top-level pattern)
+  if (WHO_ARE_YOU_PATTERN.test(msg)) {
     return `I'm SOFIA, Zyprus Property Group's AI assistant. I help with Cyprus property taxes, fees, and documents. Ask me anything!`;
   }
 
-  // Yes/No/Ok responses
-  if (
-    /^(yes|yeah|yep|yup|ok|okay|sure|alright|got it|understood|k)[\s!.,?]*$/i.test(
-      msg
-    )
-  ) {
+  // Yes/No/Ok responses (using top-level pattern)
+  if (YES_PATTERN.test(msg)) {
     return "Great! What would you like to know about Cyprus property?";
   }
 
-  // No/Nope
-  if (/^(no|nope|nah|not really|nothing)[\s!.,?]*$/i.test(msg)) {
+  // No/Nope (using top-level pattern)
+  if (NO_PATTERN.test(msg)) {
     return `No problem! I'm here if you need property calculations or documents.`;
   }
 
-  // Sorry
-  if (/^(sorry|my bad|apologies|oops)[\s!.,?]*$/i.test(msg)) {
+  // Sorry (using top-level pattern)
+  if (SORRY_PATTERN.test(msg)) {
     return "No worries! How can I help you?";
   }
 
-  // Emoji-only or very short
-  if (msg.length <= 3 && !/\d/.test(msg)) {
+  // Emoji-only or very short (using top-level pattern)
+  if (msg.length <= 3 && !DIGIT_PATTERN.test(msg)) {
     return `Need help with Cyprus property? Try "transfer fees for 400000" or /help`;
   }
 
@@ -756,8 +757,10 @@ async function handleFileUpload(message: TelegramMessage): Promise<void> {
 
     if (message.photo && message.photo.length > 0) {
       // Get the largest photo (last in array)
-      const largestPhoto = message.photo[message.photo.length - 1];
-      fileId = largestPhoto.file_id;
+      const largestPhoto = message.photo.at(-1);
+      if (largestPhoto) {
+        fileId = largestPhoto.file_id;
+      }
       fileType = "photo";
     } else if (message.document) {
       fileId = message.document.file_id;
@@ -787,12 +790,11 @@ async function handleFileUpload(message: TelegramMessage): Promise<void> {
     // Store file temporarily or upload to Supabase Storage
     // For now, acknowledge receipt and provide instructions
     const caption = message.caption || "";
-    const isPropertyImage = /property|listing|house|apartment|villa/i.test(
-      caption
-    );
-    const isTitleDeed = /title|deed|document|pdf/i.test(caption) ||
-                        fileName?.toLowerCase().includes("deed") ||
-                        fileName?.toLowerCase().endsWith(".pdf");
+    const isPropertyImage = PROPERTY_IMAGE_PATTERN.test(caption);
+    const isTitleDeed =
+      TITLE_DEED_PATTERN.test(caption) ||
+      fileName?.toLowerCase().includes("deed") ||
+      fileName?.toLowerCase().endsWith(".pdf");
 
     let responseText: string;
 
@@ -819,24 +821,21 @@ Is this for a property listing? If so, please tell me:
 - Pool, parking, and AC status
 - Owner/agent contact details`;
       }
-    } else {
-      // Document
-      if (isTitleDeed) {
-        responseText = `Title deed document received (${fileName || "document"}).
+    } else if (isTitleDeed) {
+      responseText = `Title deed document received (${fileName || "document"}).
 
 This will be attached to your property listing. Please provide the property details if you haven't already:
 - Property type, location, size, price
 - Bedrooms, bathrooms
 - Swimming pool, parking, AC status
 - Owner name and phone number`;
-      } else {
-        responseText = `Document received (${fileName || "file"}).
+    } else {
+      responseText = `Document received (${fileName || "file"}).
 
 If this is for a property listing, please describe the property:
 - Type, location, size, price
 - Features (pool, parking, AC)
 - Owner contact details`;
-      }
     }
 
     await telegramClient.sendMessage({

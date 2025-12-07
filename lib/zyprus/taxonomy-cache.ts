@@ -236,8 +236,9 @@ export async function findLocationByName(name: string): Promise<string | null> {
   const searchName = name.toLowerCase().trim();
 
   // Exact match first
-  if (cache.locations.has(searchName)) {
-    return cache.locations.get(searchName)!;
+  const exactMatch = cache.locations.get(searchName);
+  if (exactMatch) {
+    return exactMatch;
   }
 
   // Partial match (contains)
@@ -266,8 +267,9 @@ export async function findPropertyTypeByName(
 
   const searchName = name.toLowerCase().trim();
 
-  if (cache.propertyTypes.has(searchName)) {
-    return cache.propertyTypes.get(searchName)!;
+  const exactMatch = cache.propertyTypes.get(searchName);
+  if (exactMatch) {
+    return exactMatch;
   }
 
   return null;
@@ -416,8 +418,9 @@ export async function findLandTypeByName(name: string): Promise<string | null> {
 
   const searchName = name.toLowerCase().trim();
 
-  if (cache.landTypes.has(searchName)) {
-    return cache.landTypes.get(searchName)!;
+  const exactMatch = cache.landTypes.get(searchName);
+  if (exactMatch) {
+    return exactMatch;
   }
 
   // Partial match

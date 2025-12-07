@@ -61,10 +61,10 @@ export const myProvider = isTestEnvironment
           specificationVersion: "v1",
           provider: "google",
           modelId: "error-model",
-          doGenerate: async () => {
+          doGenerate: () => {
             throw new Error("Gemini API key is not configured.");
           },
-          doStream: async () => {
+          doStream: () => {
             throw new Error("Gemini API key is not configured.");
           },
         } as any;

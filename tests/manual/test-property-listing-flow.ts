@@ -65,9 +65,9 @@ async function testPropertyListingFlow() {
     } else {
       console.log("⚠️  Could not find Nicosia/Engomi location");
       console.log("Available locations:");
-      locations
-        .slice(0, 5)
-        .forEach((loc) => console.log(`  - ${loc.name} (${loc.id})`));
+      for (const loc of locations.slice(0, 5)) {
+        console.log(`  - ${loc.name} (${loc.id})`);
+      }
     }
 
     // Find apartment property type
@@ -85,9 +85,9 @@ async function testPropertyListingFlow() {
     } else {
       console.log("⚠️  Could not find Apartment property type");
       console.log("Available property types:");
-      propertyTypes
-        .slice(0, 5)
-        .forEach((type) => console.log(`  - ${type.name} (${type.id})`));
+      for (const type of propertyTypes.slice(0, 5)) {
+        console.log(`  - ${type.name} (${type.id})`);
+      }
     }
 
     // Step 4: Create the listing with real UUIDs

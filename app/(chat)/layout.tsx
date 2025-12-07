@@ -5,7 +5,7 @@ import { DataStreamProvider } from "@/components/data-stream-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "../(auth)/auth";
 
-export const experimental_ppr = true;
+// PPR requires canary - removed for stable releases
 
 export default async function Layout({
   children,

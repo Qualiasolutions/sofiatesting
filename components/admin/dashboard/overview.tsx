@@ -13,7 +13,9 @@ type DashboardOverviewProps = {
   userId: string;
 };
 
-export async function DashboardOverview({ userId }: DashboardOverviewProps) {
+export async function DashboardOverview({
+  userId: _userId,
+}: DashboardOverviewProps) {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 

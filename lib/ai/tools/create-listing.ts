@@ -4,13 +4,13 @@ import { auth } from "@/app/(auth)/auth";
 import { getUserContext } from "@/lib/ai/context";
 import {
   createPropertyListing,
-  updateListingStatus,
   logListingUploadAttempt,
+  updateListingStatus,
 } from "@/lib/db/queries";
 import {
+  isPermanentError,
   uploadToZyprusAPI,
   ZyprusAPIError,
-  isPermanentError,
 } from "@/lib/zyprus/client";
 
 // Cyprus cities for validation
@@ -173,27 +173,35 @@ export const createListingTool = tool({
       .string()
       .min(8)
       .max(64)
-      .describe("Owner/agent phone number (REQUIRED) - for back office contact"),
+      .describe(
+        "Owner/agent phone number (REQUIRED) - for back office contact"
+      ),
     swimmingPool: z
       .enum(["private", "communal", "none"])
-      .describe("Swimming pool status (REQUIRED) - private pool, communal pool, or no pool"),
-    hasParking: z
-      .boolean()
-      .describe("Does property have parking? (REQUIRED)"),
+      .describe(
+        "Swimming pool status (REQUIRED) - private pool, communal pool, or no pool"
+      ),
+    hasParking: z.boolean().describe("Does property have parking? (REQUIRED)"),
     hasAirConditioning: z
       .boolean()
-      .describe("Does property have air conditioning or AC provisions? (REQUIRED)"),
+      .describe(
+        "Does property have air conditioning or AC provisions? (REQUIRED)"
+      ),
     // Optional additional fields
     backofficeNotes: z
       .string()
       .max(2000)
       .optional()
-      .describe("Notes for the review team - viewing schedule, tenant status, special instructions"),
+      .describe(
+        "Notes for the review team - viewing schedule, tenant status, special instructions"
+      ),
     googleMapsUrl: z
       .string()
       .url()
       .optional()
-      .describe("Google Maps link with pin on the property for exact location verification"),
+      .describe(
+        "Google Maps link with pin on the property for exact location verification"
+      ),
     verandaArea: z
       .number()
       .positive()
@@ -203,7 +211,7 @@ export const createListingTool = tool({
     plotArea: z
       .number()
       .positive()
-      .max(50000)
+      .max(50_000)
       .optional()
       .describe("Total plot size in square meters (for houses/villas)"),
   }),
@@ -436,11 +444,11 @@ ${name}
 
 The listing is now on zyprus.com as an **unpublished draft** waiting for admin review and publishing.`,
         };
-      } else {
-        return {
-          success: false,
-          listingId: listing.id,
-          error: `⚠️ **Listing Saved Locally** (Upload to Zyprus failed)
+      }
+      return {
+        success: false,
+        listingId: listing.id,
+        error: `⚠️ **Listing Saved Locally** (Upload to Zyprus failed)
 
 📋 **Property Summary**
 ${name}
@@ -450,8 +458,7 @@ ${name}
 ❌ **Upload Error**: ${uploadError}
 
 The listing has been saved locally and can be uploaded manually later.`,
-        };
-      }
+      };
     } catch (error) {
       console.error("Error creating listing:", error);
       return {

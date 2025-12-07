@@ -21,7 +21,7 @@ export async function GET() {
     return NextResponse.json({
       hasGeminiKey: !!keys.gemini,
       hasGoogleKey: !!keys.google,
-      keyPrefix: activeKey.substring(0, 20) + "...",
+      keyPrefix: `${activeKey.substring(0, 20)}...`,
       keyLength: activeKey.length,
       isValid: !data.error,
       error: data.error,

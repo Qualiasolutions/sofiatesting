@@ -5,8 +5,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export async function TelegramStatus() {
   const hasTelegramToken = !!process.env.TELEGRAM_BOT_TOKEN;
 
-  let botInfo = null;
-  let webhookInfo = null;
+  let botInfo: {
+    username?: string;
+    first_name?: string;
+    can_join_groups?: boolean;
+  } | null = null;
+  let webhookInfo: {
+    url?: string;
+    last_error_date?: number;
+    last_error_message?: string;
+    pending_update_count?: number;
+  } | null = null;
   let isHealthy = false;
 
   if (hasTelegramToken) {
@@ -29,7 +38,9 @@ export async function TelegramStatus() {
       if (webhookResponse.ok) {
         const data = await webhookResponse.json();
         webhookInfo = data.result;
-        isHealthy = webhookInfo.url && webhookInfo.last_error_date === 0;
+        isHealthy = !!(
+          webhookInfo?.url && webhookInfo?.last_error_date === 0
+        );
       }
     } catch (error) {
       console.error("Telegram health check failed:", error);

@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Slash commands** (`.claude/commands/`): `/deploy-checklist`, `/test-all`, `/tool-audit`, `/new-tool <name> <desc>`, `/telegram-debug`, `/db-check`
 
-**Skills** (`.claude/skills/`): `sofia-debugger` (debug SOFIA issues), `cyprus-calculator` (property tax calculations)
+**Skills**: `sofia-debugger` (debug SOFIA issues), `cyprus-calculator` (property tax calculations)
 
 ## Project Overview
 
@@ -28,8 +28,9 @@ SOFIA is a Next.js 15 AI assistant for Zyprus Property Group (Cyprus real estate
 | Model ID | Actual Model | Use Case |
 |----------|-------------|----------|
 | `chat-model` | Gemini 2.5 Flash | Default (best price-performance) |
+| `chat-model-flash` | Gemini 2.5 Flash | Alias for chat-model |
 | `chat-model-pro` | Gemini 2.5 Pro | Complex reasoning, extended context |
-| `chat-model-gemini3` | Gemini 3 Pro Preview | Latest model, 1M context, multi-modal |
+| `chat-model-gemini3` | Gemini 3n Pro Preview | Latest model, 1M context, multi-modal, audio input |
 | `chat-model-flash-lite` | Gemini 2.5 Flash-Lite | Ultra-fast, cheapest |
 
 ## Database
@@ -66,8 +67,11 @@ pnpm test:unit        # All unit tests
 pnpm test:ai-models   # Test AI model connectivity
 PLAYWRIGHT=True pnpm test  # E2E tests (requires dev server)
 
-# Single test file
+# Single test file (node:test runner via tsx)
 pnpm exec tsx --test tests/unit/your-file.test.ts
+
+# Run specific Playwright test
+PLAYWRIGHT=True pnpm exec playwright test tests/e2e/your-file.spec.ts
 ```
 
 ## Adding AI Tools
@@ -79,11 +83,13 @@ pnpm exec tsx --test tests/unit/your-file.test.ts
 import { calculateVATTool } from "@/lib/ai/tools/calculate-vat";
 
 // 2. Add to BOTH arrays (keys must match exactly, case-sensitive)
-experimental_activeTools: ["calculateVAT", ...],
-tools: { calculateVAT: calculateVATTool, ... }
+experimental_activeTools: ["calculateVAT", "createListing", "createLandListing", ...],
+tools: { calculateVAT: calculateVATTool, createListing: createListingTool, ... }
 ```
 
 Tool file structure (`lib/ai/tools/`): export `description`, `parameters` (Zod), and `execute` function.
+
+**Property vs Land tools**: Properties have `createListing`/`uploadListing`, land has `createLandListing`/`uploadLandListing` with different field schemas.
 
 ## Streaming Chat Architecture
 
@@ -100,15 +106,19 @@ Key patterns:
 
 ## Integrations
 
-**Telegram** (`lib/telegram/`): Webhook at `/api/telegram/webhook`, typing indicators, message splitting
+**Telegram** (`lib/telegram/`): Webhook at `/api/telegram/webhook`, typing indicators, message splitting, group lead management
 
 **WhatsApp** (`lib/whatsapp/`): Document detection + DOCX generation, uses WaSender API with base64 file support
 
-**Zyprus API** (`lib/zyprus/`): Full property and land listing management - see detailed section below
+**Zyprus API** (`lib/zyprus/`): Full property and land listing management with auto-upload as unpublished drafts - see detailed section below
 
 ## Active Tools
 
-`calculateTransferFees`, `calculateCapitalGains`, `calculateVAT`, `createListing`, `listListings`, `uploadListing`, `getZyprusData`, `requestSuggestions`
+**Property**: `createListing`, `listListings`, `uploadListing`
+**Land**: `createLandListing`, `uploadLandListing`
+**Calculators**: `calculateTransferFees`, `calculateCapitalGains`, `calculateVAT`
+**Taxonomy**: `getZyprusData`
+**UX**: `requestSuggestions`
 
 Tool files: `lib/ai/tools/` - each exports `description`, `parameters` (Zod), `execute`.
 
@@ -132,7 +142,7 @@ See `.cursor/rules/ultracite.mdc` for full ruleset.
 app/
 ├── (auth)/           # Auth pages
 ├── (chat)/           # Chat UI + /api/chat streaming endpoint
-├── (admin)/          # Admin dashboard
+├── (admin)/          # Admin dashboard (listings review, user management)
 ├── api/              # REST endpoints (listings, templates, telegram, whatsapp)
 └── properties/       # Property management UI
 

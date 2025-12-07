@@ -5,6 +5,9 @@ import type { TelegramUpdate } from "@/lib/telegram/types";
 // Extended duration to allow AI responses to complete (Telegram timeout is 60s)
 export const maxDuration = 60;
 
+// Get the webhook secret from environment
+const TELEGRAM_WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET;
+
 /**
  * Telegram Bot Webhook Handler
  * This endpoint receives updates from Telegram Bot API
@@ -19,9 +22,22 @@ export const maxDuration = 60;
  * - Serverless function stays alive until processing completes (up to maxDuration)
  */
 export async function POST(request: Request) {
-  // Security note: Secret token validation removed to allow webhook to function
-  // Telegram's official servers are the only ones that know the bot token,
-  // so the risk of unauthorized requests is minimal
+  // Validate secret token if configured
+  if (TELEGRAM_WEBHOOK_SECRET) {
+    const secretToken = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
+    if (secretToken !== TELEGRAM_WEBHOOK_SECRET) {
+      console.warn("[TELEGRAM WEBHOOK] Invalid or missing secret token", {
+        hasToken: !!secretToken,
+        timestamp: new Date().toISOString(),
+      });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  } else if (process.env.NODE_ENV === "production") {
+    // Log warning if secret is not configured (should be set in production)
+    console.warn(
+      "[TELEGRAM WEBHOOK] TELEGRAM_WEBHOOK_SECRET not configured - webhook is unprotected"
+    );
+  }
 
   try {
     const body = (await request.json()) as TelegramUpdate;

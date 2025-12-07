@@ -1,12 +1,15 @@
 import { randomBytes } from "node:crypto";
 import { and, desc, eq, ilike, or, type SQL } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
+import { checkAdminAuth, hasMinimumRole } from "@/lib/auth/admin";
 import { db } from "@/lib/db/client";
 import { zyprusAgent } from "@/lib/db/schema";
 
 /**
  * GET /api/admin/agents
  * List all agents with optional filtering and pagination
+ *
+ * Requires: Admin authentication (analyst or higher)
  *
  * Query parameters:
  * - region: Filter by region (Limassol, Paphos, etc.)
@@ -17,6 +20,15 @@ import { zyprusAgent } from "@/lib/db/schema";
  * - limit: Items per page (default: 50)
  */
 export async function GET(request: NextRequest) {
+  // Check admin authentication
+  const adminCheck = await checkAdminAuth();
+  if (!adminCheck.isAdmin) {
+    return NextResponse.json(
+      { error: adminCheck.error },
+      { status: adminCheck.userId ? 403 : 401 }
+    );
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const region = searchParams.get("region");
@@ -92,6 +104,8 @@ export async function GET(request: NextRequest) {
  * POST /api/admin/agents
  * Create a new agent
  *
+ * Requires: Admin authentication (admin or higher)
+ *
  * Body:
  * {
  *   fullName: string
@@ -104,6 +118,23 @@ export async function GET(request: NextRequest) {
  * }
  */
 export async function POST(request: NextRequest) {
+  // Check admin authentication - require admin role for creating agents
+  const adminCheck = await checkAdminAuth();
+  if (!adminCheck.isAdmin) {
+    return NextResponse.json(
+      { error: adminCheck.error },
+      { status: adminCheck.userId ? 403 : 401 }
+    );
+  }
+
+  // Require at least admin role to create agents
+  if (!hasMinimumRole(adminCheck.role, "admin")) {
+    return NextResponse.json(
+      { error: "Insufficient permissions. Admin role required." },
+      { status: 403 }
+    );
+  }
+
   try {
     const body = await request.json();
 

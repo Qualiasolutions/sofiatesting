@@ -25,7 +25,7 @@ import { describe, mock, test } from "node:test";
 /**
  * Mock PropertyListing type matching the schema
  */
-type MockPropertyListing = {
+type _MockPropertyListing = {
   id: string;
   name: string;
   description: string;
@@ -34,7 +34,7 @@ type MockPropertyListing = {
   numberOfBathroomsTotal: number;
   floorSize: number;
   image?: string[] | null;
-  address?: any;
+  address?: unknown;
   locationId?: string;
   propertyTypeId?: string;
 };
@@ -178,6 +178,7 @@ describe("Parallel Image Upload Tests", () => {
 
       let uploadCounter = 0;
       // Mock fetch to return success for all requests
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async (url: string) => {
         if (typeof url === "string" && url.includes("field_gallery_")) {
           // Upload request
@@ -213,6 +214,7 @@ describe("Parallel Image Upload Tests", () => {
     test("should handle 1 image successfully", async () => {
       const imageUrls = ["https://example.com/single.jpg"];
 
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async (url: string) => {
         if (typeof url === "string" && url.includes("field_gallery_")) {
           return createMockUploadResponse("single-image-id");
@@ -238,6 +240,7 @@ describe("Parallel Image Upload Tests", () => {
       );
 
       let uploadCounter = 0;
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async (url: string) => {
         if (typeof url === "string" && url.includes("field_gallery_")) {
           uploadCounter++;
@@ -272,6 +275,7 @@ describe("Parallel Image Upload Tests", () => {
         "https://example.com/image3.jpg",
       ];
 
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async (url: string) => {
         // Fail fetch for image2-bad
         if (url.includes("image2-bad")) {
@@ -313,6 +317,7 @@ describe("Parallel Image Upload Tests", () => {
       const fetchedImages = new Set<string>();
       let uploadCounter = 0;
 
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async (url: string) => {
         // Check if it's an upload request
         const isUpload =
@@ -363,6 +368,7 @@ describe("Parallel Image Upload Tests", () => {
         "https://example.com/fail3.jpg",
       ];
 
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async () => {
         return createMockErrorResponse(404, "All images not found");
       });
@@ -387,6 +393,7 @@ describe("Parallel Image Upload Tests", () => {
         "https://example.com/image2.jpg",
       ];
 
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async (url: string) => {
         // Image fetches succeed
         if (!url.includes("field_gallery_")) {
@@ -431,6 +438,7 @@ describe("Parallel Image Upload Tests", () => {
     test("should handle network timeout errors", async () => {
       const imageUrls = ["https://example.com/timeout.jpg"];
 
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async () => {
         throw new Error("Network timeout");
       });
@@ -454,6 +462,7 @@ describe("Parallel Image Upload Tests", () => {
       ];
 
       let uploadCounter = 0;
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async (url: string) => {
         // Fail fetch for fail.jpg
         if (url.includes("fail") && !url.includes("field_gallery_")) {
@@ -596,6 +605,7 @@ describe("Parallel Image Upload Tests", () => {
         logs.push(args.join(" "));
       };
 
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async (url: string) => {
         if (url.includes("fail")) {
           return createMockErrorResponse(404, "Not found");
@@ -645,6 +655,7 @@ describe("Parallel Image Upload Tests", () => {
         errorLogs.push(args.join(" "));
       };
 
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async (url: string) => {
         if (url.includes("bad")) {
           return createMockErrorResponse(500, "Server error");
@@ -680,6 +691,7 @@ describe("Parallel Image Upload Tests", () => {
 
       let capturedFormData: FormData | null = null;
 
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async (url: string, options?: any) => {
         if (typeof url === "string" && url.includes("field_gallery_")) {
           capturedFormData = options.body as FormData;
@@ -709,6 +721,7 @@ describe("Parallel Image Upload Tests", () => {
     test("should default to jpeg when content-type missing", async () => {
       const imageUrls = ["https://example.com/unknown"];
 
+      // biome-ignore lint/suspicious/useAwait: mock function returns Promise-like Response
       const mockFetch = mock.fn(async (url: string) => {
         if (typeof url === "string" && url.includes("field_gallery_")) {
           return createMockUploadResponse("jpeg-id");
@@ -803,8 +816,8 @@ describe("Integration Test: Full Upload Flow Simulation", () => {
     );
 
     // Verify all IDs are non-empty strings
-    imageIds.forEach((id) => {
+    for (const id of imageIds) {
       assert.ok(typeof id === "string" && id.length > 0);
-    });
+    }
   });
 });

@@ -6,14 +6,14 @@ import type { UserType } from "@/app/(auth)/auth";
  * User context that can be injected for non-web channels (WhatsApp, Telegram).
  * This allows tools to access user information without requiring a web session.
  */
-export interface AIUserContext {
+export type AIUserContext = {
   user: {
     id: string;
     email?: string | null;
     name?: string | null;
     type: UserType;
   };
-}
+};
 
 // Use AsyncLocalStorage to store context per request without globals
 const userContextStorage = new AsyncLocalStorage<AIUserContext>();

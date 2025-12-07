@@ -7,9 +7,14 @@ export async function ZyprusStatus() {
   const hasZyprusCredentials =
     !!process.env.ZYPRUS_CLIENT_ID && !!process.env.ZYPRUS_CLIENT_SECRET;
 
-  let taxonomyData = null;
+  let taxonomyData: {
+    propertyTypes?: Map<string, string>;
+    locations?: Map<string, string>;
+    indoorFeatures?: Map<string, string>;
+    outdoorFeatures?: Map<string, string>;
+  } | null = null;
   let isHealthy = false;
-  let errorMessage = null;
+  let errorMessage: string | null = null;
 
   if (hasZyprusCredentials) {
     try {

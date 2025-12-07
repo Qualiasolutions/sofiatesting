@@ -170,18 +170,42 @@ async function applyMigration() {
 
     // 6. Create indexes
     console.log("Creating indexes...");
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS "LeadForwardingRotation_region_idx" ON "LeadForwardingRotation" USING btree ("region")`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS "TelegramGroup_groupId_idx" ON "TelegramGroup" USING btree ("groupId")`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS "TelegramGroup_groupType_idx" ON "TelegramGroup" USING btree ("groupType")`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS "TelegramGroup_region_idx" ON "TelegramGroup" USING btree ("region")`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS "TelegramGroup_isActive_idx" ON "TelegramGroup" USING btree ("isActive")`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS "TelegramLead_sourceGroupId_idx" ON "TelegramLead" USING btree ("sourceGroupId")`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS "TelegramLead_propertyReferenceId_idx" ON "TelegramLead" USING btree ("propertyReferenceId")`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS "TelegramLead_forwardedToAgentId_idx" ON "TelegramLead" USING btree ("forwardedToAgentId")`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS "TelegramLead_status_idx" ON "TelegramLead" USING btree ("status")`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS "TelegramLead_createdAt_idx" ON "TelegramLead" USING btree ("createdAt" DESC NULLS LAST)`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS "TelegramLead_agent_status_idx" ON "TelegramLead" USING btree ("forwardedToAgentId","status")`);
-    await db.execute(sql`CREATE INDEX IF NOT EXISTS "TelegramLead_group_createdAt_idx" ON "TelegramLead" USING btree ("sourceGroupId","createdAt" DESC NULLS LAST)`);
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS "LeadForwardingRotation_region_idx" ON "LeadForwardingRotation" USING btree ("region")`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS "TelegramGroup_groupId_idx" ON "TelegramGroup" USING btree ("groupId")`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS "TelegramGroup_groupType_idx" ON "TelegramGroup" USING btree ("groupType")`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS "TelegramGroup_region_idx" ON "TelegramGroup" USING btree ("region")`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS "TelegramGroup_isActive_idx" ON "TelegramGroup" USING btree ("isActive")`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS "TelegramLead_sourceGroupId_idx" ON "TelegramLead" USING btree ("sourceGroupId")`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS "TelegramLead_propertyReferenceId_idx" ON "TelegramLead" USING btree ("propertyReferenceId")`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS "TelegramLead_forwardedToAgentId_idx" ON "TelegramLead" USING btree ("forwardedToAgentId")`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS "TelegramLead_status_idx" ON "TelegramLead" USING btree ("status")`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS "TelegramLead_createdAt_idx" ON "TelegramLead" USING btree ("createdAt" DESC NULLS LAST)`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS "TelegramLead_agent_status_idx" ON "TelegramLead" USING btree ("forwardedToAgentId","status")`
+    );
+    await db.execute(
+      sql`CREATE INDEX IF NOT EXISTS "TelegramLead_group_createdAt_idx" ON "TelegramLead" USING btree ("sourceGroupId","createdAt" DESC NULLS LAST)`
+    );
 
     console.log("✅ Migration 0017 applied successfully!");
     await client.end();

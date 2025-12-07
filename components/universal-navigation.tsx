@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function UniversalNavigation() {
-  const pathname = usePathname();
+  const _pathname = usePathname();
 
   // Don't show on the portal page itself if you want, but "Universal" implies everywhere.
   // It's useful even on the home page to see what's available or jump around.

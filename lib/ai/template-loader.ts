@@ -9,6 +9,29 @@ import { unstable_cache } from "next/cache";
  * while maintaining identical behavior to the original system.
  */
 
+// Top-level regex patterns for template detection (performance optimization)
+const REGISTRATION_PATTERN = /registration|register|reg\b/i;
+const DEVELOPER_PATTERN = /developer/i;
+const BANK_PATTERN = /bank/i;
+const RENTAL_PATTERN = /rental|tenant|landlord/i;
+const MARKETING_ADVANCED_PATTERN = /marketing.*together|advanced/i;
+const VIEWING_PATTERN = /viewing|view.*form/i;
+const RESERVATION_PATTERN = /reserv/i;
+const MARKETING_AGREEMENT_PATTERN =
+  /marketing|agreement|signature.*document|signature.*form/i;
+const GOOD_CLIENT_PATTERN = /good.*client|client.*request/i;
+const VALUATION_PATTERN = /valuation|valuat/i;
+const PHONE_PATTERN = /phone.*number|client.*phone|no.*phone/i;
+const FOLLOW_UP_PATTERN = /follow.*up|following.*up/i;
+const BUDGET_PATTERN = /low.*budget|multiple.*area/i;
+const DECLINE_PATTERN = /time.*waster|decline|overpriced/i;
+const SELLING_PATTERN = /selling.*request|pricing.*advice/i;
+const LOCATION_PATTERN = /location|region/i;
+const DELAY_PATTERN = /delay|apology|no.*reply/i;
+const AML_PATTERN = /aml|kyc|compliance/i;
+const TEMPLATE_HEADER_PATTERN = /^(?:📌 )?Template (\d+):/;
+const TEMPLATE_LINE_PATTERN = /^(?:📌 )?Template \d+:/;
+
 // Template categories mapped to template numbers
 const TEMPLATE_CATEGORIES = {
   // Registrations (8 templates)
@@ -45,7 +68,9 @@ const COMMON_TEMPLATES = ["01", "07", "08", "17", "19"];
  * Helper function to add multiple items to a Set
  */
 function addToSet<T>(set: Set<T>, items: readonly T[]): void {
-  items.forEach((item) => set.add(item));
+  for (const item of items) {
+    set.add(item);
+  }
 }
 
 /**
@@ -55,15 +80,15 @@ export function detectRelevantTemplates(userMessage: string): string[] {
   const msg = userMessage.toLowerCase();
   const templates = new Set<string>();
 
-  // Registration detection (most specific first)
-  if (/registration|register|reg\b/i.test(msg)) {
-    if (/developer/i.test(msg)) {
+  // Registration detection (most specific first) - using top-level patterns
+  if (REGISTRATION_PATTERN.test(msg)) {
+    if (DEVELOPER_PATTERN.test(msg)) {
       addToSet(templates, TEMPLATE_CATEGORIES.registration_developer);
-    } else if (/bank/i.test(msg)) {
+    } else if (BANK_PATTERN.test(msg)) {
       addToSet(templates, TEMPLATE_CATEGORIES.registration_bank);
-    } else if (/rental|tenant|landlord/i.test(msg)) {
+    } else if (RENTAL_PATTERN.test(msg)) {
       templates.add("03"); // Rental registration
-    } else if (/marketing.*together|advanced/i.test(msg)) {
+    } else if (MARKETING_ADVANCED_PATTERN.test(msg)) {
       templates.add("02");
       templates.add("04"); // Marketing + Advanced
     } else {
@@ -73,52 +98,52 @@ export function detectRelevantTemplates(userMessage: string): string[] {
   }
 
   // Viewing forms
-  if (/viewing|view.*form/i.test(msg)) {
+  if (VIEWING_PATTERN.test(msg)) {
     addToSet(templates, TEMPLATE_CATEGORIES.viewing_forms);
   }
 
   // Reservation
-  if (/reserv/i.test(msg)) {
+  if (RESERVATION_PATTERN.test(msg)) {
     addToSet(templates, TEMPLATE_CATEGORIES.reservation);
   }
 
   // Marketing agreements
-  if (/marketing|agreement|signature.*document|signature.*form/i.test(msg)) {
-    // Check if it's not already a registration
-    if (!/registration/i.test(msg)) {
-      addToSet(templates, TEMPLATE_CATEGORIES.marketing);
-    }
+  if (
+    MARKETING_AGREEMENT_PATTERN.test(msg) &&
+    !REGISTRATION_PATTERN.test(msg)
+  ) {
+    addToSet(templates, TEMPLATE_CATEGORIES.marketing);
   }
 
   // Client communications
-  if (/good.*client|client.*request/i.test(msg)) {
+  if (GOOD_CLIENT_PATTERN.test(msg)) {
     addToSet(templates, TEMPLATE_CATEGORIES.good_client);
   }
-  if (/valuation|valuat/i.test(msg)) {
+  if (VALUATION_PATTERN.test(msg)) {
     addToSet(templates, TEMPLATE_CATEGORIES.valuation);
   }
-  if (/phone.*number|client.*phone|no.*phone/i.test(msg)) {
+  if (PHONE_PATTERN.test(msg)) {
     addToSet(templates, TEMPLATE_CATEGORIES.client_phone);
   }
-  if (/follow.*up|following.*up/i.test(msg)) {
+  if (FOLLOW_UP_PATTERN.test(msg)) {
     addToSet(templates, TEMPLATE_CATEGORIES.follow_up);
   }
-  if (/low.*budget|multiple.*area/i.test(msg)) {
+  if (BUDGET_PATTERN.test(msg)) {
     addToSet(templates, TEMPLATE_CATEGORIES.budget_issues);
   }
-  if (/time.*waster|decline|overpriced/i.test(msg)) {
+  if (DECLINE_PATTERN.test(msg)) {
     addToSet(templates, TEMPLATE_CATEGORIES.decline);
   }
-  if (/selling.*request|pricing.*advice/i.test(msg)) {
+  if (SELLING_PATTERN.test(msg)) {
     addToSet(templates, TEMPLATE_CATEGORIES.selling);
   }
-  if (/location|region/i.test(msg)) {
+  if (LOCATION_PATTERN.test(msg)) {
     addToSet(templates, TEMPLATE_CATEGORIES.location);
   }
-  if (/delay|apology|no.*reply/i.test(msg)) {
+  if (DELAY_PATTERN.test(msg)) {
     addToSet(templates, TEMPLATE_CATEGORIES.delays);
   }
-  if (/aml|kyc|compliance/i.test(msg)) {
+  if (AML_PATTERN.test(msg)) {
     addToSet(templates, TEMPLATE_CATEGORIES.aml_kyc);
   }
 
@@ -137,13 +162,10 @@ function extractTemplates(fullContent: string, templateIds: string[]): string {
   const lines = fullContent.split("\n");
   const result: string[] = [];
   let inRelevantSection = false;
-  let _currentTemplate = "";
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
+  for (const line of lines) {
     // Check if this is a template header
-    const templateMatch = line.match(/^(?:📌 )?Template (\d+):/);
+    const templateMatch = line.match(TEMPLATE_HEADER_PATTERN);
 
     if (templateMatch) {
       const templateNum = templateMatch[1].padStart(2, "0");
@@ -156,7 +178,6 @@ function extractTemplates(fullContent: string, templateIds: string[]): string {
       // Check if this is a template we want
       if (templateIds.includes(templateNum)) {
         inRelevantSection = true;
-        _currentTemplate = templateNum;
       }
     }
 
@@ -188,9 +209,7 @@ function getBaseInstructions(fullContent: string): string {
   let inTemplateSection = false;
   let skipUntilNextMajorSection = false;
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
+  for (const line of lines) {
     // Major section markers
     if (
       line.startsWith("👁️ VIEWING FORM & RESERVATION TEMPLATES") ||
@@ -203,7 +222,7 @@ function getBaseInstructions(fullContent: string): string {
     }
 
     // Check if we hit a template
-    if (line.match(/^(?:📌 )?Template \d+:/)) {
+    if (TEMPLATE_LINE_PATTERN.test(line)) {
       inTemplateSection = true;
       continue;
     }

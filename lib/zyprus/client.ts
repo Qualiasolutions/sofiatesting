@@ -833,11 +833,11 @@ async function uploadLandToZyprusAPIInternal(
         field_property_notes: listing.notes || null,
         field_map: hasCoordinates
           ? {
-              value: `POINT (${listing.coordinates!.longitude} ${listing.coordinates!.latitude})`,
+              value: `POINT (${listing.coordinates?.longitude} ${listing.coordinates?.latitude})`,
               geo_type: "Point",
-              lat: listing.coordinates!.latitude,
-              lon: listing.coordinates!.longitude,
-              latlon: `${listing.coordinates!.latitude},${listing.coordinates!.longitude}`,
+              lat: listing.coordinates?.latitude,
+              lon: listing.coordinates?.longitude,
+              latlon: `${listing.coordinates?.latitude},${listing.coordinates?.longitude}`,
             }
           : undefined,
       },
@@ -1147,7 +1147,7 @@ function getExtensionFromMime(mimeType: string): string {
  * Upload floor plan images to a property
  */
 export async function uploadFloorPlanImages(
-  propertyId: string,
+  _propertyId: string,
   floorPlanUrls: string[]
 ): Promise<string[]> {
   return uploadFilesToZyprus(floorPlanUrls, "property", "field_floor_plan");
@@ -1157,7 +1157,7 @@ export async function uploadFloorPlanImages(
  * Upload floor plan PDF to a property
  */
 export async function uploadFloorPlanPdf(
-  propertyId: string,
+  _propertyId: string,
   pdfUrl: string
 ): Promise<string | null> {
   const ids = await uploadFilesToZyprus(
@@ -1172,7 +1172,7 @@ export async function uploadFloorPlanPdf(
  * Upload Energy Performance Certificate (EPC) PDF to a property
  */
 export async function uploadEpcPdf(
-  propertyId: string,
+  _propertyId: string,
   pdfUrl: string
 ): Promise<string | null> {
   const ids = await uploadFilesToZyprus([pdfUrl], "property", "field_epc");

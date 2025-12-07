@@ -132,12 +132,8 @@
           "name": "AdminAuditLog_adminUserId_User_id_fk",
           "tableFrom": "AdminAuditLog",
           "tableTo": "User",
-          "columnsFrom": [
-            "adminUserId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["adminUserId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -187,12 +183,8 @@
           "name": "AdminUserRole_userId_User_id_fk",
           "tableFrom": "AdminUserRole",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -200,12 +192,8 @@
           "name": "AdminUserRole_createdBy_User_id_fk",
           "tableFrom": "AdminUserRole",
           "tableTo": "User",
-          "columnsFrom": [
-            "createdBy"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["createdBy"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -419,12 +407,8 @@
           "name": "AgentChatSession_agentId_ZyprusAgent_id_fk",
           "tableFrom": "AgentChatSession",
           "tableTo": "ZyprusAgent",
-          "columnsFrom": [
-            "agentId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agentId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -432,12 +416,8 @@
           "name": "AgentChatSession_chatId_Chat_id_fk",
           "tableFrom": "AgentChatSession",
           "tableTo": "Chat",
-          "columnsFrom": [
-            "chatId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chatId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -618,12 +598,8 @@
           "name": "AgentExecutionLog_userId_User_id_fk",
           "tableFrom": "AgentExecutionLog",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -631,12 +607,8 @@
           "name": "AgentExecutionLog_chatId_Chat_id_fk",
           "tableFrom": "AgentExecutionLog",
           "tableTo": "Chat",
-          "columnsFrom": [
-            "chatId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chatId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -760,12 +732,8 @@
           "name": "CalculatorUsageLog_userId_User_id_fk",
           "tableFrom": "CalculatorUsageLog",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -844,12 +812,8 @@
           "name": "Chat_userId_User_id_fk",
           "tableFrom": "Chat",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -906,12 +870,8 @@
           "name": "Document_userId_User_id_fk",
           "tableFrom": "Document",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -919,10 +879,7 @@
       "compositePrimaryKeys": {
         "Document_id_createdAt_pk": {
           "name": "Document_id_createdAt_pk",
-          "columns": [
-            "id",
-            "createdAt"
-          ]
+          "columns": ["id", "createdAt"]
         }
       },
       "uniqueConstraints": {}
@@ -1061,12 +1018,8 @@
           "name": "DocumentGenerationLog_userId_User_id_fk",
           "tableFrom": "DocumentGenerationLog",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1074,12 +1027,8 @@
           "name": "DocumentGenerationLog_chatId_Chat_id_fk",
           "tableFrom": "DocumentGenerationLog",
           "tableTo": "Chat",
-          "columnsFrom": [
-            "chatId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chatId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1465,12 +1414,8 @@
           "name": "LandListing_userId_User_id_fk",
           "tableFrom": "LandListing",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1478,12 +1423,8 @@
           "name": "LandListing_chatId_Chat_id_fk",
           "tableFrom": "LandListing",
           "tableTo": "Chat",
-          "columnsFrom": [
-            "chatId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chatId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1551,12 +1492,8 @@
           "name": "LeadForwardingRotation_lastForwardedToAgentId_ZyprusAgent_id_fk",
           "tableFrom": "LeadForwardingRotation",
           "tableTo": "ZyprusAgent",
-          "columnsFrom": [
-            "lastForwardedToAgentId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["lastForwardedToAgentId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1566,9 +1503,7 @@
         "LeadForwardingRotation_region_unique": {
           "name": "LeadForwardingRotation_region_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "region"
-          ]
+          "columns": ["region"]
         }
       }
     },
@@ -1676,12 +1611,8 @@
           "name": "ListingUploadAttempt_listingId_PropertyListing_id_fk",
           "tableFrom": "ListingUploadAttempt",
           "tableTo": "PropertyListing",
-          "columnsFrom": [
-            "listingId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["listingId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1759,12 +1690,8 @@
           "name": "Message_v2_chatId_Chat_id_fk",
           "tableFrom": "Message_v2",
           "tableTo": "Chat",
-          "columnsFrom": [
-            "chatId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chatId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2277,12 +2204,8 @@
           "name": "PropertyListing_userId_User_id_fk",
           "tableFrom": "PropertyListing",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2290,12 +2213,8 @@
           "name": "PropertyListing_chatId_Chat_id_fk",
           "tableFrom": "PropertyListing",
           "tableTo": "Chat",
-          "columnsFrom": [
-            "chatId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chatId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2333,12 +2252,8 @@
           "name": "Stream_chatId_Chat_id_fk",
           "tableFrom": "Stream",
           "tableTo": "Chat",
-          "columnsFrom": [
-            "chatId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chatId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2346,9 +2261,7 @@
       "compositePrimaryKeys": {
         "Stream_id_pk": {
           "name": "Stream_id_pk",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -2420,12 +2333,8 @@
           "name": "Suggestion_userId_User_id_fk",
           "tableFrom": "Suggestion",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2433,14 +2342,8 @@
           "name": "Suggestion_documentId_documentCreatedAt_Document_id_createdAt_fk",
           "tableFrom": "Suggestion",
           "tableTo": "Document",
-          "columnsFrom": [
-            "documentId",
-            "documentCreatedAt"
-          ],
-          "columnsTo": [
-            "id",
-            "createdAt"
-          ],
+          "columnsFrom": ["documentId", "documentCreatedAt"],
+          "columnsTo": ["id", "createdAt"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2448,9 +2351,7 @@
       "compositePrimaryKeys": {
         "Suggestion_id_pk": {
           "name": "Suggestion_id_pk",
-          "columns": [
-            "id"
-          ]
+          "columns": ["id"]
         }
       },
       "uniqueConstraints": {}
@@ -2731,12 +2632,8 @@
           "name": "TelegramGroup_defaultForwardTo_ZyprusAgent_id_fk",
           "tableFrom": "TelegramGroup",
           "tableTo": "ZyprusAgent",
-          "columnsFrom": [
-            "defaultForwardTo"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["defaultForwardTo"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2744,12 +2641,8 @@
           "name": "TelegramGroup_alternateForwardTo_ZyprusAgent_id_fk",
           "tableFrom": "TelegramGroup",
           "tableTo": "ZyprusAgent",
-          "columnsFrom": [
-            "alternateForwardTo"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["alternateForwardTo"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2759,9 +2652,7 @@
         "TelegramGroup_groupId_unique": {
           "name": "TelegramGroup_groupId_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "groupId"
-          ]
+          "columns": ["groupId"]
         }
       }
     },
@@ -3072,12 +2963,8 @@
           "name": "TelegramLead_propertyOwnerId_ZyprusAgent_id_fk",
           "tableFrom": "TelegramLead",
           "tableTo": "ZyprusAgent",
-          "columnsFrom": [
-            "propertyOwnerId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["propertyOwnerId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -3085,12 +2972,8 @@
           "name": "TelegramLead_forwardedToAgentId_ZyprusAgent_id_fk",
           "tableFrom": "TelegramLead",
           "tableTo": "ZyprusAgent",
-          "columnsFrom": [
-            "forwardedToAgentId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["forwardedToAgentId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3242,12 +3125,8 @@
           "name": "UserActivitySummary_userId_User_id_fk",
           "tableFrom": "UserActivitySummary",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3284,12 +3163,8 @@
           "name": "Vote_v2_chatId_Chat_id_fk",
           "tableFrom": "Vote_v2",
           "tableTo": "Chat",
-          "columnsFrom": [
-            "chatId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["chatId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3297,12 +3172,8 @@
           "name": "Vote_v2_messageId_Message_v2_id_fk",
           "tableFrom": "Vote_v2",
           "tableTo": "Message_v2",
-          "columnsFrom": [
-            "messageId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["messageId"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3310,10 +3181,7 @@
       "compositePrimaryKeys": {
         "Vote_v2_chatId_messageId_pk": {
           "name": "Vote_v2_chatId_messageId_pk",
-          "columns": [
-            "chatId",
-            "messageId"
-          ]
+          "columns": ["chatId", "messageId"]
         }
       },
       "uniqueConstraints": {}
@@ -3599,12 +3467,8 @@
           "name": "ZyprusAgent_userId_User_id_fk",
           "tableFrom": "ZyprusAgent",
           "tableTo": "User",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["userId"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -3614,9 +3478,7 @@
         "ZyprusAgent_email_unique": {
           "name": "ZyprusAgent_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       }
     }

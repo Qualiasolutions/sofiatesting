@@ -57,7 +57,7 @@ export function OverviewChart({
   description,
   className,
 }: ChartProps) {
-  const { theme } = useTheme();
+  const { theme: _theme } = useTheme();
 
   return (
     <Card className={className}>
@@ -173,10 +173,10 @@ export function DistributionChart({
               outerRadius={80}
               paddingAngle={5}
             >
-              {data.map((_entry, index) => (
+              {data.map((entry) => (
                 <Cell
-                  fill={COLORS[index % COLORS.length]}
-                  key={`cell-${index}`}
+                  fill={COLORS[data.indexOf(entry) % COLORS.length]}
+                  key={entry.name || entry.value}
                 />
               ))}
             </Pie>

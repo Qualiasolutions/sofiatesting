@@ -8,6 +8,47 @@
  * Purpose: Enforce strict response templates across all models
  */
 
+// Top-level regex patterns for performance optimization
+// Pleasantry prefixes to remove
+const PLEASANTRY_HAPPY = /^I'd be happy to help[^.!]*[.!]\s*/i;
+const PLEASANTRY_SURE = /^Sure[^.!]*[.!]\s*/i;
+const PLEASANTRY_CERTAINLY = /^Certainly[^.!]*[.!]\s*/i;
+const PLEASANTRY_ASSIST = /^I can assist[^.!]*[.!]\s*/i;
+const PLEASANTRY_LETME = /^Let me help[^.!]*[.!]\s*/i;
+
+// Explanatory suffixes to remove
+const SUFFIX_ONCE_HAVE = /\n\nOnce I have this information[^.]*\./gi;
+const SUFFIX_ILL_GENERATE = /\n\nI'll generate[^.]*\./gi;
+const SUFFIX_WOULD_YOU = /\n\nWould you like[^?]*\?/gi;
+const SUFFIX_PLEASE_LET = /\n\nPlease let me know[^.]*\./gi;
+
+// Client name extraction patterns
+const CLIENT_IS_PATTERN = /the client is ([^,.\n]+)/i;
+const CLIENT_IS_ALT = /client is ([^,.\n]+)/i;
+const CLIENT_IS_REVERSE = /([^,.\n]+) is the client/i;
+const CLIENT_FOR_PATTERN = /for ([A-Z][a-z]+ [A-Z][a-z]+)/;
+
+// Time extraction patterns
+const TIME_TOMORROW = /tomorrow at (\d{1,2}:\d{2}|\d{1,2}(?:am|pm))/i;
+const TIME_TODAY = /today at (\d{1,2}:\d{2}|\d{1,2}(?:am|pm))/i;
+const TIME_AT = /at (\d{1,2}:\d{2})/i;
+
+// Registration type patterns
+const REG_DEVELOPER = /(registration developer|developer registration)/i;
+const REG_STANDARD = /(standard registration|registration standard)/i;
+const REG_BANK = /(bank registration|registration bank)/i;
+const REG_EMAIL = /(email marketing|marketing email)/i;
+
+// Property patterns
+const PROP_REG_NO = /property (?:reg\.? ?no\.?|registration) ?(\d+\/\d+)/i;
+const PROP_REG_ALT = /reg\.? ?no\.? ?(\d+\/\d+)/i;
+const PROP_SIMPLE = /property (\d+\/\d+)/i;
+
+// Price patterns
+const PRICE_EURO = /€(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/;
+const PRICE_WORD = /(\d{1,3}(?:,\d{3})*) ?(?:euro|EUR)/i;
+const PRICE_ASKING = /asking (\d{1,3}(?:,\d{3})*)/i;
+
 export type ResponseTemplate = {
   type: "field_request" | "document_generation" | "error" | "clarification";
   format: string;
@@ -210,25 +251,25 @@ function isDocument(response: string): boolean {
 export function cleanResponse(response: string): string {
   let cleaned = response;
 
-  // Remove common pleasantries at the start
+  // Remove common pleasantries at the start (using top-level patterns)
   const pleasantryPrefixes = [
-    /^I'd be happy to help[^.!]*[.!]\s*/i,
-    /^Sure[^.!]*[.!]\s*/i,
-    /^Certainly[^.!]*[.!]\s*/i,
-    /^I can assist[^.!]*[.!]\s*/i,
-    /^Let me help[^.!]*[.!]\s*/i,
+    PLEASANTRY_HAPPY,
+    PLEASANTRY_SURE,
+    PLEASANTRY_CERTAINLY,
+    PLEASANTRY_ASSIST,
+    PLEASANTRY_LETME,
   ];
 
   for (const prefix of pleasantryPrefixes) {
     cleaned = cleaned.replace(prefix, "");
   }
 
-  // Remove explanatory suffixes
+  // Remove explanatory suffixes (using top-level patterns)
   const explanatorySuffixes = [
-    /\n\nOnce I have this information[^.]*\./gi,
-    /\n\nI'll generate[^.]*\./gi,
-    /\n\nWould you like[^?]*\?/gi,
-    /\n\nPlease let me know[^.]*\./gi,
+    SUFFIX_ONCE_HAVE,
+    SUFFIX_ILL_GENERATE,
+    SUFFIX_WOULD_YOU,
+    SUFFIX_PLEASE_LET,
   ];
 
   for (const suffix of explanatorySuffixes) {
@@ -250,12 +291,12 @@ export type ExtractedField = {
 export function extractFieldsFromMessage(message: string): ExtractedField[] {
   const extracted: ExtractedField[] = [];
 
-  // Client name patterns
+  // Client name patterns (using top-level patterns)
   const clientPatterns = [
-    /the client is ([^,.\n]+)/i,
-    /client is ([^,.\n]+)/i,
-    /([^,.\n]+) is the client/i,
-    /for ([A-Z][a-z]+ [A-Z][a-z]+)/,
+    CLIENT_IS_PATTERN,
+    CLIENT_IS_ALT,
+    CLIENT_IS_REVERSE,
+    CLIENT_FOR_PATTERN,
   ];
 
   for (const pattern of clientPatterns) {
@@ -270,12 +311,8 @@ export function extractFieldsFromMessage(message: string): ExtractedField[] {
     }
   }
 
-  // Time patterns
-  const timePatterns = [
-    /tomorrow at (\d{1,2}:\d{2}|\d{1,2}(?:am|pm))/i,
-    /today at (\d{1,2}:\d{2}|\d{1,2}(?:am|pm))/i,
-    /at (\d{1,2}:\d{2})/i,
-  ];
+  // Time patterns (using top-level patterns)
+  const timePatterns = [TIME_TOMORROW, TIME_TODAY, TIME_AT];
 
   for (const pattern of timePatterns) {
     const match = message.match(pattern);
@@ -289,12 +326,12 @@ export function extractFieldsFromMessage(message: string): ExtractedField[] {
     }
   }
 
-  // Registration type patterns
+  // Registration type patterns (using top-level patterns)
   const registrationPatterns = [
-    /(registration developer|developer registration)/i,
-    /(standard registration|registration standard)/i,
-    /(bank registration|registration bank)/i,
-    /(email marketing|marketing email)/i,
+    REG_DEVELOPER,
+    REG_STANDARD,
+    REG_BANK,
+    REG_EMAIL,
   ];
 
   for (const pattern of registrationPatterns) {
@@ -309,12 +346,8 @@ export function extractFieldsFromMessage(message: string): ExtractedField[] {
     }
   }
 
-  // Property patterns
-  const propertyPatterns = [
-    /property (?:reg\.? ?no\.?|registration) ?(\d+\/\d+)/i,
-    /reg\.? ?no\.? ?(\d+\/\d+)/i,
-    /property (\d+\/\d+)/i,
-  ];
+  // Property patterns (using top-level patterns)
+  const propertyPatterns = [PROP_REG_NO, PROP_REG_ALT, PROP_SIMPLE];
 
   for (const pattern of propertyPatterns) {
     const match = message.match(pattern);
@@ -328,12 +361,8 @@ export function extractFieldsFromMessage(message: string): ExtractedField[] {
     }
   }
 
-  // Price patterns
-  const pricePatterns = [
-    /€(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/,
-    /(\d{1,3}(?:,\d{3})*) ?(?:euro|EUR)/i,
-    /asking (\d{1,3}(?:,\d{3})*)/i,
-  ];
+  // Price patterns (using top-level patterns)
+  const pricePatterns = [PRICE_EURO, PRICE_WORD, PRICE_ASKING];
 
   for (const pattern of pricePatterns) {
     const match = message.match(pattern);

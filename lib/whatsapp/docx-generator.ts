@@ -7,6 +7,11 @@ import {
   TextRun,
 } from "docx";
 
+// Top-level regex patterns for DOCX generation (performance optimization)
+const BOLD_TEXT_PATTERN = /\*\*([^*]+)\*\*/g;
+const BOLD_START_PATTERN = /^\*\*/;
+const BOLD_END_PATTERN = /\*\*$/;
+
 /**
  * Parse text with bold markers (**text**) into segments
  */
@@ -17,11 +22,12 @@ type TextSegment = {
 
 function parseBoldText(line: string): TextSegment[] {
   const parts: TextSegment[] = [];
-  const regex = /\*\*([^*]+)\*\*/g;
+  // Create a fresh regex instance for each call (avoids lastIndex issues)
+  const regex = new RegExp(BOLD_TEXT_PATTERN.source, BOLD_TEXT_PATTERN.flags);
   let lastIndex = 0;
-  let match;
+  let match: RegExpExecArray | null = regex.exec(line);
 
-  while ((match = regex.exec(line)) !== null) {
+  while (match !== null) {
     // Add text before the match
     if (match.index > lastIndex) {
       const textBefore = line.slice(lastIndex, match.index);
@@ -32,6 +38,7 @@ function parseBoldText(line: string): TextSegment[] {
     // Add the bold text
     parts.push({ text: match[1], bold: true });
     lastIndex = match.index + match[0].length;
+    match = regex.exec(line);
   }
 
   // Add remaining text
@@ -73,7 +80,9 @@ export async function generateDocx(content: string): Promise<Buffer> {
       !line.includes("**", 2)
     ) {
       // This is a title/header
-      const headerText = line.replace(/^\*\*/, "").replace(/\*\*$/, "");
+      const headerText = line
+        .replace(BOLD_START_PATTERN, "")
+        .replace(BOLD_END_PATTERN, "");
       children.push(
         new Paragraph({
           children: [

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
  * IntegrationsOverview - Placeholder component
  * TODO: Implement integrationStatus table in schema when needed
  */
-export async function IntegrationsOverview() {
+export function IntegrationsOverview() {
   return (
     <Card>
       <CardHeader>

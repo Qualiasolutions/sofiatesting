@@ -32,7 +32,10 @@ export async function identifyAgentByTelegram(
   telegramUserId: string | number
 ): Promise<IdentifiedAgent | null> {
   // Convert number to string if needed (Telegram sends numbers)
-  const userIdStr = typeof telegramUserId === "number" ? String(telegramUserId) : telegramUserId;
+  const userIdStr =
+    typeof telegramUserId === "number"
+      ? String(telegramUserId)
+      : telegramUserId;
   try {
     const [agent] = await db
       .select()
