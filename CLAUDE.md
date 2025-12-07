@@ -23,15 +23,14 @@ SOFIA is a Next.js 15 AI assistant for Zyprus Property Group (Cyprus real estate
 
 ## AI Configuration
 
-**Google Gemini API is mandatory** - set `GOOGLE_GENERATIVE_AI_API_KEY` or `GEMINI_API_KEY`.
+**Google Gemini API is mandatory** - set `GOOGLE_GENERATIVE_AI_API_KEY` or `GEMINI_API_KEY`. Using **Tier 1** (paid) for higher rate limits.
 
 | Model ID | Actual Model | Use Case |
 |----------|-------------|----------|
-| `chat-model` | Gemini 2.5 Flash | Default (best price-performance) |
-| `chat-model-flash` | Gemini 2.5 Flash | Alias for chat-model |
-| `chat-model-pro` | Gemini 2.5 Pro | Complex reasoning, extended context |
-| `chat-model-gemini3` | Gemini 3n Pro Preview | Latest model, 1M context, multi-modal, audio input |
-| `chat-model-flash-lite` | Gemini 2.5 Flash-Lite | Ultra-fast, cheapest |
+| `chat-model` | Gemini 3 Pro Preview | **Default** - Best reasoning, 1M context, multimodal ($2/M in, $12/M out) |
+| `chat-model-flash` | Gemini 2.5 Flash | Fast with good quality ($0.075/M in, $0.30/M out) |
+| `chat-model-pro` | Gemini 2.5 Pro | Previous gen reasoning ($1.25/M in, $5/M out) |
+| `chat-model-flash-lite` | Gemini 2.5 Flash-Lite | Ultra-fast, cheapest ($0.0375/M in, $0.15/M out) |
 
 ## Database
 

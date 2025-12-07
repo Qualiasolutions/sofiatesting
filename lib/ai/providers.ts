@@ -82,23 +82,24 @@ export const myProvider = isTestEnvironment
         });
       }
 
-      // Pure Gemini API approach - Gemini 2.5 models (latest generation)
-      // Default to Gemini 2.5 Flash - best price-performance ratio
-      const defaultModel = google("gemini-2.5-flash");
+      // Pure Gemini API approach - Gemini 3 Pro as default (Dec 2024)
+      // Default to Gemini 3 Pro Preview - best reasoning & multimodal model
+      const defaultModel = google("gemini-3-pro-preview");
 
       return customProvider({
         languageModels: {
-          // Primary model: Gemini 2.5 Flash (default)
-          // Best price-performance with thinking capabilities
+          // Primary model: Gemini 3 Pro Preview (default)
+          // Best reasoning, 1M context, multimodal (text, image, video, audio, PDF)
+          // Pricing: $2/1M input, $12/1M output (Tier 1 rates)
           "chat-model": defaultModel,
-          "title-model": defaultModel,
+          "title-model": google("gemini-2.5-flash"), // Fast model for titles
           "artifact-model": defaultModel,
 
-          // Gemini 2.5 Pro - Most powerful reasoning model
-          // Extended context, advanced thinking, best for complex tasks
+          // Gemini 2.5 Pro - Previous generation reasoning model
+          // Good fallback if Gemini 3 has issues
           "chat-model-pro": google("gemini-2.5-pro"),
 
-          // Gemini 3 Pro - Latest and most intelligent model
+          // Gemini 3 Pro - Explicit alias for default
           // 1M context window, best for complex multi-modal tasks
           "chat-model-gemini3": google("gemini-3-pro-preview"),
 
@@ -106,7 +107,8 @@ export const myProvider = isTestEnvironment
           // Optimized for high throughput, simple tasks
           "chat-model-flash-lite": google("gemini-2.5-flash-lite"),
 
-          // Alternative naming for consistency
+          // Gemini 2.5 Flash - Fast with good quality
+          // Best price-performance for simpler queries
           "chat-model-flash": google("gemini-2.5-flash"),
         },
       });

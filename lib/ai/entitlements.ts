@@ -13,7 +13,8 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
   guest: {
     maxMessagesPerDay: 100,
     availableChatModelIds: [
-      "chat-model", // Gemini 2.5 Flash (default)
+      "chat-model", // Gemini 3 Pro Preview (default)
+      "chat-model-flash", // Gemini 2.5 Flash (fast)
       "chat-model-pro", // Gemini 2.5 Pro
       "chat-model-flash-lite", // Gemini 2.5 Flash-Lite
     ],
@@ -25,7 +26,8 @@ export const entitlementsByUserType: Record<UserType, Entitlements> = {
   regular: {
     maxMessagesPerDay: 10_000,
     availableChatModelIds: [
-      "chat-model", // Gemini 2.5 Flash (default)
+      "chat-model", // Gemini 3 Pro Preview (default)
+      "chat-model-flash", // Gemini 2.5 Flash (fast)
       "chat-model-pro", // Gemini 2.5 Pro
       "chat-model-flash-lite", // Gemini 2.5 Flash-Lite
     ],

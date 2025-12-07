@@ -1,4 +1,4 @@
-export const DEFAULT_CHAT_MODEL: string = "chat-model"; // Gemini 2.5 Flash (default)
+export const DEFAULT_CHAT_MODEL: string = "chat-model"; // Gemini 3 Pro Preview (default)
 
 export type ChatModel = {
   id: string;
@@ -9,21 +9,21 @@ export type ChatModel = {
 export const chatModels: ChatModel[] = [
   {
     id: "chat-model",
+    name: "Gemini 3 Pro",
+    description:
+      "Best reasoning & multimodal • 1M context, $2/M input, $12/M output (Default)",
+  },
+  {
+    id: "chat-model-flash",
     name: "Gemini 2.5 Flash",
     description:
-      "Best price-performance with thinking • $0.075/M input, $0.30/M output (Default)",
+      "Fast with good quality • $0.075/M input, $0.30/M output",
   },
   {
     id: "chat-model-pro",
     name: "Gemini 2.5 Pro",
     description:
-      "Most powerful reasoning model • $1.25/M input, $5.00/M output",
-  },
-  {
-    id: "chat-model-gemini3",
-    name: "Gemini 3 Pro",
-    description:
-      "Latest & most intelligent • 1M context, $2/M input, $12/M output (Preview)",
+      "Previous gen reasoning model • $1.25/M input, $5.00/M output",
   },
   {
     id: "chat-model-flash-lite",
@@ -34,5 +34,5 @@ export const chatModels: ChatModel[] = [
 
 // Semantic Model Roles
 export const ROUTER_MODEL = "chat-model-flash-lite"; // Cheap & Fast for triage
-export const WORKER_MODEL = "chat-model"; // Balanced for general chat
-export const EXPERT_MODEL = "chat-model-pro"; // For complex reasoning
+export const WORKER_MODEL = "chat-model"; // Gemini 3 Pro for general chat
+export const EXPERT_MODEL = "chat-model"; // Gemini 3 Pro is now the best
