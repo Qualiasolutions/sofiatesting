@@ -49,6 +49,53 @@ let cachedToken: OAuthToken | null = null;
 let tokenExpiresAt = 0;
 
 /**
+ * Generate a unique reference ID from owner details
+ * Format: [last 4 phone digits]-[email prefix 4 chars]-[title deed number]
+ * Fallback: AI-[8 char UUID] if no owner info provided
+ */
+export const generateReferenceId = (listing: {
+  ownerPhone?: string | null;
+  ownerEmail?: string | null;
+  titleDeedNumber?: string | null;
+}): string => {
+  const parts: string[] = [];
+
+  // Extract last 4 digits of phone
+  if (listing.ownerPhone) {
+    const phoneDigits = listing.ownerPhone.replace(/\D/g, "");
+    if (phoneDigits.length >= 4) {
+      parts.push(phoneDigits.slice(-4));
+    }
+  }
+
+  // Extract email prefix (before @), max 4 chars uppercase
+  if (listing.ownerEmail) {
+    const emailPrefix = listing.ownerEmail
+      .split("@")[0]
+      .slice(0, 4)
+      .toUpperCase();
+    if (emailPrefix.length > 0) {
+      parts.push(emailPrefix);
+    }
+  }
+
+  // Add title deed number if available (remove spaces)
+  if (listing.titleDeedNumber) {
+    const cleanDeed = listing.titleDeedNumber.replace(/\s/g, "");
+    if (cleanDeed.length > 0) {
+      parts.push(cleanDeed);
+    }
+  }
+
+  // Fallback to UUID if no owner info
+  if (parts.length === 0) {
+    return `AI-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+  }
+
+  return parts.join("-");
+};
+
+/**
  * Internal OAuth token fetch (wrapped by circuit breaker)
  */
 async function fetchAccessTokenInternal(): Promise<string> {
@@ -379,7 +426,13 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
           String((listing as any).numberOfLivingRooms || 1),
           10
         ), // Parse as integer
-        field_own_reference_id: listing.referenceId || `AI-${Date.now()}`,
+        field_own_reference_id:
+          listing.referenceId ||
+          generateReferenceId({
+            ownerPhone: listing.ownerPhone,
+            ownerEmail: (listing as any).ownerEmail,
+            titleDeedNumber: (listing as any).titleDeedNumber,
+          }),
         field_year_built: Number.parseInt(
           String(listing.yearBuilt || new Date().getFullYear()),
           10
@@ -840,7 +893,13 @@ async function uploadLandToZyprusAPIInternal(
         field_site_coverage: listing.siteCoverage || null,
         field_floors: listing.maxFloors || null,
         field_height: listing.maxHeight || null,
-        field_own_reference_id: listing.referenceId || `AI-LAND-${Date.now()}`,
+        field_own_reference_id:
+          listing.referenceId ||
+          generateReferenceId({
+            ownerPhone: listing.phoneNumber,
+            ownerEmail: null,
+            titleDeedNumber: null,
+          }),
         // NOTE: field_phone_number removed - OAuth client doesn't have permission
         field_property_notes: listing.notes || null,
         field_map: hasCoordinates
