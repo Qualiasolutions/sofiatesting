@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "../db/client";
 import {
   leadForwardingRotation,
@@ -9,6 +9,15 @@ import {
 } from "../db/schema";
 import { getTelegramClient } from "./client";
 import type { TelegramMessage } from "./types";
+import {
+  AGENT_REQUEST_PATTERN,
+  LIMASSOL_AGENTS,
+  OTHERS_GROUP_AGENTS,
+  RUSSIAN_SPEAKER_AGENT,
+  detectRussianLanguage,
+  isLimassolRegion,
+  isOthersGroup,
+} from "./routing-constants";
 
 // Top-level regex for lead mention detection
 const LEAD_MENTION_PATTERN =
@@ -169,18 +178,53 @@ function detectRegionFromName(name: string | undefined): string | null {
 
 /**
  * Get the target agent(s) for lead forwarding based on region
+ * Implements SOPHIA spec routing rules:
+ * - Limassol: ONLY Michelle Longridge or Diana Kultaseva
+ * - Others group: ONLY Lauren Ellingham or Charalambos Pitros
+ * - Other regions: Standard regional routing
  */
 async function getTargetAgents(
   region: string | null,
+  groupType: string | null,
   _propertyId?: string | null
 ): Promise<(typeof zyprusAgent.$inferSelect)[]> {
   try {
-    // For Limassol, get agents with Limassol region
-    // For Paphos, get the listing owner or office email
-    // For others, get the regional manager
+    // RULE 1: Limassol leads go ONLY to Michelle or Diana
+    // Per spec: "RULE: Never forward to individual agents, FORWARD TO: Michelle OR Diana (only these two)"
+    if (isLimassolRegion(region)) {
+      console.log("Limassol region detected - routing to Michelle/Diana only");
+      const agents = await db
+        .select()
+        .from(zyprusAgent)
+        .where(
+          and(
+            inArray(zyprusAgent.fullName, LIMASSOL_AGENTS),
+            eq(zyprusAgent.isActive, true)
+          )
+        );
+      return agents;
+    }
 
+    // RULE 2: "Zyprus Others" group leads go ONLY to Lauren or Charalambos
+    // Per spec: "Restricted to Lauren and Haralambos only"
+    if (groupType && isOthersGroup(groupType)) {
+      console.log(
+        "Others group detected - routing to Lauren/Charalambos only"
+      );
+      const agents = await db
+        .select()
+        .from(zyprusAgent)
+        .where(
+          and(
+            inArray(zyprusAgent.fullName, OTHERS_GROUP_AGENTS),
+            eq(zyprusAgent.isActive, true)
+          )
+        );
+      return agents;
+    }
+
+    // RULE 3: For "All Leads" group, get active agents who can receive leads
     if (!region || region === "All") {
-      // Get all active agents for "All Leads" group
       const agents = await db
         .select()
         .from(zyprusAgent)
@@ -194,6 +238,7 @@ async function getTargetAgents(
       return agents;
     }
 
+    // RULE 4: For other regions (Paphos, Larnaca, Nicosia, Famagusta)
     // Get agents for specific region
     const agents = await db
       .select()
@@ -211,6 +256,66 @@ async function getTargetAgents(
     console.error("Error getting target agents:", error);
     return [];
   }
+}
+
+/**
+ * Detect if a client requests a specific agent by name
+ * Per spec: "Client wants to speak with [Agent Name]" → Forward directly to named agent
+ */
+async function detectRequestedAgent(
+  messageText: string
+): Promise<(typeof zyprusAgent.$inferSelect) | null> {
+  const match = messageText.match(AGENT_REQUEST_PATTERN);
+  if (!match) return null;
+
+  const requestedName = match[1].trim();
+  console.log(`Detected agent request for: "${requestedName}"`);
+
+  // Look for partial name match (first name or full name)
+  const agents = await db
+    .select()
+    .from(zyprusAgent)
+    .where(
+      and(
+        or(
+          ilike(zyprusAgent.fullName, `${requestedName}%`),
+          ilike(zyprusAgent.fullName, `% ${requestedName}%`)
+        ),
+        eq(zyprusAgent.isActive, true)
+      )
+    )
+    .limit(1);
+
+  if (agents.length > 0) {
+    console.log(`Found requested agent: ${agents[0].fullName}`);
+    return agents[0];
+  }
+
+  console.log(`No agent found matching: "${requestedName}"`);
+  return null;
+}
+
+/**
+ * Select the best agent for Limassol leads, considering Russian language preference
+ * Per spec: "CONDITION: If lead appears Russian-speaking → prefer Diana"
+ */
+function selectLimassolAgent(
+  agents: (typeof zyprusAgent.$inferSelect)[],
+  isRussianSpeaking: boolean
+): (typeof zyprusAgent.$inferSelect) | null {
+  if (agents.length === 0) return null;
+
+  // If Russian-speaking, prefer Diana
+  if (isRussianSpeaking) {
+    const diana = agents.find((a) => a.fullName === RUSSIAN_SPEAKER_AGENT);
+    if (diana) {
+      console.log("Russian-speaking lead detected - routing to Diana");
+      return diana;
+    }
+  }
+
+  // Otherwise return first available (will be rotated)
+  return agents[0];
 }
 
 /**
@@ -305,6 +410,45 @@ async function updateRotationState(
 }
 
 /**
+ * Check if a lead was already forwarded recently (deduplication)
+ * Prevents the same property from being forwarded multiple times within 10 minutes
+ */
+async function isRecentDuplicate(
+  propertyId: string | null,
+  sourceGroupId: number
+): Promise<boolean> {
+  if (!propertyId) return false;
+
+  const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+
+  try {
+    const recentLeads = await db
+      .select({ id: telegramLead.id })
+      .from(telegramLead)
+      .where(
+        and(
+          eq(telegramLead.propertyReferenceId, propertyId),
+          eq(telegramLead.sourceGroupId, sourceGroupId),
+          sql`${telegramLead.createdAt} > ${tenMinutesAgo}`
+        )
+      )
+      .limit(1);
+
+    if (recentLeads.length > 0) {
+      console.log(
+        `Duplicate lead detected: ${propertyId} already forwarded within last 10 minutes`
+      );
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error checking for duplicate lead:", error);
+    return false; // On error, allow the lead through
+  }
+}
+
+/**
  * Log a lead in the database
  */
 async function logLead(data: {
@@ -318,6 +462,7 @@ async function logLead(data: {
   forwardedToAgentId: string | null;
   forwardedToTelegramId: string | null;
   region: string | null;
+  clientLanguage?: string;
 }): Promise<void> {
   try {
     await db.insert(telegramLead).values({
@@ -333,6 +478,7 @@ async function logLead(data: {
         ? Number(data.forwardedToTelegramId)
         : null,
       propertyRegion: data.region,
+      clientLanguage: data.clientLanguage || null,
       status: "forwarded",
     });
   } catch (error) {
@@ -343,6 +489,12 @@ async function logLead(data: {
 /**
  * Handle messages from Telegram groups
  * Main entry point for lead management
+ *
+ * Implements SOPHIA AI spec routing rules:
+ * 1. If client requests specific agent → route directly to that agent
+ * 2. Limassol leads → Michelle or Diana only (prefer Diana for Russian speakers)
+ * 3. "Zyprus Others" group → Lauren or Charalambos only
+ * 4. Other regions → standard regional routing with fair rotation
  */
 export async function handleGroupMessage(
   message: TelegramMessage
@@ -373,10 +525,47 @@ export async function handleGroupMessage(
   }
 
   const region = group?.region || detectRegionFromName(message.chat.title);
+  const groupType = group?.groupType || detectGroupType(message.chat.title);
   const primaryPropertyId = propertyIds[0] || null;
 
-  // Get target agents for this region
-  const targetAgents = await getTargetAgents(region, primaryPropertyId);
+  // Check for duplicate lead (same property forwarded within 10 minutes)
+  if (primaryPropertyId) {
+    const isDuplicate = await isRecentDuplicate(primaryPropertyId, chatId);
+    if (isDuplicate) {
+      // Silently ignore duplicate leads
+      console.log(`Skipping duplicate lead for property: ${primaryPropertyId}`);
+      return;
+    }
+  }
+
+  // Detect client language (Russian vs other)
+  const senderName = message.from
+    ? `${message.from.first_name || ""} ${message.from.last_name || ""}`.trim()
+    : "";
+  const isRussianSpeaking = detectRussianLanguage(messageText, senderName);
+  const clientLanguage = isRussianSpeaking ? "russian" : "english";
+
+  // RULE 0: Check if client requests a specific agent
+  // Per spec: "Client wants to speak with [Agent Name]" → Forward directly to named agent
+  const requestedAgent = await detectRequestedAgent(messageText);
+  if (requestedAgent) {
+    console.log(
+      `Client requested specific agent: ${requestedAgent.fullName}`
+    );
+    await forwardLeadToAgent(
+      telegramClient,
+      message,
+      requestedAgent,
+      primaryPropertyId,
+      region,
+      clientLanguage,
+      "Requested by client"
+    );
+    return;
+  }
+
+  // Get target agents based on region and group type
+  const targetAgents = await getTargetAgents(region, groupType, primaryPropertyId);
 
   if (targetAgents.length === 0) {
     console.log("No target agents found for region:", region);
@@ -410,77 +599,123 @@ export async function handleGroupMessage(
     return;
   }
 
-  // Select next agent using fair rotation
+  // Select agent based on routing rules
+  let selectedAgent: (typeof zyprusAgent.$inferSelect) | null = null;
   const effectiveRegion = region || "all";
-  const nextAgent = await getNextAgentInRotation(
-    effectiveRegion,
-    agentsWithTelegram
-  );
 
-  let forwardedAgentId: string | null = null;
-  let forwardedTelegramId: string | null = null;
-  let forwardedAgentName: string | null = null;
-
-  if (nextAgent?.telegramUserId) {
-    try {
-      // Forward the original message
-      await telegramClient.forwardMessage({
-        chatId: nextAgent.telegramUserId,
-        fromChatId: chatId,
-        messageId: message.message_id,
-      });
-
-      // Send context message with property and sender info
-      await telegramClient.sendMessage({
-        chatId: nextAgent.telegramUserId,
-        text: `New lead from ${message.chat.title || "Zyprus Group"}${
-          primaryPropertyId ? `\nProperty: ${primaryPropertyId}` : ""
-        }\nFrom: ${message.from?.first_name || "Unknown"} ${
-          message.from?.last_name || ""
-        }\nRegion: ${effectiveRegion}`,
-      });
-
-      forwardedAgentId = nextAgent.id;
-      forwardedTelegramId = nextAgent.telegramUserId;
-      forwardedAgentName = nextAgent.fullName;
-
-      // Update rotation state for fair distribution
-      await updateRotationState(effectiveRegion, nextAgent.id);
-
-      console.log(
-        `Lead forwarded to ${nextAgent.fullName} (rotation for ${effectiveRegion})`
+  // For Limassol, apply Russian-speaking preference
+  if (isLimassolRegion(region)) {
+    selectedAgent = selectLimassolAgent(agentsWithTelegram, isRussianSpeaking);
+    // If Russian speaker selected Diana, don't use rotation
+    if (!isRussianSpeaking) {
+      selectedAgent = await getNextAgentInRotation(
+        "limassol",
+        agentsWithTelegram
       );
-    } catch (error) {
-      console.error(`Failed to forward to agent ${nextAgent.fullName}:`, error);
     }
+  } else {
+    // Standard rotation for other regions
+    selectedAgent = await getNextAgentInRotation(
+      effectiveRegion,
+      agentsWithTelegram
+    );
   }
 
-  // Log the lead
-  await logLead({
-    propertyReferenceId: primaryPropertyId,
-    sourceGroupId: chatId,
-    sourceGroupName: message.chat.title || null,
-    originalMessageId: message.message_id.toString(),
-    originalMessageText: messageText.substring(0, 2000),
-    senderTelegramId: message.from?.id || null,
-    senderName: message.from
-      ? `${message.from.first_name} ${message.from.last_name || ""}`.trim()
-      : null,
-    forwardedToAgentId: forwardedAgentId,
-    forwardedToTelegramId: forwardedTelegramId,
-    region,
-  });
+  if (!selectedAgent) {
+    console.log("No agent selected after rotation");
+    return;
+  }
 
-  // Acknowledge in group
-  if (forwardedAgentName) {
+  // Forward the lead
+  await forwardLeadToAgent(
+    telegramClient,
+    message,
+    selectedAgent,
+    primaryPropertyId,
+    region,
+    clientLanguage,
+    effectiveRegion
+  );
+
+  // Update rotation state for fair distribution (skip for Russian-speaking Limassol)
+  if (!(isLimassolRegion(region) && isRussianSpeaking)) {
+    await updateRotationState(effectiveRegion, selectedAgent.id);
+  }
+}
+
+/**
+ * Forward a lead to a specific agent
+ * Handles the actual Telegram forwarding and logging
+ */
+async function forwardLeadToAgent(
+  telegramClient: ReturnType<typeof getTelegramClient>,
+  message: TelegramMessage,
+  agent: typeof zyprusAgent.$inferSelect,
+  propertyId: string | null,
+  region: string | null,
+  clientLanguage: string,
+  routingReason: string
+): Promise<void> {
+  const chatId = message.chat.id;
+  const messageText = message.text || message.caption || "";
+
+  if (!agent.telegramUserId) {
+    console.log(`Agent ${agent.fullName} has no Telegram ID`);
+    return;
+  }
+
+  try {
+    // Forward the original message
+    await telegramClient.forwardMessage({
+      chatId: agent.telegramUserId,
+      fromChatId: chatId,
+      messageId: message.message_id,
+    });
+
+    // Send context message with property and sender info
+    await telegramClient.sendMessage({
+      chatId: agent.telegramUserId,
+      text: `New lead from ${message.chat.title || "Zyprus Group"}${
+        propertyId ? `\nProperty: ${propertyId}` : ""
+      }\nFrom: ${message.from?.first_name || "Unknown"} ${
+        message.from?.last_name || ""
+      }\nRegion: ${region || "Unknown"}${
+        clientLanguage === "russian" ? "\nLanguage: Russian" : ""
+      }`,
+    });
+
+    console.log(
+      `Lead forwarded to ${agent.fullName} (${routingReason})`
+    );
+
+    // Log the lead
+    await logLead({
+      propertyReferenceId: propertyId,
+      sourceGroupId: chatId,
+      sourceGroupName: message.chat.title || null,
+      originalMessageId: message.message_id.toString(),
+      originalMessageText: messageText.substring(0, 2000),
+      senderTelegramId: message.from?.id || null,
+      senderName: message.from
+        ? `${message.from.first_name} ${message.from.last_name || ""}`.trim()
+        : null,
+      forwardedToAgentId: agent.id,
+      forwardedToTelegramId: agent.telegramUserId,
+      region,
+      clientLanguage,
+    });
+
+    // Acknowledge in group
     try {
       await telegramClient.sendMessage({
         chatId,
-        text: `Lead forwarded to ${forwardedAgentName}`,
+        text: `Lead forwarded to ${agent.fullName}`,
         replyToMessageId: message.message_id,
       });
     } catch (error) {
       console.error("Failed to send acknowledgment:", error);
     }
+  } catch (error) {
+    console.error(`Failed to forward to agent ${agent.fullName}:`, error);
   }
 }

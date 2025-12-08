@@ -127,6 +127,13 @@
       "when": 1764919339745,
       "tag": "0017_flimsy_psylocke",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1765156610893,
+      "tag": "0018_wide_proudstar",
+      "breakpoints": true
     }
   ]
 }

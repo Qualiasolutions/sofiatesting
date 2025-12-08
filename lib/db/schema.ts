@@ -569,6 +569,7 @@ export const zyprusAgent = pgTable(
     userId: uuid("userId").references(() => user.id), // Optional - set after agent registers
     fullName: text("fullName").notNull(), // Agent full name
     email: varchar("email", { length: 255 }).notNull().unique(),
+    listingOwnerEmail: varchar("listingOwnerEmail", { length: 255 }), // Different email for Zyprus listing ownership (null = same as email)
     phoneNumber: varchar("phoneNumber", { length: 20 }), // Cyprus mobile: +357 XX XXX XXX
     region: varchar("region", { length: 50 }).notNull(), // Limassol, Paphos, Larnaca, Famagusta, Nicosia, All
     role: varchar("role", { length: 50 }).notNull(), // CEO, Manager Limassol, Manager Paphos, Normal Agent, Listing Admin

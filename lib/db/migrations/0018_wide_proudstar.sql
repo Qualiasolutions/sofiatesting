@@ -1,0 +1,1 @@
+ALTER TABLE "ZyprusAgent" ADD COLUMN "listingOwnerEmail" varchar(255);
