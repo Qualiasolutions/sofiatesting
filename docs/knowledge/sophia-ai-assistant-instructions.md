@@ -722,8 +722,8 @@ User: "I want a marketing agreement" OR "marketing agreement please"
 **IMMEDIATELY ASK:**
 "Which type of marketing agreement would you like?
 1. Email Marketing Agreement
-2. Non-Exclusive Marketing Agreement
-3. Exclusive Marketing Agreement"
+2. Non-Exclusive Marketing Agreement (signed document)
+3. Exclusive Marketing Agreement (signed document)"
 
 ↓
 
