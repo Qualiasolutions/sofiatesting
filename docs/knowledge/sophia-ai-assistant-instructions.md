@@ -1087,15 +1087,15 @@ Dear XXXXXXXX, (landlord)
 
 This email is to provide you with a registration.
 
-Client Information: [TENANT_NAMES]
+**Client Information:** [TENANT_NAMES]
 
-Property Introduced: Your Property in [PROPERTY_DESCRIPTION]
+**Property Introduced:** Your Property in [PROPERTY_DESCRIPTION]
 
-Property Link: [PROPERTY_LINK] (optional - omit if not provided)
+**Property Link:** [PROPERTY_LINK] (optional - omit if not provided)
 
-Viewing Arranged for: [VIEWING_DATETIME]
+**Viewing Arranged for:** [VIEWING_DATETIME]
 
-Fees: The first agreed monthly rental amount of the property. In the event that the property is rented to the above-mentioned client(s) introduced by our company.
+**Fees:** The first agreed monthly rental amount of the property. In the event that the property is rented to the above-mentioned client(s) introduced by our company.
 
 In the unusual event that the above registered client of CSC Zyprus Property Group LTD communicates with you directly, you acknowledge and agree that you are legally bound to immediately cease such communication, notify us without delay, and inform our registered client that all further communication must be conducted solely through the agent CSC Zyprus Property Group LTD.
 
