@@ -1,20 +1,6 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Sofia AI Features", () => {
-  test.beforeEach(async ({ context }) => {
-    // Set access cookie
-    await context.addCookies([
-      {
-        name: "qualia-access",
-        value: "granted",
-        domain: "localhost",
-        path: "/",
-        httpOnly: true,
-        secure: false,
-      },
-    ]);
-  });
-
   test("Document generation works", async ({ page }) => {
     // Navigate to main page
     await page.goto("http://localhost:3000");

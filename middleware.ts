@@ -13,11 +13,6 @@ export async function middleware(request: NextRequest) {
     return new Response("pong", { status: 200 });
   }
 
-  // Allow access to the access page
-  if (pathname.startsWith("/access")) {
-    return NextResponse.next();
-  }
-
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
@@ -25,12 +20,6 @@ export async function middleware(request: NextRequest) {
   // Allow API routes (they handle their own auth)
   if (pathname.startsWith("/api/")) {
     return NextResponse.next();
-  }
-
-  // Check for access code first (for page routes only)
-  const accessCookie = request.cookies.get("qualia-access");
-  if (!accessCookie || accessCookie.value !== "granted") {
-    return NextResponse.redirect(new URL("/access", request.url));
   }
 
   const token = await getToken({
