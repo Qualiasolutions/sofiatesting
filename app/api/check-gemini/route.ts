@@ -1,6 +1,20 @@
 import { NextResponse } from "next/server";
+import { checkAdminAuth } from "@/lib/auth/admin";
 
 export async function GET() {
+  // Only allow in development or for admins
+  const isDev = process.env.NODE_ENV === "development";
+
+  if (!isDev) {
+    const adminCheck = await checkAdminAuth();
+    if (!adminCheck.isAdmin) {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
+    }
+  }
+
   const keys = {
     gemini: process.env.GEMINI_API_KEY,
     google: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
@@ -18,13 +32,11 @@ export async function GET() {
     );
     const data = await response.json();
 
+    // Never expose key prefix in response
     return NextResponse.json({
       hasGeminiKey: !!keys.gemini,
       hasGoogleKey: !!keys.google,
-      keyPrefix: `${activeKey.substring(0, 20)}...`,
-      keyLength: activeKey.length,
       isValid: !data.error,
-      error: data.error,
       modelCount: data.models?.length || 0,
     });
   } catch (error) {

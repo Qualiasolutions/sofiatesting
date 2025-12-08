@@ -2,8 +2,8 @@ import type { InferUITool, UIMessage } from "ai";
 import { z } from "zod";
 import type { ArtifactKind } from "@/components/artifact";
 import type { createDocument } from "./ai/tools/create-document";
-
 import type { requestSuggestions } from "./ai/tools/request-suggestions";
+import type { sendDocument } from "./ai/tools/send-document";
 import type { updateDocument } from "./ai/tools/update-document";
 import type { Suggestion } from "./db/schema";
 import type { AppUsage } from "./usage";
@@ -21,11 +21,26 @@ type updateDocumentTool = InferUITool<ReturnType<typeof updateDocument>>;
 type requestSuggestionsTool = InferUITool<
   ReturnType<typeof requestSuggestions>
 >;
+type sendDocumentTool = InferUITool<ReturnType<typeof sendDocument>>;
 
 export type ChatTools = {
   createDocument: createDocumentTool;
   updateDocument: updateDocumentTool;
   requestSuggestions: requestSuggestionsTool;
+  sendDocument: sendDocumentTool;
+};
+
+// Type for document sending data stream
+export type SendDocumentData = {
+  id: string;
+  title: string;
+  url: string;
+  content: string;
+  size: number;
+  suggestedRecipientName?: string;
+  suggestedRecipientEmail?: string;
+  suggestedRecipientPhone?: string;
+  suggestedMethod: "email" | "whatsapp" | "download";
 };
 
 export type CustomUIDataTypes = {
@@ -41,6 +56,7 @@ export type CustomUIDataTypes = {
   clear: null;
   finish: null;
   usage: AppUsage;
+  "send-document": SendDocumentData;
 };
 
 export type ChatMessage = UIMessage<

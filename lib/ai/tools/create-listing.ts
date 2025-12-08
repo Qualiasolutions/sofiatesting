@@ -5,9 +5,12 @@ import { getUserContext } from "@/lib/ai/context";
 import {
   createPropertyListing,
   logListingUploadAttempt,
+  updateListingDuplicateStatus,
   updateListingStatus,
 } from "@/lib/db/queries";
 import {
+  checkForDuplicates,
+  generateReferenceId,
   isPermanentError,
   uploadToZyprusAPI,
   ZyprusAPIError,
@@ -176,6 +179,18 @@ export const createListingTool = tool({
       .describe(
         "Owner/agent phone number (REQUIRED) - for back office contact"
       ),
+    ownerEmail: z
+      .string()
+      .email()
+      .optional()
+      .describe("Owner/agent email address for reference ID generation"),
+    titleDeedNumber: z
+      .string()
+      .max(50)
+      .optional()
+      .describe(
+        "Title deed registration number from property documents (for reference ID and duplicate detection)"
+      ),
     swimmingPool: z
       .enum(["private", "communal", "none"])
       .describe(
@@ -241,6 +256,8 @@ export const createListingTool = tool({
     // New required fields (Nov 2025)
     ownerName,
     ownerPhone,
+    ownerEmail,
+    titleDeedNumber,
     swimmingPool,
     hasParking,
     hasAirConditioning,
@@ -302,7 +319,6 @@ export const createListingTool = tool({
         yearBuilt,
         energyClass,
         videoUrl,
-        referenceId,
         coordinates,
         // Deprecated: still support old text features for backward compatibility
         propertyType: "", // Deprecated field - using propertyTypeId instead
@@ -314,16 +330,55 @@ export const createListingTool = tool({
         swimmingPool,
         hasParking,
         hasAirConditioning,
-        // New optional fields
+        // New optional fields (Dec 2025)
+        titleDeedNumber,
         backofficeNotes,
         googleMapsUrl,
         verandaArea,
         plotArea,
+        // Auto-generate reference ID if not provided
+        referenceId:
+          referenceId ||
+          generateReferenceId({
+            ownerPhone,
+            ownerEmail,
+            titleDeedNumber,
+          }),
         // Listing goes to draft for review - NOT auto-uploaded
         status: "draft",
         reviewStatus: "pending", // Requires reviewer approval
         draftExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       });
+
+      // Check for duplicate listings in Zyprus API
+      let duplicateWarning: string | null = null;
+      try {
+        const duplicateCheck = await checkForDuplicates("property", {
+          referenceId: listing.referenceId || undefined,
+          locationId,
+          price,
+          title: name,
+        });
+
+        if (duplicateCheck.exists && duplicateCheck.matches.length > 0) {
+          // Flag the listing as potential duplicate
+          const matchInfo = duplicateCheck.matches
+            .slice(0, 3)
+            .map((m) => `• "${m.title}" - ${m.url}`)
+            .join("\n");
+
+          await updateListingDuplicateStatus({
+            id: listing.id,
+            duplicateDetected: true,
+            propertyNotes: `Potential duplicates detected:\n${matchInfo}`,
+          });
+
+          duplicateWarning = `⚠️ **POTENTIAL DUPLICATE DETECTED**\n\nThis listing may already exist:\n${matchInfo}\n\nYour listing has been flagged for review. The listings team will verify this is not a duplicate.`;
+        }
+      } catch (err) {
+        // Don't fail if duplicate check errors - just log and continue
+        console.warn("Duplicate check failed:", err);
+      }
 
       // Now automatically upload to Zyprus as DRAFT (status: false = unpublished)
       const startTime = Date.now();
@@ -421,6 +476,7 @@ export const createListingTool = tool({
           listingId: listing.id,
           zyprusListingId: zyprusResult.listingId,
           zyprusListingUrl: zyprusResult.listingUrl,
+          duplicateDetected: !!duplicateWarning,
           message: `🎉 **Listing Created on Zyprus!**
 
 📋 **Property Summary**
@@ -428,6 +484,7 @@ ${name}
 💰 €${price.toLocaleString()}
 🛏️ ${bedrooms} bedroom${bedrooms > 1 ? "s" : ""} | 🚿 ${bathrooms} bath${bathrooms > 1 ? "s" : ""}
 📐 ${squareFootage}m²
+🔑 Reference: ${listing.referenceId || "Auto-generated"}
 
 **Owner/Agent Details**
 👤 ${ownerName}
@@ -438,7 +495,7 @@ ${name}
 🚗 Parking: ${hasParking ? "Yes" : "No"}
 ❄️ Air Conditioning: ${hasAirConditioning ? "Yes" : "No"}
 
-✅ **Uploaded to Zyprus as DRAFT**
+${duplicateWarning ? `${duplicateWarning}\n\n` : ""}✅ **Uploaded to Zyprus as DRAFT**
 🔗 Zyprus ID: ${zyprusResult.listingId}
 🌐 View: ${zyprusResult.listingUrl}
 
@@ -448,14 +505,16 @@ The listing is now on zyprus.com as an **unpublished draft** waiting for admin r
       return {
         success: false,
         listingId: listing.id,
+        duplicateDetected: !!duplicateWarning,
         error: `⚠️ **Listing Saved Locally** (Upload to Zyprus failed)
 
 📋 **Property Summary**
 ${name}
 💰 €${price.toLocaleString()}
 🛏️ ${bedrooms} bedroom${bedrooms > 1 ? "s" : ""} | 🚿 ${bathrooms} bath${bathrooms > 1 ? "s" : ""}
+🔑 Reference: ${listing.referenceId || "Auto-generated"}
 
-❌ **Upload Error**: ${uploadError}
+${duplicateWarning ? `${duplicateWarning}\n\n` : ""}❌ **Upload Error**: ${uploadError}
 
 The listing has been saved locally and can be uploaded manually later.`,
       };

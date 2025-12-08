@@ -16,14 +16,12 @@ export const chatModels: ChatModel[] = [
   {
     id: "chat-model-flash",
     name: "Gemini 2.5 Flash",
-    description:
-      "Fast with good quality • $0.075/M input, $0.30/M output",
+    description: "Fast with good quality • $0.075/M input, $0.30/M output",
   },
   {
     id: "chat-model-pro",
     name: "Gemini 2.5 Pro",
-    description:
-      "Previous gen reasoning model • $1.25/M input, $5.00/M output",
+    description: "Previous gen reasoning model • $1.25/M input, $5.00/M output",
   },
   {
     id: "chat-model-flash-lite",

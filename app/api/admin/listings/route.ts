@@ -1,21 +1,23 @@
 import { desc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { auth } from "@/app/(auth)/auth";
+import { checkAdminAuth } from "@/lib/auth/admin";
 import { db } from "@/lib/db/client";
 import { propertyListing, user } from "@/lib/db/schema";
 
 /**
  * GET /api/admin/listings - Get all property listings for admin review
  * Returns all listings, with optional status filter
+ * Requires admin role
  */
 export async function GET(req: Request) {
   try {
-    const session = await auth();
+    // Check admin authentication
+    const adminCheck = await checkAdminAuth();
 
-    if (!session?.user?.id) {
+    if (!adminCheck.isAdmin) {
       return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
+        { error: adminCheck.error || "Admin access required" },
+        { status: adminCheck.userId ? 403 : 401 }
       );
     }
 
@@ -55,6 +57,10 @@ export async function GET(req: Request) {
         reviewNotes: propertyListing.reviewNotes,
         userId: propertyListing.userId,
         userEmail: user.email,
+        // Additional fields for reference ID, AI notes, and duplicate detection
+        referenceId: propertyListing.referenceId,
+        propertyNotes: propertyListing.propertyNotes,
+        duplicateDetected: propertyListing.duplicateDetected,
       })
       .from(propertyListing)
       .leftJoin(user, eq(propertyListing.userId, user.id))

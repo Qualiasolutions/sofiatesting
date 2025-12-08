@@ -1,0 +1,198 @@
+import { desc, eq } from "drizzle-orm";
+import { NextResponse } from "next/server";
+import { auth } from "@/app/(auth)/auth";
+import { db } from "@/lib/db/client";
+import {
+  calculatorUsageLog,
+  chat,
+  documentGenerationLog,
+  landListing,
+  message,
+  propertyListing,
+  user,
+  userActivitySummary,
+} from "@/lib/db/schema";
+
+/**
+ * GET /api/user/export - Export all user data (GDPR Right to Data Portability)
+ *
+ * Returns all user data in a machine-readable JSON format.
+ */
+export async function GET() {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const userId = session.user.id;
+
+    // Get user profile
+    const [userProfile] = await db
+      .select({
+        id: user.id,
+        email: user.email,
+      })
+      .from(user)
+      .where(eq(user.id, userId));
+
+    if (!userProfile) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Get all chats with messages
+    const userChats = await db
+      .select({
+        id: chat.id,
+        title: chat.title,
+        createdAt: chat.createdAt,
+        visibility: chat.visibility,
+      })
+      .from(chat)
+      .where(eq(chat.userId, userId))
+      .orderBy(desc(chat.createdAt));
+
+    // Get messages for each chat
+    const chatsWithMessages = await Promise.all(
+      userChats.map(async (chatItem) => {
+        const messages = await db
+          .select({
+            id: message.id,
+            role: message.role,
+            parts: message.parts,
+            createdAt: message.createdAt,
+          })
+          .from(message)
+          .where(eq(message.chatId, chatItem.id))
+          .orderBy(message.createdAt);
+
+        return {
+          ...chatItem,
+          messages,
+        };
+      })
+    );
+
+    // Get property listings
+    const propertyListings = await db
+      .select({
+        id: propertyListing.id,
+        name: propertyListing.name,
+        description: propertyListing.description,
+        price: propertyListing.price,
+        currency: propertyListing.currency,
+        propertyType: propertyListing.propertyType,
+        address: propertyListing.address,
+        status: propertyListing.status,
+        createdAt: propertyListing.createdAt,
+        updatedAt: propertyListing.updatedAt,
+      })
+      .from(propertyListing)
+      .where(eq(propertyListing.userId, userId))
+      .orderBy(desc(propertyListing.createdAt));
+
+    // Get land listings
+    const landListings = await db
+      .select({
+        id: landListing.id,
+        name: landListing.name,
+        description: landListing.description,
+        price: landListing.price,
+        currency: landListing.currency,
+        landTypeId: landListing.landTypeId,
+        landSize: landListing.landSize,
+        locationId: landListing.locationId,
+        coordinates: landListing.coordinates,
+        status: landListing.status,
+        createdAt: landListing.createdAt,
+        updatedAt: landListing.updatedAt,
+      })
+      .from(landListing)
+      .where(eq(landListing.userId, userId))
+      .orderBy(desc(landListing.createdAt));
+
+    // Get activity summaries
+    const activitySummaries = await db
+      .select()
+      .from(userActivitySummary)
+      .where(eq(userActivitySummary.userId, userId))
+      .orderBy(desc(userActivitySummary.date));
+
+    // Get calculator usage
+    const calculatorLogs = await db
+      .select({
+        id: calculatorUsageLog.id,
+        calculatorType: calculatorUsageLog.calculatorType,
+        inputs: calculatorUsageLog.inputs,
+        outputs: calculatorUsageLog.outputs,
+        timestamp: calculatorUsageLog.timestamp,
+      })
+      .from(calculatorUsageLog)
+      .where(eq(calculatorUsageLog.userId, userId))
+      .orderBy(desc(calculatorUsageLog.timestamp));
+
+    // Get document generation logs
+    const documentLogs = await db
+      .select({
+        id: documentGenerationLog.id,
+        templateType: documentGenerationLog.templateType,
+        templateName: documentGenerationLog.templateName,
+        success: documentGenerationLog.success,
+        timestamp: documentGenerationLog.timestamp,
+      })
+      .from(documentGenerationLog)
+      .where(eq(documentGenerationLog.userId, userId))
+      .orderBy(desc(documentGenerationLog.timestamp));
+
+    // Compile export data
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      exportVersion: "1.0",
+      dataSubject: {
+        id: userProfile.id,
+        email: userProfile.email,
+      },
+      data: {
+        chats: chatsWithMessages,
+        propertyListings,
+        landListings,
+        activitySummaries,
+        calculatorUsage: calculatorLogs,
+        documentGenerations: documentLogs,
+      },
+      summary: {
+        totalChats: chatsWithMessages.length,
+        totalMessages: chatsWithMessages.reduce(
+          (acc, c) => acc + c.messages.length,
+          0
+        ),
+        totalPropertyListings: propertyListings.length,
+        totalLandListings: landListings.length,
+        totalCalculatorUsages: calculatorLogs.length,
+        totalDocumentGenerations: documentLogs.length,
+      },
+    };
+
+    // Return as downloadable JSON file
+    return new NextResponse(JSON.stringify(exportData, null, 2), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Disposition": `attachment; filename="sofia-data-export-${new Date().toISOString().split("T")[0]}.json"`,
+      },
+    });
+  } catch (error) {
+    console.error("[GDPR Export] Error exporting user data:", error);
+    return NextResponse.json(
+      {
+        error: "Failed to export user data",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}

@@ -185,6 +185,7 @@ export const propertyListing = pgTable(
     outdoorFeatureIds: uuid("outdoorFeatureIds").array(), // UUIDs from zyprus.com taxonomy_term--outdoor_property_features
     priceModifierId: uuid("priceModifierId"), // UUID from zyprus.com taxonomy_term--price_modifier
     titleDeedId: uuid("titleDeedId"), // UUID from zyprus.com taxonomy_term--title_deed
+    titleDeedNumber: text("titleDeedNumber"), // Actual title deed registration number (for reference ID generation)
     listingTypeId: uuid("listingTypeId"), // UUID from zyprus.com taxonomy_term--listing_type (For Sale, For Rent)
     propertyStatusId: uuid("propertyStatusId"), // UUID from zyprus.com taxonomy_term--property_status (Resale, New Build)
     viewIds: uuid("viewIds").array(), // UUIDs from zyprus.com taxonomy_term--property_views (Sea View, Mountain View)
@@ -305,6 +306,12 @@ export const landListing = pgTable(
     listingTypeId: uuid("listingTypeId").notNull(), // UUID from zyprus.com taxonomy_term--listing_type
     priceModifierId: uuid("priceModifierId"), // UUID from zyprus.com taxonomy_term--price_modifier
     titleDeedId: uuid("titleDeedId"), // UUID from zyprus.com taxonomy_term--title_deed
+    titleDeedNumber: text("titleDeedNumber"), // Actual title deed registration number (for reference ID generation)
+
+    // Owner info (for reference ID generation)
+    ownerName: varchar("ownerName", { length: 256 }),
+    ownerPhone: varchar("ownerPhone", { length: 64 }),
+    ownerEmail: varchar("ownerEmail", { length: 256 }),
 
     // Building permissions
     buildingDensity: numeric("buildingDensity"), // % density allowed
@@ -779,5 +786,48 @@ export const leadForwardingRotation = pgTable(
 export type LeadForwardingRotation = InferSelectModel<
   typeof leadForwardingRotation
 >;
+
+// ===================================================================
+// DOCUMENT SEND TRACKING TABLE
+// ===================================================================
+
+// Track documents sent via email/WhatsApp from the web chat
+export const documentSend = pgTable(
+  "DocumentSend",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("userId")
+      .notNull()
+      .references(() => user.id),
+    chatId: uuid("chatId").references(() => chat.id),
+    // Document details
+    documentTitle: varchar("documentTitle", { length: 256 }).notNull(),
+    documentUrl: text("documentUrl").notNull(), // Vercel Blob URL
+    documentContent: text("documentContent"), // Original content for regeneration
+    // Recipient details
+    recipientName: varchar("recipientName", { length: 256 }),
+    recipientEmail: varchar("recipientEmail", { length: 256 }),
+    recipientPhone: varchar("recipientPhone", { length: 64 }),
+    // Sending method and status
+    method: varchar("method", { length: 20 }).notNull(), // email, whatsapp, download
+    status: varchar("status", { length: 20 }).notNull().default("pending"), // pending, sent, failed, downloaded
+    // Optional message to include
+    message: text("message"),
+    // Tracking
+    errorMessage: text("errorMessage"),
+    sentAt: timestamp("sentAt"),
+    createdAt: timestamp("createdAt").notNull().defaultNow(),
+  },
+  (table) => ({
+    userIdIdx: index("DocumentSend_userId_idx").on(table.userId),
+    chatIdIdx: index("DocumentSend_chatId_idx").on(table.chatId),
+    statusIdx: index("DocumentSend_status_idx").on(table.status),
+    createdAtIdx: index("DocumentSend_createdAt_idx").on(
+      table.createdAt.desc()
+    ),
+  })
+);
+
+export type DocumentSend = InferSelectModel<typeof documentSend>;
 
 export type { InferInsertModel } from "drizzle-orm";

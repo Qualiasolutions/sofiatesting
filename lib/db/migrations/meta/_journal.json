@@ -134,6 +134,20 @@
       "when": 1765156610893,
       "tag": "0018_wide_proudstar",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1765166226338,
+      "tag": "0019_cold_shotgun",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1765181786173,
+      "tag": "0020_goofy_vargas",
+      "breakpoints": true
     }
   ]
 }

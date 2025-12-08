@@ -6,6 +6,8 @@ import {
   ChevronDownIcon,
   CircleIcon,
   ClockIcon,
+  FileTextIcon,
+  SendIcon,
   WrenchIcon,
   XCircleIcon,
 } from "lucide-react";
@@ -60,6 +62,35 @@ const getStatusBadge = (status: ToolUIPart["state"]) => {
   );
 };
 
+// Human-readable tool names
+const getToolDisplayName = (type: ToolUIPart["type"]) => {
+  const toolNames: Record<string, string> = {
+    "tool-sendDocument": "Generate & Send Document",
+    "tool-requestSuggestions": "Request Suggestions",
+    "tool-createDocument": "Create Document",
+    "tool-updateDocument": "Update Document",
+    "tool-calculateTransferFees": "Calculate Transfer Fees",
+    "tool-calculateCapitalGains": "Calculate Capital Gains",
+    "tool-calculateVAT": "Calculate VAT",
+    "tool-createListing": "Create Property Listing",
+    "tool-uploadListing": "Upload Listing",
+    "tool-listListings": "List Properties",
+    "tool-getZyprusData": "Fetch Zyprus Data",
+  };
+  return toolNames[type] || type.replace("tool-", "");
+};
+
+// Get appropriate icon for tool type
+const getToolIcon = (type: ToolUIPart["type"]) => {
+  if (type === "tool-sendDocument") {
+    return <SendIcon className="size-4 shrink-0 text-primary" />;
+  }
+  if (type.includes("Document")) {
+    return <FileTextIcon className="size-4 shrink-0 text-muted-foreground" />;
+  }
+  return <WrenchIcon className="size-4 shrink-0 text-muted-foreground" />;
+};
+
 export const ToolHeader = ({
   className,
   type,
@@ -74,8 +105,10 @@ export const ToolHeader = ({
     {...props}
   >
     <div className="flex min-w-0 flex-1 items-center gap-2">
-      <WrenchIcon className="size-4 shrink-0 text-muted-foreground" />
-      <span className="truncate font-medium text-sm">{type}</span>
+      {getToolIcon(type)}
+      <span className="truncate font-medium text-sm">
+        {getToolDisplayName(type)}
+      </span>
     </div>
     <div className="flex shrink-0 items-center gap-2">
       {getStatusBadge(state)}

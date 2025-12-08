@@ -2,7 +2,11 @@ import { tool } from "ai";
 import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
 import { getUserContext } from "@/lib/ai/context";
-import { createLandListing } from "@/lib/db/queries";
+import {
+  createLandListing,
+  updateListingDuplicateStatus,
+} from "@/lib/db/queries";
+import { checkForDuplicates, generateReferenceId } from "@/lib/zyprus/client";
 
 export const createLandListingTool = tool({
   description:
@@ -112,6 +116,31 @@ export const createLandListingTool = tool({
       .max(50)
       .optional()
       .describe("Your internal reference number for this land"),
+    // Owner info (for reference ID generation)
+    ownerName: z
+      .string()
+      .min(2)
+      .max(256)
+      .optional()
+      .describe("Land owner or listing agent name"),
+    ownerPhone: z
+      .string()
+      .min(8)
+      .max(64)
+      .optional()
+      .describe("Owner/agent phone number - for back office contact"),
+    ownerEmail: z
+      .string()
+      .email()
+      .optional()
+      .describe("Owner/agent email address for reference ID generation"),
+    titleDeedNumber: z
+      .string()
+      .max(50)
+      .optional()
+      .describe(
+        "Title deed registration number from land documents (for reference ID and duplicate detection)"
+      ),
     // Required images
     imageUrls: z
       .array(z.string().url())
@@ -138,6 +167,10 @@ export const createLandListingTool = tool({
     titleDeedId,
     coordinates,
     referenceId,
+    ownerName,
+    ownerPhone,
+    ownerEmail,
+    titleDeedNumber,
     imageUrls,
   }) => {
     try {
@@ -178,6 +211,15 @@ export const createLandListingTool = tool({
         };
       }
 
+      // Auto-generate reference ID if not provided
+      const generatedReferenceId =
+        referenceId ||
+        generateReferenceId({
+          ownerPhone,
+          ownerEmail,
+          titleDeedNumber,
+        });
+
       // Create land listing in database
       const listing = await createLandListing({
         userId,
@@ -197,16 +239,52 @@ export const createLandListingTool = tool({
         viewIds,
         priceModifierId,
         titleDeedId,
+        titleDeedNumber,
+        ownerName,
+        ownerPhone,
+        ownerEmail,
         coordinates,
-        referenceId,
+        referenceId: generatedReferenceId,
         image: imageUrls,
         status: "draft",
         draftExpiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       });
 
+      // Check for duplicate listings in Zyprus API
+      let duplicateWarning: string | null = null;
+      try {
+        const duplicateCheck = await checkForDuplicates("land", {
+          referenceId: listing.referenceId || undefined,
+          locationId,
+          price,
+          title: name,
+        });
+
+        if (duplicateCheck.exists && duplicateCheck.matches.length > 0) {
+          // Flag the listing as potential duplicate
+          const matchInfo = duplicateCheck.matches
+            .slice(0, 3)
+            .map((m) => `• "${m.title}" - ${m.url}`)
+            .join("\n");
+
+          await updateListingDuplicateStatus({
+            id: listing.id,
+            duplicateDetected: true,
+            propertyNotes: `Potential duplicates detected:\n${matchInfo}`,
+            type: "land",
+          });
+
+          duplicateWarning = `⚠️ **POTENTIAL DUPLICATE DETECTED**\n\nThis land listing may already exist:\n${matchInfo}\n\nYour listing has been flagged for review. The listings team will verify this is not a duplicate.`;
+        }
+      } catch (err) {
+        // Don't fail if duplicate check errors - just log and continue
+        console.warn("Duplicate check failed:", err);
+      }
+
       return {
         success: true,
         listingId: listing.id,
+        duplicateDetected: !!duplicateWarning,
         message: `✅ **Land Listing Draft Created!**
 
 📋 **Land Summary**
@@ -214,8 +292,11 @@ ${name}
 📍 Location ID: ${locationId}
 💰 €${price.toLocaleString()}
 📐 ${landSize.toLocaleString()}m²
+🔑 Reference: ${listing.referenceId || "Auto-generated"}
 🏗️ Land Type: Set
 🏷️ Listing Type: Set
+${ownerName ? `👤 Owner: ${ownerName}` : ""}
+${ownerPhone ? `📞 Phone: ${ownerPhone}` : ""}
 ${buildingDensity ? `📊 Building Density: ${buildingDensity}%` : ""}
 ${siteCoverage ? `📊 Site Coverage: ${siteCoverage}%` : ""}
 ${maxFloors ? `🏢 Max Floors: ${maxFloors}` : ""}
@@ -223,10 +304,9 @@ ${maxHeight ? `📏 Max Height: ${maxHeight}m` : ""}
 ${infrastructureIds && infrastructureIds.length > 0 ? `⚡ Infrastructure: ${infrastructureIds.length} selected` : ""}
 ${viewIds && viewIds.length > 0 ? `👁️ Views: ${viewIds.length} selected` : ""}
 ${coordinates ? `📍 GPS: ${coordinates.latitude.toFixed(4)}, ${coordinates.longitude.toFixed(4)}` : ""}
-${referenceId ? `🔖 Reference: ${referenceId}` : ""}
 ${imageUrls && imageUrls.length > 0 ? `📸 Images: ${imageUrls.length} photo${imageUrls.length > 1 ? "s" : ""}` : ""}
 
-Status: **Draft** (expires in 7 days)
+${duplicateWarning ? `${duplicateWarning}\n\n` : ""}Status: **Draft** (expires in 7 days)
 
 Say "upload land listing" to publish to zyprus.com`,
       };

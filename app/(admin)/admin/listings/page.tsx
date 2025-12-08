@@ -2,10 +2,12 @@
 
 import { formatDistanceToNow } from "date-fns";
 import {
+  AlertTriangle,
   Building2,
   CheckCircle,
   Clock,
   ExternalLink,
+  FileText,
   Phone,
   RefreshCw,
   Upload,
@@ -66,6 +68,10 @@ type Listing = {
   reviewNotes: string | null;
   userId: string | null;
   userEmail: string | null;
+  // Reference ID, AI notes, and duplicate detection fields
+  referenceId: string | null;
+  propertyNotes: string | null;
+  duplicateDetected: boolean | null;
 };
 
 export default function AdminListingsPage() {
@@ -262,6 +268,7 @@ export default function AdminListingsPage() {
                 <TableRow>
                   <TableHead>Property</TableHead>
                   <TableHead>Owner</TableHead>
+                  <TableHead>Reference / Notes</TableHead>
                   <TableHead>Features</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created</TableHead>
@@ -304,6 +311,43 @@ export default function AdminListingsPage() {
                           Not provided
                         </span>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        {/* Reference ID */}
+                        {listing.referenceId ? (
+                          <div className="font-mono text-xs">
+                            Ref: {listing.referenceId}
+                          </div>
+                        ) : (
+                          <div className="text-muted-foreground text-xs">
+                            No reference ID
+                          </div>
+                        )}
+                        {/* Duplicate Warning */}
+                        {listing.duplicateDetected && (
+                          <Badge className="bg-orange-100 text-orange-700">
+                            <AlertTriangle className="mr-1 h-3 w-3" />
+                            Potential Duplicate
+                          </Badge>
+                        )}
+                        {/* AI Notes indicator */}
+                        {listing.propertyNotes && (
+                          <div
+                            className="flex cursor-pointer items-center gap-1 text-blue-600 text-xs hover:underline"
+                            onClick={() => {
+                              toast.info(listing.propertyNotes || "No notes", {
+                                duration: 10000,
+                                description: "SOFIA AI Notes",
+                              });
+                            }}
+                            title={listing.propertyNotes}
+                          >
+                            <FileText className="h-3 w-3" />
+                            View AI Notes
+                          </div>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">

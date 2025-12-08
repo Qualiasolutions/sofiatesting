@@ -23,6 +23,7 @@ import { MessageActions } from "./message-actions";
 import { MessageEditor } from "./message-editor";
 import { MessageReasoning } from "./message-reasoning";
 import { PreviewAttachment } from "./preview-attachment";
+import { SendDocumentPanel } from "./send-document-modal";
 
 const PurePreviewMessage = ({
   chatId,
@@ -253,6 +254,59 @@ const PurePreviewMessage = ({
                   </ToolContent>
                 </Tool>
               );
+            }
+
+            // Handle sendDocument tool - shows a form to send/download the generated document
+            if (type === "tool-sendDocument") {
+              const { toolCallId, state } = part;
+
+              // Error state
+              if (part.output && "error" in part.output) {
+                return (
+                  <div
+                    className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-500 dark:border-red-800 dark:bg-red-950/50"
+                    key={toolCallId}
+                  >
+                    <p className="font-medium">Error generating document</p>
+                    <p className="text-sm">{String(part.output.error)}</p>
+                  </div>
+                );
+              }
+
+              // Loading state
+              if (state === "input-available" || state === "input-streaming") {
+                return (
+                  <Tool defaultOpen={true} key={toolCallId}>
+                    <ToolHeader state={state} type="tool-sendDocument" />
+                    <ToolContent>
+                      <ToolInput input={part.input} />
+                    </ToolContent>
+                  </Tool>
+                );
+              }
+
+              // Success state - show the send form
+              if (state === "output-available" && part.output) {
+                const { title, url } = part.output as {
+                  id: string;
+                  title: string;
+                  url: string;
+                  message?: string;
+                };
+
+                return (
+                  <div className="w-full max-w-md" key={toolCallId}>
+                    <SendDocumentPanel
+                      chatId={chatId}
+                      documentContent={
+                        (part.input as { content?: string })?.content
+                      }
+                      documentTitle={title}
+                      documentUrl={url}
+                    />
+                  </div>
+                );
+              }
             }
 
             return null;

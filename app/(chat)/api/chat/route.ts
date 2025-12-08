@@ -28,6 +28,7 @@ import { createListingTool } from "@/lib/ai/tools/create-listing";
 import { getZyprusDataTool } from "@/lib/ai/tools/get-zyprus-data";
 import { listListingsTool } from "@/lib/ai/tools/list-listings";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
+import { sendDocument } from "@/lib/ai/tools/send-document";
 // import { updateDocument } from "@/lib/ai/tools/update-document"; // DISABLED - No artifacts needed
 import { uploadLandListingTool } from "@/lib/ai/tools/upload-land-listing";
 import { uploadListingTool } from "@/lib/ai/tools/upload-listing";
@@ -229,7 +230,8 @@ export async function POST(request: Request) {
             // "createDocument", // DISABLED - No artifacts needed
             // "updateDocument", // DISABLED - No artifacts needed
             "requestSuggestions",
-          ], // SOFIA can use calculator, property listing, land listing, and taxonomy tools
+            "sendDocument", // Generate and send documents via email/WhatsApp/download
+          ], // SOFIA can use calculator, property listing, land listing, taxonomy, and document tools
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             calculateTransferFees: calculateTransferFeesTool,
@@ -245,7 +247,8 @@ export async function POST(request: Request) {
             // createDocument: createDocument({ session, dataStream }), // DISABLED - No artifacts needed
             // updateDocument: updateDocument({ session, dataStream }), // DISABLED - No artifacts needed
             requestSuggestions: requestSuggestions({ session, dataStream }),
-          }, // Cyprus real estate tools - property listings, land listings, taxonomy
+            sendDocument: sendDocument({ session, dataStream }),
+          }, // Cyprus real estate tools - property listings, land listings, taxonomy, documents
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
             functionId: "stream-text",

@@ -8,16 +8,16 @@ import {
   zyprusAgent,
 } from "../db/schema";
 import { getTelegramClient } from "./client";
-import type { TelegramMessage } from "./types";
 import {
   AGENT_REQUEST_PATTERN,
-  LIMASSOL_AGENTS,
-  OTHERS_GROUP_AGENTS,
-  RUSSIAN_SPEAKER_AGENT,
   detectRussianLanguage,
   isLimassolRegion,
   isOthersGroup,
+  LIMASSOL_AGENTS,
+  OTHERS_GROUP_AGENTS,
+  RUSSIAN_SPEAKER_AGENT,
 } from "./routing-constants";
+import type { TelegramMessage } from "./types";
 
 // Top-level regex for lead mention detection
 const LEAD_MENTION_PATTERN =
@@ -208,9 +208,7 @@ async function getTargetAgents(
     // RULE 2: "Zyprus Others" group leads go ONLY to Lauren or Charalambos
     // Per spec: "Restricted to Lauren and Haralambos only"
     if (groupType && isOthersGroup(groupType)) {
-      console.log(
-        "Others group detected - routing to Lauren/Charalambos only"
-      );
+      console.log("Others group detected - routing to Lauren/Charalambos only");
       const agents = await db
         .select()
         .from(zyprusAgent)
@@ -264,7 +262,7 @@ async function getTargetAgents(
  */
 async function detectRequestedAgent(
   messageText: string
-): Promise<(typeof zyprusAgent.$inferSelect) | null> {
+): Promise<typeof zyprusAgent.$inferSelect | null> {
   const match = messageText.match(AGENT_REQUEST_PATTERN);
   if (!match) return null;
 
@@ -302,7 +300,7 @@ async function detectRequestedAgent(
 function selectLimassolAgent(
   agents: (typeof zyprusAgent.$inferSelect)[],
   isRussianSpeaking: boolean
-): (typeof zyprusAgent.$inferSelect) | null {
+): typeof zyprusAgent.$inferSelect | null {
   if (agents.length === 0) return null;
 
   // If Russian-speaking, prefer Diana
@@ -549,9 +547,7 @@ export async function handleGroupMessage(
   // Per spec: "Client wants to speak with [Agent Name]" → Forward directly to named agent
   const requestedAgent = await detectRequestedAgent(messageText);
   if (requestedAgent) {
-    console.log(
-      `Client requested specific agent: ${requestedAgent.fullName}`
-    );
+    console.log(`Client requested specific agent: ${requestedAgent.fullName}`);
     await forwardLeadToAgent(
       telegramClient,
       message,
@@ -565,7 +561,11 @@ export async function handleGroupMessage(
   }
 
   // Get target agents based on region and group type
-  const targetAgents = await getTargetAgents(region, groupType, primaryPropertyId);
+  const targetAgents = await getTargetAgents(
+    region,
+    groupType,
+    primaryPropertyId
+  );
 
   if (targetAgents.length === 0) {
     console.log("No target agents found for region:", region);
@@ -600,7 +600,7 @@ export async function handleGroupMessage(
   }
 
   // Select agent based on routing rules
-  let selectedAgent: (typeof zyprusAgent.$inferSelect) | null = null;
+  let selectedAgent: typeof zyprusAgent.$inferSelect | null = null;
   const effectiveRegion = region || "all";
 
   // For Limassol, apply Russian-speaking preference
@@ -684,9 +684,7 @@ async function forwardLeadToAgent(
       }`,
     });
 
-    console.log(
-      `Lead forwarded to ${agent.fullName} (${routingReason})`
-    );
+    console.log(`Lead forwarded to ${agent.fullName} (${routingReason})`);
 
     // Log the lead
     await logLead({

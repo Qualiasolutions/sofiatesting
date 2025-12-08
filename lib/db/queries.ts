@@ -953,3 +953,53 @@ export async function updateLandListingStatus({
     );
   }
 }
+
+/**
+ * Update listing duplicate detection status and AI notes
+ * Used to flag potential duplicates after checkForDuplicates()
+ */
+export async function updateListingDuplicateStatus({
+  id,
+  duplicateDetected,
+  propertyNotes,
+  type = "property",
+}: {
+  id: string;
+  duplicateDetected: boolean;
+  propertyNotes?: string;
+  type?: "property" | "land";
+}) {
+  try {
+    if (type === "land") {
+      await db
+        .update(landListing)
+        .set({
+          duplicateDetected,
+          notes: propertyNotes,
+          updatedAt: new Date(),
+        })
+        .where(eq(landListing.id, id));
+    } else {
+      await db
+        .update(propertyListing)
+        .set({
+          duplicateDetected,
+          propertyNotes,
+          updatedAt: new Date(),
+        })
+        .where(eq(propertyListing.id, id));
+    }
+  } catch (error) {
+    console.error("Database error in updateListingDuplicateStatus:", {
+      listingId: id,
+      duplicateDetected,
+      type,
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to update listing duplicate status"
+    );
+  }
+}
