@@ -23,67 +23,87 @@ import { db } from "@/lib/db/client";
 import { systemHealthLog, zyprusAgent } from "@/lib/db/schema";
 
 async function getDashboardStats() {
-  // 1. Agent Stats
-  const [totalCount] = await db.select({ count: count() }).from(zyprusAgent);
-  const [activeCount] = await db
-    .select({ count: count() })
-    .from(zyprusAgent)
-    .where(eq(zyprusAgent.isActive, true));
-  const [pendingCount] = await db
-    .select({ count: count() })
-    .from(zyprusAgent)
-    .where(isNull(zyprusAgent.registeredAt));
+  try {
+    // 1. Agent Stats
+    const [totalCount] = await db.select({ count: count() }).from(zyprusAgent);
+    const [activeCount] = await db
+      .select({ count: count() })
+      .from(zyprusAgent)
+      .where(eq(zyprusAgent.isActive, true));
+    const [pendingCount] = await db
+      .select({ count: count() })
+      .from(zyprusAgent)
+      .where(isNull(zyprusAgent.registeredAt));
 
-  // 2. Recent Activity (Last 7 days)
-  const _sevenDaysAgo = subDays(new Date(), 7);
+    // 2. Recent Activity (Last 7 days)
+    const _sevenDaysAgo = subDays(new Date(), 7);
 
-  // Mocking activity data for chart (since we might not have enough real data yet)
-  // In a real scenario, we would aggregate `agentExecutionLog` by day
-  const activityData = [
-    { name: "Mon", total: Math.floor(Math.random() * 50) + 10 },
-    { name: "Tue", total: Math.floor(Math.random() * 50) + 10 },
-    { name: "Wed", total: Math.floor(Math.random() * 50) + 10 },
-    { name: "Thu", total: Math.floor(Math.random() * 50) + 10 },
-    { name: "Fri", total: Math.floor(Math.random() * 50) + 10 },
-    { name: "Sat", total: Math.floor(Math.random() * 50) + 10 },
-    { name: "Sun", total: Math.floor(Math.random() * 50) + 10 },
-  ];
+    // Mocking activity data for chart (since we might not have enough real data yet)
+    // In a real scenario, we would aggregate `agentExecutionLog` by day
+    const activityData = [
+      { name: "Mon", total: Math.floor(Math.random() * 50) + 10 },
+      { name: "Tue", total: Math.floor(Math.random() * 50) + 10 },
+      { name: "Wed", total: Math.floor(Math.random() * 50) + 10 },
+      { name: "Thu", total: Math.floor(Math.random() * 50) + 10 },
+      { name: "Fri", total: Math.floor(Math.random() * 50) + 10 },
+      { name: "Sat", total: Math.floor(Math.random() * 50) + 10 },
+      { name: "Sun", total: Math.floor(Math.random() * 50) + 10 },
+    ];
 
-  // 3. Regional Distribution
-  const regionalStats = await db
-    .select({
-      name: zyprusAgent.region,
-      value: count(),
-    })
-    .from(zyprusAgent)
-    .groupBy(zyprusAgent.region)
-    .orderBy(desc(count()));
+    // 3. Regional Distribution
+    const regionalStats = await db
+      .select({
+        name: zyprusAgent.region,
+        value: count(),
+      })
+      .from(zyprusAgent)
+      .groupBy(zyprusAgent.region)
+      .orderBy(desc(count()));
 
-  // 4. System Health (Latest logs)
-  const healthLogs = await db
-    .select()
-    .from(systemHealthLog)
-    .orderBy(desc(systemHealthLog.timestamp))
-    .limit(5);
+    // 4. System Health (Latest logs)
+    const healthLogs = await db
+      .select()
+      .from(systemHealthLog)
+      .orderBy(desc(systemHealthLog.timestamp))
+      .limit(5);
 
-  // 5. Recent Agents
-  const recentAgents = await db
-    .select()
-    .from(zyprusAgent)
-    .orderBy(desc(zyprusAgent.createdAt))
-    .limit(5);
+    // 5. Recent Agents
+    const recentAgents = await db
+      .select()
+      .from(zyprusAgent)
+      .orderBy(desc(zyprusAgent.createdAt))
+      .limit(5);
 
-  return {
-    agents: {
-      total: totalCount.count,
-      active: activeCount.count,
-      pending: pendingCount.count,
-    },
-    activityData,
-    regionalStats,
-    healthLogs,
-    recentAgents,
-  };
+    return {
+      agents: {
+        total: totalCount.count,
+        active: activeCount.count,
+        pending: pendingCount.count,
+      },
+      activityData,
+      regionalStats,
+      healthLogs,
+      recentAgents,
+    };
+  } catch (error) {
+    console.error("[Admin Dashboard] Failed to fetch stats:", error);
+    // Return default values to allow page to render
+    return {
+      agents: { total: 0, active: 0, pending: 0 },
+      activityData: [
+        { name: "Mon", total: 0 },
+        { name: "Tue", total: 0 },
+        { name: "Wed", total: 0 },
+        { name: "Thu", total: 0 },
+        { name: "Fri", total: 0 },
+        { name: "Sat", total: 0 },
+        { name: "Sun", total: 0 },
+      ],
+      regionalStats: [],
+      healthLogs: [],
+      recentAgents: [],
+    };
+  }
 }
 
 export default async function AdminDashboardPage() {

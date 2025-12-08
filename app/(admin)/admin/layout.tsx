@@ -6,6 +6,22 @@ import { AdminSidebar } from "@/components/admin/sidebar";
 import { db } from "@/lib/db/client";
 import { adminUserRole } from "@/lib/db/schema";
 
+async function getAdminRole(userId: string) {
+  try {
+    const adminRole = await db
+      .select()
+      .from(adminUserRole)
+      .where(eq(adminUserRole.userId, userId))
+      .limit(1);
+
+    return adminRole;
+  } catch (error) {
+    console.error("[Admin Layout] Failed to fetch admin role:", error);
+    // Return empty array to trigger default permissions
+    return [];
+  }
+}
+
 export default async function AdminLayout({
   children,
 }: {
@@ -18,11 +34,7 @@ export default async function AdminLayout({
   }
 
   // Check if user has admin role, otherwise grant default admin access
-  const adminRole = await db
-    .select()
-    .from(adminUserRole)
-    .where(eq(adminUserRole.userId, session.user.id))
-    .limit(1);
+  const adminRole = await getAdminRole(session.user.id);
 
   // Grant all logged-in users admin access with default permissions
   const userRole = adminRole.length > 0 ? adminRole[0].role : "admin";

@@ -88,9 +88,12 @@ export default function AdminListingsPage() {
         url.searchParams.set("status", statusFilter);
       }
 
-      const response = await fetch(url.toString());
+      const response = await fetch(url.toString(), {
+        credentials: "include",
+      });
       if (!response.ok) {
-        throw new Error("Failed to fetch listings");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to fetch listings");
       }
 
       const data = await response.json();
@@ -113,6 +116,7 @@ export default function AdminListingsPage() {
       const response = await fetch("/api/listings/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ listingId }),
       });
 

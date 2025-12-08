@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Slash commands** (`.claude/commands/`): `/deploy-checklist`, `/test-all`, `/tool-audit`, `/new-tool <name> <desc>`, `/telegram-debug`, `/db-check`
 
-**Skills** (`.claude/skills/`): `sofia-debugger` (debug SOFIA issues), `cyprus-calculator` (property tax calculations)
+**Skills** (global `~/.claude/skills/`): `sofia-debugger` (debug SOFIA issues), `cyprus-calculator` (property tax calculations)
 
 ## Project Overview
 
@@ -24,11 +24,14 @@ SOFIA is a Next.js 15 AI assistant for Zyprus Property Group (Cyprus real estate
 
 | Model ID | Actual Model | Use Case |
 |----------|-------------|----------|
-| `chat-model` | Gemini 3 Pro Preview | **Default** - Best reasoning, 1M context, $2/M in, $12/M out |
-| `chat-model-flash` | Gemini 2.5 Flash | Fast with good quality, $0.075/M in, $0.30/M out |
-| `chat-model-pro` | Gemini 2.5 Pro | Previous gen reasoning, $1.25/M in, $5.00/M out |
-| `chat-model-flash-lite` | Gemini 2.5 Flash-Lite | Ultra-fast, cheapest, $0.0375/M in, $0.15/M out |
+| `chat-model` | Gemini 3 Pro Preview | **Default** - Best reasoning, 1M context, multimodal |
+| `chat-model-gemini3` | Gemini 3 Pro Preview | Explicit alias for default |
+| `chat-model-pro` | Gemini 2.5 Pro | Previous gen reasoning fallback |
+| `chat-model-flash` | Gemini 2.5 Flash | Fast with good quality |
+| `chat-model-flash-lite` | Gemini 2.5 Flash-Lite | Ultra-fast, cost-efficient |
 | `title-model` | Gemini 2.5 Flash | Chat title generation |
+
+See `lib/ai/providers.ts` for implementation details.
 
 ## Database
 
@@ -100,14 +103,15 @@ Tool file structure (`lib/ai/tools/`): export `description`, `parameters` (Zod),
 
 ## Streaming Chat Architecture
 
-**Endpoint**: `app/(chat)/api/chat/route.ts` → SSE via `JsonToSseTransformStream`
+**Main endpoint**: `app/(chat)/api/chat/route.ts` → SSE via `JsonToSseTransformStream`
+**Resume endpoint**: `app/(chat)/api/chat/[id]/stream/route.ts` → AI SDK `resumeStream` for reconnection
 
 Key patterns:
 - `pruneConversationHistory()` prevents unbounded token growth
 - `stopWhen: stepCountIs(5)` limits tool call chains
 - `smoothStream({ chunking: "word" })` for smooth streaming
 - System prompt cached 24h via `unstable_cache`
-- Token tracking with tokenlens library
+- Token tracking with `tokenlens` library
 
 **SSE Event Types**: `0:` text, `2:` tool call, `3:` tool result, `d:` done
 
@@ -191,18 +195,16 @@ See `.env.example` for complete list.
 | "Cannot find module" | Check path aliases (@/lib, @/app) |
 | Zyprus API 404 errors | Run `pnpm exec tsx tests/manual/test-zyprus-api.ts` to discover correct endpoint names |
 | "Unable to create listing" | Check Vercel logs for taxonomy errors; vocabulary names may have changed |
+| Sentry "Project not found" | Verify `SENTRY_PROJECT` env var matches Sentry project slug (not display name) |
 
 ## Key Patterns
 
 - **Soft deletes**: Check `deletedAt IS NULL` in queries
 - **Error responses**: Use `ChatSDKError` from `lib/errors.ts`
 - **DB schema changes**: `pnpm db:generate` → `pnpm db:migrate` → `pnpm build`
-- **Streaming**: Use `JsonToSseTransformStream` for SSE
-- **Conversation pruning**: `pruneConversationHistory()` prevents unbounded token growth
-- **Tool call limits**: `stopWhen: stepCountIs(5)` limits chained tool calls
-- **Circuit breaker**: Opossum library (`opossum` package) for API resilience
+- **Circuit breaker**: `opossum` package for API resilience
 - **Document generation**: DOCX files via `docx` package
-- **Token counting**: `tokenlens` library for AI token tracking
+- **Lead routing**: SOPHIA spec rules in `lib/telegram/lead-router.ts` for agent assignment
 
 ---
 
