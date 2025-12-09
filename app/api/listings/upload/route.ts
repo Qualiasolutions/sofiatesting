@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/app/(auth)/auth";
+import { checkAdminAuth } from "@/lib/auth/admin";
 import {
   getListingById,
   logListingUploadAttempt,
@@ -39,8 +40,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Listing not found" }, { status: 404 });
     }
 
-    // Check ownership
-    if (listing.userId !== session.user.id) {
+    // Check ownership OR admin role
+    const adminCheck = await checkAdminAuth();
+    if (listing.userId !== session.user.id && !adminCheck.isAdmin) {
       return NextResponse.json(
         { error: "Not authorized to upload this listing" },
         { status: 403 }
