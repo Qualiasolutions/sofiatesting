@@ -50,7 +50,8 @@ import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { generateTitleFromUserMessage } from "../../actions";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
 
-export const maxDuration = 60;
+// Increased to 120s to allow for image uploads to Zyprus API
+export const maxDuration = 120;
 
 const getTokenlensCatalog = cache(
   async (): Promise<ModelCatalog | undefined> => {

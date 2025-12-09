@@ -17,9 +17,10 @@ export default async function Layout({
 
   return (
     <>
+      {/* Pyodide: Lazy load Python runtime - only needed when user runs Python code */}
       <Script
         src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"
-        strategy="beforeInteractive"
+        strategy="lazyOnload"
       />
       <DataStreamProvider>
         <SidebarProvider defaultOpen={!isCollapsed}>
