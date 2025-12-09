@@ -97,6 +97,158 @@ async function testEndpoint(
   }
 }
 
+async function discoverPropertyFields(token: string): Promise<void> {
+  const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
+  console.log(`\n${"=".repeat(60)}`);
+  console.log("DISCOVERING PROPERTY FIELDS (Looking for reviewer/instructor)");
+  console.log("=".repeat(60));
+
+  // Fetch a single property with ALL fields included
+  const url = `${apiUrl}/jsonapi/node/property?page[limit]=1`;
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/vnd.api+json",
+        Authorization: `Bearer ${token}`,
+        "User-Agent": "SophiaAI",
+      },
+    });
+
+    if (!response.ok) {
+      console.log(`Failed to fetch property: ${response.status}`);
+      return;
+    }
+
+    const data = await response.json();
+    if (data.data && data.data.length > 0) {
+      const property = data.data[0];
+      console.log(`\nSample Property ID: ${property.id}`);
+      console.log(`Title: ${property.attributes?.title}`);
+
+      console.log("\n--- ALL ATTRIBUTES ---");
+      const attrs = Object.keys(property.attributes || {}).sort();
+      for (const key of attrs) {
+        const value = property.attributes[key];
+        // Highlight fields that might be reviewer/instructor related
+        if (key.toLowerCase().includes("reviewer") ||
+            key.toLowerCase().includes("instructor") ||
+            key.toLowerCase().includes("draft") ||
+            key.toLowerCase().includes("ai_")) {
+          console.log(`  ⭐ ${key}: ${JSON.stringify(value)}`);
+        } else {
+          console.log(`  ${key}: ${typeof value === "object" ? JSON.stringify(value) : value}`);
+        }
+      }
+
+      console.log("\n--- ALL RELATIONSHIPS ---");
+      const rels = Object.keys(property.relationships || {}).sort();
+      for (const key of rels) {
+        const rel = property.relationships[key];
+        // Highlight fields that might be reviewer/instructor related
+        if (key.toLowerCase().includes("reviewer") ||
+            key.toLowerCase().includes("instructor") ||
+            key.toLowerCase().includes("user")) {
+          console.log(`  ⭐ ${key}: ${JSON.stringify(rel.data)}`);
+        } else {
+          const dataInfo = rel.data
+            ? (Array.isArray(rel.data) ? `[${rel.data.length} items]` : rel.data.type)
+            : "null";
+          console.log(`  ${key}: ${dataInfo}`);
+        }
+      }
+    } else {
+      console.log("No properties found in the system");
+    }
+  } catch (error) {
+    console.error("Error fetching property:", error);
+  }
+}
+
+async function findLaurenUuid(token: string): Promise<string | null> {
+  const apiUrl = process.env.ZYPRUS_API_URL || "https://dev9.zyprus.com";
+  console.log(`\n${"=".repeat(60)}`);
+  console.log("FINDING LAUREN ELLINGHAM'S USER UUID");
+  console.log("=".repeat(60));
+
+  // Try to query users endpoint
+  const endpoints = [
+    "/jsonapi/user/user",
+    "/jsonapi/user--user",
+  ];
+
+  for (const endpoint of endpoints) {
+    const url = `${apiUrl}${endpoint}?filter[name][operator]=CONTAINS&filter[name][value]=Lauren`;
+    console.log(`\nTrying: ${endpoint}`);
+
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/vnd.api+json",
+          Authorization: `Bearer ${token}`,
+          "User-Agent": "SophiaAI",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`Found ${data.data?.length || 0} users matching "Lauren"`);
+
+        if (data.data && data.data.length > 0) {
+          for (const user of data.data) {
+            console.log(`  - ${user.attributes?.name || user.attributes?.display_name}: ${user.id}`);
+            if (user.attributes?.name?.toLowerCase().includes("lauren") ||
+                user.attributes?.display_name?.toLowerCase().includes("lauren")) {
+              console.log(`\n✅ LAUREN'S UUID: ${user.id}`);
+              return user.id;
+            }
+          }
+        }
+      } else {
+        console.log(`  Status: ${response.status} (may not have permission)`);
+      }
+    } catch (error) {
+      console.log(`  Error: ${error instanceof Error ? error.message : "Unknown"}`);
+    }
+  }
+
+  // Also try without filter to see all users
+  console.log("\nTrying to list all users (no filter)...");
+  try {
+    const response = await fetch(`${apiUrl}/jsonapi/user/user?page[limit]=50`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/vnd.api+json",
+        Authorization: `Bearer ${token}`,
+        "User-Agent": "SophiaAI",
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log(`Found ${data.data?.length || 0} total users`);
+
+      if (data.data) {
+        for (const user of data.data) {
+          const name = user.attributes?.name || user.attributes?.display_name || "Unknown";
+          console.log(`  - ${name}: ${user.id}`);
+          if (name.toLowerCase().includes("lauren")) {
+            console.log(`\n✅ LAUREN'S UUID: ${user.id}`);
+            return user.id;
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.log(`Error listing users: ${error instanceof Error ? error.message : "Unknown"}`);
+  }
+
+  console.log("\n❌ Could not find Lauren's UUID - may need to check Zyprus admin");
+  return null;
+}
+
 async function main() {
   console.log("=".repeat(60));
   console.log("ZYPRUS API ENDPOINT DISCOVERY TEST");
@@ -117,6 +269,12 @@ async function main() {
     console.error("\nFailed to get OAuth token:", error);
     process.exit(1);
   }
+
+  // NEW: Discover property fields first
+  await discoverPropertyFields(token);
+
+  // NEW: Find Lauren's UUID
+  await findLaurenUuid(token);
 
   // Test JSON:API root to see available resources
   console.log(`\n${"=".repeat(60)}`);

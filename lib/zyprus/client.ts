@@ -1,5 +1,9 @@
 import { createCircuitBreaker } from "@/lib/circuit-breakers";
 import type { PropertyListing } from "@/lib/db/schema";
+import {
+  DEFAULT_LISTING_INSTRUCTOR_UUID,
+  DEFAULT_LISTING_REVIEWER_UUID,
+} from "./constants";
 
 type ZyprusAPIErrorOptions = {
   message: string;
@@ -508,6 +512,14 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
             ownerEmail: (listing as any).ownerEmail,
             titleDeedNumber: (listing as any).titleDeedNumber,
           }),
+        // AI Draft Reference ID - same as own_reference_id for AI-generated listings
+        field_ai_draft_own_reference_id:
+          listing.referenceId ||
+          generateReferenceId({
+            ownerPhone: listing.ownerPhone,
+            ownerEmail: (listing as any).ownerEmail,
+            titleDeedNumber: (listing as any).titleDeedNumber,
+          }),
         field_year_built: Number.parseInt(
           String(listing.yearBuilt || new Date().getFullYear()),
           10
@@ -654,6 +666,24 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
       };
     }
   }
+
+  // AI Listing Reviewer - assigned to review AI-generated listings (array of users)
+  relationships.field_ai_listing_reviewer = {
+    data: [
+      {
+        type: "user--user",
+        id: DEFAULT_LISTING_REVIEWER_UUID,
+      },
+    ],
+  };
+
+  // AI Listing Instructor - who instructed/submitted the listing (single user)
+  relationships.field_ai_listing_instructor = {
+    data: {
+      type: "user--user",
+      id: DEFAULT_LISTING_INSTRUCTOR_UUID,
+    },
+  };
 
   if (imageIds.length > 0) {
     relationships.field_gallery_ = {
@@ -1001,6 +1031,14 @@ async function uploadLandToZyprusAPIInternal(
             ownerEmail: null,
             titleDeedNumber: null,
           }),
+        // AI Draft Reference ID - same as own_reference_id for AI-generated listings
+        field_ai_draft_own_reference_id:
+          listing.referenceId ||
+          generateReferenceId({
+            ownerPhone: listing.phoneNumber,
+            ownerEmail: null,
+            titleDeedNumber: null,
+          }),
         // NOTE: field_phone_number removed - OAuth client doesn't have permission
         field_property_notes: listing.notes || null,
         field_map: hasCoordinates
@@ -1092,6 +1130,24 @@ async function uploadLandToZyprusAPIInternal(
       };
     }
   }
+
+  // AI Listing Reviewer - assigned to review AI-generated listings (array of users)
+  relationships.field_ai_listing_reviewer = {
+    data: [
+      {
+        type: "user--user",
+        id: DEFAULT_LISTING_REVIEWER_UUID,
+      },
+    ],
+  };
+
+  // AI Listing Instructor - who instructed/submitted the listing (single user)
+  relationships.field_ai_listing_instructor = {
+    data: {
+      type: "user--user",
+      id: DEFAULT_LISTING_INSTRUCTOR_UUID,
+    },
+  };
 
   // Images
   if (imageIds.length > 0) {
