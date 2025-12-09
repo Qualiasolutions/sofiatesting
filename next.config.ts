@@ -70,7 +70,10 @@ const nextConfig: NextConfig = {
 // Wrap with Sentry for error monitoring
 // Trim env vars to handle trailing newlines from Vercel
 const sentryOrg = (process.env.SENTRY_ORG || "qualia-solutions").trim();
-const sentryProject = (process.env.SENTRY_PROJECT || "sofia").trim();
+const sentryProject = (process.env.SENTRY_PROJECT || "sofia-ai").trim();
+
+// Only enable source map uploads if auth token is configured
+const hasSentryAuth = Boolean(process.env.SENTRY_AUTH_TOKEN);
 
 export default withSentryConfig(nextConfig, {
   // For all available options, see:
@@ -81,6 +84,9 @@ export default withSentryConfig(nextConfig, {
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
+
+  // Disable telemetry to prevent build noise
+  telemetry: false,
 
   // For all available options, see:
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
@@ -99,10 +105,16 @@ export default withSentryConfig(nextConfig, {
   // side errors will fail.
   tunnelRoute: "/monitoring",
 
-  // Source maps configuration - hide from client bundles for security
+  // Source maps configuration - disable uploads if no auth token
   sourcemaps: {
-    disable: false,
+    disable: !hasSentryAuth,
     deleteSourcemapsAfterUpload: true,
+  },
+
+  // Disable release creation if no auth - prevents "Project not found" errors
+  release: {
+    create: hasSentryAuth,
+    finalize: hasSentryAuth,
   },
 
   // Automatically tree-shake Sentry logger statements to reduce bundle size
@@ -111,5 +123,5 @@ export default withSentryConfig(nextConfig, {
   },
 
   // Enables automatic instrumentation of Vercel Cron Monitors. (Requires Server Monitoring)
-  automaticVercelMonitors: true,
+  automaticVercelMonitors: hasSentryAuth,
 });
