@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SOFIA is a Next.js 15 AI assistant for Zyprus Property Group (Cyprus real estate). Core features:
+**SOFIA v3.1.0** - Next.js 15 AI assistant for Zyprus Property Group (Cyprus real estate). Core features:
 - AI chat with Cyprus real estate tools (VAT, transfer fees, capital gains calculators)
 - Property listing management with Zyprus API integration (Drupal JSON:API)
 - Telegram and WhatsApp bot integrations
@@ -24,12 +24,13 @@ SOFIA is a Next.js 15 AI assistant for Zyprus Property Group (Cyprus real estate
 
 | Model ID | Actual Model | Use Case |
 |----------|-------------|----------|
-| `chat-model` | Gemini 3 Pro Preview | **Default** - Best reasoning, 1M context, multimodal |
-| `chat-model-gemini3` | Gemini 3 Pro Preview | Explicit alias for default |
-| `chat-model-pro` | Gemini 2.5 Pro | Previous gen reasoning fallback |
-| `chat-model-flash` | Gemini 2.5 Flash | Fast with good quality |
-| `chat-model-flash-lite` | Gemini 2.5 Flash-Lite | Ultra-fast, cost-efficient |
-| `title-model` | Gemini 2.5 Flash | Chat title generation |
+| `chat-model` | `gemini-3-pro-preview` | **Default** - Best reasoning, 1M context, multimodal |
+| `chat-model-gemini3` | `gemini-3-pro-preview` | Explicit alias for default |
+| `chat-model-pro` | `gemini-2.5-pro` | Previous gen reasoning fallback |
+| `chat-model-flash` | `gemini-2.5-flash` | Fast with good quality |
+| `chat-model-flash-lite` | `gemini-2.5-flash-lite` | Ultra-fast, cost-efficient |
+| `title-model` | `gemini-2.5-flash` | Chat title generation |
+| `artifact-model` | `gemini-3-pro-preview` | Uses default model |
 
 See `lib/ai/providers.ts` for implementation details.
 
@@ -121,7 +122,7 @@ Key patterns:
 
 **WhatsApp** (`lib/whatsapp/`): Document detection + DOCX generation via `wasenderapi` npm package (~$6/month). Supports base64 file attachments for document sending.
 
-**Zyprus API** (`lib/zyprus/`): Drupal JSON:API backend for property/land listings. OAuth 2.0 auth, auto-upload as unpublished drafts. See `lib/zyprus/README.md` for detailed payload schemas.
+**Zyprus API** (`lib/zyprus/`): Drupal JSON:API backend for property/land listings. OAuth 2.0 auth, auto-upload as unpublished drafts. See Zyprus API Quick Reference section below.
 
 ## Active Tools
 
@@ -210,9 +211,7 @@ See `.env.example` for complete list.
 
 ## Zyprus API Quick Reference
 
-**Full documentation**: `lib/zyprus/README.md`
-
-**Architecture**: `lib/zyprus/client.ts` (API client), `lib/zyprus/taxonomy-cache.ts` (1h TTL cache), `lib/zyprus/types.ts`
+**Architecture**: `lib/zyprus/client.ts` (API client with OAuth 2.0), `lib/zyprus/taxonomy-cache.ts` (Redis-backed cache with 1h TTL and in-memory fallback)
 
 ### Critical Configuration
 
