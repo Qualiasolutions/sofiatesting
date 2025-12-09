@@ -49,6 +49,69 @@ let cachedToken: OAuthToken | null = null;
 let tokenExpiresAt = 0;
 
 /**
+ * Validate if a string is a valid UUID v4
+ */
+const isValidUuid = (id: string): boolean => {
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
+};
+
+/**
+ * Filter array to only include valid UUIDs, with warning for invalid ones
+ */
+const filterValidUuids = (ids: string[], fieldName: string): string[] => {
+  const valid: string[] = [];
+  const invalid: string[] = [];
+
+  for (const id of ids) {
+    if (isValidUuid(id)) {
+      valid.push(id);
+    } else {
+      invalid.push(id);
+    }
+  }
+
+  if (invalid.length > 0) {
+    console.warn(
+      `[Zyprus] Filtered out ${invalid.length} invalid ${fieldName} ID(s): ${invalid.join(", ")}. ` +
+        `Use getZyprusData tool to fetch valid UUIDs.`
+    );
+  }
+
+  return valid;
+};
+
+/**
+ * Convert ibb.co page URLs to direct image URLs
+ * ibb.co page URLs (e.g., https://ibb.co/YFZ2Qt2j) don't return images directly
+ * We need to convert them to i.ibb.co direct URLs
+ */
+const convertToDirectImageUrl = (url: string): string => {
+  // Check if it's an ibb.co page URL (not i.ibb.co)
+  const ibbPageMatch = url.match(/^https?:\/\/ibb\.co\/([a-zA-Z0-9]+)$/);
+  if (ibbPageMatch) {
+    const imageId = ibbPageMatch[1];
+    // Convert to direct image URL format
+    // Note: ibb.co doesn't have a simple conversion, we need to fetch the page and extract the image
+    // For now, log a warning and try the i.ibb.co format
+    console.warn(
+      `ibb.co page URL detected: ${url}. Please use direct image URLs (i.ibb.co) instead.`
+    );
+    // Try common i.ibb.co format - this may not always work
+    return `https://i.ibb.co/${imageId}/image.jpg`;
+  }
+
+  // Check if it's already a direct i.ibb.co URL - these are fine
+  if (url.includes("i.ibb.co")) {
+    return url;
+  }
+
+  // Return other URLs unchanged
+  return url;
+};
+
+/**
  * Generate a unique reference ID from owner details
  * Format: [last 4 phone digits]-[email prefix 4 chars]-[title deed number]
  * Fallback: AI-[8 char UUID] if no owner info provided
@@ -309,20 +372,31 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
 
     // Create upload promise for each image
     const uploadPromises = imageUrls.map(async (imageUrl, i) => {
-      console.log(`Uploading image ${i + 1}/${totalImages}: ${imageUrl}`);
+      // Convert ibb.co page URLs to direct image URLs
+      const directUrl = convertToDirectImageUrl(imageUrl);
+      console.log(
+        `Uploading image ${i + 1}/${totalImages}: ${directUrl}${directUrl !== imageUrl ? ` (converted from ${imageUrl})` : ""}`
+      );
 
       try {
         // Fetch image from URL (supports both external URLs and Vercel Blob URLs)
-        const imageResponse = await fetch(imageUrl);
+        const imageResponse = await fetch(directUrl);
         if (!imageResponse.ok) {
           throw new Error(
             `Failed to fetch image: ${imageResponse.status} ${imageResponse.statusText}`
           );
         }
 
-        const imageBlob = await imageResponse.blob();
+        // Validate content-type is an actual image
         const contentType =
           imageResponse.headers.get("content-type") || "image/jpeg";
+        if (!contentType.startsWith("image/")) {
+          throw new Error(
+            `URL returned non-image content-type: ${contentType}. Use direct image URLs (e.g., i.ibb.co instead of ibb.co)`
+          );
+        }
+
+        const imageBlob = await imageResponse.blob();
 
         // Determine file extension from content type
         const ext = contentType.split("/")[1] || "jpg";
@@ -415,9 +489,10 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
           String((listing as any).landSize || listing.floorSize)
         ), // Parse as float
         field_no_bedrooms: Number.parseInt(String(listing.numberOfRooms), 10), // Parse as integer
-        field_no_bathrooms: Number.parseFloat(
-          String(listing.numberOfBathroomsTotal)
-        ), // Parse as float (allows 2.5, etc.)
+        field_no_bathrooms: Number.parseInt(
+          String(listing.numberOfBathroomsTotal),
+          10
+        ), // Parse as integer (Drupal expects integer)
         field_no_kitchens: Number.parseInt(
           String((listing as any).numberOfKitchens || 1),
           10
@@ -484,21 +559,33 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
   }
 
   if (listing.indoorFeatureIds?.length) {
-    relationships.field_indoor_property_features = {
-      data: listing.indoorFeatureIds.map((id) => ({
-        type: "taxonomy_term--indoor_property_views",
-        id,
-      })),
-    };
+    const validIndoorIds = filterValidUuids(
+      listing.indoorFeatureIds,
+      "indoor feature"
+    );
+    if (validIndoorIds.length > 0) {
+      relationships.field_indoor_property_features = {
+        data: validIndoorIds.map((id) => ({
+          type: "taxonomy_term--indoor_property_views",
+          id,
+        })),
+      };
+    }
   }
 
   if (listing.outdoorFeatureIds?.length) {
-    relationships.field_outdoor_property_features = {
-      data: listing.outdoorFeatureIds.map((id) => ({
-        type: "taxonomy_term--outdoor_property_features",
-        id,
-      })),
-    };
+    const validOutdoorIds = filterValidUuids(
+      listing.outdoorFeatureIds,
+      "outdoor feature"
+    );
+    if (validOutdoorIds.length > 0) {
+      relationships.field_outdoor_property_features = {
+        data: validOutdoorIds.map((id) => ({
+          type: "taxonomy_term--outdoor_property_features",
+          id,
+        })),
+      };
+    }
   }
 
   if (listing.listingTypeId) {
@@ -557,12 +644,15 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
 
   // NEW: Property views relationship (Sea View, Mountain View, City View, etc.)
   if (listing.viewIds?.length) {
-    relationships.field_property_views = {
-      data: listing.viewIds.map((id) => ({
-        type: "taxonomy_term--property_views",
-        id,
-      })),
-    };
+    const validViewIds = filterValidUuids(listing.viewIds, "property view");
+    if (validViewIds.length > 0) {
+      relationships.field_property_views = {
+        data: validViewIds.map((id) => ({
+          type: "taxonomy_term--property_views",
+          id,
+        })),
+      };
+    }
   }
 
   if (imageIds.length > 0) {
@@ -791,19 +881,30 @@ async function uploadLandToZyprusAPIInternal(
     );
 
     const uploadPromises = imageUrls.map(async (imageUrl, i) => {
-      console.log(`Uploading land image ${i + 1}/${totalImages}: ${imageUrl}`);
+      // Convert ibb.co page URLs to direct image URLs
+      const directUrl = convertToDirectImageUrl(imageUrl);
+      console.log(
+        `Uploading land image ${i + 1}/${totalImages}: ${directUrl}${directUrl !== imageUrl ? ` (converted from ${imageUrl})` : ""}`
+      );
 
       try {
-        const imageResponse = await fetch(imageUrl);
+        const imageResponse = await fetch(directUrl);
         if (!imageResponse.ok) {
           throw new Error(
             `Failed to fetch image: ${imageResponse.status} ${imageResponse.statusText}`
           );
         }
 
-        const imageBlob = await imageResponse.blob();
+        // Validate content-type is an actual image
         const contentType =
           imageResponse.headers.get("content-type") || "image/jpeg";
+        if (!contentType.startsWith("image/")) {
+          throw new Error(
+            `URL returned non-image content-type: ${contentType}. Use direct image URLs (e.g., i.ibb.co instead of ibb.co)`
+          );
+        }
+
+        const imageBlob = await imageResponse.blob();
         const ext = contentType.split("/")[1] || "jpg";
         const filename = `land-image-${i + 1}.${ext}`;
 
@@ -965,22 +1066,31 @@ async function uploadLandToZyprusAPIInternal(
 
   // Optional: Infrastructure (Electricity, Water, Road Access, etc.)
   if (listing.infrastructureIds?.length) {
-    relationships.field_infrastructure = {
-      data: listing.infrastructureIds.map((id) => ({
-        type: "taxonomy_term--infrastructure_",
-        id,
-      })),
-    };
+    const validInfraIds = filterValidUuids(
+      listing.infrastructureIds,
+      "infrastructure"
+    );
+    if (validInfraIds.length > 0) {
+      relationships.field_infrastructure = {
+        data: validInfraIds.map((id) => ({
+          type: "taxonomy_term--infrastructure_",
+          id,
+        })),
+      };
+    }
   }
 
   // Optional: Land views (land uses field_land_views)
   if (listing.viewIds?.length) {
-    relationships.field_land_views = {
-      data: listing.viewIds.map((id) => ({
-        type: "taxonomy_term--property_views",
-        id,
-      })),
-    };
+    const validViewIds = filterValidUuids(listing.viewIds, "land view");
+    if (validViewIds.length > 0) {
+      relationships.field_land_views = {
+        data: validViewIds.map((id) => ({
+          type: "taxonomy_term--property_views",
+          id,
+        })),
+      };
+    }
   }
 
   // Images
