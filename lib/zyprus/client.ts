@@ -710,7 +710,7 @@ export async function getZyprusListings(): Promise<any[]> {
 // Circuit breaker for property upload
 const uploadBreaker = createCircuitBreaker(uploadToZyprusAPIInternal, {
   name: "ZyprusUpload",
-  timeout: 45_000, // 45 second timeout (allows for image uploads)
+  timeout: 90_000, // 90 second timeout (allows for multiple image uploads)
   errorThresholdPercentage: 50, // 50% failure rate trips circuit
   resetTimeout: 30_000, // Wait 30 seconds before trying again
   volumeThreshold: 3, // Need at least 3 failed requests to trip
@@ -1084,7 +1084,7 @@ async function uploadLandToZyprusAPIInternal(
 // Circuit breaker for land upload
 const landUploadBreaker = createCircuitBreaker(uploadLandToZyprusAPIInternal, {
   name: "ZyprusLandUpload",
-  timeout: 45_000,
+  timeout: 90_000, // 90 second timeout (allows for multiple image uploads)
   errorThresholdPercentage: 50,
   resetTimeout: 30_000,
   volumeThreshold: 3,

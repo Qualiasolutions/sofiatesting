@@ -4,11 +4,11 @@
   "framework": "nextjs",
   "functions": {
     "app/(chat)/api/chat/route.ts": {
-      "maxDuration": 60,
+      "maxDuration": 120,
       "memory": 1024
     },
     "app/api/telegram/webhook/route.ts": {
-      "maxDuration": 30,
+      "maxDuration": 60,
       "memory": 512
     }
   },
