@@ -58,34 +58,60 @@ export async function handleWhatsAppMessage(
   const phoneNumber = messageData.from;
   const userMessage = messageData.text;
 
+  // Default user context (used if DB fails)
+  let userContext: {
+    id: string;
+    email: string;
+    name: string;
+    type: "guest" | "regular";
+  } = {
+    id: `whatsapp-${phoneNumber}`,
+    email: `${phoneNumber}@whatsapp.local`,
+    name: messageData.sender?.name || phoneNumber,
+    type: "guest",
+  };
+
   try {
-    // Get or create user for this WhatsApp phone number
-    const whatsappUser = await getOrCreateWhatsAppUser(phoneNumber);
-    const chatSession = await getOrCreateWhatsAppChat(
-      whatsappUser.id,
-      phoneNumber
-    );
+    // Try to get or create user from DB (non-blocking if fails)
+    try {
+      const dbUser = await getOrCreateWhatsAppUser(phoneNumber);
+      const dbChat = await getOrCreateWhatsAppChat(dbUser.id, phoneNumber);
 
-    // Update agent last active if this is a registered agent
-    if (whatsappUser.agentId) {
-      await updateAgentLastActive(whatsappUser.agentId);
+      // Use DB user context if available
+      userContext = {
+        id: dbUser.id,
+        email: dbUser.email,
+        name: dbUser.name || phoneNumber,
+        type: dbUser.type,
+      };
+
+      // Update agent last active if this is a registered agent
+      if (dbUser.agentId) {
+        await updateAgentLastActive(dbUser.agentId);
+      }
+
+      // Log incoming message
+      await db.insert(agentExecutionLog).values({
+        agentType: "whatsapp",
+        action: "message_received",
+        modelUsed: "user",
+        success: true,
+        metadata: {
+          from: phoneNumber,
+          message: userMessage,
+          isGroup: messageData.isGroup,
+          userId: dbUser.id,
+          chatId: dbChat.id,
+          isAgent: dbUser.isAgent,
+        },
+      });
+    } catch (dbError) {
+      console.warn("[WhatsApp] DB operations failed, using fallback context:", {
+        error: dbError instanceof Error ? dbError.message : "Unknown error",
+        phoneNumber,
+      });
+      // Continue with default user context - AI will still respond
     }
-
-    // Log incoming message
-    await db.insert(agentExecutionLog).values({
-      agentType: "whatsapp",
-      action: "message_received",
-      modelUsed: "user",
-      success: true,
-      metadata: {
-        from: phoneNumber,
-        message: userMessage,
-        isGroup: messageData.isGroup,
-        userId: whatsappUser.id,
-        chatId: chatSession.id,
-        isAgent: whatsappUser.isAgent,
-      },
-    });
 
     // STEP 1: ROUTING (Cost Optimization)
     // Use Flash-Lite to decide intent
@@ -156,16 +182,16 @@ export async function handleWhatsAppMessage(
     };
 
     // Wrap AI execution with user context so tools can access user info
-    const userContext = {
+    const aiUserContext = {
       user: {
-        id: whatsappUser.id,
-        email: whatsappUser.email,
-        name: whatsappUser.name,
-        type: whatsappUser.type,
+        id: userContext.id,
+        email: userContext.email,
+        name: userContext.name,
+        type: userContext.type,
       },
     };
 
-    fullResponse = await runWithUserContext(userContext, async () => {
+    fullResponse = await runWithUserContext(aiUserContext, async () => {
       const result = await streamText({
         model: chatModel,
         system: finalSystemPrompt,
