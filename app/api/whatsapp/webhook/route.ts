@@ -77,8 +77,9 @@ export async function POST(request: Request): Promise<Response> {
       case "message":
       case "messages.received":
       case "messages.upsert": {
-        // WaSenderAPI SDK structure: body.data is MessagesUpsertData | MessagesUpsertData[]
-        // The data is directly the message object(s), not nested under "messages"
+        // WaSenderAPI has TWO formats:
+        // 1. SDK format: body.data is MessagesUpsertData | MessagesUpsertData[]
+        // 2. Webhook format: body.data.messages is the message object
         const rawData = body.data;
 
         if (!rawData) {
@@ -86,8 +87,19 @@ export async function POST(request: Request): Promise<Response> {
           return NextResponse.json({ success: true });
         }
 
+        // Check if messages are nested under "messages" key (webhook format)
+        // or directly in data (SDK format)
+        let messageSource = rawData;
+        if (rawData.messages && !rawData.key) {
+          // Webhook format: data.messages contains the message
+          messageSource = rawData.messages;
+          console.log("[WhatsApp Webhook] Using nested messages format");
+        }
+
         // Handle both single object and array formats
-        const messagesArray = Array.isArray(rawData) ? rawData : [rawData];
+        const messagesArray = Array.isArray(messageSource)
+          ? messageSource
+          : [messageSource];
 
         for (const msgData of messagesArray) {
           // Skip if no message data
