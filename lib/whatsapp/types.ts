@@ -11,7 +11,7 @@ export type {
 
 /**
  * WaSender Webhook Message Data
- * Simplified type for incoming messages
+ * Simplified type for incoming messages processed by our handler
  */
 export type WaSenderMessageData = {
   id: string;
@@ -42,23 +42,49 @@ export type WaSenderMessageData = {
 
 /**
  * WaSender Webhook Event Types
+ * Combines legacy event names with SDK standard event types
  */
 export type WaSenderWebhookEvent =
+  // Legacy/custom event names
   | "message"
+  | "message.sent"
   | "message.status"
   | "session.status"
   | "contact.upsert"
   | "group.update"
   | "call"
-  | "webhook.test";
+  | "webhook.test"
+  // SDK standard event types (wasenderapi)
+  | "messages.upsert"
+  | "messages.received"
+  | "messages.update"
+  | "messages.delete"
+  | "messages.reaction"
+  | "message-receipt.update"
+  | "chats.upsert"
+  | "chats.update"
+  | "chats.delete"
+  | "contacts.upsert"
+  | "contacts.update"
+  | "groups.upsert"
+  | "groups.update"
+  | "group-participants.update"
+  | "qrcode.updated";
 
 /**
- * WaSender Webhook Payload
+ * WaSender Webhook Payload (Legacy format)
+ * Note: SDK uses 'type' field, legacy uses 'event' field
  */
 export type WaSenderWebhookPayload = {
-  event: WaSenderWebhookEvent;
+  event?: WaSenderWebhookEvent;
+  type?: WaSenderWebhookEvent;
   sessionId?: string;
-  data: WaSenderMessageData | WaSenderStatusData | WaSenderSessionData;
+  timestamp?: number;
+  data:
+    | WaSenderMessageData
+    | WaSenderStatusData
+    | WaSenderSessionData
+    | unknown;
 };
 
 /**
@@ -66,7 +92,14 @@ export type WaSenderWebhookPayload = {
  */
 export type WaSenderStatusData = {
   id: string;
-  status: "sent" | "delivered" | "read" | "failed";
+  status:
+    | "sent"
+    | "delivered"
+    | "read"
+    | "failed"
+    | "pending"
+    | "played"
+    | "error";
   timestamp: number;
   error?: string;
 };
@@ -75,8 +108,17 @@ export type WaSenderStatusData = {
  * Session Status Update
  */
 export type WaSenderSessionData = {
-  status: "connected" | "disconnected" | "connecting" | "qr_ready";
+  status:
+    | "connected"
+    | "disconnected"
+    | "connecting"
+    | "qr_ready"
+    | "error"
+    | "logged_out"
+    | "need_scan";
   qrCode?: string;
+  qr?: string; // SDK uses 'qr' field
+  reason?: string;
 };
 
 /**

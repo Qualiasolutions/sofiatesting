@@ -132,13 +132,17 @@ async function discoverPropertyFields(token: string): Promise<void> {
       for (const key of attrs) {
         const value = property.attributes[key];
         // Highlight fields that might be reviewer/instructor related
-        if (key.toLowerCase().includes("reviewer") ||
-            key.toLowerCase().includes("instructor") ||
-            key.toLowerCase().includes("draft") ||
-            key.toLowerCase().includes("ai_")) {
+        if (
+          key.toLowerCase().includes("reviewer") ||
+          key.toLowerCase().includes("instructor") ||
+          key.toLowerCase().includes("draft") ||
+          key.toLowerCase().includes("ai_")
+        ) {
           console.log(`  ⭐ ${key}: ${JSON.stringify(value)}`);
         } else {
-          console.log(`  ${key}: ${typeof value === "object" ? JSON.stringify(value) : value}`);
+          console.log(
+            `  ${key}: ${typeof value === "object" ? JSON.stringify(value) : value}`
+          );
         }
       }
 
@@ -147,13 +151,17 @@ async function discoverPropertyFields(token: string): Promise<void> {
       for (const key of rels) {
         const rel = property.relationships[key];
         // Highlight fields that might be reviewer/instructor related
-        if (key.toLowerCase().includes("reviewer") ||
-            key.toLowerCase().includes("instructor") ||
-            key.toLowerCase().includes("user")) {
+        if (
+          key.toLowerCase().includes("reviewer") ||
+          key.toLowerCase().includes("instructor") ||
+          key.toLowerCase().includes("user")
+        ) {
           console.log(`  ⭐ ${key}: ${JSON.stringify(rel.data)}`);
         } else {
           const dataInfo = rel.data
-            ? (Array.isArray(rel.data) ? `[${rel.data.length} items]` : rel.data.type)
+            ? Array.isArray(rel.data)
+              ? `[${rel.data.length} items]`
+              : rel.data.type
             : "null";
           console.log(`  ${key}: ${dataInfo}`);
         }
@@ -173,10 +181,7 @@ async function findLaurenUuid(token: string): Promise<string | null> {
   console.log("=".repeat(60));
 
   // Try to query users endpoint
-  const endpoints = [
-    "/jsonapi/user/user",
-    "/jsonapi/user--user",
-  ];
+  const endpoints = ["/jsonapi/user/user", "/jsonapi/user--user"];
 
   for (const endpoint of endpoints) {
     const url = `${apiUrl}${endpoint}?filter[name][operator]=CONTAINS&filter[name][value]=Lauren`;
@@ -198,9 +203,13 @@ async function findLaurenUuid(token: string): Promise<string | null> {
 
         if (data.data && data.data.length > 0) {
           for (const user of data.data) {
-            console.log(`  - ${user.attributes?.name || user.attributes?.display_name}: ${user.id}`);
-            if (user.attributes?.name?.toLowerCase().includes("lauren") ||
-                user.attributes?.display_name?.toLowerCase().includes("lauren")) {
+            console.log(
+              `  - ${user.attributes?.name || user.attributes?.display_name}: ${user.id}`
+            );
+            if (
+              user.attributes?.name?.toLowerCase().includes("lauren") ||
+              user.attributes?.display_name?.toLowerCase().includes("lauren")
+            ) {
               console.log(`\n✅ LAUREN'S UUID: ${user.id}`);
               return user.id;
             }
@@ -210,7 +219,9 @@ async function findLaurenUuid(token: string): Promise<string | null> {
         console.log(`  Status: ${response.status} (may not have permission)`);
       }
     } catch (error) {
-      console.log(`  Error: ${error instanceof Error ? error.message : "Unknown"}`);
+      console.log(
+        `  Error: ${error instanceof Error ? error.message : "Unknown"}`
+      );
     }
   }
 
@@ -232,7 +243,8 @@ async function findLaurenUuid(token: string): Promise<string | null> {
 
       if (data.data) {
         for (const user of data.data) {
-          const name = user.attributes?.name || user.attributes?.display_name || "Unknown";
+          const name =
+            user.attributes?.name || user.attributes?.display_name || "Unknown";
           console.log(`  - ${name}: ${user.id}`);
           if (name.toLowerCase().includes("lauren")) {
             console.log(`\n✅ LAUREN'S UUID: ${user.id}`);
@@ -242,10 +254,14 @@ async function findLaurenUuid(token: string): Promise<string | null> {
       }
     }
   } catch (error) {
-    console.log(`Error listing users: ${error instanceof Error ? error.message : "Unknown"}`);
+    console.log(
+      `Error listing users: ${error instanceof Error ? error.message : "Unknown"}`
+    );
   }
 
-  console.log("\n❌ Could not find Lauren's UUID - may need to check Zyprus admin");
+  console.log(
+    "\n❌ Could not find Lauren's UUID - may need to check Zyprus admin"
+  );
   return null;
 }
 

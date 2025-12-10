@@ -33,9 +33,13 @@ async function getToken(): Promise<string> {
   return tokenData.access_token;
 }
 
-async function uploadImage(token: string, imageUrl: string, index: number): Promise<string> {
+async function uploadImage(
+  token: string,
+  imageUrl: string,
+  index: number
+): Promise<string> {
   console.log(`Uploading image ${index + 1}: ${imageUrl}`);
-  
+
   const imageResponse = await fetch(imageUrl);
   if (!imageResponse.ok) {
     throw new Error(`Failed to fetch image: ${imageResponse.status}`);
@@ -46,20 +50,25 @@ async function uploadImage(token: string, imageUrl: string, index: number): Prom
   const ext = contentType.split("/")[1] || "jpg";
   const filename = `property-image-${index + 1}.${ext}`;
 
-  const uploadResponse = await fetch(`${baseUrl}/jsonapi/node/property/field_gallery_`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "User-Agent": "SophiaAI",
-      "Content-Type": "application/octet-stream",
-      "Content-Disposition": `file; filename="${filename}"`,
-    },
-    body: imageBlob,
-  });
+  const uploadResponse = await fetch(
+    `${baseUrl}/jsonapi/node/property/field_gallery_`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "User-Agent": "SophiaAI",
+        "Content-Type": "application/octet-stream",
+        "Content-Disposition": `file; filename="${filename}"`,
+      },
+      body: imageBlob,
+    }
+  );
 
   if (!uploadResponse.ok) {
     const errorText = await uploadResponse.text();
-    throw new Error(`Image upload failed: ${uploadResponse.status} - ${errorText}`);
+    throw new Error(
+      `Image upload failed: ${uploadResponse.status} - ${errorText}`
+    );
   }
 
   const data = await uploadResponse.json();
@@ -77,21 +86,22 @@ async function main() {
   const TALA_LOCATION_ID = "5efac119-c841-42f6-9c0a-bc6dcb485c1e";
   const DETACHED_HOUSE_ID = "76b4fa8e-de7e-4232-85ac-869dca3620f4";
   const SALE_LISTING_TYPE_ID = "8f187816-a888-4cda-a937-1cee84b9c0ee";
-  
+
   // Indoor features
   const AIR_CONDITIONING_ID = "f577829f-8cbe-4ba8-9ce8-e67a30b6fe76";
   const CENTRAL_HEATING_ID = "4f2523f7-9fde-4390-b532-c0da52644632";
   const GUEST_TOILET_ID = "5e2a90da-6836-444b-8d72-a5f810d3a9e5";
   const COVERED_PARKING_ID = "432ac572-ed64-4107-a818-19a8a22c5371";
-  
+
   // Outdoor features
   const PHOTOVOLTAIC_ID = "cf0e9658-bd22-4d8d-988e-b579f7139c1a";
   const UNCOVERED_PARKING_ID = "695d4e05-83df-4345-8f03-911302e96784";
 
   // Upload image first
-  const imageUrl = "https://i.ibb.co/4ndWtjWN/2-bedroom-detached-house-sale-kamares-tala-paphos-41330-784983.jpg";
+  const imageUrl =
+    "https://i.ibb.co/4ndWtjWN/2-bedroom-detached-house-sale-kamares-tala-paphos-41330-784983.jpg";
   let imageId: string | null = null;
-  
+
   try {
     imageId = await uploadImage(token, imageUrl, 0);
   } catch (err) {
@@ -142,12 +152,13 @@ Contact: David Smith - 99123456`,
         field_own_reference_id: "3456-SMITH-TALA",
         field_year_built: 2020,
         field_new_build: false,
-        field_property_notes: "Title deeds are clean, will have a copy soon. Owner is living inside and will vacate once sold. Owner: David Smith - 99123456",
+        field_property_notes:
+          "Title deeds are clean, will have a copy soon. Owner is living inside and will vacate once sold. Owner: David Smith - 99123456",
         field_map: {
           value: "POINT (32.432358 34.830077)",
           geo_type: "Point",
-          lat: 34.830077,
-          lon: 32.432358,
+          lat: 34.830_077,
+          lon: 32.432_358,
           latlon: "34.830077,32.432358",
         },
       },
@@ -159,20 +170,41 @@ Contact: David Smith - 99123456`,
           data: { type: "taxonomy_term--property_type", id: DETACHED_HOUSE_ID },
         },
         field_listing_type: {
-          data: { type: "taxonomy_term--listing_type", id: SALE_LISTING_TYPE_ID },
+          data: {
+            type: "taxonomy_term--listing_type",
+            id: SALE_LISTING_TYPE_ID,
+          },
         },
         field_indoor_property_features: {
           data: [
-            { type: "taxonomy_term--indoor_property_views", id: AIR_CONDITIONING_ID },
-            { type: "taxonomy_term--indoor_property_views", id: CENTRAL_HEATING_ID },
-            { type: "taxonomy_term--indoor_property_views", id: GUEST_TOILET_ID },
-            { type: "taxonomy_term--indoor_property_views", id: COVERED_PARKING_ID },
+            {
+              type: "taxonomy_term--indoor_property_views",
+              id: AIR_CONDITIONING_ID,
+            },
+            {
+              type: "taxonomy_term--indoor_property_views",
+              id: CENTRAL_HEATING_ID,
+            },
+            {
+              type: "taxonomy_term--indoor_property_views",
+              id: GUEST_TOILET_ID,
+            },
+            {
+              type: "taxonomy_term--indoor_property_views",
+              id: COVERED_PARKING_ID,
+            },
           ],
         },
         field_outdoor_property_features: {
           data: [
-            { type: "taxonomy_term--outdoor_property_features", id: PHOTOVOLTAIC_ID },
-            { type: "taxonomy_term--outdoor_property_features", id: UNCOVERED_PARKING_ID },
+            {
+              type: "taxonomy_term--outdoor_property_features",
+              id: PHOTOVOLTAIC_ID,
+            },
+            {
+              type: "taxonomy_term--outdoor_property_features",
+              id: UNCOVERED_PARKING_ID,
+            },
           ],
         },
         ...(imageId && {
@@ -213,7 +245,9 @@ Contact: David Smith - 99123456`,
   console.log(`Property UUID: ${propertyId}`);
   console.log(`Property Node ID: ${nodeId}`);
   console.log(`Property URL: ${propertyUrl}`);
-  console.log("\nThe listing is now on dev9.zyprus.com as an UNPUBLISHED DRAFT.");
+  console.log(
+    "\nThe listing is now on dev9.zyprus.com as an UNPUBLISHED DRAFT."
+  );
   console.log("An admin will need to review and publish it.");
 }
 

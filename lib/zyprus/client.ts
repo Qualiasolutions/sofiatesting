@@ -79,7 +79,7 @@ const filterValidUuids = (ids: string[], fieldName: string): string[] => {
   if (invalid.length > 0) {
     console.warn(
       `[Zyprus] Filtered out ${invalid.length} invalid ${fieldName} ID(s): ${invalid.join(", ")}. ` +
-        `Use getZyprusData tool to fetch valid UUIDs.`
+        "Use getZyprusData tool to fetch valid UUIDs."
     );
   }
 

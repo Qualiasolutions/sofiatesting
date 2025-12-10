@@ -12,7 +12,7 @@ import type { NextRequest } from "next/server";
  */
 export const GET = async (
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   // Extract chatId for logging/debugging purposes
   const { id: _chatId } = await params;

@@ -341,7 +341,7 @@ export default function AdminListingsPage() {
                             className="flex cursor-pointer items-center gap-1 text-blue-600 text-xs hover:underline"
                             onClick={() => {
                               toast.info(listing.propertyNotes || "No notes", {
-                                duration: 10000,
+                                duration: 10_000,
                                 description: "SOFIA AI Notes",
                               });
                             }}
