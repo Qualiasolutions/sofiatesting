@@ -49,7 +49,8 @@ export type WaSenderWebhookEvent =
   | "session.status"
   | "contact.upsert"
   | "group.update"
-  | "call";
+  | "call"
+  | "webhook.test";
 
 /**
  * WaSender Webhook Payload

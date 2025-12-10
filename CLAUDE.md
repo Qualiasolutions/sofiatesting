@@ -8,15 +8,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Slash commands** (`.claude/commands/`): `/deploy-checklist`, `/test-all`, `/tool-audit`, `/new-tool <name> <desc>`, `/telegram-debug`, `/db-check`
 
-**Skills** (global `~/.claude/skills/`): `sofia-debugger` (debug SOFIA issues), `cyprus-calculator` (property tax calculations)
+**Skills** (project-managed): `sofia-debugger` (debug SOFIA issues), `cyprus-calculator` (property tax calculations)
 
 ## Project Overview
 
 **SOFIA v3.1.0** - Next.js 15 AI assistant for Zyprus Property Group (Cyprus real estate). Core features:
 - AI chat with Cyprus real estate tools (VAT, transfer fees, capital gains calculators)
 - Property listing management with Zyprus API integration (Drupal JSON:API)
-- Telegram and WhatsApp bot integrations
-- Document generation (38 DOCX templates via `docx` package)
+- Telegram bot integration (WhatsApp currently disabled)
+- Document generation (38 DOCX templates via `docx` package, sent via Resend email)
 
 ## AI Configuration
 
@@ -44,12 +44,21 @@ POSTGRES_URL="postgresql://postgres.ebgsbtqtkdgaafqejjye:[PASSWORD]@aws-1-eu-wes
 # NOT: postgresql://postgres:[PASSWORD]@db.ebgsbtqtkdgaafqejjye.supabase.co:5432/postgres (will fail)
 ```
 
-**Schema**: `User`, `Chat`, `Message_v2`, `PropertyListing`, `Vote_v2` (Drizzle ORM with CASCADE deletes)
+**Schema** (Drizzle ORM in `lib/db/schema.ts`):
+- `User` - email/password auth
+- `Chat` - conversations with `visibility` (public/private), `lastContext` for token tracking
+- `Message_v2` - chat messages with `parts` (JSON), `attachments` (JSON), CASCADE delete on chat
+- `Vote_v2` - message feedback, CASCADE delete on chat/message
+- `PropertyListing` - draft listings with `deletedAt` soft delete, `uploadStatus` tracking
+- `Stream` - SSE stream resumption, CASCADE delete on chat
+- `ListingUploadAttempt` - upload retry tracking with error logs
 
 ## Authentication
 
-1. Guest vs Regular users with different rate limits (`lib/ai/entitlements.ts`)
-2. Redis (Upstash) for rate limiting
+1. Access gate cookie (`qualia-access=granted`) required for all pages
+2. Guest vs Regular users with different rate limits (`lib/ai/entitlements.ts`)
+3. Redis (Upstash) for rate limiting
+4. NextAuth.js 5.0 Beta with JWT sessions (30-day expiration)
 
 ## Commands
 
@@ -65,6 +74,7 @@ pnpm db:studio        # Drizzle Studio GUI
 pnpm db:push          # Push schema directly (skip migrations)
 pnpm db:pull          # Pull schema from database
 pnpm db:check         # Check schema consistency
+pnpm db:up            # Upgrade snapshots for split migrations
 
 pnpm test:unit        # All unit tests
 pnpm test:ai-models   # Test AI model connectivity
@@ -108,34 +118,37 @@ Tool file structure (`lib/ai/tools/`): export `description`, `parameters` (Zod),
 **Resume endpoint**: `app/(chat)/api/chat/[id]/stream/route.ts` → AI SDK `resumeStream` for reconnection
 
 Key patterns:
-- `pruneConversationHistory()` prevents unbounded token growth
-- `stopWhen: stepCountIs(5)` limits tool call chains
-- `smoothStream({ chunking: "word" })` for smooth streaming
-- System prompt cached 24h via `unstable_cache`
-- Token tracking with `tokenlens` library
+- `pruneConversationHistory()` prevents unbounded token growth (`lib/ai/conversation-pruning.ts`)
+- `stopWhen: stepCountIs(5)` limits tool call chains to 5 steps max
+- `smoothStream({ chunking: "word" })` for smooth streaming UX
+- System prompt cached 24h via `unstable_cache` (`lib/ai/prompts.ts`)
+- Token tracking with `tokenlens` library (catalog cached 24h)
+- `maxDuration = 120` seconds for image upload operations
 
 **SSE Event Types**: `0:` text, `2:` tool call, `3:` tool result, `d:` done
 
 ## Integrations
 
-**Telegram** (`lib/telegram/`): Webhook at `/api/telegram/webhook`, typing indicators, message splitting, group lead management
+**Telegram** (`lib/telegram/`): Webhook at `/api/telegram/webhook`, typing indicators (time-based, 3s interval), message splitting, group lead management via `lib/telegram/lead-router.ts`
 
-**WhatsApp** (`lib/whatsapp/`): Document detection + DOCX generation via `wasenderapi` npm package (~$6/month). Supports base64 file attachments for document sending.
+**WhatsApp** (`lib/whatsapp/`): **Currently disabled**. Was using WaSenderAPI for DOCX attachments and text messages.
 
-**Zyprus API** (`lib/zyprus/`): Drupal JSON:API backend for property/land listings. OAuth 2.0 auth, auto-upload as unpublished drafts. See Zyprus API Quick Reference section below.
+**Zyprus API** (`lib/zyprus/`): Drupal JSON:API backend for property/land listings. OAuth 2.0 auth, auto-upload as unpublished drafts. Redis-cached taxonomy (1h TTL) with in-memory fallback. See Zyprus API Quick Reference section below.
 
 ## Active Tools
 
-**Property**: `createListing`, `listListings`, `uploadListing`
-**Land**: `createLandListing`, `uploadLandListing`
-**Calculators**: `calculateTransferFees`, `calculateCapitalGains`, `calculateVAT`
-**Taxonomy**: `getZyprusData`
-**Documents**: `sendDocument` (email DOCX templates to users)
-**UX**: `requestSuggestions`
+Tool files in `lib/ai/tools/` - each exports `description`, `parameters` (Zod), `execute`:
 
-Tool files: `lib/ai/tools/` - each exports `description`, `parameters` (Zod), `execute`.
+| Category | Tools |
+|----------|-------|
+| **Property** | `createListing`, `listListings`, `uploadListing` |
+| **Land** | `createLandListing`, `uploadLandListing` |
+| **Calculators** | `calculateTransferFees`, `calculateCapitalGains`, `calculateVAT` |
+| **Taxonomy** | `getZyprusData` (fetch location/property type UUIDs) |
+| **Documents** | `sendDocument` (email DOCX templates via Resend) |
+| **UX** | `requestSuggestions` |
 
-Disabled: `createDocument`, `updateDocument`, `getGeneralKnowledge` (knowledge embedded in `docs/knowledge/`, cached 24h in system prompt)
+**Disabled tools**: `createDocument`, `updateDocument`, `getGeneralKnowledge` (knowledge now embedded in system prompt, cached 24h)
 
 ## Code Style (Ultracite/Biome)
 
@@ -146,6 +159,13 @@ Key rules to follow:
 - `function(){}` → use arrow functions
 - `<button>` → always add `type` attribute
 - Array index keys → use stable IDs
+- No `console.log` in production code (except error logging)
+- Use `import type` for type-only imports
+- Prefer `at()` over bracket notation for array access
+
+**Linting commands:**
+- `pnpm lint` - Check for issues
+- `pnpm format` - Auto-fix issues
 
 See `.cursor/rules/ultracite.mdc` for full ruleset.
 
@@ -181,7 +201,7 @@ POSTGRES_URL=                   # Session Pooler format (see Database section)
 AUTH_SECRET=                    # NextAuth JWT key
 ```
 
-Optional integrations: `TELEGRAM_BOT_TOKEN`, `ZYPRUS_CLIENT_ID`, `ZYPRUS_CLIENT_SECRET`, `ZYPRUS_API_URL`
+Optional integrations: `TELEGRAM_BOT_TOKEN`, `WASENDER_API_KEY`, `WASENDER_WEBHOOK_SECRET`, `ZYPRUS_CLIENT_ID`, `ZYPRUS_CLIENT_SECRET`, `ZYPRUS_API_URL`
 
 See `.env.example` for complete list.
 
@@ -200,12 +220,15 @@ See `.env.example` for complete list.
 
 ## Key Patterns
 
-- **Soft deletes**: Check `deletedAt IS NULL` in queries
+- **Soft deletes**: Check `deletedAt IS NULL` in queries (`PropertyListing` table)
+- **CASCADE deletes**: `Chat` deletion auto-deletes related `Message_v2`, `Vote_v2`, `Stream` records
 - **Error responses**: Use `ChatSDKError` from `lib/errors.ts`
 - **DB schema changes**: `pnpm db:generate` → `pnpm db:migrate` → `pnpm build`
-- **Circuit breaker**: `opossum` package for API resilience
-- **Document generation**: DOCX files via `docx` package
+- **Circuit breaker**: `opossum` package for API resilience (Zyprus API)
+- **Document generation**: DOCX files via `docx` package, sent via Resend email
 - **Lead routing**: SOPHIA spec rules in `lib/telegram/lead-router.ts` for agent assignment
+- **Rate limiting**: Redis-backed via `@upstash/ratelimit`, limits in `lib/ai/entitlements.ts`
+- **Caching**: System prompt cached 24h (`unstable_cache`), taxonomy cache 1h (Redis with in-memory fallback)
 
 ---
 
@@ -234,6 +257,8 @@ headers: {
 3. **AI-generated listings**: Always set `status: false` (unpublished draft), `field_ai_state: "draft"`, `field_ai_generated: true`
 
 4. **Land vs Property**: Different field prefixes - `field_land_price` vs `field_price`, `field_land_map` vs `field_map`
+
+5. **AI Notes field**: `field_ai_assistant_notes` is a new text field auto-populated on listing upload with user requirements, property type, and key features summary
 
 ### Debugging
 

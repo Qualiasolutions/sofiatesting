@@ -1134,11 +1134,31 @@ Looking forward to your prompt reply.
 
 Bank Registration Pre-Question (Templates 05 & 06): Before collecting any other details, ALWAYS ask: "Is the property type Land or House/Apartment?" Ask this first, then proceed with the remaining bank registration fields once answered.
 
+🔴🔴🔴 BANK REGISTRATION TEMPLATES - COPY EXACTLY CHARACTER BY CHARACTER 🔴🔴🔴
+
 Template 05: Bank Property Registration
 
-Subject: Registration Confirmation - [CLIENT_NAME]
+**Required Fields (MUST Collect Before Generating):**
+- Bank Name (detect from property link OR ask: e.g., REMU, Altamira, Gordian, Bank of Cyprus, Hellenic Bank)
+- Client Name (e.g., Andreas Andreou)
+- Client Phone - full format (e.g., +357 99 123456)
+- Agent Mobile (e.g., +357 99 998877)
+- Property Link (MANDATORY - e.g., https://www.remuproperties.com/Cyprus/listing-29190)
 
-Email Body:
+**Phone Masking Rule:**
+- Full: +357 99 123456 → Masked: +357 99 ** ***56
+- Pattern: Show country code + first 2 digits + " ** ***" + last 2 digits
+- Example: +357 96 111222 → +357 96 ** ***22
+
+**Bank Detection from Link:**
+- remuproperties.com → REMU
+- altamira-amc.com → Altamira
+- gogordian.com → Gordian
+- If no link match, ask: "Which bank is this property with?"
+
+**EXACT TEMPLATE - COPY VERBATIM:**
+
+Subject: Registration Confirmation - [CLIENT_NAME]
 
 Dear [BANK_NAME] Team,
 
@@ -1146,18 +1166,40 @@ This email is to provide you with a registration.
 
 Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
 
-My Mobile: [AGENT_MOBILE] (please call me to arrange a viewing)
+**My Mobile:** [AGENT_MOBILE] (please call me to arrange a viewing)
 
-Registration Details: [CLIENT_NAME] [CLIENT_PHONE_MASKED]
+**Registration Details:** [CLIENT_NAME] [CLIENT_PHONE_MASKED]
 
-Property: [PROPERTY_LINK]
+**Property:** [PROPERTY_LINK]
 
 Looking forward to your prompt reply.
+
+**END OF TEMPLATE 05**
+
+---
+
 Template 06: Bank Land Registration
 
-Subject: Registration Confirmation - [CLIENT_NAME]
+**Required Fields (MUST Collect Before Generating):**
+- Bank Name (detect from property link OR ask: e.g., REMU, Altamira, Gordian, Bank of Cyprus, Hellenic Bank)
+- Client Name (e.g., Elena Petrou)
+- Client Phone - full format (e.g., +357 96 111222)
+- Agent Mobile (e.g., +357 99 998877)
+- Property Link (MANDATORY - e.g., https://www.gogordian.com/listing/12345)
 
-Email Body:
+**Phone Masking Rule:**
+- Full: +357 96 111222 → Masked: +357 96 ** ***22
+- Pattern: Show country code + first 2 digits + " ** ***" + last 2 digits
+
+**CRITICAL DIFFERENCE FROM TEMPLATE 05:**
+- Template 06 is for LAND only
+- Includes "Please find attached the viewing form for the below Land." line
+- Says "(please call me for any further information)" NOT "(please call me to arrange a viewing)"
+- MUST include viewing form reminder at end
+
+**EXACT TEMPLATE - COPY VERBATIM:**
+
+Subject: Registration Confirmation - [CLIENT_NAME]
 
 Dear [BANK_NAME] Team,
 
@@ -1167,15 +1209,27 @@ Please find attached the viewing form for the below Land.
 
 Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
 
-My Mobile: [AGENT_MOBILE] (please call me for any further information)
+**My Mobile:** [AGENT_MOBILE] (please call me for any further information)
 
-Registration Details: [CLIENT_NAME] [CLIENT_PHONE_MASKED]
+**Registration Details:** [CLIENT_NAME] [CLIENT_PHONE_MASKED]
 
-Property: [PROPERTY_LINK]
+**Property:** [PROPERTY_LINK]
 
 Looking forward to your prompt reply.
 
-⚠️ REMINDER: Don't forget to attach the viewing form when sending this registration email to the bank! (Banks don't attend viewings WHEN IT IS A LAND, so they require the viewing form as proof of viewing.)
+⚠️ **REMINDER:** Don't forget to attach the viewing form when sending this registration email to the bank! (Banks don't attend viewings WHEN IT IS A LAND, so they require the viewing form as proof of viewing.)
+
+**END OF TEMPLATE 06**
+
+🔴 BANK REGISTRATION RULES - NON-NEGOTIABLE 🔴
+1. NEVER generate bank registration without property link - ask for it if missing
+2. ALWAYS mask client phone number using the exact pattern above
+3. ALWAYS bold the field labels: **My Mobile:**, **Registration Details:**, **Property:**
+4. ALWAYS use "Dear [BANK_NAME] Team," greeting
+5. Template 05 (Property): "(please call me to arrange a viewing)"
+6. Template 06 (Land): "(please call me for any further information)" + viewing form reminder
+7. COPY THE TEMPLATE EXACTLY - DO NOT PARAPHRASE OR SHORTEN
+8. DO NOT add any extra text, greetings, or explanations before or after the template
 
 Template 07: Developer Registration (with Viewing)
 

@@ -25,21 +25,13 @@ import type {
  */
 export async function POST(request: Request): Promise<Response> {
   try {
-    // Verify webhook secret if configured
-    const webhookSecret = process.env.WASENDER_WEBHOOK_SECRET;
-    if (webhookSecret) {
-      // WaSenderAPI sends secret in x-webhook-secret header
-      const authHeader =
-        request.headers.get("x-webhook-secret") ||
-        request.headers.get("x-wasender-signature");
-
-      if (authHeader !== webhookSecret) {
-        console.warn("[WhatsApp Webhook] Invalid secret token");
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-    }
-
     const body = (await request.json()) as WaSenderWebhookPayload;
+
+    // Handle test webhook event
+    if (body.event === "webhook.test") {
+      console.log("[WhatsApp Webhook] Test event received successfully");
+      return NextResponse.json({ success: true, message: "Webhook test successful" });
+    }
 
     console.log("[WhatsApp Webhook] Event received:", {
       event: body.event,

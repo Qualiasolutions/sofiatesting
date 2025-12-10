@@ -1,32 +1,38 @@
 📌 Template 06: Bank Land Registration
 
-**Purpose**: Register a client with a bank for a land plot and include the viewing form reminder.
+**Purpose**: Register a client with a bank for a LAND plot and include the viewing form attachment reminder.
 
 🔹 Required Fields (MUST Collect Before Generating)
-- Pre-question: Ask "Is the property type Land or House/Apartment?" before collecting any other details
-- Bank Name (e.g., Gordian)
+- Bank Name (e.g., Gordian, REMU, Altamira, Bank of Cyprus, Hellenic Bank)
 - Client Name (e.g., Elena Petrou)
-- Client Phone (full) (e.g., +357 96 111222)
+- Client Phone (full format) (e.g., +357 96 111222)
 - Agent Mobile (e.g., +357 99 998877)
-- Property Link (e.g., https://www.gogordian.com/listing/12345)
+- Property Link (MANDATORY - e.g., https://www.gogordian.com/listing/12345)
 
 🔹 Critical Rules
-- Greeting: Default `Dear XXXXXXXX,` (placeholder) unless template requires personalization; follow template-specific overrides.
-- Dates/Times: "tomorrow" → Auto-convert to October 21, 2025; if year is missing automatically assume the upcoming occurrence (NEVER ask for the year); if time is missing ask for a time (24h or am/pm).
-- Links: Mandatory for Bank Registrations, Good Client, and Email Marketing; optional elsewhere (omit line if missing).
-- Bolding: Only monetary values or fees/percentages (e.g., **€350,000**, **5%+ VAT**). Nothing else.
-- Subject Lines: Follow template-specific formats exactly; do not bold.
 - Greeting must be `Dear [BANK_NAME] Team,`
-- **Attach** the viewing form; include the reminder line.
-- Property link is **mandatory**.
-- Mask client phone in the body.
+- Property link is **MANDATORY** - do not generate without it
+- Mask client phone in the body (e.g., +357 96 ** ***22)
+- Subject line: No bolding
+- Body: Only bold the field labels (My Mobile:, Registration Details:, Property:)
+- **MUST include** the viewing form attachment reminder at the end
+- This template is ONLY for LAND - not for houses/apartments (use Template 05 for those)
+
+🔹 Phone Masking Rules
+Full phone: +357 96 111222
+Masked: +357 96 ** ***22
+Pattern: Show country code + first 2 digits of number + mask middle + show last 2 digits
+
+🔹 Why Land is Different
+Banks do NOT attend viewings for land plots. The agent must:
+1. Conduct the viewing with the client
+2. Have the client sign a viewing form
+3. Attach the signed viewing form to this registration email
+This viewing form serves as proof that a viewing took place.
 
 🔹 Exact Template
-Template 06: Bank Land Registration
 
 Subject: Registration Confirmation - [CLIENT_NAME]
-
-Email Body:
 
 Dear [BANK_NAME] Team,
 
@@ -44,42 +50,66 @@ Please register the following client under CSC Zyprus Property Group LTD and sen
 
 Looking forward to your prompt reply.
 
-⚠️ REMINDER: Don't forget to attach the viewing form when sending this registration email to the bank! (Banks don't attend viewings WHEN IT IS A LAND, so they require the viewing form as proof of viewing.)
+---
 
-(Banks don't attend viewings, so they require the viewing form as proof of viewing.)
+⚠️ **REMINDER:** Don't forget to attach the viewing form when sending this registration email to the bank!
+
+(Banks don't attend viewings for LAND, so they require the signed viewing form as proof of viewing.)
 
 🔹 Workflow
-1. Detect: Identify template from keywords (e.g., "rental registration" → Template 03).
-2. Extract: Silently extract provided fields (names, reg no., dates, links).
-3. Ask: Minimize questions; only ask missing required fields (e.g., "What time is the viewing?").
-4. Validate: Confirm year for dates; ensure links present where mandatory; ensure greeting style per template.
-5. Generate: Copy Exact Template verbatim, replacing placeholders; omit optional lines when data missing.
+1. Detect: User mentions "bank registration", "land registration", "register land with bank", etc.
+2. Ask Pre-Question: "Is this for a Property (house/apartment/villa) or Land?" - If Land, use this template. If Property, use Template 05.
+3. Extract: Silently extract provided fields from conversation
+4. Ask: Only ask for MISSING required fields
+5. Validate: Ensure property link is present (mandatory)
+6. Generate: Copy template exactly, replacing all placeholders
+7. Remind: Always include the viewing form attachment reminder
 
-🔹 Common Mistakes
-❌ Wrong		✅ Correct
-Bolding subject lines	No bolding except pricing/fees
-Using personalized greeting when placeholder is required	Use `Dear XXXXXXXX,` unless template says otherwise
-Generating with [FIELD] placeholders left	Ask for missing fields, then generate with no placeholders
+🔹 Common Banks
+- REMU (Real Estate Management Unit)
+- Altamira Asset Management
+- Gordian Holdings
+- Bank of Cyprus
+- Hellenic Bank
+- APS Cyprus
 
 🔹 Example Output
+
 Subject: Registration Confirmation - Elena Petrou
 
-Email Body:
 Dear Gordian Team,
 
 This email is to provide you with a registration.
 
 Please find attached the viewing form for the below Land.
+
 Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
 
 **My Mobile:** +357 99 998877 (please call me for any further information)
+
 **Registration Details:** Elena Petrou +357 96 ** ***22
+
 **Property:** https://www.gogordian.com/listing/12345
 
 Looking forward to your prompt reply.
 
-⚠️ REMINDER: Don't forget to attach the viewing form when sending this registration email to the bank! (Banks don't attend viewings WHEN IT IS A LAND, so they require the viewing form as proof of viewing.)
+---
+
+⚠️ **REMINDER:** Don't forget to attach the viewing form when sending this registration email to the bank!
+
+(Banks don't attend viewings for LAND, so they require the signed viewing form as proof of viewing.)
+
+🔹 Common Mistakes to Avoid
+❌ Generating without property link → Always require the link
+❌ Not masking client phone → Always mask middle digits
+❌ Using "Dear Sir/Madam" → Use "Dear [BANK_NAME] Team,"
+❌ Forgetting viewing form reminder → ALWAYS include for land registrations
+❌ Using Template 05 for land → Land MUST use Template 06 (includes viewing form reminder)
+❌ Bolding the subject line → Never bold subject lines
 
 💡 Pro Tips
-- Banks don't attend viewings; the viewing form is proof.
-- Never send without property link.
+- Banks NEVER attend land viewings - they rely on the viewing form as proof
+- The viewing form must be signed by the client before sending
+- Use Template 09, 10, or 11 to generate the viewing form first
+- The agent mobile says "for any further information" (not "to arrange a viewing" like Template 05)
+- This process protects the agent's commission claim for land sales
