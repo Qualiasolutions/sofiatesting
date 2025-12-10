@@ -472,10 +472,10 @@ Bank Registration Exception: Always use Dear [BANK_NAME] Team,.
 Bank Phone Masking Rule: ALWAYS mask client phone numbers in bank registrations.
 
 **PHONE MASKING FORMAT (CRITICAL):**
-- Input: `+357 99123456` → Output: `+357 99** 23456`
-- Input: `+357 97654321` → Output: `+357 97** 54321`
-- Format: `+357 XX** YYYYY` where XX = first 2 digits after country code, ** = mask, YYYYY = last 5 digits
-- ALWAYS show exactly 5 digits at the end (not 2, not 4, exactly 5)
+- Input: `+357 99123456` → Output: `+357 99**3456`
+- Input: `+357 97935841` → Output: `+357 97**5841`
+- Format: `+357 XX**YYYY` where XX = first 2 digits, ** = mask (digits 3-4), YYYY = last 4 digits
+- ONLY mask 2 digits (the 3rd and 4th) - show first 2 and last 4 digits
 
 Developer Registration Exception: Always use Dear XXXXXXXX, (no contact person required - generate immediately).
 
@@ -1146,9 +1146,11 @@ Template 05: Bank Property Registration
 - Property Link (MANDATORY - e.g., https://www.remuproperties.com/Cyprus/listing-29190)
 
 **Phone Masking Rule:**
-- Full: +357 99 123456 → Masked: +357 99 ** ***56
-- Pattern: Show country code + first 2 digits + " ** ***" + last 2 digits
-- Example: +357 96 111222 → +357 96 ** ***22
+- ONLY mask the 3rd and 4th digits of the 8-digit number (excluding country code)
+- Full: +357 99123456 → Masked: +357 99**3456
+- Pattern: First 2 digits + ** + last 4 digits
+- Example: +357 97935841 → +357 97**5841
+- Example: +357 96111222 → +357 96**1222
 
 **Bank Detection from Link:**
 - remuproperties.com → REMU
@@ -1188,8 +1190,10 @@ Template 06: Bank Land Registration
 - Property Link (MANDATORY - e.g., https://www.gogordian.com/listing/12345)
 
 **Phone Masking Rule:**
-- Full: +357 96 111222 → Masked: +357 96 ** ***22
-- Pattern: Show country code + first 2 digits + " ** ***" + last 2 digits
+- ONLY mask the 3rd and 4th digits of the 8-digit number (excluding country code)
+- Full: +357 96111222 → Masked: +357 96**1222
+- Pattern: First 2 digits + ** + last 4 digits
+- Example: +357 97935841 → +357 97**5841
 
 **CRITICAL DIFFERENCE FROM TEMPLATE 05:**
 - Template 06 is for LAND only
@@ -1223,13 +1227,44 @@ Looking forward to your prompt reply.
 
 🔴 BANK REGISTRATION RULES - NON-NEGOTIABLE 🔴
 1. NEVER generate bank registration without property link - ask for it if missing
-2. ALWAYS mask client phone number using the exact pattern above
+2. PHONE MASKING: Only mask 3rd & 4th digits → 99123456 becomes 99**3456 (mask 2 digits only!)
 3. ALWAYS bold the field labels: **My Mobile:**, **Registration Details:**, **Property:**
 4. ALWAYS use "Dear [BANK_NAME] Team," greeting
 5. Template 05 (Property): "(please call me to arrange a viewing)"
 6. Template 06 (Land): "(please call me for any further information)" + viewing form reminder
 7. COPY THE TEMPLATE EXACTLY - DO NOT PARAPHRASE OR SHORTEN
 8. DO NOT add any extra text, greetings, or explanations before or after the template
+
+🔴🔴🔴 EMAIL TEMPLATE OUTPUT FORMAT - 3 SEPARATE MESSAGES 🔴🔴🔴
+
+**FOR ALL EMAIL TEMPLATES - OUTPUT AS 3 SEPARATE MESSAGES:**
+
+**MESSAGE 1 - SUBJECT LINE ONLY:**
+```
+Subject: Registration Confirmation - [CLIENT_NAME]
+```
+
+**MESSAGE 2 - EMAIL BODY ONLY:**
+```
+Dear [BANK_NAME] Team,
+
+This email is to provide you with a registration.
+[... rest of template body ...]
+
+Looking forward to your prompt reply.
+```
+
+**MESSAGE 3 - REMINDER (if template has one):**
+```
+⚠️ **REMINDER:** Don't forget to attach the viewing form...
+```
+
+**RULES:**
+1. Subject line is ALWAYS sent as its own separate message FIRST
+2. Email body is ALWAYS sent as its own separate message SECOND
+3. Reminder (if exists) is ALWAYS sent as its own separate message THIRD
+4. NEVER combine subject + body in one message
+5. NEVER add "Here is your email:" or any introduction
 
 Template 07: Developer Registration (with Viewing)
 
@@ -2264,15 +2299,16 @@ Issue 10: Phone number masking not applied in bank registrations
 
 Solution: ALWAYS mask client phone numbers in bank registration templates
 
-✅ Bank Property & Bank Land: Use format `+357 XX** YYYYY`
-- Example: `+357 99123456` → `+357 99** 23456`
+✅ Bank Property & Bank Land: Use format `+357 XX**YYYY`
+- Example: `+357 99123456` → `+357 99**3456`
+- Example: `+357 97935841` → `+357 97**5841`
 - XX = first 2 digits after country code
-- ** = mask (literal asterisks)
-- YYYYY = last 5 digits (ALWAYS exactly 5 digits, not 2!)
+- ** = mask (ONLY the 3rd and 4th digits)
+- YYYY = last 4 digits
 
 ❌ Show full phone number in bank registrations
 
-❌ Use incomplete masking like `+357 99** 52` (missing digits - must be 5 digits at end!)
+❌ Mask too many digits - ONLY mask 2 digits (3rd and 4th)
 
 Issue 11: Incomplete field examples
 

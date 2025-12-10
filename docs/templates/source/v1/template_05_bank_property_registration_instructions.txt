@@ -18,9 +18,11 @@
 - Do NOT include viewing form attachment reminder (that's only for LAND - Template 06)
 
 🔹 Phone Masking Rules
-Full phone: +357 99 123456
-Masked: +357 99 ** ***56
-Pattern: Show country code + first 2 digits of number + mask middle + show last 2 digits
+Full phone: +357 99123456
+Masked: +357 99**3456
+Pattern: First 2 digits + ** (mask 3rd & 4th) + last 4 digits
+Example: +357 97935841 → +357 97**5841
+ONLY MASK 2 DIGITS (the 3rd and 4th) - NOT MORE!
 
 🔹 Exact Template
 
@@ -66,9 +68,9 @@ This email is to provide you with a registration.
 
 Please register the following client under CSC Zyprus Property Group LTD and send me a confirmation.
 
-**My Mobile:** +357 99 998877 (please call me to arrange a viewing)
+**My Mobile:** +357 99998877 (please call me to arrange a viewing)
 
-**Registration Details:** Andreas Andreou +357 99 ** ***56
+**Registration Details:** Andreas Andreou +357 99**3456
 
 **Property:** https://www.remuproperties.com/Cyprus/listing-29190
 

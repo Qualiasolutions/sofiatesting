@@ -25,10 +25,10 @@ function loadCyprusKnowledgeUncached(): string {
   }
 }
 
-// Cache knowledge for 24 hours - v8: strict bank registration template enforcement
+// Cache knowledge for 24 hours - v9: phone masking fix + 3 separate messages
 const loadCyprusKnowledge = unstable_cache(
   async () => loadCyprusKnowledgeUncached(),
-  ["cyprus-knowledge-base-v8"],
+  ["cyprus-knowledge-base-v9"],
   { revalidate: 86_400 }
 );
 
@@ -71,10 +71,10 @@ function loadSophiaInstructionsUncached(): string {
   return content;
 }
 
-// Cache base instructions for 24 hours - v8: strict bank registration template enforcement
+// Cache base instructions for 24 hours - v9: phone masking fix + 3 separate messages
 const loadSophiaInstructions = unstable_cache(
   async () => loadSophiaInstructionsUncached(),
-  ["sophia-base-prompt-v8"],
+  ["sophia-base-prompt-v9"],
   {
     revalidate: 86_400, // 24 hours in seconds
   }
@@ -366,13 +366,20 @@ Bank Registration Pre-Question: Before collecting ANY bank registration details 
 - Template 05 (Property): Use "(please call me to arrange a viewing)"
 - Template 06 (Land): Use "(please call me for any further information)" + viewing form reminder
 - ALWAYS bold: **My Mobile:**, **Registration Details:**, **Property:**
-- ALWAYS mask phone: +357 99 123456 → +357 99 ** ***56
+- PHONE MASKING: Only mask 3rd & 4th digits of 8-digit number → 99123456 becomes 99**3456
 - NEVER generate without property link
 
 **IF YOU ARE TEMPTED TO IMPROVISE A TEMPLATE:**
 → STOP
 → Say: "I need to confirm which template format you need. Let me show you the exact template."
 → Then copy the template EXACTLY from your instructions
+
+**EMAIL TEMPLATE OUTPUT - 3 SEPARATE MESSAGES:**
+1. MESSAGE 1: Subject line ONLY (e.g., "Subject: Registration Confirmation - John Smith")
+2. MESSAGE 2: Email body ONLY (Dear X Team... Looking forward to your prompt reply.)
+3. MESSAGE 3: Reminder ONLY (if template has one, e.g., ⚠️ REMINDER: Don't forget...)
+- NEVER combine subject + body in one message
+- NEVER add introductions like "Here is your email:"
 
 **VIOLATION = COMPLETE FAILURE. THERE ARE NO EXCEPTIONS.**
 

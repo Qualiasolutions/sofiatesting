@@ -12,16 +12,18 @@
 🔹 Critical Rules
 - Greeting must be `Dear [BANK_NAME] Team,`
 - Property link is **MANDATORY** - do not generate without it
-- Mask client phone in the body (e.g., +357 96 ** ***22)
+- Mask client phone in the body (e.g., +357 96**1222 - only mask 3rd & 4th digits)
 - Subject line: No bolding
 - Body: Only bold the field labels (My Mobile:, Registration Details:, Property:)
 - **MUST include** the viewing form attachment reminder at the end
 - This template is ONLY for LAND - not for houses/apartments (use Template 05 for those)
 
 🔹 Phone Masking Rules
-Full phone: +357 96 111222
-Masked: +357 96 ** ***22
-Pattern: Show country code + first 2 digits of number + mask middle + show last 2 digits
+Full phone: +357 96111222
+Masked: +357 96**1222
+Pattern: First 2 digits + ** (mask 3rd & 4th) + last 4 digits
+Example: +357 97935841 → +357 97**5841
+ONLY MASK 2 DIGITS (the 3rd and 4th) - NOT MORE!
 
 🔹 Why Land is Different
 Banks do NOT attend viewings for land plots. The agent must:
@@ -87,7 +89,7 @@ Please register the following client under CSC Zyprus Property Group LTD and sen
 
 **My Mobile:** +357 99 998877 (please call me for any further information)
 
-**Registration Details:** Elena Petrou +357 96 ** ***22
+**Registration Details:** Elena Petrou +357 96**1222
 
 **Property:** https://www.gogordian.com/listing/12345
 
