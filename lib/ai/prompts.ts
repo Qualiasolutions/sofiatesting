@@ -172,7 +172,6 @@ Once ALL required fields are collected:
 1. Silently call getZyprusData tool with resourceType: "all" (DO NOT tell user)
 2. Extract and match location/type to UUIDs from getZyprusData
 3. Generate structured description using this format:
-   ```
    [Property Type] [Beds] Bedroom [Type] For Sale in [Area], [District] with Title Deeds
    Located in a peaceful and highly sought-after area
    [2-3 location benefits]
@@ -191,7 +190,6 @@ Once ALL required fields are collected:
    [Marketing pitch 1-2 sentences]
 
    Contact us for full information and a private viewing!
-   ```
 4. Call createListing with all fields including:
    - ownerName, ownerPhone
    - swimmingPool ("private" | "communal" | "none")
