@@ -71,10 +71,10 @@ function loadSophiaInstructionsUncached(): string {
   return content;
 }
 
-// Cache base instructions for 24 hours - v9: phone masking fix + 3 separate messages
+// Cache base instructions for 24 hours - v10: 5%+VAT fix in developer templates
 const loadSophiaInstructions = unstable_cache(
   async () => loadSophiaInstructionsUncached(),
-  ["sophia-base-prompt-v9"],
+  ["sophia-base-prompt-v10"],
   {
     revalidate: 86_400, // 24 hours in seconds
   }
