@@ -1,10 +1,17 @@
 /**
  * WhatsApp Session Manager
- * Tracks user conversation state and menu context
+ * Tracks user conversation state and menu context using Redis for persistence
  */
 
+import { Redis } from "@upstash/redis";
+
 export type SessionState = {
-  currentMenu?: "main" | "templates" | "calculator" | "listing" | "listing_type";
+  currentMenu?:
+    | "main"
+    | "templates"
+    | "calculator"
+    | "listing"
+    | "listing_type";
   lastMenuSent?: string;
   listingData?: Partial<{
     type: string;
@@ -17,85 +24,188 @@ export type SessionState = {
   }>;
   pendingAction?: {
     type: string;
-    data?: any;
+    data?: Record<string, unknown>;
   };
   lastActivity: number;
 };
 
-// In-memory session storage (consider Redis for production)
-const sessions = new Map<string, SessionState>();
-const SESSION_TTL = 30 * 60 * 1000; // 30 minutes
+// Redis configuration
+const SESSION_PREFIX = "whatsapp:session:";
+const SESSION_TTL_SECONDS = 1800; // 30 minutes
+
+// In-memory fallback cache (used if Redis fails)
+const memoryCache = new Map<string, SessionState>();
+
+// Redis client (lazy initialization)
+let redisClient: Redis | null = null;
 
 /**
- * Get or create session for a phone number
+ * Get Redis client with lazy initialization
  */
-export function getSession(phoneNumber: string): SessionState {
-  cleanupOldSessions();
+const getRedis = (): Redis | null => {
+  if (redisClient) {
+    return redisClient;
+  }
 
-  const existing = sessions.get(phoneNumber);
+  const redisUrl = process.env.REDIS_URL;
+  if (!redisUrl) {
+    console.warn(
+      "[WhatsApp Session] REDIS_URL not configured, using in-memory fallback"
+    );
+    return null;
+  }
+
+  try {
+    const parsedRedisUrl = new URL(redisUrl);
+    const redisToken = parsedRedisUrl.password;
+
+    if (!redisToken) {
+      console.warn(
+        "[WhatsApp Session] REDIS_URL missing password, using in-memory fallback"
+      );
+      return null;
+    }
+
+    redisClient = new Redis({
+      url: redisUrl,
+      token: redisToken,
+    });
+
+    return redisClient;
+  } catch (error) {
+    console.error("[WhatsApp Session] Failed to initialize Redis:", error);
+    return null;
+  }
+};
+
+/**
+ * Create a default session
+ */
+const createDefaultSession = (): SessionState => ({
+  lastActivity: Date.now(),
+});
+
+/**
+ * Get or create session for a phone number (async with Redis)
+ */
+export async function getSession(phoneNumber: string): Promise<SessionState> {
+  const redis = getRedis();
+
+  if (redis) {
+    try {
+      const key = `${SESSION_PREFIX}${phoneNumber}`;
+      const session = await redis.get<SessionState>(key);
+
+      if (session) {
+        // Update lastActivity and refresh TTL
+        session.lastActivity = Date.now();
+        await redis.set(key, session, { ex: SESSION_TTL_SECONDS });
+        return session;
+      }
+
+      // Create new session
+      const newSession = createDefaultSession();
+      await redis.set(key, newSession, { ex: SESSION_TTL_SECONDS });
+      return newSession;
+    } catch (error) {
+      console.error("[WhatsApp Session] Redis get failed:", error);
+      // Fall through to memory cache
+    }
+  }
+
+  // Fallback to memory cache
+  cleanupMemoryCache();
+  const existing = memoryCache.get(phoneNumber);
   if (existing) {
     existing.lastActivity = Date.now();
     return existing;
   }
 
-  const newSession: SessionState = {
-    lastActivity: Date.now(),
-  };
-  sessions.set(phoneNumber, newSession);
+  const newSession = createDefaultSession();
+  memoryCache.set(phoneNumber, newSession);
   return newSession;
 }
 
 /**
- * Update session state
+ * Update session state (async with Redis)
  */
-export function updateSession(
+export async function updateSession(
   phoneNumber: string,
   updates: Partial<SessionState>
-): void {
-  const session = getSession(phoneNumber);
-  Object.assign(session, updates, { lastActivity: Date.now() });
-  sessions.set(phoneNumber, session);
-}
+): Promise<void> {
+  const redis = getRedis();
+  const key = `${SESSION_PREFIX}${phoneNumber}`;
 
-/**
- * Clear session
- */
-export function clearSession(phoneNumber: string): void {
-  sessions.delete(phoneNumber);
-}
-
-/**
- * Clean up expired sessions
- */
-function cleanupOldSessions(): void {
-  const now = Date.now();
-  for (const [phone, session] of sessions.entries()) {
-    if (now - session.lastActivity > SESSION_TTL) {
-      sessions.delete(phone);
+  if (redis) {
+    try {
+      const current = await getSession(phoneNumber);
+      const updated = { ...current, ...updates, lastActivity: Date.now() };
+      await redis.set(key, updated, { ex: SESSION_TTL_SECONDS });
+      return;
+    } catch (error) {
+      console.error("[WhatsApp Session] Redis set failed:", error);
+      // Fall through to memory cache
     }
   }
+
+  // Fallback to memory cache
+  const session = memoryCache.get(phoneNumber) || createDefaultSession();
+  Object.assign(session, updates, { lastActivity: Date.now() });
+  memoryCache.set(phoneNumber, session);
 }
 
 /**
- * Handle menu selection based on current context
+ * Clear session (async with Redis)
  */
-export function handleMenuSelection(
+export async function clearSession(phoneNumber: string): Promise<void> {
+  const redis = getRedis();
+  const key = `${SESSION_PREFIX}${phoneNumber}`;
+
+  if (redis) {
+    try {
+      await redis.del(key);
+    } catch (error) {
+      console.error("[WhatsApp Session] Redis del failed:", error);
+    }
+  }
+
+  // Always clear from memory cache too
+  memoryCache.delete(phoneNumber);
+}
+
+/**
+ * Clean up expired sessions in memory cache
+ */
+const cleanupMemoryCache = (): void => {
+  const SESSION_TTL_MS = SESSION_TTL_SECONDS * 1000;
+  const now = Date.now();
+  for (const [phone, session] of memoryCache.entries()) {
+    if (now - session.lastActivity > SESSION_TTL_MS) {
+      memoryCache.delete(phone);
+    }
+  }
+};
+
+/**
+ * Handle menu selection based on current context (async)
+ */
+export async function handleMenuSelection(
   phoneNumber: string,
   selection: number
-): { action: string; data?: any } | null {
-  const session = getSession(phoneNumber);
+): Promise<{ action: string; data?: Record<string, unknown> } | null> {
+  const session = await getSession(phoneNumber);
 
   if (!session.currentMenu) {
     // Main menu selection
     switch (selection) {
       case 1:
-        updateSession(phoneNumber, { currentMenu: "templates" });
+        await updateSession(phoneNumber, { currentMenu: "templates" });
         return { action: "show_templates" };
       case 2:
-        updateSession(phoneNumber, { currentMenu: "listing" });
+        await updateSession(phoneNumber, { currentMenu: "listing" });
         return { action: "start_listing" };
       case 3:
-        updateSession(phoneNumber, { currentMenu: "calculator" });
+        await updateSession(phoneNumber, { currentMenu: "calculator" });
         return { action: "show_calculators" };
       case 4:
         return { action: "show_status" };
@@ -106,30 +216,31 @@ export function handleMenuSelection(
 
   switch (session.currentMenu) {
     case "templates":
-      return handleTemplateSelection(phoneNumber, selection);
+      return await handleTemplateSelection(phoneNumber, selection);
     case "calculator":
-      return handleCalculatorSelection(phoneNumber, selection);
+      return await handleCalculatorSelection(phoneNumber, selection);
     case "listing_type":
-      return handleListingTypeSelection(phoneNumber, selection);
+      return await handleListingTypeSelection(phoneNumber, selection);
     default:
       return null;
   }
 }
 
 /**
- * Handle template menu selection
+ * Handle template menu selection (async)
  */
-function handleTemplateSelection(
+async function handleTemplateSelection(
   phoneNumber: string,
   selection: number
-): { action: string; data?: any } | null {
+): Promise<{ action: string; data?: Record<string, unknown> } | null> {
+  // Updated to match actual template-config.json keys
   const templates = [
     "seller_registration",
-    "bank_registration",
+    "bank_registration_property", // Fixed: was "bank_registration"
     "viewing_form",
-    "marketing_agreement",
-    "followup_email",
-    "valuation_email",
+    "marketing_agreement_exclusive", // Fixed: was "marketing_agreement"
+    "followup_viewed", // Fixed: was "followup_email"
+    "valuation_report", // Fixed: was "valuation_email"
     "offer_submission",
     "other",
   ];
@@ -147,14 +258,17 @@ function handleTemplateSelection(
 
   // Check if it's an email template (text) or document (DOCX)
   const emailTemplates = [
-    "followup_email",
-    "valuation_email",
-    "offer_submission",
+    "followup_viewed",
+    "valuation_report",
+    "introduction_email",
+    "welcome_email",
+    "property_match",
+    "price_reduction",
   ];
 
   const isEmail = emailTemplates.includes(templateId);
 
-  clearSession(phoneNumber); // Reset after selection
+  await clearSession(phoneNumber); // Reset after selection
   return {
     action: isEmail ? "generate_email_template" : "generate_document",
     data: { template: templateId },
@@ -162,12 +276,12 @@ function handleTemplateSelection(
 }
 
 /**
- * Handle calculator menu selection
+ * Handle calculator menu selection (async)
  */
-function handleCalculatorSelection(
+async function handleCalculatorSelection(
   phoneNumber: string,
   selection: number
-): { action: string; data?: any } | null {
+): Promise<{ action: string; data?: Record<string, unknown> } | null> {
   const calculators = ["vat", "transfer_fees", "capital_gains"];
 
   if (selection < 1 || selection > calculators.length) {
@@ -175,7 +289,7 @@ function handleCalculatorSelection(
   }
 
   const calcType = calculators[selection - 1];
-  clearSession(phoneNumber);
+  await clearSession(phoneNumber);
 
   return {
     action: "start_calculator",
@@ -184,12 +298,12 @@ function handleCalculatorSelection(
 }
 
 /**
- * Handle listing type selection
+ * Handle listing type selection (async)
  */
-function handleListingTypeSelection(
+async function handleListingTypeSelection(
   phoneNumber: string,
   selection: number
-): { action: string; data?: any } | null {
+): Promise<{ action: string; data?: Record<string, unknown> } | null> {
   const types = ["apartment", "house", "land", "commercial"];
 
   if (selection < 1 || selection > types.length) {
@@ -197,7 +311,7 @@ function handleListingTypeSelection(
   }
 
   const propertyType = types[selection - 1];
-  updateSession(phoneNumber, {
+  await updateSession(phoneNumber, {
     listingData: { type: propertyType },
     currentMenu: "listing",
   });
@@ -209,10 +323,10 @@ function handleListingTypeSelection(
 }
 
 /**
- * Build listing progress message
+ * Build listing progress message (async)
  */
-export function getListingProgress(phoneNumber: string): string {
-  const session = getSession(phoneNumber);
+export async function getListingProgress(phoneNumber: string): Promise<string> {
+  const session = await getSession(phoneNumber);
   const data = session.listingData || {};
 
   const required = [

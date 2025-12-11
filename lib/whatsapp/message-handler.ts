@@ -28,6 +28,7 @@ import { getWhatsAppClient } from "./client";
 import { getDocumentType, shouldSendAsDocument } from "./document-detector";
 import { generateDocx } from "./docx-generator";
 import { createWhatsAppSendDocumentTool } from "./tools/send-document-whatsapp";
+import { formatForWhatsApp, splitSubjectFromBody } from "./text-utils";
 import type { WaSenderMessageData } from "./types";
 import {
   getOrCreateWhatsAppChat,
@@ -354,46 +355,4 @@ PLATFORM CONTEXT: WhatsApp Mobile Messaging
   }
 }
 
-/**
- * Split subject line from email body for separate WhatsApp messages
- * Subject line can appear as "Subject: X" or just at the start of the response
- */
-function splitSubjectFromBody(text: string): {
-  subject: string | null;
-  body: string;
-} {
-  // Match "Subject:" at the start of a line (case-insensitive)
-  // Using [^\n]+ instead of .+? to prevent ReDoS (catastrophic backtracking)
-  const subjectMatch = text.match(/^(Subject:\s*[^\n]+)(?:\n\n|\n(?=Dear|Email Body))/im);
-
-  if (subjectMatch) {
-    const subject = subjectMatch[1].trim();
-    // Remove the subject line and any "Email Body:" marker from the body
-    let body = text
-      .replace(subjectMatch[0], "")
-      .replace(/^Email Body:\s*/im, "")
-      .trim();
-
-    return { subject, body };
-  }
-
-  return { subject: null, body: text };
-}
-
-/**
- * Format text for WhatsApp (plain text mode)
- */
-function formatForWhatsApp(text: string): string {
-  let formatted = text;
-
-  // WhatsApp supports basic markdown: *bold*, _italic_, ~strikethrough~, ```code```
-  // Convert our markdown to WhatsApp format
-
-  // Bold: **text** -> *text* (WhatsApp format)
-  formatted = formatted.replace(/\*\*(.+?)\*\*/g, "*$1*");
-
-  // Clean up multiple newlines
-  formatted = formatted.replace(/\n{3,}/g, "\n\n");
-
-  return formatted.trim();
-}
+// NOTE: splitSubjectFromBody and formatForWhatsApp moved to ./text-utils.ts for testability

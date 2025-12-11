@@ -4,27 +4,26 @@
 
 import { getWhatsAppClient } from "./client";
 import {
-  parseWhatsAppCommand,
-  getHelpMenu,
   getCalculatorMenu,
+  getHelpMenu,
   getListingTypeMenu,
+  parseWhatsAppCommand,
 } from "./command-parser";
+
 import {
-  getSession,
-  updateSession,
-  handleMenuSelection,
-  getListingProgress,
   clearSession,
+  getListingProgress,
+  getSession,
+  handleMenuSelection,
+  updateSession,
 } from "./session-manager";
 import {
   formatTemplateMenu,
-  getTemplate,
-  shouldSendAsDocument,
-  getTemplatePrompt,
-  getQuickTemplateList,
   getListingWorkflowStep,
+  getQuickTemplateList,
+  getTemplate,
+  getTemplatePrompt,
 } from "./template-manager";
-import { generateDocx } from "./docx-generator";
 import type { WaSenderMessageData } from "./types";
 
 /**
@@ -39,48 +38,105 @@ export async function handleEnhancedWhatsAppMessage(
 
   // Parse command/menu selection
   const parsed = parseWhatsAppCommand(userMessage);
-  const session = getSession(phoneNumber);
+  const session = await getSession(phoneNumber);
 
   try {
-    // Handle commands first
+    // Handle commands first (slash commands like /help, /templates)
     if (parsed.type === "command") {
       await handleCommand(phoneNumber, parsed.command || "", parsed.args || []);
-      return;
+      return; // IMPORTANT: Stop here, don't fall through to AI
     }
 
-    // Handle menu selections
+    // Handle menu selections (single digits 1-9)
     if (parsed.type === "menu_selection" && parsed.selection) {
-      const action = handleMenuSelection(phoneNumber, parsed.selection);
+      const action = await handleMenuSelection(phoneNumber, parsed.selection);
 
       if (action) {
         await executeAction(phoneNumber, action);
-        return;
+        return; // IMPORTANT: Stop here, don't fall through to AI
       }
+      // If no action matched, let AI handle it
     }
 
     // Handle ongoing workflows (listing upload, etc.)
     if (session.currentMenu === "listing" && session.listingData) {
       await handleListingWorkflow(phoneNumber, userMessage);
+      return; // IMPORTANT: Stop here
+    }
+
+    // Natural language template matching BEFORE showing generic help
+    const lowerMessage = userMessage.toLowerCase().trim();
+
+    // Check for template-related requests in natural language
+    const templateMatch = matchNaturalTemplateRequest(lowerMessage);
+    if (templateMatch) {
+      if (templateMatch.type === "show_menu") {
+        await updateSession(phoneNumber, { currentMenu: "templates" });
+        await client.sendMessage({
+          to: phoneNumber,
+          text: formatTemplateMenu(),
+        });
+        return;
+      }
+      if (templateMatch.type === "generate" && templateMatch.templateId) {
+        await generateTemplate(phoneNumber, templateMatch.templateId);
+        return;
+      }
+      if (templateMatch.type === "show_options" && templateMatch.message) {
+        await client.sendMessage({
+          to: phoneNumber,
+          text: templateMatch.message,
+        });
+        return;
+      }
+    }
+
+    // Check for calculator requests
+    if (
+      lowerMessage.includes("calculator") ||
+      lowerMessage.includes("calculate") ||
+      lowerMessage.includes("calc")
+    ) {
+      await updateSession(phoneNumber, { currentMenu: "calculator" });
+      await client.sendMessage({
+        to: phoneNumber,
+        text: getCalculatorMenu(),
+      });
       return;
     }
 
-    // Default: Process as regular message with AI
-    // But suggest commands if the message seems like it wants help
-    const lowerMessage = userMessage.toLowerCase();
+    // Check for listing requests
     if (
-      lowerMessage.includes("help") ||
-      lowerMessage.includes("menu") ||
+      lowerMessage.includes("listing") ||
+      lowerMessage.includes("upload") ||
+      lowerMessage.includes("property")
+    ) {
+      await updateSession(phoneNumber, { currentMenu: "listing_type" });
+      await client.sendMessage({
+        to: phoneNumber,
+        text: getListingTypeMenu(),
+      });
+      return;
+    }
+
+    // Only show help menu for explicit greetings - let AI handle rest
+    if (
       lowerMessage === "hi" ||
-      lowerMessage === "hello"
+      lowerMessage === "hello" ||
+      lowerMessage === "hey" ||
+      lowerMessage === "help" ||
+      lowerMessage === "menu" ||
+      lowerMessage === "start"
     ) {
       await client.sendMessage({
         to: phoneNumber,
         text: getHelpMenu(),
       });
-      return;
+      return; // IMPORTANT: Stop here, don't call AI for greetings
     }
 
-    // Process with AI (your existing handler)
+    // For all other messages, let AI handle naturally
+    // This includes conversational queries, follow-ups, etc.
     await processWithAI(phoneNumber, userMessage);
   } catch (error) {
     console.error("Error in enhanced handler:", error);
@@ -89,6 +145,131 @@ export async function handleEnhancedWhatsAppMessage(
       text: "Sorry, I encountered an error. Type 'help' to see available options.",
     });
   }
+}
+
+/**
+ * Match natural language template requests
+ */
+function matchNaturalTemplateRequest(message: string): {
+  type: "show_menu" | "generate" | "show_options";
+  templateId?: string;
+  message?: string;
+} | null {
+  // Check for generic "templates" or "documents" request
+  if (
+    message === "templates" ||
+    message === "documents" ||
+    message === "forms" ||
+    message === "docs"
+  ) {
+    return { type: "show_menu" };
+  }
+
+  // Marketing agreement variations
+  if (
+    message.includes("marketing agreement") ||
+    message.includes("marketing")
+  ) {
+    if (message.includes("exclusive") && !message.includes("non")) {
+      return { type: "generate", templateId: "marketing_agreement_exclusive" };
+    }
+    if (
+      message.includes("non-exclusive") ||
+      message.includes("nonexclusive") ||
+      message.includes("non exclusive")
+    ) {
+      return {
+        type: "generate",
+        templateId: "marketing_agreement_nonexclusive",
+      };
+    }
+    if (
+      message.includes("off-market") ||
+      message.includes("offmarket") ||
+      message.includes("off market")
+    ) {
+      return { type: "generate", templateId: "marketing_agreement_offmarket" };
+    }
+    // Show options for generic "marketing" request
+    return {
+      type: "show_options",
+      message:
+        "📄 *Marketing Agreements*\n\nWhich type do you need?\n\n*1.* Exclusive Marketing Agreement\n*2.* Non-Exclusive Marketing Agreement\n*3.* Off-Market Agreement\n\n_Reply with a number or type the full name_",
+    };
+  }
+
+  // Email templates
+  if (message.includes("email")) {
+    if (message.includes("introduction") || message.includes("intro")) {
+      return { type: "generate", templateId: "introduction_email" };
+    }
+    if (message.includes("follow") || message.includes("followup")) {
+      return { type: "generate", templateId: "followup_viewed" };
+    }
+    if (message.includes("valuation")) {
+      return { type: "generate", templateId: "valuation_report" };
+    }
+    if (message.includes("welcome")) {
+      return { type: "generate", templateId: "welcome_email" };
+    }
+    // Show email options
+    return {
+      type: "show_options",
+      message:
+        "✉️ *Email Templates*\n\nPopular options:\n\n*1.* Introduction Email\n*2.* Follow-up After Viewing\n*3.* Property Match Email\n*4.* Valuation Report\n*5.* Welcome Email\n\n_Reply with a number or describe what you need_",
+    };
+  }
+
+  // Registration forms
+  if (
+    message.includes("seller registration") ||
+    message.includes("seller form")
+  ) {
+    if (message.includes("exclusive")) {
+      return { type: "generate", templateId: "seller_registration_exclusive" };
+    }
+    if (message.includes("non")) {
+      return {
+        type: "generate",
+        templateId: "seller_registration_nonexclusive",
+      };
+    }
+    return { type: "generate", templateId: "seller_registration" };
+  }
+
+  if (
+    message.includes("bank") &&
+    (message.includes("registration") || message.includes("form"))
+  ) {
+    if (message.includes("land")) {
+      return { type: "generate", templateId: "bank_registration_land" };
+    }
+    return { type: "generate", templateId: "bank_registration_property" };
+  }
+
+  if (
+    message.includes("viewing") &&
+    (message.includes("form") || message.includes("request"))
+  ) {
+    return { type: "generate", templateId: "viewing_form" };
+  }
+
+  if (message.includes("booking") || message.includes("book")) {
+    return { type: "generate", templateId: "booking_form" };
+  }
+
+  if (message.includes("reservation") || message.includes("reserve")) {
+    return { type: "generate", templateId: "reservation_form" };
+  }
+
+  if (
+    message.includes("offer") &&
+    (message.includes("submission") || message.includes("submit"))
+  ) {
+    return { type: "generate", templateId: "offer_submission" };
+  }
+
+  return null;
 }
 
 /**
@@ -114,7 +295,7 @@ async function handleCommand(
     case "templates":
     case "docs":
     case "documents":
-      updateSession(phoneNumber, { currentMenu: "templates" });
+      await updateSession(phoneNumber, { currentMenu: "templates" });
       await client.sendMessage({
         to: phoneNumber,
         text: formatTemplateMenu(),
@@ -124,7 +305,7 @@ async function handleCommand(
     case "listing":
     case "upload":
     case "property":
-      updateSession(phoneNumber, { currentMenu: "listing_type" });
+      await updateSession(phoneNumber, { currentMenu: "listing_type" });
       await client.sendMessage({
         to: phoneNumber,
         text: getListingTypeMenu(),
@@ -133,7 +314,7 @@ async function handleCommand(
 
     case "calculator":
     case "calc":
-      updateSession(phoneNumber, { currentMenu: "calculator" });
+      await updateSession(phoneNumber, { currentMenu: "calculator" });
       await client.sendMessage({
         to: phoneNumber,
         text: getCalculatorMenu(),
@@ -148,7 +329,7 @@ async function handleCommand(
 
     case "clear":
     case "reset":
-      clearSession(phoneNumber);
+      await clearSession(phoneNumber);
       await client.sendMessage({
         to: phoneNumber,
         text: "Session cleared. Type 'help' to start fresh.",
@@ -202,7 +383,7 @@ async function executeAction(
       break;
 
     case "continue_listing":
-      updateSession(phoneNumber, { currentMenu: "listing" });
+      await updateSession(phoneNumber, { currentMenu: "listing" });
       await client.sendMessage({
         to: phoneNumber,
         text: getListingWorkflowStep(2, action.data?.type),
@@ -210,19 +391,21 @@ async function executeAction(
       break;
 
     case "generate_document":
-    case "generate_email_template":
+    case "generate_email_template": {
       const template = action.data?.template;
       if (template) {
         await generateTemplate(phoneNumber, template);
       }
       break;
+    }
 
-    case "start_calculator":
+    case "start_calculator": {
       const calcType = action.data?.type;
       if (calcType) {
         await startCalculator(phoneNumber, calcType);
       }
       break;
+    }
 
     case "show_status":
       await showListingsStatus(phoneNumber);
@@ -272,7 +455,7 @@ async function generateTemplate(
   }
 
   // Store pending template generation in session
-  updateSession(phoneNumber, {
+  await updateSession(phoneNumber, {
     pendingAction: {
       type: "generate_template",
       data: { templateId },
@@ -291,8 +474,10 @@ async function startCalculator(
 
   const prompts = {
     vat: "🧮 *VAT Calculator*\n\nPlease provide:\n- Property price (EUR)\n- Property size (sqm)\n- Is it your main residence? (yes/no)",
-    transfer_fees: "🧮 *Transfer Fees Calculator*\n\nPlease provide:\n- Property price (EUR)\n- Is it in joint names? (yes/no)",
-    capital_gains: "🧮 *Capital Gains Calculator*\n\nFor accurate calculation, please visit:\nhttps://www.zyprus.com/capital-gains-calculator\n\nOr provide your selling price and I'll give you an estimate.",
+    transfer_fees:
+      "🧮 *Transfer Fees Calculator*\n\nPlease provide:\n- Property price (EUR)\n- Is it in joint names? (yes/no)",
+    capital_gains:
+      "🧮 *Capital Gains Calculator*\n\nFor accurate calculation, please visit:\nhttps://www.zyprus.com/capital-gains-calculator\n\nOr provide your selling price and I'll give you an estimate.",
   };
 
   const prompt = prompts[calcType as keyof typeof prompts];
@@ -302,7 +487,7 @@ async function startCalculator(
       text: prompt,
     });
 
-    updateSession(phoneNumber, {
+    await updateSession(phoneNumber, {
       pendingAction: {
         type: "calculator",
         data: { calcType },
@@ -319,12 +504,12 @@ async function handleListingWorkflow(
   userMessage: string
 ): Promise<void> {
   const client = getWhatsAppClient();
-  const session = getSession(phoneNumber);
+  const session = await getSession(phoneNumber);
   const listingData = session.listingData || {};
 
   // Determine what field we're collecting
   if (!listingData.location) {
-    updateSession(phoneNumber, {
+    await updateSession(phoneNumber, {
       listingData: { ...listingData, location: userMessage },
     });
     await client.sendMessage({
@@ -333,46 +518,53 @@ async function handleListingWorkflow(
     });
   } else if (!listingData.price) {
     const price = userMessage.replace(/[€,]/g, "").trim();
-    updateSession(phoneNumber, {
+    await updateSession(phoneNumber, {
       listingData: { ...listingData, price },
     });
     await client.sendMessage({
       to: phoneNumber,
       text: getListingWorkflowStep(4, listingData.type),
     });
-  } else if (!listingData.size) {
+  } else if (listingData.size) {
+    // Continue with remaining steps...
+    await client.sendMessage({
+      to: phoneNumber,
+      text: await getListingProgress(phoneNumber),
+    });
+  } else {
     // Parse the specifications message
     const lines = userMessage.split("\n");
-    const updates: any = {};
+    const updates: Record<string, string | number> = {};
+    const digitPattern = /\d+/;
 
     for (const line of lines) {
       const lower = line.toLowerCase();
       if (lower.includes("size") || lower.includes("sqm")) {
-        const match = line.match(/\d+/);
-        if (match) updates.size = match[0];
+        const match = line.match(digitPattern);
+        if (match) {
+          updates.size = match[0];
+        }
       }
       if (lower.includes("bedroom")) {
-        const match = line.match(/\d+/);
-        if (match) updates.bedrooms = parseInt(match[0]);
+        const match = line.match(digitPattern);
+        if (match) {
+          updates.bedrooms = Number.parseInt(match[0], 10);
+        }
       }
       if (lower.includes("bathroom")) {
-        const match = line.match(/\d+/);
-        if (match) updates.bathrooms = parseInt(match[0]);
+        const match = line.match(digitPattern);
+        if (match) {
+          updates.bathrooms = Number.parseInt(match[0], 10);
+        }
       }
     }
 
-    updateSession(phoneNumber, {
+    await updateSession(phoneNumber, {
       listingData: { ...listingData, ...updates },
     });
     await client.sendMessage({
       to: phoneNumber,
       text: getListingWorkflowStep(5),
-    });
-  } else {
-    // Continue with remaining steps...
-    await client.sendMessage({
-      to: phoneNumber,
-      text: getListingProgress(phoneNumber),
     });
   }
 }

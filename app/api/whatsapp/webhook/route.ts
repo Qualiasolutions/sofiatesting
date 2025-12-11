@@ -1,34 +1,103 @@
-import crypto from "node:crypto";
 import { NextResponse } from "next/server";
+import { Redis } from "@upstash/redis";
 import { handleEnhancedWhatsAppMessage } from "@/lib/whatsapp/enhanced-handler";
 import type {
   WaSenderMessageData,
   WaSenderSessionData,
   WaSenderStatusData,
 } from "@/lib/whatsapp/types";
+import { verifyWebhookSignature } from "@/lib/whatsapp/webhook-utils";
 
-// Simple in-memory deduplication cache (TTL: 60 seconds)
-// This prevents duplicate processing when WaSenderAPI sends multiple events for the same message
-const processedMessages = new Map<string, number>();
-const MESSAGE_TTL_MS = 60_000; // 60 seconds
+// Deduplication configuration
+const DEDUP_PREFIX = "whatsapp:dedup:";
+const DEDUP_TTL_SECONDS = 60; // 60 seconds
 
-const isMessageProcessed = (messageId: string): boolean => {
-  const now = Date.now();
+// In-memory fallback cache (used if Redis unavailable)
+const memoryDedup = new Map<string, number>();
+let lastMemoryCleanup = Date.now();
+const MEMORY_CLEANUP_INTERVAL = 10_000; // Clean every 10 seconds
 
-  // Clean up old entries
-  for (const [id, timestamp] of processedMessages.entries()) {
-    if (now - timestamp > MESSAGE_TTL_MS) {
-      processedMessages.delete(id);
+// Redis client (lazy initialization)
+let redisClient: Redis | null = null;
+
+/**
+ * Get Redis client with lazy initialization
+ */
+const getRedis = (): Redis | null => {
+  if (redisClient) {
+    return redisClient;
+  }
+
+  const redisUrl = process.env.REDIS_URL;
+  if (!redisUrl) {
+    return null;
+  }
+
+  try {
+    const parsedRedisUrl = new URL(redisUrl);
+    const redisToken = parsedRedisUrl.password;
+
+    if (!redisToken) {
+      return null;
+    }
+
+    redisClient = new Redis({
+      url: redisUrl,
+      token: redisToken,
+    });
+
+    return redisClient;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Check if message was already processed (Redis with in-memory fallback)
+ * Returns true if duplicate, false if new message
+ */
+const isMessageProcessed = async (messageId: string): Promise<boolean> => {
+  const redis = getRedis();
+
+  if (redis) {
+    try {
+      const key = `${DEDUP_PREFIX}${messageId}`;
+      const exists = await redis.get(key);
+
+      if (exists) {
+        return true; // Already processed
+      }
+
+      // Mark as processed with TTL (Redis handles expiration automatically)
+      await redis.set(key, 1, { ex: DEDUP_TTL_SECONDS });
+      return false;
+    } catch (error) {
+      console.error("[WhatsApp Webhook] Redis dedup failed:", error);
+      // Fall through to memory cache
     }
   }
 
+  // Fallback to in-memory deduplication with periodic cleanup
+  const now = Date.now();
+
+  // Only cleanup every 10 seconds (not on every call - O(1) amortized)
+  if (now - lastMemoryCleanup > MEMORY_CLEANUP_INTERVAL) {
+    const ttlMs = DEDUP_TTL_SECONDS * 1000;
+    for (const [id, timestamp] of memoryDedup.entries()) {
+      if (now - timestamp > ttlMs) {
+        memoryDedup.delete(id);
+      }
+    }
+    lastMemoryCleanup = now;
+  }
+
   // Check if message was already processed
-  if (processedMessages.has(messageId)) {
+  if (memoryDedup.has(messageId)) {
     return true;
   }
 
   // Mark as processed
-  processedMessages.set(messageId, now);
+  memoryDedup.set(messageId, now);
   return false;
 };
 
@@ -65,35 +134,7 @@ const isMessageProcessed = (messageId: string): boolean => {
  * }
  */
 
-/**
- * Verify HMAC signature from WaSenderAPI webhook
- * Uses timing-safe comparison to prevent timing attacks
- */
-const verifyWebhookSignature = (
-  rawBody: string,
-  signature: string | null,
-  secret: string
-): boolean => {
-  if (!signature) {
-    return false;
-  }
-
-  const expectedSignature = crypto
-    .createHmac("sha256", secret)
-    .update(rawBody)
-    .digest("hex");
-
-  // Use timing-safe comparison to prevent timing attacks
-  try {
-    return crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    );
-  } catch {
-    // If buffers have different lengths, timingSafeEqual throws
-    return false;
-  }
-};
+// NOTE: verifyWebhookSignature moved to @/lib/whatsapp/webhook-utils.ts for testability
 
 /**
  * POST - Handle incoming WhatsApp messages from WaSenderAPI
@@ -281,7 +322,7 @@ export async function POST(request: Request): Promise<Response> {
           // Deduplication check - prevent processing same message multiple times
           // WaSenderAPI can send multiple events for the same message
           const messageKey = `${messageData.id}-${messageData.from}`;
-          if (isMessageProcessed(messageKey)) {
+          if (await isMessageProcessed(messageKey)) {
             console.log(
               "[WhatsApp Webhook] Duplicate message, skipping:",
               messageKey
