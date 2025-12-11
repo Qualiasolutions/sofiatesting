@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { NextResponse } from "next/server";
 import { handleEnhancedWhatsAppMessage } from "@/lib/whatsapp/enhanced-handler";
 import type {
@@ -65,12 +66,75 @@ const isMessageProcessed = (messageId: string): boolean => {
  */
 
 /**
+ * Verify HMAC signature from WaSenderAPI webhook
+ * Uses timing-safe comparison to prevent timing attacks
+ */
+const verifyWebhookSignature = (
+  rawBody: string,
+  signature: string | null,
+  secret: string
+): boolean => {
+  if (!signature) {
+    return false;
+  }
+
+  const expectedSignature = crypto
+    .createHmac("sha256", secret)
+    .update(rawBody)
+    .digest("hex");
+
+  // Use timing-safe comparison to prevent timing attacks
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature)
+    );
+  } catch {
+    // If buffers have different lengths, timingSafeEqual throws
+    return false;
+  }
+};
+
+/**
  * POST - Handle incoming WhatsApp messages from WaSenderAPI
  */
 export async function POST(request: Request): Promise<Response> {
-  try {
-    const body = await request.json();
+  // 1. Get signature from headers
+  const signature = request.headers.get("x-wasender-signature");
+  const webhookSecret = process.env.WASENDER_WEBHOOK_SECRET;
 
+  // 2. Verify webhook secret is configured
+  if (!webhookSecret) {
+    console.error("[WhatsApp Webhook] WASENDER_WEBHOOK_SECRET not configured");
+    return NextResponse.json(
+      { error: "Server misconfigured" },
+      { status: 500 }
+    );
+  }
+
+  // 3. Get raw body for signature verification
+  const rawBody = await request.text();
+
+  // 4. Verify HMAC signature
+  if (!verifyWebhookSignature(rawBody, signature, webhookSecret)) {
+    console.warn("[WhatsApp Webhook] Invalid signature, rejecting request", {
+      hasSignature: !!signature,
+      signatureLength: signature?.length,
+    });
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
+  // 5. Parse verified body
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let body: Record<string, any>;
+  try {
+    body = JSON.parse(rawBody) as Record<string, any>;
+  } catch {
+    console.error("[WhatsApp Webhook] Invalid JSON in request body");
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  try {
     // Log EVERYTHING for debugging
     console.log(
       "[WhatsApp Webhook] RAW PAYLOAD:",
@@ -218,16 +282,23 @@ export async function POST(request: Request): Promise<Response> {
           // WaSenderAPI can send multiple events for the same message
           const messageKey = `${messageData.id}-${messageData.from}`;
           if (isMessageProcessed(messageKey)) {
-            console.log("[WhatsApp Webhook] Duplicate message, skipping:", messageKey);
+            console.log(
+              "[WhatsApp Webhook] Duplicate message, skipping:",
+              messageKey
+            );
             continue;
           }
 
           // Process message and wait for completion
           // The 60s function timeout should be enough for AI processing
           try {
-            console.log("[WhatsApp Webhook] Starting enhanced message handler...");
+            console.log(
+              "[WhatsApp Webhook] Starting enhanced message handler..."
+            );
             await handleEnhancedWhatsAppMessage(messageData);
-            console.log("[WhatsApp Webhook] Enhanced handler completed successfully");
+            console.log(
+              "[WhatsApp Webhook] Enhanced handler completed successfully"
+            );
           } catch (error) {
             console.error("[WhatsApp Webhook] Error processing message:", {
               error: error instanceof Error ? error.message : "Unknown error",

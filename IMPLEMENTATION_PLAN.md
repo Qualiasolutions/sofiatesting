@@ -3,8 +3,8 @@
 > **Master tracking document for all development and optimization work**
 > **All agents must read and update this file before and after completing tasks**
 
-Last Updated: 2025-11-14
-Status: ✅ ALL OPTIMIZATIONS DEPLOYED | 📚 DOCUMENTATION REFRESH COMPLETE
+Last Updated: 2025-12-11
+Status: ✅ ALL OPTIMIZATIONS DEPLOYED | 📚 DOCUMENTATION REFRESH COMPLETE | 🔒 WHATSAPP SECURITY FIXES (Issues #1-3)
 
 ---
 
@@ -42,16 +42,326 @@ Status: ✅ ALL OPTIMIZATIONS DEPLOYED | 📚 DOCUMENTATION REFRESH COMPLETE
 
 ---
 
-## 🎯 CURRENT STATUS & PRIORITIES (2025-11-14)
+## 🎯 CURRENT STATUS & PRIORITIES (2025-12-11)
+
+### 🔴 CRITICAL - WhatsApp Integration Hardening (Full Review Findings)
+
+**Context:** Full review on 2025-12-11 identified critical security, reliability, and code quality issues in the WhatsApp integration. These must be addressed before production use.
+
+---
+
+#### Issue #1: Missing Webhook Authentication (CRITICAL SECURITY)
+**File:** `app/api/whatsapp/webhook/route.ts`
+**Risk:** HIGH - Anyone can send fake webhook payloads
+**Effort:** 30 minutes
+
+**Current Problem:**
+```typescript
+// NO signature verification at all!
+export async function POST(request: Request): Promise<Response> {
+  try {
+    const body = await request.json();
+    // Directly processes body without verifying it came from WaSenderAPI
+```
+
+**Fix Required:**
+```typescript
+import crypto from "crypto";
+
+export async function POST(request: Request): Promise<Response> {
+  // 1. Get signature from headers
+  const signature = request.headers.get("x-wasender-signature");
+  const webhookSecret = process.env.WASENDER_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    console.error("[WhatsApp Webhook] WASENDER_WEBHOOK_SECRET not configured");
+    return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+  }
+
+  // 2. Get raw body for signature verification
+  const rawBody = await request.text();
+
+  // 3. Verify HMAC signature
+  const expectedSignature = crypto
+    .createHmac("sha256", webhookSecret)
+    .update(rawBody)
+    .digest("hex");
+
+  if (signature !== expectedSignature) {
+    console.warn("[WhatsApp Webhook] Invalid signature, rejecting request");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
+  // 4. Parse verified body
+  const body = JSON.parse(rawBody);
+  // ... rest of handler
+```
+
+**Tasks:**
+- [x] Add HMAC signature verification to webhook route (2025-12-11)
+- [ ] Verify `WASENDER_WEBHOOK_SECRET` is set in Vercel
+- [ ] Test with WaSenderAPI's webhook verification
+- [x] Add logging for rejected requests (2025-12-11)
+
+---
+
+#### Issue #2: ReDoS Vulnerability in Regex (CRITICAL SECURITY)
+**File:** `lib/whatsapp/message-handler.ts:372`
+**Risk:** HIGH - Malicious input can freeze server
+**Effort:** 15 minutes
+
+**Current Problem:**
+```typescript
+// Catastrophic backtracking possible with nested quantifiers
+const subjectMatch = text.match(/^(Subject:\s*.+?)(?:\n\n|\n(?=Dear|Email Body))/im);
+```
+
+**Fix Required:**
+```typescript
+// Safe regex - no catastrophic backtracking
+const subjectMatch = text.match(/^(Subject:\s*[^\n]+)(?:\n\n|\n(?=Dear|Email Body))/im);
+// Changed .+? to [^\n]+ which cannot backtrack catastrophically
+```
+
+**Tasks:**
+- [x] Replace `.+?` with `[^\n]+` in splitSubjectFromBody regex (2025-12-11)
+- [ ] Add timeout protection for regex operations (optional hardening)
+- [ ] Test with edge cases (very long subjects, malformed input)
+
+---
+
+#### Issue #3: Linting Violations (CODE QUALITY)
+**File:** `lib/whatsapp/message-handler.ts`
+**Risk:** MEDIUM - Code quality, potential bugs
+**Effort:** 20 minutes
+
+**Current Problems (4 violations):**
+1. Line 46-48: `return;` inside if block → use `if (!condition) return;` pattern
+2. Line 50-54: Same pattern
+3. Line 264: `for await` on non-async iterator warning
+4. Line 391: Function uses `any` type implicitly
+
+**Fix Required:**
+```typescript
+// Lines 44-54: Combine conditions
+if (messageData.type !== "text" || !messageData.text || messageData.isGroup) {
+  console.log("Skipping WhatsApp message:", messageData.type, messageData.isGroup ? "group" : "");
+  return;
+}
+
+// Line 264: Add explicit type annotation
+for await (const textPart of result.textStream as AsyncIterable<string>) {
+
+// Line 391: Add return type
+function formatForWhatsApp(text: string): string {
+```
+
+**Tasks:**
+- [x] Fix early return pattern (lines 44-54) - combined into single condition (2025-12-11)
+- [x] Add type annotation to async iterator (line 264) (2025-12-11)
+- [x] Add explicit return type to formatForWhatsApp (line 391) - already had return type (2025-12-11)
+- [x] Run `pnpm lint` to verify fixes (2025-12-11)
+
+---
+
+#### Issue #4: In-Memory Session Storage Won't Scale (ARCHITECTURE)
+**File:** `lib/whatsapp/session-manager.ts`
+**Risk:** MEDIUM - Sessions lost on serverless cold starts, won't work with multiple instances
+**Effort:** 1-2 hours
+
+**Current Problem:**
+```typescript
+// In-memory Map - lost on cold start, not shared between instances
+const sessions = new Map<string, UserSession>();
+```
+
+**Fix Required:** Migrate to Redis (Vercel KV)
+```typescript
+import { kv } from "@vercel/kv";
+
+const SESSION_PREFIX = "whatsapp:session:";
+const SESSION_TTL = 1800; // 30 minutes
+
+export async function getSession(phoneNumber: string): Promise<UserSession> {
+  const session = await kv.get<UserSession>(`${SESSION_PREFIX}${phoneNumber}`);
+  return session || createDefaultSession();
+}
+
+export async function updateSession(phoneNumber: string, updates: Partial<UserSession>): Promise<void> {
+  const current = await getSession(phoneNumber);
+  await kv.set(`${SESSION_PREFIX}${phoneNumber}`, { ...current, ...updates }, { ex: SESSION_TTL });
+}
+
+export async function clearSession(phoneNumber: string): Promise<void> {
+  await kv.del(`${SESSION_PREFIX}${phoneNumber}`);
+}
+```
+
+**Tasks:**
+- [ ] Import `kv` from `@vercel/kv`
+- [ ] Add session key prefix constant
+- [ ] Convert `getSession()` to async with Redis lookup
+- [ ] Convert `updateSession()` to async with Redis set
+- [ ] Convert `clearSession()` to async with Redis del
+- [ ] Update all callers to use await
+- [ ] Add in-memory fallback for Redis failures
+- [ ] Test session persistence across requests
+
+---
+
+#### Issue #5: O(n) Deduplication Cache Cleanup (PERFORMANCE)
+**File:** `app/api/whatsapp/webhook/route.ts:14-32`
+**Risk:** LOW - Performance degrades with high message volume
+**Effort:** 30 minutes
+
+**Current Problem:**
+```typescript
+// O(n) cleanup on EVERY message check
+const isMessageProcessed = (messageId: string): boolean => {
+  const now = Date.now();
+  // This loops through ALL entries every time
+  for (const [id, timestamp] of processedMessages.entries()) {
+    if (now - timestamp > MESSAGE_TTL_MS) {
+      processedMessages.delete(id);
+    }
+  }
+  // ...
+};
+```
+
+**Fix Option A:** Periodic cleanup (simple)
+```typescript
+let lastCleanup = Date.now();
+const CLEANUP_INTERVAL = 10_000; // Every 10 seconds
+
+const isMessageProcessed = (messageId: string): boolean => {
+  const now = Date.now();
+
+  // Only cleanup every 10 seconds, not every call
+  if (now - lastCleanup > CLEANUP_INTERVAL) {
+    for (const [id, timestamp] of processedMessages.entries()) {
+      if (now - timestamp > MESSAGE_TTL_MS) {
+        processedMessages.delete(id);
+      }
+    }
+    lastCleanup = now;
+  }
+  // ...
+};
+```
+
+**Fix Option B:** Redis deduplication (recommended for scale)
+```typescript
+import { kv } from "@vercel/kv";
+
+const isMessageProcessed = async (messageId: string): Promise<boolean> => {
+  const key = `whatsapp:dedup:${messageId}`;
+  const exists = await kv.get(key);
+  if (exists) return true;
+
+  // Set with TTL - Redis handles expiration automatically
+  await kv.set(key, 1, { ex: 60 }); // 60 second TTL
+  return false;
+};
+```
+
+**Tasks:**
+- [ ] Choose approach (Option A for quick fix, Option B for scale)
+- [ ] Implement periodic cleanup or Redis deduplication
+- [ ] Test with high message volume simulation
+- [ ] Monitor memory usage in production
+
+---
+
+#### Issue #6: Zero Automated Test Coverage (RELIABILITY)
+**Files:** `lib/whatsapp/*.ts`, `app/api/whatsapp/webhook/route.ts`
+**Risk:** MEDIUM - Regressions go undetected
+**Effort:** 2-3 hours
+
+**Tests to Add:**
+
+1. **Webhook signature verification test:**
+```typescript
+// tests/unit/whatsapp-webhook.test.ts
+test("rejects requests with invalid signature", async () => {
+  const response = await POST(mockRequest({ signature: "invalid" }));
+  expect(response.status).toBe(401);
+});
+
+test("accepts requests with valid signature", async () => {
+  const validSignature = createHmacSignature(payload, secret);
+  const response = await POST(mockRequest({ signature: validSignature }));
+  expect(response.status).toBe(200);
+});
+```
+
+2. **Subject/body splitting test:**
+```typescript
+// tests/unit/whatsapp-message-handler.test.ts
+test("splits subject from body correctly", () => {
+  const input = "Subject: Test Email\n\nDear Client,\nBody text here.";
+  const result = splitSubjectFromBody(input);
+  expect(result.subject).toBe("Subject: Test Email");
+  expect(result.body).toBe("Dear Client,\nBody text here.");
+});
+
+test("handles messages without subject", () => {
+  const input = "Just a plain message";
+  const result = splitSubjectFromBody(input);
+  expect(result.subject).toBeNull();
+  expect(result.body).toBe("Just a plain message");
+});
+```
+
+3. **Session manager test (after Redis migration):**
+```typescript
+// tests/unit/whatsapp-session.test.ts
+test("persists session to Redis", async () => {
+  await updateSession("1234567890", { currentMenu: "templates" });
+  const session = await getSession("1234567890");
+  expect(session.currentMenu).toBe("templates");
+});
+```
+
+**Tasks:**
+- [ ] Create `tests/unit/whatsapp-webhook.test.ts`
+- [ ] Create `tests/unit/whatsapp-message-handler.test.ts`
+- [ ] Create `tests/unit/whatsapp-session.test.ts` (after Redis migration)
+- [ ] Export internal functions for testing
+- [ ] Add to CI pipeline
+- [ ] Achieve >70% coverage for WhatsApp module
+
+---
+
+### 📋 Implementation Priority Order
+
+| Priority | Issue | Severity | Effort | Dependencies |
+|----------|-------|----------|--------|--------------|
+| 1 | Webhook Authentication | CRITICAL | 30 min | None |
+| 2 | ReDoS Vulnerability | CRITICAL | 15 min | None |
+| 3 | Linting Violations | MEDIUM | 20 min | None |
+| 4 | Session Storage Migration | MEDIUM | 1-2 hrs | None |
+| 5 | Dedup Cache Optimization | LOW | 30 min | #4 if using Redis |
+| 6 | Test Coverage | MEDIUM | 2-3 hrs | #1, #2, #4 |
+
+**Total Estimated Effort:** 5-7 hours
+
+---
 
 ### ✅ Recently Completed
-1. **Documentation Refresh (2025-11-14)**
+1. **WhatsApp VAT Format Fix (2025-12-11)**
+   - ✅ Fixed `5%VAT` to `5%+VAT` in 4 locations in `lib/ai/instructions/base.md`
+   - ✅ Added subject/body splitting in `lib/whatsapp/message-handler.ts`
+   - ✅ Bumped prompt cache key to v10 for immediate effect
+   - ✅ Deployed to production
+
+2. **Documentation Refresh (2025-11-14)**
    - ✅ Created comprehensive PRD (`/docs/PRD.md`)
    - ✅ Created architecture documentation (`/docs/ARCHITECTURE.md`)
    - ✅ Updated IMPLEMENTATION_PLAN.md
    - ✅ Pushed 4 pending commits to production
 
-2. **All Performance Optimizations Deployed (Week 1-3)**
+3. **All Performance Optimizations Deployed (Week 1-3)**
    - ✅ Database indexes (10-100x faster)
    - ✅ Telegram typing indicators (90% fewer calls)
    - ✅ System prompt caching (50-100ms saved)
@@ -63,8 +373,8 @@ Status: ✅ ALL OPTIMIZATIONS DEPLOYED | 📚 DOCUMENTATION REFRESH COMPLETE
    - ✅ Environment variable consolidation
    - ✅ Directory cleanup & security fixes
 
-### 🚀 Next Up (Production Readiness)
-1. **Agent Onboarding Documentation** (In Progress)
+### 🚀 Next Up (After WhatsApp Hardening)
+1. **Agent Onboarding Documentation** (Pending)
    - Create `/docs/for-agents/QUICK_START.md`
    - Organize documentation structure
    - Create navigation guide for new agents
@@ -82,9 +392,10 @@ Status: ✅ ALL OPTIMIZATIONS DEPLOYED | 📚 DOCUMENTATION REFRESH COMPLETE
 
 ### 📊 System Health
 - **Build Status:** ✅ Passing
-- **Tests:** ✅ All passing
+- **Tests:** ⚠️ WhatsApp module needs test coverage
 - **Deployment:** ✅ Production (Vercel)
 - **Performance:** ✅ All optimizations active
+- **Security:** ✅ WhatsApp webhook HMAC authentication added (2025-12-11)
 - **Documentation:** ✅ Comprehensive (PRD + Architecture)
 
 ---

@@ -41,15 +41,9 @@ import {
 export async function handleWhatsAppMessage(
   messageData: WaSenderMessageData
 ): Promise<void> {
-  // Only handle text messages for now
-  if (messageData.type !== "text" || !messageData.text) {
-    console.log("Skipping non-text WhatsApp message:", messageData.type);
-    return;
-  }
-
-  // Skip group messages unless specifically mentioned
-  if (messageData.isGroup) {
-    console.log("Skipping group message from:", messageData.groupName);
+  // Only handle text messages, skip group messages
+  if (messageData.type !== "text" || !messageData.text || messageData.isGroup) {
+    console.log("Skipping WhatsApp message:", messageData.type, messageData.isGroup ? "group" : "");
     return;
   }
 
@@ -261,7 +255,7 @@ PLATFORM CONTEXT: WhatsApp Mobile Messaging
 
       // Collect the response
       let response = "";
-      for await (const textPart of result.textStream) {
+      for await (const textPart of result.textStream as AsyncIterable<string>) {
         response += textPart;
       }
       console.log("[WhatsApp] AI response collected, length:", response.length);
@@ -369,7 +363,8 @@ function splitSubjectFromBody(text: string): {
   body: string;
 } {
   // Match "Subject:" at the start of a line (case-insensitive)
-  const subjectMatch = text.match(/^(Subject:\s*.+?)(?:\n\n|\n(?=Dear|Email Body))/im);
+  // Using [^\n]+ instead of .+? to prevent ReDoS (catastrophic backtracking)
+  const subjectMatch = text.match(/^(Subject:\s*[^\n]+)(?:\n\n|\n(?=Dear|Email Body))/im);
 
   if (subjectMatch) {
     const subject = subjectMatch[1].trim();
