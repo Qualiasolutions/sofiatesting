@@ -6,6 +6,31 @@ import type {
   WaSenderStatusData,
 } from "@/lib/whatsapp/types";
 
+// Simple in-memory deduplication cache (TTL: 60 seconds)
+// This prevents duplicate processing when WaSenderAPI sends multiple events for the same message
+const processedMessages = new Map<string, number>();
+const MESSAGE_TTL_MS = 60_000; // 60 seconds
+
+const isMessageProcessed = (messageId: string): boolean => {
+  const now = Date.now();
+
+  // Clean up old entries
+  for (const [id, timestamp] of processedMessages.entries()) {
+    if (now - timestamp > MESSAGE_TTL_MS) {
+      processedMessages.delete(id);
+    }
+  }
+
+  // Check if message was already processed
+  if (processedMessages.has(messageId)) {
+    return true;
+  }
+
+  // Mark as processed
+  processedMessages.set(messageId, now);
+  return false;
+};
+
 /**
  * WhatsApp Webhook Endpoint for WaSenderAPI
  *
@@ -189,16 +214,28 @@ export async function POST(request: Request): Promise<Response> {
             continue;
           }
 
-          // Process message asynchronously to respond quickly to webhook
-          // WaSenderAPI expects a quick 200 response
-          handleWhatsAppMessage(messageData).catch((error) => {
+          // Deduplication check - prevent processing same message multiple times
+          // WaSenderAPI can send multiple events for the same message
+          const messageKey = `${messageData.id}-${messageData.from}`;
+          if (isMessageProcessed(messageKey)) {
+            console.log("[WhatsApp Webhook] Duplicate message, skipping:", messageKey);
+            continue;
+          }
+
+          // Process message and wait for completion
+          // The 60s function timeout should be enough for AI processing
+          try {
+            console.log("[WhatsApp Webhook] Starting message handler...");
+            await handleWhatsAppMessage(messageData);
+            console.log("[WhatsApp Webhook] Message handler completed successfully");
+          } catch (error) {
             console.error("[WhatsApp Webhook] Error processing message:", {
               error: error instanceof Error ? error.message : "Unknown error",
               stack: error instanceof Error ? error.stack : undefined,
               from: messageData.from,
               type: messageData.type,
             });
-          });
+          }
         }
 
         break;
