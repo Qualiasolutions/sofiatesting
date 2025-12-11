@@ -3,7 +3,9 @@ import { convertToModelMessages, stepCountIs, streamText } from "ai";
 import { runWithUserContext } from "@/lib/ai/context";
 import { db } from "@/lib/db/client";
 import { agentExecutionLog } from "@/lib/db/schema";
-import { WORKER_MODEL } from "../ai/models";
+// Use Flash model for WhatsApp to reduce quota usage and cost
+// Gemini 2.5 Flash has much higher rate limits than Gemini 3 Pro
+const WHATSAPP_MODEL = "chat-model-flash";
 import { systemPrompt } from "../ai/prompts";
 import { myProvider } from "../ai/providers";
 import { calculateCapitalGainsTool } from "../ai/tools/calculate-capital-gains";
@@ -113,7 +115,7 @@ export async function handleWhatsAppMessage(
     // Prepare system prompt
     console.log("[WhatsApp] Building system prompt...");
     const baseSystemPrompt = await systemPrompt({
-      selectedChatModel: WORKER_MODEL,
+      selectedChatModel: WHATSAPP_MODEL,
       requestHints: {
         latitude: undefined,
         longitude: undefined,
@@ -138,8 +140,8 @@ PLATFORM CONTEXT: WhatsApp Mobile Messaging
 
     const finalSystemPrompt = baseSystemPrompt + whatsappContext;
 
-    // Main Chat Execution (Worker Model)
-    const chatModel = myProvider.languageModel(WORKER_MODEL);
+    // Main Chat Execution (Flash Model - higher quota limits)
+    const chatModel = myProvider.languageModel(WHATSAPP_MODEL);
     const message: ChatMessage = {
       id: generateUUID(),
       role: "user",
