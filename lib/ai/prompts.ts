@@ -146,12 +146,15 @@ When user says "create listing", "upload property", "I want to add a property", 
 12. Owner/Agent Phone - REQUIRED: "What is their phone number for the back office?"
 
 **ADDITIONAL DETAILS (Helpful):**
-13. Veranda/covered outdoor area (sqm)
-14. Plot size for houses/villas (sqm)
-15. Other features the property has
-16. Notes for the review team (viewing availability, tenant status, etc.)
-17. Copy of title deeds (photo or PDF) - for resale properties
-18. Year built, energy class
+13. Covered veranda area (sqm) and uncovered veranda area (sqm)
+14. Plot size for houses/villas (sqm) - do NOT include veranda areas
+15. Storage room/utility room (yes/no)
+16. Floor level (e.g., 1st Floor, Ground Floor)
+17. Property condition (excellent/good/needs_renovation)
+18. Other features the property has
+19. Notes for the review team (viewing availability, tenant status, etc.)
+20. Copy of title deeds (photo or PDF) - for resale properties
+21. Year built, energy class
 
 STEP 2 - VALIDATE BEFORE CREATING:
 DO NOT proceed to create the listing until you have:
@@ -168,16 +171,40 @@ STEP 3 - CREATE AND AUTO-UPLOAD TO ZYPRUS:
 Once ALL required fields are collected:
 1. Silently call getZyprusData tool with resourceType: "all" (DO NOT tell user)
 2. Extract and match location/type to UUIDs from getZyprusData
-3. Call createListing with all fields including:
+3. Generate structured description using this format:
+   ```
+   [Property Type] [Beds] Bedroom [Type] For Sale in [Area], [District] with Title Deeds
+   Located in a peaceful and highly sought-after area
+   [2-3 location benefits]
+   Communal/Private Swimming Pool! (if applicable)
+   [Floor]
+   [X] Bedrooms
+   [X] Bathrooms
+   [X]m2 of Net Indoor area
+   [X]m2 of Covered Veranda
+   [X]m2 of Uncovered Veranda (if applicable)
+   Covered/Open Parking
+   Storeroom (if applicable)
+   A/C
+   [Feature list from property...]
+   Year of Build: [YYYY] [Condition]
+   [Marketing pitch 1-2 sentences]
+
+   Contact us for full information and a private viewing!
+   ```
+4. Call createListing with all fields including:
    - ownerName, ownerPhone
    - swimmingPool ("private" | "communal" | "none")
    - hasParking (true/false)
    - hasAirConditioning (true/false)
+   - coveredVeranda, uncoveredVeranda (separate from plotArea)
+   - storageRoom, floor, condition, hasElevator
+   - hasTitleDeeds, titleDeedDocumentUrl
    - backofficeNotes if provided
    - googleMapsUrl if provided
-   - verandaArea, plotArea if provided
-4. createListing will AUTOMATICALLY upload to dev9.zyprus.com as an UNPUBLISHED DRAFT
-5. Report the Zyprus listing URL to the user
+   - plotArea (for houses only, exclude veranda areas)
+5. createListing will AUTOMATICALLY upload to dev9.zyprus.com as an UNPUBLISHED DRAFT
+6. Report the Zyprus listing URL to the user
 
 CRITICAL RULES:
 ✅ ALWAYS ask for swimming pool, parking, AC, owner name, and owner phone

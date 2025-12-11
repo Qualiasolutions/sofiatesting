@@ -12,9 +12,12 @@ import {
   AGENT_REQUEST_PATTERN,
   detectRussianLanguage,
   isLimassolRegion,
+  isLarnacaRegion,
   isOthersGroup,
   LIMASSOL_AGENTS,
+  LARNACA_AGENTS,
   OTHERS_GROUP_AGENTS,
+  PRIORITY_AGENTS,
   RUSSIAN_SPEAKER_AGENT,
 } from "./routing-constants";
 import type { TelegramMessage } from "./types";
@@ -199,6 +202,21 @@ async function getTargetAgents(
         .where(
           and(
             inArray(zyprusAgent.fullName, LIMASSOL_AGENTS),
+            eq(zyprusAgent.isActive, true)
+          )
+        );
+      return agents;
+    }
+
+    // RULE 1.5: Larnaca leads go to Michelle/Diana (same as Limassol)
+    if (isLarnacaRegion(region)) {
+      console.log("Larnaca region detected - routing to Michelle/Diana");
+      const agents = await db
+        .select()
+        .from(zyprusAgent)
+        .where(
+          and(
+            inArray(zyprusAgent.fullName, LARNACA_AGENTS),
             eq(zyprusAgent.isActive, true)
           )
         );
@@ -613,6 +631,12 @@ export async function handleGroupMessage(
         agentsWithTelegram
       );
     }
+  } else if (isLarnacaRegion(region)) {
+    // For Larnaca, use same logic as Limassol but without Russian preference
+    selectedAgent = await getNextAgentInRotation(
+      "larnaca",
+      agentsWithTelegram
+    );
   } else {
     // Standard rotation for other regions
     selectedAgent = await getNextAgentInRotation(

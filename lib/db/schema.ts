@@ -204,8 +204,16 @@ export const propertyListing = pgTable(
     hasAirConditioning: boolean("hasAirConditioning"), // Has AC or provisions?
     backofficeNotes: text("backofficeNotes"), // Notes for review team
     googleMapsUrl: text("googleMapsUrl"), // Google Maps link with pin
-    verandaArea: real("verandaArea"), // Veranda/outdoor covered area in sqm
+    verandaArea: real("verandaArea"), // Veranda/outdoor covered area in sqm (deprecated - use coveredVeranda)
+    coveredVeranda: real("coveredVeranda"), // Covered veranda area in sqm
+    uncoveredVeranda: real("uncoveredVeranda"), // Uncovered veranda area in sqm
     plotArea: real("plotArea"), // Total plot size in sqm (for houses)
+    storageRoom: boolean("storageRoom"), // Has storage/utility room
+    floor: varchar("floor", { length: 50 }), // Floor level (e.g., '1st Floor', 'Ground Floor')
+    condition: varchar("condition", { length: 32 }), // Property condition (excellent, good, needs_renovation)
+    hasElevator: boolean("hasElevator"), // Building has elevator
+    hasTitleDeeds: boolean("hasTitleDeeds").default(false), // Property has title deeds
+    titleDeedDocumentUrl: text("titleDeedDocumentUrl"), // URL to uploaded title deed document
     // Review workflow fields
     reviewStatus: varchar("reviewStatus", { length: 32 }).default("pending"), // pending, approved, rejected
     firstReviewerId: uuid("firstReviewerId"), // First reviewer (usually Lauren)

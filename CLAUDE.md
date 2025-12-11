@@ -131,7 +131,7 @@ Key patterns:
 
 **Telegram** (`lib/telegram/`): Webhook at `/api/telegram/webhook`, typing indicators (time-based, 3s interval), message splitting, group lead management via `lib/telegram/lead-router.ts`
 
-**WhatsApp** (`lib/whatsapp/`): **Currently disabled**. Was using WaSenderAPI for DOCX attachments and text messages.
+**WhatsApp** (`lib/whatsapp/`): Uses WaSenderAPI (~$6/month) for DOCX attachments and text messages. Requires `WASENDER_API_KEY` env var. Features: text messages, document uploads (upload→URL→send flow), all AI tools including calculators, listings, and document generation.
 
 **Zyprus API** (`lib/zyprus/`): Drupal JSON:API backend for property/land listings. OAuth 2.0 auth, auto-upload as unpublished drafts. Redis-cached taxonomy (1h TTL) with in-memory fallback. See Zyprus API Quick Reference section below.
 

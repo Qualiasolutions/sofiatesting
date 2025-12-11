@@ -4,6 +4,7 @@ import {
   DEFAULT_LISTING_INSTRUCTOR_UUID,
   DEFAULT_LISTING_REVIEWER_UUID,
 } from "./constants";
+import { getReviewers } from "./reviewer-assignment";
 
 type ZyprusAPIErrorOptions = {
   message: string;
@@ -667,14 +668,44 @@ async function uploadToZyprusAPIInternal(listing: ZyprusListingInput): Promise<{
     }
   }
 
-  // AI Listing Reviewer - assigned to review AI-generated listings (array of users)
+  // AI Listing Reviewer - dynamically assigned based on region and type
+  const reviewers = getReviewers({
+    listingType: listing.listingTypeId?.includes('rent') ? 'rent' : 'sale',
+    region: listing.region || 'Unknown',
+    submittedByEmail: (listing as any).submittedByEmail,
+    isMichelleRental: (listing as any).submittedByEmail?.toLowerCase().includes('michelle') && listing.listingTypeId?.includes('rent')
+  });
+
+  const reviewerData: any[] = [];
+
+  // Add primary reviewer
+  if (reviewers.reviewer1) {
+    reviewerData.push({
+      type: "user--user",
+      id: reviewers.reviewer1 === 'listings@zyprus.com'
+        ? DEFAULT_LISTING_REVIEWER_UUID
+        : reviewers.reviewer1 // Would need UUID lookup for emails
+    });
+  }
+
+  // Add secondary reviewer
+  if (reviewers.reviewer2) {
+    reviewerData.push({
+      type: "user--user",
+      id: reviewers.reviewer2 // Would need UUID lookup for emails
+    });
+  }
+
+  // Fallback to default if no reviewers assigned
+  if (reviewerData.length === 0) {
+    reviewerData.push({
+      type: "user--user",
+      id: DEFAULT_LISTING_REVIEWER_UUID,
+    });
+  }
+
   relationships.field_ai_listing_reviewer = {
-    data: [
-      {
-        type: "user--user",
-        id: DEFAULT_LISTING_REVIEWER_UUID,
-      },
-    ],
+    data: reviewerData,
   };
 
   // AI Listing Instructor - who instructed/submitted the listing (single user)

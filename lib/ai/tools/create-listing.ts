@@ -222,13 +222,51 @@ export const createListingTool = tool({
       .positive()
       .max(500)
       .optional()
-      .describe("Veranda/outdoor covered area in square meters"),
+      .describe("Veranda/outdoor covered area in square meters (deprecated - use coveredVeranda)"),
+    coveredVeranda: z
+      .number()
+      .positive()
+      .max(500)
+      .optional()
+      .describe("Covered veranda area in square meters"),
+    uncoveredVeranda: z
+      .number()
+      .positive()
+      .max(500)
+      .optional()
+      .describe("Uncovered veranda area in square meters"),
     plotArea: z
       .number()
       .positive()
       .max(50_000)
       .optional()
       .describe("Total plot size in square meters (for houses/villas)"),
+    storageRoom: z
+      .boolean()
+      .optional()
+      .describe("Has storage/utility room"),
+    floor: z
+      .string()
+      .max(50)
+      .optional()
+      .describe("Floor level (e.g., '1st Floor', 'Ground Floor')"),
+    condition: z
+      .enum(["excellent", "good", "needs_renovation"])
+      .optional()
+      .describe("Property condition"),
+    hasElevator: z
+      .boolean()
+      .optional()
+      .describe("Building has elevator"),
+    hasTitleDeeds: z
+      .boolean()
+      .optional()
+      .describe("Property has title deeds"),
+    titleDeedDocumentUrl: z
+      .string()
+      .url()
+      .optional()
+      .describe("URL to uploaded title deed document"),
   }),
   execute: async ({
     name,
@@ -265,7 +303,15 @@ export const createListingTool = tool({
     backofficeNotes,
     googleMapsUrl,
     verandaArea,
+    coveredVeranda,
+    uncoveredVeranda,
     plotArea,
+    storageRoom,
+    floor,
+    condition,
+    hasElevator,
+    hasTitleDeeds,
+    titleDeedDocumentUrl,
   }) => {
     try {
       // Get session for user authentication (web) or context (WhatsApp/Telegram)
@@ -335,7 +381,15 @@ export const createListingTool = tool({
         backofficeNotes,
         googleMapsUrl,
         verandaArea,
+        coveredVeranda,
+        uncoveredVeranda,
         plotArea,
+        storageRoom,
+        floor,
+        condition,
+        hasElevator,
+        hasTitleDeeds,
+        titleDeedDocumentUrl,
         // Auto-generate reference ID if not provided
         referenceId:
           referenceId ||

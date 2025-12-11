@@ -148,6 +148,13 @@
       "when": 1765181786173,
       "tag": "0020_goofy_vargas",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1765426333935,
+      "tag": "0021_quick_roland_deschain",
+      "breakpoints": true
     }
   ]
 }

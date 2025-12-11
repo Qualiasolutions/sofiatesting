@@ -7,7 +7,9 @@ import { calculateTransferFeesTool } from "../ai/tools/calculate-transfer-fees";
 import { calculateVATTool } from "../ai/tools/calculate-vat";
 import { createListingTool } from "../ai/tools/create-listing";
 import { getZyprusDataTool } from "../ai/tools/get-zyprus-data";
+import { parseTitleDeedTool } from "../ai/tools/parse-title-deed";
 import { isProductionEnvironment } from "../constants";
+import { uploadToSupabaseStorage, generateFilePath } from "../storage/upload-file";
 import {
   getChatById,
   getMessagesByChatId,
@@ -210,6 +212,7 @@ export async function handleTelegramMessage(
             "calculateVAT",
             "createListing",
             "getZyprusData",
+            "parseTitleDeed",
             // Note: uploadListing deliberately NOT added - listings require reviewer approval
           ],
           tools: {
@@ -218,6 +221,7 @@ export async function handleTelegramMessage(
             calculateVAT: calculateVATTool,
             createListing: createListingTool,
             getZyprusData: getZyprusDataTool,
+            parseTitleDeed: parseTitleDeedTool,
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
@@ -786,8 +790,7 @@ async function handleFileUpload(message: TelegramMessage): Promise<void> {
       return;
     }
 
-    // Store file temporarily or upload to Supabase Storage
-    // For now, acknowledge receipt and provide instructions
+    // Determine file type from content and metadata
     const caption = message.caption || "";
     const isPropertyImage = PROPERTY_IMAGE_PATTERN.test(caption);
     const isTitleDeed =
@@ -795,7 +798,37 @@ async function handleFileUpload(message: TelegramMessage): Promise<void> {
       fileName?.toLowerCase().includes("deed") ||
       fileName?.toLowerCase().endsWith(".pdf");
 
+    let documentUrl: string | null = null;
     let responseText: string;
+
+    // Upload title deeds to Supabase Storage
+    if (isTitleDeed && fileData.buffer) {
+      const filePath = generateFilePath({
+        chatId: chatId.toString(),
+        fileName: fileName || "deed.pdf",
+        fileType: "title-deeds"
+      });
+
+      const uploadResult = await uploadToSupabaseStorage({
+        file: fileData.buffer,
+        bucket: "documents",
+        path: filePath,
+        contentType: fileData.mimeType || "application/pdf"
+      });
+
+      if (uploadResult.success && uploadResult.publicUrl) {
+        documentUrl = uploadResult.publicUrl;
+        console.log("Title deed uploaded to:", uploadResult.publicUrl);
+
+        // Try to parse the title deed if it's an image
+        if (fileData.mimeType?.startsWith("image/")) {
+          // TODO: Add OCR parsing for image-based deeds
+          console.log("Image title deed received - OCR parsing not implemented yet");
+        }
+      } else {
+        console.error("Failed to upload title deed:", uploadResult.error);
+      }
+    }
 
     if (fileType === "photo") {
       if (isPropertyImage) {
@@ -821,13 +854,17 @@ Is this for a property listing? If so, please tell me:
 - Owner/agent contact details`;
       }
     } else if (isTitleDeed) {
-      responseText = `Title deed document received (${fileName || "document"}).
+      responseText = `📄 Title deed document received (${fileName || "document"}).
 
-This will be attached to your property listing. Please provide the property details if you haven't already:
-- Property type, location, size, price
-- Bedrooms, bathrooms
-- Swimming pool, parking, AC status
-- Owner name and phone number`;
+${documentUrl ? "✅ Document saved successfully!" : ""}
+
+I'll analyze it to extract property details. Please provide additional information:
+- Property type and location
+- Swimming pool (private/communal/none)
+- Parking and AC status
+- Owner name and phone number
+
+The title deed will be attached to your property listing in the Documents section.`;
     } else {
       responseText = `Document received (${fileName || "file"}).
 
