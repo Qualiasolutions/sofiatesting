@@ -1,0 +1,362 @@
+{
+  "templates": {
+    "seller_registration": {
+      "name": "Seller Registration Form",
+      "description": "Register property for sale with Zyprus",
+      "deliveryMethod": "document",
+      "templateId": "01",
+      "category": "registration"
+    },
+    "seller_registration_exclusive": {
+      "name": "Seller Registration (Exclusive)",
+      "description": "Exclusive listing agreement",
+      "deliveryMethod": "document",
+      "templateId": "02",
+      "category": "registration"
+    },
+    "seller_registration_nonexclusive": {
+      "name": "Seller Registration (Non-Exclusive)",
+      "description": "Non-exclusive listing agreement",
+      "deliveryMethod": "document",
+      "templateId": "03",
+      "category": "registration"
+    },
+    "developer_registration": {
+      "name": "Developer Registration",
+      "description": "Developer property registration",
+      "deliveryMethod": "document",
+      "templateId": "04",
+      "category": "registration"
+    },
+    "bank_registration_property": {
+      "name": "Bank Registration (Property)",
+      "description": "Bank form for property",
+      "deliveryMethod": "document",
+      "templateId": "05",
+      "category": "registration"
+    },
+    "bank_registration_land": {
+      "name": "Bank Registration (Land)",
+      "description": "Bank form for land",
+      "deliveryMethod": "document",
+      "templateId": "06",
+      "category": "registration"
+    },
+    "buyer_information": {
+      "name": "Buyer Information Form",
+      "description": "Collect buyer details",
+      "deliveryMethod": "document",
+      "templateId": "07",
+      "category": "registration"
+    },
+    "tenant_registration": {
+      "name": "Tenant Registration",
+      "description": "Register as tenant",
+      "deliveryMethod": "document",
+      "templateId": "08",
+      "category": "registration"
+    },
+    "viewing_form": {
+      "name": "Viewing Form",
+      "description": "Property viewing request",
+      "deliveryMethod": "document",
+      "templateId": "09",
+      "category": "viewing"
+    },
+    "booking_form": {
+      "name": "Booking Form",
+      "description": "Property booking",
+      "deliveryMethod": "document",
+      "templateId": "10",
+      "category": "viewing"
+    },
+    "reservation_form": {
+      "name": "Reservation Form",
+      "description": "Reserve property",
+      "deliveryMethod": "document",
+      "templateId": "11",
+      "category": "viewing"
+    },
+    "expression_of_interest": {
+      "name": "Expression of Interest",
+      "description": "Show interest in property",
+      "deliveryMethod": "document",
+      "templateId": "12",
+      "category": "viewing"
+    },
+    "offer_submission": {
+      "name": "Offer Submission",
+      "description": "Submit property offer",
+      "deliveryMethod": "document",
+      "templateId": "13",
+      "category": "viewing"
+    },
+    "marketing_agreement_exclusive": {
+      "name": "Marketing Agreement (Exclusive)",
+      "description": "Exclusive marketing rights",
+      "deliveryMethod": "document",
+      "templateId": "14",
+      "category": "agreements"
+    },
+    "marketing_agreement_nonexclusive": {
+      "name": "Marketing Agreement (Non-Exclusive)",
+      "description": "Non-exclusive marketing",
+      "deliveryMethod": "document",
+      "templateId": "15",
+      "category": "agreements"
+    },
+    "marketing_agreement_offmarket": {
+      "name": "Marketing Agreement (Off-Market)",
+      "description": "Off-market property agreement",
+      "deliveryMethod": "document",
+      "templateId": "16",
+      "category": "agreements"
+    },
+    "introduction_email": {
+      "name": "Introduction Email",
+      "description": "First contact email",
+      "deliveryMethod": "text",
+      "templateId": "17",
+      "category": "emails",
+      "subject": "Introduction - Zyprus Property Group"
+    },
+    "followup_viewed": {
+      "name": "Follow-up After Viewing",
+      "description": "Post-viewing follow-up",
+      "deliveryMethod": "text",
+      "templateId": "18",
+      "category": "emails",
+      "subject": "Thank you for viewing - [Property]"
+    },
+    "followup_interest": {
+      "name": "Follow-up Interest Check",
+      "description": "Check continued interest",
+      "deliveryMethod": "text",
+      "templateId": "19",
+      "category": "emails",
+      "subject": "Still interested? - [Property]"
+    },
+    "property_match": {
+      "name": "Property Match Email",
+      "description": "New matching property",
+      "deliveryMethod": "text",
+      "templateId": "20",
+      "category": "emails",
+      "subject": "New property matching your criteria"
+    },
+    "price_reduction": {
+      "name": "Price Reduction Notice",
+      "description": "Notify of price drop",
+      "deliveryMethod": "text",
+      "templateId": "21",
+      "category": "emails",
+      "subject": "Price Reduced - [Property]"
+    },
+    "new_listing": {
+      "name": "New Listing Announcement",
+      "description": "Announce new property",
+      "deliveryMethod": "text",
+      "templateId": "22",
+      "category": "emails",
+      "subject": "New Property Listed - [Location]"
+    },
+    "viewing_confirmation": {
+      "name": "Viewing Confirmation",
+      "description": "Confirm viewing appointment",
+      "deliveryMethod": "text",
+      "templateId": "23",
+      "category": "emails",
+      "subject": "Viewing Confirmed - [Date/Time]"
+    },
+    "offer_accepted": {
+      "name": "Offer Accepted",
+      "description": "Confirm offer acceptance",
+      "deliveryMethod": "text",
+      "templateId": "24",
+      "category": "emails",
+      "subject": "Offer Accepted - Congratulations!"
+    },
+    "offer_rejected": {
+      "name": "Offer Rejected",
+      "description": "Inform of offer rejection",
+      "deliveryMethod": "text",
+      "templateId": "25",
+      "category": "emails",
+      "subject": "Offer Update - [Property]"
+    },
+    "valuation_report": {
+      "name": "Valuation Report",
+      "description": "Property valuation details",
+      "deliveryMethod": "text",
+      "templateId": "26",
+      "category": "emails",
+      "subject": "Property Valuation - [Address]"
+    },
+    "inspection_report": {
+      "name": "Inspection Report",
+      "description": "Property inspection findings",
+      "deliveryMethod": "text",
+      "templateId": "27",
+      "category": "emails",
+      "subject": "Inspection Report - [Property]"
+    },
+    "newsletter": {
+      "name": "Newsletter",
+      "description": "Monthly property newsletter",
+      "deliveryMethod": "text",
+      "templateId": "28",
+      "category": "emails",
+      "subject": "Zyprus Monthly Newsletter"
+    },
+    "referral_request": {
+      "name": "Referral Request",
+      "description": "Ask for referrals",
+      "deliveryMethod": "text",
+      "templateId": "29",
+      "category": "emails",
+      "subject": "Know someone looking for property?"
+    },
+    "thank_you": {
+      "name": "Thank You Email",
+      "description": "General thank you",
+      "deliveryMethod": "text",
+      "templateId": "30",
+      "category": "emails",
+      "subject": "Thank You - Zyprus Property Group"
+    },
+    "appointment_reminder": {
+      "name": "Appointment Reminder",
+      "description": "Remind of upcoming appointment",
+      "deliveryMethod": "text",
+      "templateId": "31",
+      "category": "emails",
+      "subject": "Appointment Reminder - [Date/Time]"
+    },
+    "documentation_request": {
+      "name": "Documentation Request",
+      "description": "Request required documents",
+      "deliveryMethod": "text",
+      "templateId": "32",
+      "category": "emails",
+      "subject": "Documents Required - [Property]"
+    },
+    "completion_notice": {
+      "name": "Completion Notice",
+      "description": "Sale completion details",
+      "deliveryMethod": "text",
+      "templateId": "33",
+      "category": "emails",
+      "subject": "Sale Completion - [Property]"
+    },
+    "rental_inquiry": {
+      "name": "Rental Inquiry Response",
+      "description": "Respond to rental inquiry",
+      "deliveryMethod": "text",
+      "templateId": "34",
+      "category": "emails",
+      "subject": "Rental Inquiry - [Property]"
+    },
+    "maintenance_notice": {
+      "name": "Maintenance Notice",
+      "description": "Property maintenance update",
+      "deliveryMethod": "text",
+      "templateId": "35",
+      "category": "emails",
+      "subject": "Maintenance Update - [Property]"
+    },
+    "survey_request": {
+      "name": "Customer Survey",
+      "description": "Service feedback request",
+      "deliveryMethod": "text",
+      "templateId": "36",
+      "category": "emails",
+      "subject": "How was your experience?"
+    },
+    "legal_update": {
+      "name": "Legal Update",
+      "description": "Legal process update",
+      "deliveryMethod": "text",
+      "templateId": "37",
+      "category": "emails",
+      "subject": "Legal Update - [Property]"
+    },
+    "welcome_email": {
+      "name": "Welcome Email",
+      "description": "Welcome new client",
+      "deliveryMethod": "text",
+      "templateId": "38",
+      "category": "emails",
+      "subject": "Welcome to Zyprus Property Group"
+    },
+    "market_report": {
+      "name": "Market Report",
+      "description": "Cyprus property market update",
+      "deliveryMethod": "text",
+      "templateId": "39",
+      "category": "emails",
+      "subject": "Cyprus Property Market Report"
+    },
+    "investment_opportunity": {
+      "name": "Investment Opportunity",
+      "description": "Special investment property",
+      "deliveryMethod": "text",
+      "templateId": "40",
+      "category": "emails",
+      "subject": "Investment Opportunity - [Location]"
+    },
+    "open_house": {
+      "name": "Open House Invitation",
+      "description": "Invite to open house",
+      "deliveryMethod": "text",
+      "templateId": "41",
+      "category": "emails",
+      "subject": "Open House - [Property]"
+    },
+    "contract_update": {
+      "name": "Contract Update",
+      "description": "Contract status update",
+      "deliveryMethod": "text",
+      "templateId": "42",
+      "category": "emails",
+      "subject": "Contract Update - [Property]"
+    },
+    "closing_checklist": {
+      "name": "Closing Checklist",
+      "description": "Pre-closing requirements",
+      "deliveryMethod": "text",
+      "templateId": "43",
+      "category": "emails",
+      "subject": "Closing Checklist - [Property]"
+    }
+  },
+  "categories": {
+    "registration": {
+      "name": "Registration Forms",
+      "description": "Client and property registration",
+      "icon": "📝"
+    },
+    "viewing": {
+      "name": "Viewing & Offers",
+      "description": "Property viewing and offers",
+      "icon": "🏠"
+    },
+    "agreements": {
+      "name": "Marketing Agreements",
+      "description": "Marketing and listing agreements",
+      "icon": "📄"
+    },
+    "emails": {
+      "name": "Email Templates",
+      "description": "Email communications",
+      "icon": "✉️"
+    }
+  },
+  "settings": {
+    "documentFormat": "docx",
+    "emailFormat": "text",
+    "includeSubjectInText": true,
+    "splitEmailParts": true,
+    "documentFooter": "Generated by SOFIA - Zyprus Property Group AI Assistant",
+    "maxTextMessageLength": 4096
+  }
+}

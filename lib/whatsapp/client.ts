@@ -50,6 +50,103 @@ const wasenderClient = API_KEY
  */
 export class WhatsAppClient {
   /**
+   * Upload a file to WaSenderAPI and get a temporary URL (valid 24h)
+   * This is required for sending documents/media via base64
+   */
+  async uploadFile({
+    buffer,
+    mimeType,
+    filename,
+  }: {
+    buffer: Buffer;
+    mimeType: string;
+    filename: string;
+  }): Promise<{ success: boolean; url?: string; error?: string }> {
+    if (!API_KEY) {
+      return { success: false, error: "WhatsApp API key not configured" };
+    }
+
+    try {
+      const base64Data = buffer.toString("base64");
+      const dataUrl = `data:${mimeType};base64,${base64Data}`;
+
+      console.log("[WhatsApp] Uploading file:", {
+        filename,
+        mimeType,
+        size: buffer.length,
+      });
+
+      const response = await fetch("https://api.wasenderapi.com/api/upload", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${API_KEY}`,
+        },
+        body: JSON.stringify({ base64: dataUrl }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("[WhatsApp] Upload failed:", {
+          status: response.status,
+          error: errorData,
+        });
+        return {
+          success: false,
+          error:
+            errorData.message ||
+            errorData.error ||
+            `Upload failed: ${response.status}`,
+        };
+      }
+
+      const data = await response.json();
+      // WaSenderAPI returns publicUrl, not url
+      const fileUrl = data.url || data.publicUrl;
+      console.log("[WhatsApp] Upload successful:", { url: fileUrl });
+      return { success: true, url: fileUrl };
+    } catch (error) {
+      console.error("[WhatsApp] Upload error:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Upload failed",
+      };
+    }
+  }
+
+  /**
+   * Upload file with retry logic for resilience
+   */
+  async uploadFileWithRetry(
+    params: { buffer: Buffer; mimeType: string; filename: string },
+    maxRetries = 2
+  ): Promise<{ success: boolean; url?: string; error?: string }> {
+    let lastError = "";
+
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      const result = await this.uploadFile(params);
+      if (result.success) {
+        return result;
+      }
+
+      lastError = result.error || "Unknown error";
+
+      if (attempt < maxRetries) {
+        console.log(
+          `[WhatsApp] Upload retry ${attempt + 1}/${maxRetries} after error: ${lastError}`
+        );
+        // Exponential backoff
+        await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+      }
+    }
+
+    return {
+      success: false,
+      error: `Upload failed after ${maxRetries + 1} attempts: ${lastError}`,
+    };
+  }
+
+  /**
    * Send a text message
    */
   async sendMessage({ to, text }: { to: string; text: string }): Promise<{
@@ -97,6 +194,7 @@ export class WhatsAppClient {
 
   /**
    * Send a document file
+   * Uses the correct WaSenderAPI flow: upload → get URL → send
    */
   async sendDocument({
     to,
@@ -119,20 +217,37 @@ export class WhatsAppClient {
     }
 
     try {
-      // Convert buffer to base64 for API upload
-      const base64Document = document.toString("base64");
-
       // Determine MIME type from filename
       const mimeType = getMimeType(filename);
 
-      // Cast to any because SDK types only have documentUrl, but API supports documentBase64
-      const response = await wasenderClient.send({
-        messageType: "document",
-        to: formatPhoneNumber(to),
-        documentBase64: `data:${mimeType};base64,${base64Document}`,
+      // Step 1: Upload the document to get a temporary URL (valid 24h)
+      const uploadResult = await this.uploadFileWithRetry({
+        buffer: document,
+        mimeType,
         filename,
-        caption,
-      } as any);
+      });
+
+      if (!uploadResult.success || !uploadResult.url) {
+        console.error("[WhatsApp] Document upload failed:", uploadResult.error);
+        return {
+          success: false,
+          error: uploadResult.error || "Failed to upload document",
+        };
+      }
+
+      console.log("[WhatsApp] Document uploaded, sending message:", {
+        to,
+        filename,
+        uploadUrl: uploadResult.url,
+      });
+
+      // Step 2: Send document using the temporary URL
+      // Note: fileName is supported by REST API but not in SDK types, so we cast
+      const response = await wasenderClient.sendDocument({
+        to: formatPhoneNumber(to),
+        documentUrl: uploadResult.url,
+        text: caption || `Document: ${filename}`,
+      } as Parameters<typeof wasenderClient.sendDocument>[0]);
 
       console.log("[WhatsApp] Document sent successfully", {
         to,
@@ -164,6 +279,7 @@ export class WhatsAppClient {
 
   /**
    * Send an image
+   * Uses the correct WaSenderAPI flow: upload → get URL → send (for Buffer)
    */
   async sendImage({
     to,
@@ -183,23 +299,34 @@ export class WhatsAppClient {
     }
 
     try {
-      // Cast to any because SDK types only have imageUrl, but API supports imageBase64
-      const payload =
-        typeof image === "string"
-          ? {
-              messageType: "image" as const,
-              to: formatPhoneNumber(to),
-              imageUrl: image,
-              caption,
-            }
-          : {
-              messageType: "image" as const,
-              to: formatPhoneNumber(to),
-              imageBase64: `data:image/jpeg;base64,${image.toString("base64")}`,
-              caption,
-            };
+      let imageUrl: string;
 
-      const response = await wasenderClient.send(payload as any);
+      if (typeof image === "string") {
+        // Already a URL, use directly
+        imageUrl = image;
+      } else {
+        // Buffer: upload first to get URL
+        const uploadResult = await this.uploadFileWithRetry({
+          buffer: image,
+          mimeType: "image/jpeg",
+          filename: `image_${Date.now()}.jpg`,
+        });
+
+        if (!uploadResult.success || !uploadResult.url) {
+          return {
+            success: false,
+            error: uploadResult.error || "Failed to upload image",
+          };
+        }
+
+        imageUrl = uploadResult.url;
+      }
+
+      const response = await wasenderClient.sendImage({
+        to: formatPhoneNumber(to),
+        imageUrl,
+        text: caption,
+      });
 
       return {
         success: true,
@@ -207,6 +334,11 @@ export class WhatsAppClient {
       };
     } catch (error) {
       const apiError = error as WasenderAPIError;
+      console.error("[WhatsApp] Send image error:", {
+        statusCode: apiError.statusCode,
+        message: apiError.apiMessage,
+        to,
+      });
       return {
         success: false,
         error: apiError.apiMessage || "Failed to send image",

@@ -49,6 +49,27 @@ const FORM_TEMPLATE_PATTERNS = [
   /Exclusive\s*Marketing/i,
 ];
 
+// Calculator exclusion patterns - these should NEVER be sent as documents
+const CALCULATOR_EXCLUSION_PATTERNS = [
+  /VAT.*calculation/i,
+  /transfer.*fees/i,
+  /capital.*gains/i,
+  /stamp.*duty/i,
+  /property.*tax/i,
+  /municipal.*taxes/i,
+  /immovable.*property/i,
+  /total.*cost/i,
+  /total.*amount/i,
+  /due.*amount/i,
+  /€[0-9,]+/i,
+  /EUR\s*[0-9,]+/i,
+  /cyprus.*real.*estate/i,
+  /cyprus.*property/i,
+  /property.*value/i,
+  /market.*value/i,
+  /taxable.*value/i,
+];
+
 // Form field indicators - strong signals for document detection
 const FORM_FIELD_INDICATORS = [
   /Registration\s*No\./i,
@@ -74,25 +95,39 @@ const FORM_FIELD_INDICATORS = [
  * Emails and other communications should be sent as plain text
  */
 export function shouldSendAsDocument(response: string): boolean {
-  // Check for form template patterns
-  for (const pattern of FORM_TEMPLATE_PATTERNS) {
+  // FIRST: Check if this looks like a calculator response - if so, NEVER send as document
+  for (const pattern of CALCULATOR_EXCLUSION_PATTERNS) {
     if (pattern.test(response)) {
-      return true;
+      // This contains calculator-like content, send as text
+      return false;
     }
   }
 
-  // Check for form field indicators (need at least 2 to be sure)
+  // SECOND: Check for explicit form template name match (very strict)
+  let hasFormTemplateName = false;
+  for (const pattern of FORM_TEMPLATE_PATTERNS) {
+    if (pattern.test(response)) {
+      hasFormTemplateName = true;
+      break;
+    }
+  }
+
+  // If no form template name found, don't send as document
+  if (!hasFormTemplateName) {
+    return false;
+  }
+
+  // THIRD: Require multiple field indicators to confirm it's actually a form
+  // Increased from 2 to 5 to be more strict
   let fieldIndicatorCount = 0;
   for (const pattern of FORM_FIELD_INDICATORS) {
     if (pattern.test(response)) {
       fieldIndicatorCount++;
-      if (fieldIndicatorCount >= 2) {
-        return true;
-      }
     }
   }
 
-  return false;
+  // Need at least 5 field indicators to confirm it's a form (was 2)
+  return fieldIndicatorCount >= 5;
 }
 
 /**

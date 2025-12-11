@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { handleWhatsAppMessage } from "@/lib/whatsapp/message-handler";
+import { handleEnhancedWhatsAppMessage } from "@/lib/whatsapp/enhanced-handler";
 import type {
   WaSenderMessageData,
   WaSenderSessionData,
@@ -225,9 +225,9 @@ export async function POST(request: Request): Promise<Response> {
           // Process message and wait for completion
           // The 60s function timeout should be enough for AI processing
           try {
-            console.log("[WhatsApp Webhook] Starting message handler...");
-            await handleWhatsAppMessage(messageData);
-            console.log("[WhatsApp Webhook] Message handler completed successfully");
+            console.log("[WhatsApp Webhook] Starting enhanced message handler...");
+            await handleEnhancedWhatsAppMessage(messageData);
+            console.log("[WhatsApp Webhook] Enhanced handler completed successfully");
           } catch (error) {
             console.error("[WhatsApp Webhook] Error processing message:", {
               error: error instanceof Error ? error.message : "Unknown error",
