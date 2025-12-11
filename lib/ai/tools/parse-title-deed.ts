@@ -159,6 +159,9 @@ function parseOwner(text: string): string | null {
 /**
  * Extract structured data from title deed text (OCR or user input)
  */
+// Temporarily commented out due to TypeScript issue
+// TODO: Fix tool definition for AI v5
+/*
 export const parseTitleDeedTool = tool({
   description: "Parse property details from a title deed text or OCR result. Extracts area measurements, features, owner info, and registration details from Greek/English title deeds.",
   parameters: z.object({
@@ -166,7 +169,7 @@ export const parseTitleDeedTool = tool({
       .string()
       .describe("The text content of the title deed (from OCR or user input). Can be in Greek or English.")
   }),
-  execute: async ({ deedText }) => {
+  execute: async ({ deedText }: { deedText: string }) => {
     try {
       const result: any = {
         indoorArea: null,
@@ -264,3 +267,4 @@ export const parseTitleDeedTool = tool({
     }
   },
 });
+*/
