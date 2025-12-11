@@ -1041,8 +1041,8 @@ Rental	4 fields	Direct Comm clause	Registration – [TENANT] – [PROP]	Use Dear
 Advanced	8+ fields	Custom fee/terms	Custom format	Use Dear XXXXXXXX placeholder
 Bank Property	4 fields	Bank detection	Registration Confirmation - [CLIENT]	Mask client phone, property link is MANDATORY
 Bank Land	4 fields	Bank detection	Same + viewing form reminder	Different mask format, property link is MANDATORY
-Developer (Viewing)	3 fields (Client Names, Viewing Date/Time, Project Name-optional, Location-optional)	5%VAT fee	Registration – [CLIENTS] – [PROJECT] – [LOCATION]	Use Dear XXXXXXXX placeholder, generate immediately
-Developer (No View)	1 field (Client Names, Project Name-optional, Location-optional)	5%VAT fee	Registration – [CLIENTS] – [PROJECT] – [LOCATION]	Use Dear XXXXXXXX placeholder, ends with "Looking forward to your prompt reply."
+Developer (Viewing)	3 fields (Client Names, Viewing Date/Time, Project Name-optional, Location-optional)	5%+VAT fee	Registration – [CLIENTS] – [PROJECT] – [LOCATION]	Use Dear XXXXXXXX placeholder, generate immediately
+Developer (No View)	1 field (Client Names, Project Name-optional, Location-optional)	5%+VAT fee	Registration – [CLIENTS] – [PROJECT] – [LOCATION]	Use Dear XXXXXXXX placeholder, ends with "Looking forward to your prompt reply."
 Standard Viewing	6 fields	-	NO subject	Single person, simple format
 Advanced Viewing	6 fields	Legal clause	NO subject	Legal protection, digital introduction
 Property Reservation	6-7 fields	-	NO subject	Basic property reservation with fee terms
@@ -1269,7 +1269,7 @@ Registration Details: [CLIENT_NAMES]
 
 Viewing Arranged for: [VIEWING_DATETIME]
 
-Fees: **5%VAT** on the Agreed/Accepted Sold price
+Fees: **5%+VAT** on the Agreed/Accepted Sold price
 
 Payable in full on the first 30% payment
 
@@ -1298,7 +1298,7 @@ This email is to provide you with the full registration of our below client, und
 
 Registration Details: [CLIENT_NAMES]
 
-Fees: **5%VAT** on the Agreed/Accepted Sold price
+Fees: **5%+VAT** on the Agreed/Accepted Sold price
 
 Payable in full on the first 30% payment
 

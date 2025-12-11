@@ -2,10 +2,14 @@ import "server-only";
 import { convertToModelMessages, stepCountIs, streamText } from "ai";
 import { runWithUserContext } from "@/lib/ai/context";
 import { db } from "@/lib/db/client";
+import { getMessagesByChatId, saveMessages } from "@/lib/db/queries";
 import { agentExecutionLog } from "@/lib/db/schema";
+import { convertToUIMessages } from "@/lib/utils";
+
 // Use Flash model for WhatsApp to reduce quota usage and cost
 // Gemini 2.5 Flash has much higher rate limits than Gemini 3 Pro
 const WHATSAPP_MODEL = "chat-model-flash";
+
 import { systemPrompt } from "../ai/prompts";
 import { myProvider } from "../ai/providers";
 import { calculateCapitalGainsTool } from "../ai/tools/calculate-capital-gains";
@@ -112,6 +116,34 @@ export async function handleWhatsAppMessage(
     // This reduces API calls and quota usage significantly
     let fullResponse = "";
 
+    // Get chat ID for conversation history (use phone-based ID as fallback)
+    let sessionChatId = `whatsapp-${phoneNumber}`;
+    try {
+      const dbUser = await getOrCreateWhatsAppUser(phoneNumber);
+      const dbChat = await getOrCreateWhatsAppChat(dbUser.id, phoneNumber);
+      sessionChatId = dbChat.id;
+    } catch (dbErr) {
+      console.warn("[WhatsApp] Failed to get chat ID, using fallback:", dbErr);
+    }
+
+    // Get message history from database for conversation continuity
+    let previousMessages: ChatMessage[] = [];
+    try {
+      const messagesFromDb = await getMessagesByChatId({ id: sessionChatId });
+      previousMessages = convertToUIMessages(messagesFromDb);
+      console.log(
+        "[WhatsApp] Retrieved",
+        previousMessages.length,
+        "previous messages for context"
+      );
+    } catch (historyErr) {
+      console.warn(
+        "[WhatsApp] Failed to retrieve message history:",
+        historyErr
+      );
+      // Continue without history - AI will still respond
+    }
+
     // Prepare system prompt
     console.log("[WhatsApp] Building system prompt...");
     const baseSystemPrompt = await systemPrompt({
@@ -136,17 +168,41 @@ PLATFORM CONTEXT: WhatsApp Mobile Messaging
 - Use emojis sparingly for better readability on mobile
 - Keep responses concise but complete
 - DO NOT auto-generate documents based on content - wait for explicit user request
+- CRITICAL: You have access to full conversation history. Review previous messages to understand what information the user has ALREADY PROVIDED. DO NOT ask for details that have already been given in earlier messages.
+- When collecting listing details, track which fields have been provided and only ask for MISSING information.
 `;
 
     const finalSystemPrompt = baseSystemPrompt + whatsappContext;
 
     // Main Chat Execution (Flash Model - higher quota limits)
     const chatModel = myProvider.languageModel(WHATSAPP_MODEL);
-    const message: ChatMessage = {
+    const newUserMessage: ChatMessage = {
       id: generateUUID(),
       role: "user",
       parts: [{ type: "text", text: userMessage }],
     };
+
+    // Save user message to database BEFORE AI processing
+    try {
+      await saveMessages({
+        messages: [
+          {
+            chatId: sessionChatId,
+            id: newUserMessage.id,
+            role: "user",
+            parts: newUserMessage.parts,
+            attachments: [],
+            createdAt: new Date(),
+          },
+        ],
+      });
+      console.log("[WhatsApp] Saved user message to database");
+    } catch (saveErr) {
+      console.warn("[WhatsApp] Failed to save user message:", saveErr);
+    }
+
+    // Combine previous messages with new message for full context
+    const allMessages = [...previousMessages, newUserMessage];
 
     // Wrap AI execution with user context so tools can access user info
     const aiUserContext = {
@@ -158,12 +214,17 @@ PLATFORM CONTEXT: WhatsApp Mobile Messaging
       },
     };
 
-    console.log("[WhatsApp] Starting AI generation...");
+    console.log(
+      "[WhatsApp] Starting AI generation with",
+      allMessages.length,
+      "messages..."
+    );
+    const assistantMessageId = generateUUID();
     fullResponse = await runWithUserContext(aiUserContext, async () => {
       const result = await streamText({
         model: chatModel,
         system: finalSystemPrompt,
-        messages: convertToModelMessages([message]),
+        messages: convertToModelMessages(allMessages),
         temperature: 0, // Match web chat for strict instruction following
         stopWhen: stepCountIs(5), // Limit tool call chains to 5 steps max
         experimental_activeTools: [
@@ -207,7 +268,29 @@ PLATFORM CONTEXT: WhatsApp Mobile Messaging
       return response;
     });
 
-    console.log("[WhatsApp] AI generation complete, response length:", fullResponse.length);
+    // Save assistant response to database for conversation continuity
+    try {
+      await saveMessages({
+        messages: [
+          {
+            chatId: sessionChatId,
+            id: assistantMessageId,
+            role: "assistant",
+            parts: [{ type: "text", text: fullResponse }],
+            attachments: [],
+            createdAt: new Date(),
+          },
+        ],
+      });
+      console.log("[WhatsApp] Saved assistant message to database");
+    } catch (saveErr) {
+      console.warn("[WhatsApp] Failed to save assistant message:", saveErr);
+    }
+
+    console.log(
+      "[WhatsApp] AI generation complete, response length:",
+      fullResponse.length
+    );
 
     // Determine if response should be sent as document (forms) or text (emails)
     if (shouldSendAsDocument(fullResponse)) {
@@ -226,14 +309,37 @@ PLATFORM CONTEXT: WhatsApp Mobile Messaging
       console.log("[WhatsApp] Document send result:", docResult);
     } else {
       // Send as plain text message (emails, calculations, etc.)
-      // Use sendLongMessage for automatic splitting if response exceeds WhatsApp's 4096 char limit
       console.log("[WhatsApp] Sending as text message...");
       const formattedResponse = formatForWhatsApp(fullResponse);
-      const textResult = await client.sendLongMessage({
-        to: phoneNumber,
-        text: formattedResponse,
-      });
-      console.log("[WhatsApp] Text send result:", textResult);
+
+      // Split subject line into separate message for email templates
+      const messageParts = splitSubjectFromBody(formattedResponse);
+
+      if (messageParts.subject) {
+        // Send subject as first message
+        console.log("[WhatsApp] Sending subject as separate message...");
+        await client.sendMessage({
+          to: phoneNumber,
+          text: messageParts.subject,
+        });
+
+        // Small delay to ensure message order
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Send body as second message
+        const bodyResult = await client.sendLongMessage({
+          to: phoneNumber,
+          text: messageParts.body,
+        });
+        console.log("[WhatsApp] Body send result:", bodyResult);
+      } else {
+        // No subject line, send as single message
+        const textResult = await client.sendLongMessage({
+          to: phoneNumber,
+          text: formattedResponse,
+        });
+        console.log("[WhatsApp] Text send result:", textResult);
+      }
     }
   } catch (error) {
     console.error("Error handling WhatsApp message:", {
@@ -252,6 +358,31 @@ PLATFORM CONTEXT: WhatsApp Mobile Messaging
       console.error("Failed to send error message:", sendError);
     }
   }
+}
+
+/**
+ * Split subject line from email body for separate WhatsApp messages
+ * Subject line can appear as "Subject: X" or just at the start of the response
+ */
+function splitSubjectFromBody(text: string): {
+  subject: string | null;
+  body: string;
+} {
+  // Match "Subject:" at the start of a line (case-insensitive)
+  const subjectMatch = text.match(/^(Subject:\s*.+?)(?:\n\n|\n(?=Dear|Email Body))/im);
+
+  if (subjectMatch) {
+    const subject = subjectMatch[1].trim();
+    // Remove the subject line and any "Email Body:" marker from the body
+    let body = text
+      .replace(subjectMatch[0], "")
+      .replace(/^Email Body:\s*/im, "")
+      .trim();
+
+    return { subject, body };
+  }
+
+  return { subject: null, body: text };
 }
 
 /**
