@@ -1,5 +1,10 @@
 import "server-only";
-import { convertToModelMessages, generateObject, streamText } from "ai";
+import {
+  convertToModelMessages,
+  generateObject,
+  stepCountIs,
+  streamText,
+} from "ai";
 import { runWithUserContext } from "@/lib/ai/context";
 import { db } from "@/lib/db/client";
 import { agentExecutionLog } from "@/lib/db/schema";
@@ -18,7 +23,7 @@ import { calculateTransferFeesTool } from "../ai/tools/calculate-transfer-fees";
 import { calculateVATTool } from "../ai/tools/calculate-vat";
 import { createLandListingTool } from "../ai/tools/create-land-listing";
 import { createListingTool } from "../ai/tools/create-listing";
-import { getGeneralKnowledge } from "../ai/tools/get-general-knowledge";
+// import { getGeneralKnowledge } from "../ai/tools/get-general-knowledge"; // DISABLED - Knowledge now embedded in system prompt
 import { getZyprusDataTool } from "../ai/tools/get-zyprus-data";
 import { listListingsTool } from "../ai/tools/list-listings";
 import { uploadLandListingTool } from "../ai/tools/upload-land-listing";
@@ -29,6 +34,7 @@ import { generateUUID } from "../utils";
 import { getWhatsAppClient } from "./client";
 import { getDocumentType, shouldSendAsDocument } from "./document-detector";
 import { generateDocx } from "./docx-generator";
+import { createWhatsAppSendDocumentTool } from "./tools/send-document-whatsapp";
 import type { WaSenderMessageData } from "./types";
 import {
   getOrCreateWhatsAppChat,
@@ -115,6 +121,7 @@ export async function handleWhatsAppMessage(
 
     // STEP 1: ROUTING (Cost Optimization)
     // Use Flash-Lite to decide intent
+    console.log("[WhatsApp] Step 1: Starting intent classification...");
     const routerModel = myProvider.languageModel(ROUTER_MODEL);
     const { object: classification } = await generateObject({
       model: routerModel,
@@ -122,7 +129,7 @@ export async function handleWhatsAppMessage(
       prompt: `Classify the user intent for this real estate assistant message: "${userMessage}"`,
     });
 
-    console.log("Router Classification:", classification);
+    console.log("[WhatsApp] Router Classification:", classification);
 
     // STEP 2: EXECUTION BASED ON INTENT
     let fullResponse = "";
@@ -153,6 +160,7 @@ export async function handleWhatsAppMessage(
     }
 
     // Prepare system prompt with extracted data context if available
+    console.log("[WhatsApp] Step 2: Building system prompt...");
     const baseSystemPrompt = await systemPrompt({
       selectedChatModel: WORKER_MODEL,
       requestHints: {
@@ -163,14 +171,28 @@ export async function handleWhatsAppMessage(
       },
       userMessage,
     });
+    console.log("[WhatsApp] System prompt length:", baseSystemPrompt.length);
 
-    let finalSystemPrompt = baseSystemPrompt;
+    // Add WhatsApp-specific platform context
+    const whatsappContext = `
+PLATFORM CONTEXT: WhatsApp Mobile Messaging
+- Users are on mobile and expect quick, concise text responses
+- Calculator results (VAT, transfer fees, capital gains) should ALWAYS be formatted as text, NOT documents
+- Only generate documents when users EXPLICITLY ask: "send document", "generate form", "email me the form", etc.
+- For calculator queries, provide clear, formatted text responses with tables if needed
+- Use emojis for better readability on mobile where appropriate
+- Keep responses concise but complete
+- DO NOT auto-generate documents based on content - wait for explicit user request
+`;
+
+    let finalSystemPrompt = baseSystemPrompt + whatsappContext;
+
     if (extractedData) {
       finalSystemPrompt += `\n\nCONTEXT FROM STRUCTURED EXTRACTION:\n${JSON.stringify(
         extractedData,
         null,
         2
-      )}\n\nUse this extracted data to either generate the document (if complete) or ask for missing fields.`;
+      )}\n\nUse this extracted data to either generate the document (if user explicitly requested) or ask for missing fields.`;
     }
 
     // Main Chat Execution (Worker Model)
@@ -191,34 +213,39 @@ export async function handleWhatsAppMessage(
       },
     };
 
+    console.log("[WhatsApp] Step 3: Starting AI generation...");
     fullResponse = await runWithUserContext(aiUserContext, async () => {
       const result = await streamText({
         model: chatModel,
         system: finalSystemPrompt,
         messages: convertToModelMessages([message]),
+        temperature: 0, // Match web chat for strict instruction following
+        stopWhen: stepCountIs(5), // Limit tool call chains to 5 steps max
         experimental_activeTools: [
           "calculateTransferFees",
           "calculateCapitalGains",
           "calculateVAT",
-          "getGeneralKnowledge",
+          // "getGeneralKnowledge", // DISABLED - Knowledge now embedded in system prompt
           "createListing",
           "listListings",
           "uploadListing",
           "getZyprusData",
           "createLandListing",
           "uploadLandListing",
+          "sendDocument",
         ],
         tools: {
           calculateTransferFees: calculateTransferFeesTool,
           calculateCapitalGains: calculateCapitalGainsTool,
           calculateVAT: calculateVATTool,
-          getGeneralKnowledge,
+          // getGeneralKnowledge, // DISABLED - Knowledge now embedded in system prompt
           createListing: createListingTool,
           listListings: listListingsTool,
           uploadListing: uploadListingTool,
           getZyprusData: getZyprusDataTool,
           createLandListing: createLandListingTool,
           uploadLandListing: uploadLandListingTool,
+          sendDocument: createWhatsAppSendDocumentTool(phoneNumber),
         },
         experimental_telemetry: {
           isEnabled: isProductionEnvironment,
@@ -231,30 +258,37 @@ export async function handleWhatsAppMessage(
       for await (const textPart of result.textStream) {
         response += textPart;
       }
+      console.log("[WhatsApp] AI response collected, length:", response.length);
       return response;
     });
+
+    console.log("[WhatsApp] Step 4: AI generation complete, response length:", fullResponse.length);
 
     // Determine if response should be sent as document (forms) or text (emails)
     if (shouldSendAsDocument(fullResponse)) {
       // Generate .docx for forms (templates 01-16)
+      console.log("[WhatsApp] Step 5: Sending as document...");
       const docBuffer = await generateDocx(fullResponse);
       const docType = getDocumentType(fullResponse);
       const filename = `SOFIA_${docType}_${Date.now()}.docx`;
 
-      await client.sendDocument({
+      const docResult = await client.sendDocument({
         to: phoneNumber,
         document: docBuffer,
         filename,
         caption: "Here is your completed document.",
       });
+      console.log("[WhatsApp] Document send result:", docResult);
     } else {
       // Send as plain text message (emails, calculations, etc.)
       // Use sendLongMessage for automatic splitting if response exceeds WhatsApp's 4096 char limit
+      console.log("[WhatsApp] Step 5: Sending as text message...");
       const formattedResponse = formatForWhatsApp(fullResponse);
-      await client.sendLongMessage({
+      const textResult = await client.sendLongMessage({
         to: phoneNumber,
         text: formattedResponse,
       });
+      console.log("[WhatsApp] Text send result:", textResult);
     }
   } catch (error) {
     console.error("Error handling WhatsApp message:", {
